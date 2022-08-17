@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Example.iml" filepath="$PROJECT_DIR$/.idea/modules/Example.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/android/Example.android.iml" filepath="$PROJECT_DIR$/.idea/modules/android/Example.android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/android/Example.android.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/android/Example.android.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/android/Example.android.main.iml" filepath="$PROJECT_DIR$/.idea/modules/android/Example.android.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/android/Example.android.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/android/Example.android.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Example.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Example.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Example.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Example.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Example.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Example.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Example.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Example.app.unitTest.iml" />
+    </modules>
+  </component>
+</project>
