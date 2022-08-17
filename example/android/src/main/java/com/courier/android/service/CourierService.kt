@@ -1,6 +1,5 @@
 package com.courier.android.service
 
-import android.util.Log
 import com.courier.android.Courier
 import com.courier.android.log
 import com.courier.android.models.CourierPushEvent
@@ -18,6 +17,10 @@ open class CourierService: FirebaseMessagingService() {
         super.onMessageReceived(message)
 
         // Track the event in Courier
+        // The payload being sent to the device must contain only data
+        // If the payload contains title and body, there will be
+        // issues tracking the event
+        // More info: https://stackoverflow.com/a/71253912/2415921
         Courier.trackNotification(
             message = message,
             event = CourierPushEvent.DELIVERED,
@@ -25,12 +28,7 @@ open class CourierService: FirebaseMessagingService() {
             onFailure = { Courier.log(it.toString()) }
         )
 
-        // Check if message contains a notification payload.
-        message.notification?.let {
-            Log.d(TAG, "Message Notification Body: ${it.body}")
-        }
-
-        // TODO: MESSAGE RECEIVED CALLBACK
+        showNotification(message)
 
     }
 
@@ -40,6 +38,11 @@ open class CourierService: FirebaseMessagingService() {
             onSuccess = { Courier.log("Courier FCM token refreshed") },
             onFailure = { Courier.log(it.toString()) }
         )
+        super.onNewToken(token)
+    }
+
+    open fun showNotification(message: RemoteMessage) {
+        // Empty
     }
 
 }
