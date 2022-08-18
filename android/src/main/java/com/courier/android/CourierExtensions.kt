@@ -61,3 +61,11 @@ fun Courier.Companion.trackNotification(message: RemoteMessage, event: CourierPu
         onFailure(e)
     }
 }
+
+internal fun Courier.Companion.broadcastMessage(message: RemoteMessage) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
+    try {
+        eventBus.emitEvent(message)
+    } catch (e: Exception) {
+        Courier.log(e.toString())
+    }
+}
