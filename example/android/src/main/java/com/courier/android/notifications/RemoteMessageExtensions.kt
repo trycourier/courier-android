@@ -8,7 +8,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.RemoteMessage
 
-fun RemoteMessage.presentNotification(context: Context, handlingClass: Class<*>?) {
+fun RemoteMessage.presentNotification(context: Context, handlingClass: Class<*>?, icon: Int) {
 
     try {
 
@@ -17,22 +17,23 @@ fun RemoteMessage.presentNotification(context: Context, handlingClass: Class<*>?
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val notificationBuilder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(com.google.android.material.R.drawable.ic_clock_black_24dp)
-            .setContentTitle(data["title"] ?: "No title")
-            .setContentText(data["body"] ?: "No body")
+            .setSmallIcon(icon)
+            .setContentTitle(data["title"].orEmpty())
+            .setContentText(data["body"].orEmpty())
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
             .setContentIntent(pendingIntent)
 
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, "Channel human readable title", NotificationManager.IMPORTANCE_DEFAULT)
+            val channel = NotificationChannel(channelId, "Channel human readable title", NotificationManager.IMPORTANCE_HIGH)
             notificationManager.createNotificationChannel(channel)
         }
 
-        notificationManager.notify(0, notificationBuilder.build())
+        val uuid = System.currentTimeMillis().toInt()
+        notificationManager.notify(uuid, notificationBuilder.build())
 
     } catch (e: Exception) {
 

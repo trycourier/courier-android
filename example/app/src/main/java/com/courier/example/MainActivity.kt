@@ -9,6 +9,8 @@ import com.courier.android.models.CourierProvider
 import com.courier.android.notifications.CourierActivity
 import com.courier.android.sendPush
 import com.courier.example.databinding.ActivityMainBinding
+import com.google.firebase.FirebaseApp
+import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,6 +24,17 @@ class MainActivity : CourierActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Start firebase
+        // This must be set before you can sync FCM tokens in Courier
+        val options = FirebaseOptions.Builder().apply {
+            setApiKey("AIzaSyC_9Bq05Ywuy3mjAOkF8rB0LkmyYUoQIrA")
+            setApplicationId("1:694725526129:android:77c71528200b105c8811d0")
+            setProjectId("test-fcm-e7ddc")
+            setGcmSenderId("694725526129")
+        }.build()
+
+        FirebaseApp.initializeApp(this, options)
 
         // Setup the view to handle clicks and things
         ActivityMainBinding.inflate(layoutInflater).apply {
@@ -86,12 +99,12 @@ class MainActivity : CourierActivity() {
 
     override fun onPushNotificationClicked(message: RemoteMessage) {
         print(message)
-        Toast.makeText(this, "Message clicked: ${message.data["body"]}", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Message clicked:\n${message.data}", Toast.LENGTH_LONG).show()
     }
 
     override fun onPushNotificationDelivered(message: RemoteMessage) {
         print(message)
-        Toast.makeText(this, "Message delivered: ${message.data["body"]}", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Message delivered:\n${message.data}", Toast.LENGTH_LONG).show()
     }
 
 }

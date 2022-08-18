@@ -3,14 +3,6 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
-ext {
-    var = '12341234'
-    var1 = var
-    var2 = 'key0'
-    var3 = '12341234'
-    var4 = '/Users/mike/Desktop/android-release-key'
-}
-
 android {
     compileSdk 32
 
