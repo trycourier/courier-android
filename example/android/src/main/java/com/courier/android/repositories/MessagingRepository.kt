@@ -39,6 +39,17 @@ internal class MessagingRepository : Repository() {
                         "channels" to providers.map { it.value }
                     ),
                     "providers" to mapOf(
+                        "firebase-fcm" to mapOf(
+                            "override" to mapOf(
+                                "body" to mapOf(
+                                    "notification" to null,
+                                    "data" to mapOf(
+                                        "title" to title,
+                                        "body" to body
+                                    )
+                                )
+                            )
+                        ),
                         "apn" to mapOf(
                             "override" to mapOf(
                                 "config" to mapOf(
@@ -65,6 +76,7 @@ internal class MessagingRepository : Repository() {
             override fun onFailure(call: Call, e: IOException) {
                 continuation.resumeWithException(e)
             }
+
             override fun onResponse(call: Call, response: Response) {
                 if (!listOf(202, 202).contains(response.code)) {
                     continuation.resumeWithException(CourierException.requestError)
@@ -101,6 +113,7 @@ internal class MessagingRepository : Repository() {
             override fun onFailure(call: Call, e: IOException) {
                 continuation.resumeWithException(e)
             }
+
             override fun onResponse(call: Call, response: Response) {
                 if (!listOf(200).contains(response.code)) {
                     continuation.resumeWithException(CourierException.requestError)

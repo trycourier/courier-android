@@ -1,17 +1,19 @@
 package com.courier.example
 
+import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.models.CourierProvider
+import com.courier.android.notifications.CourierActivity
 import com.courier.android.sendPush
 import com.courier.example.databinding.ActivityMainBinding
+import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
-class MainActivity : AppCompatActivity() {
+class MainActivity : CourierActivity() {
 
     companion object {
         const val COURIER_USER_ID = "example_user_2"
@@ -80,6 +82,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    override fun onPushNotificationClicked(message: RemoteMessage) {
+        print(message)
+        Toast.makeText(this, "Message clicked: ${message.data["body"]}", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onPushNotificationDelivered(message: RemoteMessage) {
+        print(message)
+        Toast.makeText(this, "Message delivered: ${message.data["body"]}", Toast.LENGTH_LONG).show()
     }
 
 }

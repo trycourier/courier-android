@@ -1,6 +1,7 @@
 package com.courier.android.service
 
 import com.courier.android.Courier
+import com.courier.android.broadcastMessage
 import com.courier.android.log
 import com.courier.android.models.CourierPushEvent
 import com.courier.android.trackNotification
@@ -8,10 +9,6 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
 open class CourierService: FirebaseMessagingService() {
-
-    companion object {
-        private const val TAG = "CourierService"
-    }
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
@@ -28,17 +25,22 @@ open class CourierService: FirebaseMessagingService() {
             onFailure = { Courier.log(it.toString()) }
         )
 
+        // Broadcast the message to the app
+        // This will allow us to handle when it's delivered
+        Courier.broadcastMessage(message)
+
+        // Try and show the notification
         showNotification(message)
 
     }
 
     override fun onNewToken(token: String) {
+        super.onNewToken(token)
         Courier.instance.setFCMToken(
             token = token,
             onSuccess = { Courier.log("Courier FCM token refreshed") },
             onFailure = { Courier.log(it.toString()) }
         )
-        super.onNewToken(token)
     }
 
     open fun showNotification(message: RemoteMessage) {
