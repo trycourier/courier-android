@@ -26,11 +26,11 @@ class CourierTests {
 
     companion object {
         const val COURIER_USER_ID = "example_user"
-        const val COURIER_ACCESS_TOKEN = "pk_prod_X9SHD669JF400NHY56KYPTE639HH"
-        const val FIREBASE_API_KEY = "AIzaSyC_9Bq05Ywuy3mjAOkF8rB0LkmyYUoQIrA"
-        const val FIREBASE_APP_ID = "1:694725526129:android:77c71528200b105c8811d0"
-        const val FIREBASE_PROJECT_ID = "test-fcm-e7ddc"
-        const val FIREBASE_GCM_SENDER_ID = "694725526129"
+        const val COURIER_ACCESS_TOKEN = "<YOUR_VALUE>"
+        const val FIREBASE_API_KEY = "<YOUR_VALUE>"
+        const val FIREBASE_APP_ID = "<YOUR_VALUE>"
+        const val FIREBASE_PROJECT_ID = "<YOUR_VALUE>"
+        const val FIREBASE_GCM_SENDER_ID = "<YOUR_VALUE>"
     }
 
     @Test
