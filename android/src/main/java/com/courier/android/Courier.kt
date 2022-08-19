@@ -63,13 +63,10 @@ class Courier private constructor() {
         this@Courier.accessToken = accessToken
         this@Courier.userId = userId
 
-        // Try and grab the users current fcm token
-        this@Courier.fcmToken = getCurrentFcmToken()
-
         // Post the fcm token if we can
         // If this SDK supports more tokens
         // this return will need to change
-        return@withContext fcmToken?.let { token ->
+        return@withContext getCurrentFcmToken()?.let { token ->
             setFCMToken(token)
         }
 
