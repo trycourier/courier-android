@@ -1,6 +1,11 @@
 package com.courier.android
 
+import android.Manifest
+import android.os.Build
 import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationManagerCompat
 import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierPushEvent
 import com.courier.android.repositories.MessagingRepository
@@ -9,6 +14,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
+
 
 internal fun Courier.Companion.log(data: String) {
     if (instance.isDebugging) {
@@ -67,5 +75,30 @@ internal fun Courier.Companion.broadcastMessage(message: RemoteMessage) = Corout
         eventBus.emitEvent(message)
     } catch (e: Exception) {
         Courier.log(e.toString())
+    }
+}
+
+fun AppCompatActivity.requestNotificationPermission(onStatusChange: (granted: Boolean) -> Unit) {
+
+    // Check if the notification manager can show push notifications
+    val notificationManagerCompat = NotificationManagerCompat.from(this)
+    val areNotificationsEnabled = notificationManagerCompat.areNotificationsEnabled()
+
+    // Handle granting notification permission if possible
+    if (Build.VERSION.SDK_INT >= 33) {
+        val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            val canReceivePushes = granted && areNotificationsEnabled
+            onStatusChange(canReceivePushes)
+        }
+        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    } else {
+        onStatusChange(areNotificationsEnabled)
+    }
+
+}
+
+suspend fun AppCompatActivity.requestNotificationPermission() = suspendCoroutine { continuation ->
+    requestNotificationPermission { granted ->
+        continuation.resume(granted)
     }
 }

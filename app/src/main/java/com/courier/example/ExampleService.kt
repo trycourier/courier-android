@@ -21,7 +21,7 @@ class ExampleService: CourierService() {
         // Courier will handle delivery tracking of notifications automatically
         // if you extend your service class with `CourierService()`
         // If you do present a custom notification, you should use this
-        // function when it is clicked to ensure the status is updated properly
+        // function when the notification is clicked to ensure the status is updated properly
         /**
         Courier.trackNotification(
             message = message,

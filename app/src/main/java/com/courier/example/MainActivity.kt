@@ -1,11 +1,13 @@
 package com.courier.example
 
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.models.CourierProvider
 import com.courier.android.notifications.CourierActivity
+import com.courier.android.requestNotificationPermission
 import com.courier.android.sendPush
 import com.courier.example.databinding.ActivityMainBinding
 import com.google.firebase.FirebaseApp
@@ -67,24 +69,14 @@ class MainActivity : CourierActivity() {
 
     }
 
-    private fun sendPush() {
+    private fun sendPush() = lifecycleScope.launch(Dispatchers.Main) {
 
-//        Courier.sendPush(
-//            authKey = accessToken,
-//            userId = userId,
-//            title = "This is a title",
-//            body = "This is a message",
-//            providers = listOf(CourierProvider.FCM),
-//            onSuccess = { requestId ->
-//                print(requestId)
-//            },
-//            onFailure = { e ->
-//                print(e)
-//            }
-//        )
+        val granted = requestNotificationPermission()
 
-        lifecycleScope.launch(Dispatchers.IO) {
+        if (granted) {
+
             try {
+
                 val requestId = Courier.sendPush(
                     authKey = COURIER_ACCESS_TOKEN,
                     userId = COURIER_USER_ID,
@@ -93,10 +85,34 @@ class MainActivity : CourierActivity() {
                     providers = listOf(CourierProvider.FCM)
                 )
                 print(requestId)
+
             } catch (e: Exception) {
                 print(e)
             }
+
         }
+
+//        requestNotificationPermission { granted ->
+//
+//            if (granted) {
+//
+//                Courier.sendPush(
+//                    authKey = COURIER_ACCESS_TOKEN,
+//                    userId = COURIER_USER_ID,
+//                    title = "This is a title",
+//                    body = "This is a message",
+//                    providers = listOf(CourierProvider.FCM),
+//                    onSuccess = { requestId ->
+//                        print(requestId)
+//                    },
+//                    onFailure = { e ->
+//                        print(e)
+//                    }
+//                )
+//
+//            }
+//
+//        }
 
     }
 

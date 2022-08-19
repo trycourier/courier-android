@@ -104,7 +104,6 @@ internal class MessagingRepository : Repository() {
 
         val request = Request.Builder()
             .url(url)
-            .addHeader("X-Courier-Client-Key", "YWY2MzAzYmUtMGUxZS00MGI1LWJiODAtZTFkOTI5OWNjY2Zm")
             .addHeader("Content-Type", "application/json")
             .post(json.toRequestBody())
             .build()
