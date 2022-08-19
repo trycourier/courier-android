@@ -1,7 +1,7 @@
 package com.courier.android.service
 
-import android.util.Log
 import com.courier.android.Courier
+import com.courier.android.broadcastMessage
 import com.courier.android.log
 import com.courier.android.models.CourierPushEvent
 import com.courier.android.trackNotification
@@ -10,14 +10,14 @@ import com.google.firebase.messaging.RemoteMessage
 
 open class CourierService: FirebaseMessagingService() {
 
-    companion object {
-        private const val TAG = "CourierService"
-    }
-
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
         // Track the event in Courier
+        // The payload being sent to the device must contain only data
+        // If the payload contains title and body, there will be
+        // issues tracking the event
+        // More info: https://stackoverflow.com/a/71253912/2415921
         Courier.trackNotification(
             message = message,
             event = CourierPushEvent.DELIVERED,
@@ -25,21 +25,26 @@ open class CourierService: FirebaseMessagingService() {
             onFailure = { Courier.log(it.toString()) }
         )
 
-        // Check if message contains a notification payload.
-        message.notification?.let {
-            Log.d(TAG, "Message Notification Body: ${it.body}")
-        }
+        // Broadcast the message to the app
+        // This will allow us to handle when it's delivered
+        Courier.broadcastMessage(message)
 
-        // TODO: MESSAGE RECEIVED CALLBACK
+        // Try and show the notification
+        showNotification(message)
 
     }
 
     override fun onNewToken(token: String) {
+        super.onNewToken(token)
         Courier.instance.setFCMToken(
             token = token,
             onSuccess = { Courier.log("Courier FCM token refreshed") },
             onFailure = { Courier.log(it.toString()) }
         )
+    }
+
+    open fun showNotification(message: RemoteMessage) {
+        // Empty
     }
 
 }

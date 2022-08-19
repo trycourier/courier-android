@@ -1,10 +1,15 @@
 package com.courier.android
 
+import com.courier.android.models.CourierException
 import com.courier.android.models.CourierProvider
 import com.courier.android.repositories.TokenRepository
+import com.courier.android.utils.NotificationEventBus
+import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.*
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class Courier private constructor() {
@@ -12,6 +17,8 @@ class Courier private constructor() {
     companion object {
         internal const val TAG = "Courier"
         internal val COURIER_COROUTINE_CONTEXT by lazy { Job() }
+        const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
+        internal val eventBus by lazy { NotificationEventBus() }
         val instance = Courier()
     }
 
@@ -56,13 +63,10 @@ class Courier private constructor() {
         this@Courier.accessToken = accessToken
         this@Courier.userId = userId
 
-        // Try and grab the users current fcm token
-        this@Courier.fcmToken = getCurrentFcmToken()
-
         // Post the fcm token if we can
         // If this SDK supports more tokens
         // this return will need to change
-        return@withContext fcmToken?.let { token ->
+        return@withContext getCurrentFcmToken()?.let { token ->
             setFCMToken(token)
         }
 
