@@ -38,13 +38,16 @@ Courier.instance.signOut()
 
 ## **Installation (5 Steps)**
 
-The following steps will get the Courier Android SDK setup and allow support for sending push notifications from Courier to your device.
+The following steps will get the Courier Android SDK setup and allow support for sending push notifications from Courier to your device. The following messaging providers are supported
 
-For an example, clone this repo, install the dependencies, and run the project the app.
+The following messaging providers are supported:
+- Firebase Cloud Messaging (FCM)
+
+For a full example, clone this repo, install the dependencies, and run the project the app found at the root directory.
 
 ⚠️ You may need a physical device to receive push notifications. You cannot test this effectively using the simulator.
 
-The SDK also supports Coroutines for all major functions and has simple functions for Android 13+ runtime push notification permissions.
+This SDK supports kotlin coroutines for all major functions and has simple helpers for Android 13+ runtime push notification permissions.
 
 &emsp;
 
