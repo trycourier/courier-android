@@ -72,8 +72,18 @@ dependencyResolutionManagement {
 ```
 
 #### 2. Add the implementation to your app build.gradle file
-```
-implementation 'com.github.trycourier:courier-android:1.0.0'
+``` gradle
+dependencies {
+
+    ...
+    
+    implementation 'com.github.trycourier:courier-android:1.0.0'
+
+    // The firebase messaging dependency is also required to receive messages from firebase cloud messaging (fcm)
+    implementation platform('com.google.firebase:firebase-bom:30.3.1')
+    implementation 'com.google.firebase:firebase-messaging-ktx'
+    
+}
 ```
 
 &emsp;
