@@ -43,7 +43,7 @@ The following steps will get the Courier Android SDK setup and allow support for
 The following messaging providers are supported:
 - Firebase Cloud Messaging (FCM)
 
-For a full example, clone this repo, install the dependencies, and run the project the app found at the root directory.
+For a full example, clone the repo, install the dependencies, and run `app` found at the root directory.
 
 ⚠️ You may need a physical device to receive push notifications. You cannot test this effectively using the simulator.
 
