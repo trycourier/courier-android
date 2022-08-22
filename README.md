@@ -9,33 +9,32 @@ Courier helps you spend less time building notification infrastructure, and more
 ## **Quick Overview**
 
 ```kotlin
-
 // Must be initialized before Courier is started
 FirebaseApp.initializeApp(this, options)
 
 val userId = "example_user"
 val accessToken = "a_jwt_from_courier" // For more checkout -> https://www.courier.com/docs/reference/auth/issue-token/
+val authKey = "your_auth_key_that_should_not_live_in_your_production_app"
 
 // Set your Courier credentials
 Courier.instance.setCredentials(
     accessToken = "your_access_token_and_not_your_api_key",
-    userId = "example_user"
+    userId = userId
 )
 
 // Send a message to your device
 // This should only be used for testing purposes
 Courier.sendPush(
-    authKey = COURIER_ACCESS_TOKEN,
-    userId = COURIER_USER_ID,
+    authKey = authKey,
+    userId = userId,
     title = "This is a title",
     body = "This is a message"
 )
 
 // Sign the current user out
 Courier.instance.signOut()
-
 ```
-
+&emsp;
 
 ## **Installation (5 Steps)**
 
@@ -61,7 +60,7 @@ TODO
 
 User Credentials must be set in Courier before they can receive push notifications. This should be handled where you normally manage your user's state.
 
-⚠️ User Credentials should be [signed out](#6-signing-users-out) when you no longer want that user to receive push notifications.
+⚠️ User Credentials should be [signed out](#5-signing-users-out) when you no longer want that user to receive push notifications.
 
 ⚠️ Courier does not maintain user state between app sessions, or in other words, if you force close the app, you will need to set user credentials again. We will be looking into maintaining user credential state between app sessions in future versions of this SDK.
 
@@ -69,27 +68,23 @@ User Credentials must be set in Courier before they can receive push notificatio
 
 func signInWithCourier() {
     
-    Task.init {
-
-        val userId = "example_user"
+    val userId = "example_user"
         
-        // Courier needs you to generate an access token on your backend
-        // Docs for setting this up: https://www.courier.com/docs/reference/auth/issue-token/
-        val accessToken = "example_jwt"
+    // Courier needs you to generate an access token on your backend
+    // Docs for setting this up: https://www.courier.com/docs/reference/auth/issue-token/
+    val accessToken = "example_jwt"
 
-        // Set Courier user credentials
-        Courier.shared.setCredentials(
-            accessToken = accessToken, 
-            userId = userId, 
-            onSuccess = {
-                print("Credentials are set")
-            }, 
-            onFailure = { e ->
-                print(e)
-            }
-        )
-
-    }
+    // Set Courier user credentials
+    Courier.shared.setCredentials(
+        accessToken = accessToken, 
+        userId = userId, 
+        onSuccess = {
+            print("Credentials are set")
+        }, 
+        onFailure = { e ->
+            print(e)
+        }
+    )
     
 }
 ```
@@ -145,7 +140,7 @@ class ExampleService: CourierService() {
 </manifest>
 ```
 
-## **Important: Payload Data Override**
+### **Important: Payload Data Override**
 
 To ensure `CourierService.showNotification()` gets triggered for every possible state your app can be in, you need to structure your `firebase-fcm` payload in the Courier Send endpoint like the following.
 
@@ -174,7 +169,7 @@ This will not track the delivery of the notification properly and will not prese
 			]
 		},
 		"providers": {
-			"firebase-fcm": { // firebase-fcm must be set like this 👇
+			"firebase-fcm": {
                 "override": {
                     "body": {
                         "notification": null,
@@ -214,7 +209,7 @@ Courier.trackNotification(
 
 &emsp;
 
-### **3. Handling Push Notifications**
+### **4. Handling Push Notifications**
 
 The SDK has simple functions you can override to handle when you receive or click on a notification. Implement the following to handle this actions.
 
@@ -236,7 +231,7 @@ You can skip this step, but you will have to handle the above functions yourself
 
 &emsp;
 
-### **4. Configure a Provider**
+### **5. Configure a Provider**
 
 To get pushes to appear, add support for the provider you would like to use. Checkout the following tutorials to get a push provider setup.
 
@@ -244,7 +239,7 @@ To get pushes to appear, add support for the provider you would like to use. Che
 
 &emsp;
 
-### **5. Signing Users Out**
+### **6. Signing Users Out**
 
 Best user experience practice is to synchronize the current user's push notification tokens and the user's state. 
 
@@ -269,10 +264,10 @@ Courier.instance.signOut(
 
 ```swift
 Courier.sendPush(
-    authKey = COURIER_ACCESS_TOKEN,
-    userId = COURIER_USER_ID,
-    title = "This is a title",
-    body = "This is a message",
+    authKey = "your_api_key_that_should_not_stay_in_your_production_app",
+    userId = "example_user",
+    title = "Test message!",
+    body = "Chrip Chirp!",
     providers = listOf(CourierProvider.FCM),
     onSuccess = { requestId ->
         print(requestId)
