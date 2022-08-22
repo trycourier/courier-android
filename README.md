@@ -50,8 +50,27 @@ The SDK also supports Coroutines for all major functions and has simple function
 
 ### **1. Add the Gradle Dependency**
 
+Courier Android is currently distributed via Jitpack. Maven Central support will be coming in a future update.
+
+### 1. Add Jitpack repository support in your settings.gradle file
+```gradle
+pluginManagement {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+dependencyResolutionManagement {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
 ```
-TODO
+
+### 2. Add the implementation to your build.gradle file
+```
+implementation 'com.github.trycourier:courier-android:1.0.0'
 ```
 
 &emsp;
@@ -66,7 +85,7 @@ User Credentials must be set in Courier before they can receive push notificatio
 
 ```kotlin
 
-func signInWithCourier() {
+fun signInWithCourier() {
     
     val userId = "example_user"
         
