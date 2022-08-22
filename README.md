@@ -106,7 +106,7 @@ fun signInWithCourier() {
     val accessToken = "example_jwt"
 
     // Set Courier user credentials
-    Courier.shared.setCredentials(
+    Courier.instance.setCredentials(
         accessToken = accessToken, 
         userId = userId, 
         onSuccess = {
@@ -126,7 +126,7 @@ fun signInWithCourier() {
 
 #### 1. Create a new class extending `CourierService`
 
-This class will automatically manage firebase cloud messaging tokens and handle tracking Courier message delivery analytics.
+This class will automatically manage Firebase Cloud Messaging (FCM) tokens and handle tracking Courier message delivery analytics.
 
 ```kotlin
 class ExampleService: CourierService() {
@@ -183,38 +183,36 @@ This will not track the delivery of the notification properly and will not prese
 
 
 ```JSON
-
 {
-	"message": {
-		"to": {
-			"user_id": "example_user"
-		},
-		"content": {
-			"title": "Hi! 👋",
-			"body": "Chrip Chirp!"
-		},
-		"routing": {
-			"method": "all",
-			"channels": [
-				"firebase-fcm"
-			]
-		},
-		"providers": {
-			"firebase-fcm": {
-                "override": {
-                    "body": {
-                        "notification": null,
-                        "data": {
-                            "title": "Hi! 👋",
-                            "body": "Chrip Chirp!"
-                        }
-                    }
-                }
+  "message": {
+    "to": {
+      "user_id": "example_user"
+    },
+    "content": {
+      "title": "Hi! 👋",
+      "body": "Chrip Chirp!"
+    },
+    "routing": {
+      "method": "all",
+      "channels": [
+        "firebase-fcm"
+      ]
+    },
+    "providers": {
+      "firebase-fcm": {
+        "override": {
+          "body": {
+            "notification": null,
+            "data": {
+              "title": "Hi! 👋",
+              "body": "Chrip Chirp!"
             }
-		}
-	}
+          }
+        }
+      }
+    }
+  }
 }
-
 ```
 
 &emsp;
@@ -242,7 +240,7 @@ Courier.trackNotification(
 
 ### **4. Handling Push Notifications**
 
-The SDK has simple functions you can override to handle when you receive or click on a notification. Implement the following to handle this actions.
+The SDK has simple functions you can override to handle when you receive or click on a notification.
 
 ```kotlin
 class YourActivity : CourierActivity() {
