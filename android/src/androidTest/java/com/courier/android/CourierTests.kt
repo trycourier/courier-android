@@ -26,11 +26,11 @@ class CourierTests {
 
     companion object {
         const val COURIER_USER_ID = "example_user"
-        const val COURIER_ACCESS_TOKEN = "<YOUR_VALUE>"
-        const val FIREBASE_API_KEY = "<YOUR_VALUE>"
-        const val FIREBASE_APP_ID = "<YOUR_VALUE>"
-        const val FIREBASE_PROJECT_ID = "<YOUR_VALUE>"
-        const val FIREBASE_GCM_SENDER_ID = "<YOUR_VALUE>"
+        const val COURIER_ACCESS_TOKEN = "pk_prod_G7KDRN4NAXMR9BMBQVDN2375ZHE7"
+        const val FIREBASE_API_KEY = "AIzaSyDide6nNMYZQ312MIYT4z6FOKqz3RH-F2I"
+        const val FIREBASE_APP_ID = "1:939573391521:android:935a7be3ae1099200d80e0"
+        const val FIREBASE_PROJECT_ID = "courier-example"
+        const val FIREBASE_GCM_SENDER_ID = "939573391521"
     }
 
     @Test
@@ -127,7 +127,7 @@ class CourierTests {
             authKey = COURIER_ACCESS_TOKEN,
             userId = COURIER_USER_ID,
             title = "🐤 Chirp Chirp!",
-            body = "Message sent from Xcode tests",
+            body = "Message sent from Android Studio tests",
             providers = listOf(CourierProvider.FCM)
         )
 

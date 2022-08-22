@@ -124,6 +124,18 @@ class Courier private constructor() {
      */
     suspend fun setFCMToken(token: String) {
 
+        // Delete the previous token if possible
+        // If we fail the delete, skip and move on
+        // We want to ensure the user has a new token in Courier
+        this@Courier.fcmToken?.let { currentToken ->
+            try {
+                tokenRepo.deleteUserToken(currentToken)
+            } catch (e: Exception) {
+                Courier.log(e.toString())
+            }
+        }
+
+        // Set the new token and put in Courier
         this@Courier.fcmToken = token
 
         Courier.log("Firebase Cloud Messaging Token")
