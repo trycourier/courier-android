@@ -55,7 +55,7 @@ This SDK supports kotlin coroutines for all major functions and has simple helpe
 
 Courier Android is currently distributed via Jitpack. Maven Central support will be coming in a future update.
 
-### 1. Add Jitpack repository support in your settings.gradle file
+#### 1. Add Jitpack repository support in your settings.gradle file
 ```gradle
 pluginManagement {
     repositories {
@@ -71,7 +71,7 @@ dependencyResolutionManagement {
 }
 ```
 
-### 2. Add the implementation to your build.gradle file
+#### 2. Add the implementation to your build.gradle file
 ```
 implementation 'com.github.trycourier:courier-android:1.0.0'
 ```
@@ -115,7 +115,7 @@ fun signInWithCourier() {
 
 ### **3. Add the Courier Service**
 
-### 1. Create a new class extending `CourierService`
+#### 1. Create a new class extending `CourierService`
 
 This class will automatically manage firebase cloud messaging tokens and handle tracking Courier message delivery analytics.
 
@@ -138,7 +138,7 @@ class ExampleService: CourierService() {
 }
 ```
 
-### 2. Add the new service class to your `AndroidManifest`
+#### 2. Add the new service class to your `AndroidManifest`
 
 ```xml
 <manifest ...>
@@ -162,7 +162,7 @@ class ExampleService: CourierService() {
 </manifest>
 ```
 
-### **Important: Payload Data Override**
+#### **Important: Payload Data Override**
 
 To ensure `CourierService.showNotification()` gets triggered for every possible state your app can be in, you need to structure your `firebase-fcm` payload in the Courier Send endpoint like the following.
 
@@ -284,7 +284,7 @@ Courier.instance.signOut(
 
 ⚠️ This is only for testing purposes and should not be in your production app.
 
-```swift
+```kotlin
 Courier.sendPush(
     authKey = "your_api_key_that_should_not_stay_in_your_production_app",
     userId = "example_user",
