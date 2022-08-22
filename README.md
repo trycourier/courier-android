@@ -71,7 +71,7 @@ dependencyResolutionManagement {
 }
 ```
 
-#### 2. Add the implementation to your build.gradle file
+#### 2. Add the implementation to your app build.gradle file
 ```
 implementation 'com.github.trycourier:courier-android:1.0.0'
 ```
