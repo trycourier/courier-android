@@ -1,15 +1,11 @@
 package com.courier.android
 
-import com.courier.android.models.CourierException
 import com.courier.android.models.CourierProvider
 import com.courier.android.repositories.TokenRepository
 import com.courier.android.utils.NotificationEventBus
-import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.*
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class Courier private constructor() {

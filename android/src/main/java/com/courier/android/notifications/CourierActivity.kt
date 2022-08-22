@@ -13,7 +13,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-
 open class CourierActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,11 +22,7 @@ open class CourierActivity : AppCompatActivity() {
         intent.detectPushNotificationClick()
 
         // Handle delivered messages on the main thread
-        CoroutineScope(Courier.COURIER_COROUTINE_CONTEXT).launch(Dispatchers.Main) {
-            Courier.eventBus.events.collectLatest { message ->
-                onPushNotificationDelivered(message)
-            }
-        }
+        handlePushDeliveredEvent()
 
     }
 
@@ -59,12 +54,16 @@ open class CourierActivity : AppCompatActivity() {
 
     }
 
-    open fun onPushNotificationClicked(message: RemoteMessage) {
-        // Empty
+    private fun handlePushDeliveredEvent() {
+        CoroutineScope(Courier.COURIER_COROUTINE_CONTEXT).launch(Dispatchers.Main) {
+            Courier.eventBus.events.collectLatest { message ->
+                onPushNotificationDelivered(message)
+            }
+        }
     }
 
-    open fun onPushNotificationDelivered(message: RemoteMessage) {
-        // Empty
-    }
+    open fun onPushNotificationClicked(message: RemoteMessage) {}
+
+    open fun onPushNotificationDelivered(message: RemoteMessage) {}
 
 }
