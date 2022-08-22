@@ -16,11 +16,11 @@ class MainActivity : CourierActivity() {
 
     companion object {
         const val COURIER_USER_ID = "example_user"
-        const val COURIER_ACCESS_TOKEN = "pk_prod_G7KDRN4NAXMR9BMBQVDN2375ZHE7"
-        const val FIREBASE_API_KEY = "AIzaSyDide6nNMYZQ312MIYT4z6FOKqz3RH-F2I"
-        const val FIREBASE_APP_ID = "1:939573391521:android:935a7be3ae1099200d80e0"
-        const val FIREBASE_PROJECT_ID = "courier-example"
-        const val FIREBASE_GCM_SENDER_ID = "939573391521"
+        const val COURIER_ACCESS_TOKEN = "<YOUR_KEY>"
+        const val FIREBASE_API_KEY = "<YOUR_KEY>"
+        const val FIREBASE_APP_ID = "<YOUR_KEY>"
+        const val FIREBASE_PROJECT_ID = "<YOUR_KEY>"
+        const val FIREBASE_GCM_SENDER_ID = "<YOUR_KEY>"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
