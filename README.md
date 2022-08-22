@@ -74,15 +74,11 @@ dependencyResolutionManagement {
 #### 2. Add the implementation to your app build.gradle file
 ``` gradle
 dependencies {
-
-    ...
-    
     implementation 'com.github.trycourier:courier-android:1.0.0'
 
-    // The firebase messaging dependency is also required to receive messages from firebase cloud messaging (fcm)
+    // The firebase messaging dependency is also required
     implementation platform('com.google.firebase:firebase-bom:30.3.1')
     implementation 'com.google.firebase:firebase-messaging-ktx'
-    
 }
 ```
 
@@ -99,6 +95,9 @@ User Credentials must be set in Courier before they can receive push notificatio
 ```kotlin
 
 fun signInWithCourier() {
+
+    // Firebase must be initialized before Courier to receive messages via FCM (Firebase Cloud Messaging)
+    // FirebaseApp.initializeApp(this, options)
     
     val userId = "example_user"
         
