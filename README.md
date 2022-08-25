@@ -65,7 +65,7 @@ class YourMessagingService: CourierService() {
 ```
 &emsp;
 
-## **Installation (5 Steps)**
+## **Full Installation (6 Steps)**
 
 The following steps will get the Courier Android SDK setup and allow support for sending push notifications from Courier to your device. The following messaging providers are supported
 
@@ -117,7 +117,7 @@ dependencies {
 
 User Credentials must be set in Courier before they can receive push notifications. This should be handled where you normally manage your user's state.
 
-⚠️ User Credentials should be [signed out](#5-signing-users-out) when you no longer want that user to receive push notifications.
+⚠️ User Credentials should be [signed out](#6-signing-users-out) when you no longer want that user to receive push notifications.
 
 ⚠️ Courier does not maintain user state between app sessions, or in other words, if you force close the app, you will need to set user credentials again. We will be looking into maintaining user credential state between app sessions in future versions of this SDK.
 
