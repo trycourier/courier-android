@@ -18,7 +18,7 @@ val authKey = "your_auth_key_that_should_not_live_in_your_production_app"
 
 // Set your Courier credentials
 Courier.instance.setCredentials(
-    accessToken = "your_access_token_and_not_your_api_key",
+    accessToken = accessToken,
     userId = userId
 )
 
