@@ -6,6 +6,8 @@ import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
+import com.courier.android.Courier.Companion.COURIER_COROUTINE_CONTEXT
+import com.courier.android.Courier.Companion.eventBus
 import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierPushEvent
 import com.courier.android.repositories.MessagingRepository
@@ -24,7 +26,7 @@ internal fun Courier.Companion.log(data: String) {
     }
 }
 
-suspend fun Courier.Companion.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList()): String {
+suspend fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList()): String {
     return MessagingRepository().send(
         authKey = authKey,
         userId = userId,
@@ -35,9 +37,9 @@ suspend fun Courier.Companion.sendPush(authKey: String, userId: String, title: S
     )
 }
 
-fun Courier.Companion.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList(), onSuccess: (requestId: String) -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
+fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList(), onSuccess: (requestId: String) -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
     try {
-        val messageId = Courier.sendPush(
+        val messageId = Courier.instance.sendPush(
             authKey = authKey,
             userId = userId,
             title = title,
@@ -50,7 +52,7 @@ fun Courier.Companion.sendPush(authKey: String, userId: String, title: String, b
     }
 }
 
-suspend fun Courier.Companion.trackNotification(message: RemoteMessage, event: CourierPushEvent) = withContext(COURIER_COROUTINE_CONTEXT) {
+suspend fun Courier.trackNotification(message: RemoteMessage, event: CourierPushEvent) = withContext(COURIER_COROUTINE_CONTEXT) {
     val trackingUrl = message.data["trackingUrl"] ?: return@withContext
     MessagingRepository().postTrackingUrl(
         url = trackingUrl,
@@ -58,9 +60,9 @@ suspend fun Courier.Companion.trackNotification(message: RemoteMessage, event: C
     )
 }
 
-fun Courier.Companion.trackNotification(message: RemoteMessage, event: CourierPushEvent, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
+fun Courier.trackNotification(message: RemoteMessage, event: CourierPushEvent, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
     try {
-        Courier.trackNotification(
+        Courier.instance.trackNotification(
             message = message,
             event = event
         )
@@ -70,7 +72,26 @@ fun Courier.Companion.trackNotification(message: RemoteMessage, event: CourierPu
     }
 }
 
-internal fun Courier.Companion.broadcastMessage(message: RemoteMessage) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
+suspend fun Courier.trackNotification(trackingUrl: String, event: CourierPushEvent) = withContext(COURIER_COROUTINE_CONTEXT) {
+    MessagingRepository().postTrackingUrl(
+        url = trackingUrl,
+        event = event
+    )
+}
+
+fun Courier.trackNotification(trackingUrl: String, event: CourierPushEvent, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
+    try {
+        Courier.instance.trackNotification(
+            trackingUrl = trackingUrl,
+            event = event
+        )
+        onSuccess()
+    } catch (e: Exception) {
+        onFailure(e)
+    }
+}
+
+internal fun Courier.broadcastMessage(message: RemoteMessage) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
     try {
         eventBus.emitEvent(message)
     } catch (e: Exception) {

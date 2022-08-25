@@ -2,15 +2,19 @@ package com.courier.example
 
 import android.os.Bundle
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.models.CourierProvider
+import com.courier.android.models.CourierPushEvent
 import com.courier.android.notifications.CourierActivity
 import com.courier.android.requestNotificationPermission
 import com.courier.android.sendPush
+import com.courier.android.trackNotification
 import com.courier.example.databinding.ActivityMainBinding
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.launch
 
 class MainActivity : CourierActivity() {
 
@@ -64,7 +68,7 @@ class MainActivity : CourierActivity() {
 
             if (granted) {
 
-                Courier.sendPush(
+                Courier.instance.sendPush(
                     authKey = COURIER_ACCESS_TOKEN,
                     userId = COURIER_USER_ID,
                     title = "This is a title",

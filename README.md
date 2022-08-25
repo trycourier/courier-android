@@ -6,11 +6,11 @@ Courier helps you spend less time building notification infrastructure, and more
 
 &emsp;
 
-## **Quick Overview**
+## **Overview**
 
 ```kotlin
 // Must be initialized before Courier is started
-FirebaseApp.initializeApp(this, options)
+FirebaseApp.initializeApp(context, options)
 
 val userId = "example_user"
 val accessToken = "a_jwt_from_courier" // For more checkout -> https://www.courier.com/docs/reference/auth/issue-token/
@@ -24,7 +24,7 @@ Courier.instance.setCredentials(
 
 // Send a message to your device
 // This should only be used for testing purposes
-Courier.sendPush(
+Courier.instance.sendPush(
     authKey = authKey,
     userId = userId,
     title = "This is a title",
@@ -33,6 +33,35 @@ Courier.sendPush(
 
 // Sign the current user out
 Courier.instance.signOut()
+
+// Handling message interactions
+class YourActivity : CourierActivity() {
+
+    override fun onPushNotificationClicked(message: RemoteMessage) {
+        print(message)
+    }
+
+    override fun onPushNotificationDelivered(message: RemoteMessage) {
+        print(message)
+    }
+
+}
+
+// Handling notification presentation
+class YourMessagingService: CourierService() {
+
+    override fun showNotification(message: RemoteMessage) {
+        
+        message.presentNotification(
+            context = this,
+            handlingClass = YourActivity::class.java,
+            icon = R.drawable.your_drawable
+        )
+
+    }
+
+}
+
 ```
 &emsp;
 
@@ -228,7 +257,7 @@ Courier.instance.setFCMToken(
 )
 
 // Track a remote message payload
-Courier.trackNotification(
+Courier.instance.trackNotification(
     message = message,
     event = CourierPushEvent.DELIVERED,
     onSuccess = { Courier.log("Event tracked") },
@@ -292,7 +321,7 @@ Courier.instance.signOut(
 ⚠️ This is only for testing purposes and should not be in your production app.
 
 ```kotlin
-Courier.sendPush(
+Courier.instance.sendPush(
     authKey = "your_api_key_that_should_not_stay_in_your_production_app",
     userId = "example_user",
     title = "Test message!",

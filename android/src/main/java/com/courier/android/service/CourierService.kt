@@ -18,7 +18,7 @@ open class CourierService: FirebaseMessagingService() {
         // If the payload contains title and body, there will be
         // issues tracking the event
         // More info: https://stackoverflow.com/a/71253912/2415921
-        Courier.trackNotification(
+        Courier.instance.trackNotification(
             message = message,
             event = CourierPushEvent.DELIVERED,
             onSuccess = { Courier.log("Event tracked") },
@@ -27,7 +27,7 @@ open class CourierService: FirebaseMessagingService() {
 
         // Broadcast the message to the app
         // This will allow us to handle when it's delivered
-        Courier.broadcastMessage(message)
+        Courier.instance.broadcastMessage(message)
 
         // Try and show the notification
         showNotification(message)
