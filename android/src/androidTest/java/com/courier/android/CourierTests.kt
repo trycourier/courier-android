@@ -5,6 +5,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierPushEvent
+import com.google.android.datatransport.BuildConfig
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.RemoteMessage
@@ -123,7 +124,7 @@ class CourierTests {
 
         print("🔬 Sending Push")
 
-        val requestId = Courier.sendPush(
+        val requestId = Courier.instance.sendPush(
             authKey = COURIER_ACCESS_TOKEN,
             userId = COURIER_USER_ID,
             title = "🐤 Chirp Chirp!",
@@ -145,12 +146,12 @@ class CourierTests {
             .addData("trackingUrl", "https://af6303be-0e1e-40b5-bb80-e1d9299cccff.ct0.app/t/tzgspbr4jcmcy1qkhw96m0034bvy")
             .build()
 
-        Courier.trackNotification(
+        Courier.instance.trackNotification(
             message = message,
             event = CourierPushEvent.DELIVERED
         )
 
-        Courier.trackNotification(
+        Courier.instance.trackNotification(
             message = message,
             event = CourierPushEvent.CLICKED
         )

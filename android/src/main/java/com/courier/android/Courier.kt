@@ -1,5 +1,6 @@
 package com.courier.android
 
+import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierProvider
 import com.courier.android.repositories.TokenRepository
 import com.courier.android.utils.NotificationEventBus
@@ -11,6 +12,8 @@ import kotlin.coroutines.suspendCoroutine
 class Courier private constructor() {
 
     companion object {
+        internal val AGENT = CourierAgent.NATIVE_ANDROID
+        internal const val VERSION = "1.0.2"
         internal const val TAG = "Courier"
         internal val COURIER_COROUTINE_CONTEXT by lazy { Job() }
         const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
