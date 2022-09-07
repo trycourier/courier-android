@@ -6,9 +6,11 @@ import com.courier.android.models.CourierException
 import com.courier.android.models.CourierMessageResponse
 import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierPushEvent
-import com.google.gson.Gson
-import okhttp3.*
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
 import org.json.JSONObject
 import java.io.IOException
 import kotlin.coroutines.resume
@@ -86,6 +88,8 @@ internal class MessagingRepository : Repository() {
                         val requestId = messageResponse.requestId
                         Courier.log("New Courier message sent. View logs here:")
                         Courier.log("https://app.courier.com/logs/messages?message=${requestId}")
+                        Courier.log("If you do not receive this message, you may need to configure the Firebase Cloud Messaging provider. More info:")
+                        Courier.log("https://app.courier.com/channels/firebase-fcm")
                         continuation.resume(requestId)
                     } catch (e: Exception) {
                         continuation.resumeWithException(e)

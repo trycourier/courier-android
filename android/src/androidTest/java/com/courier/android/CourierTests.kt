@@ -5,7 +5,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierPushEvent
-import com.google.android.datatransport.BuildConfig
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.RemoteMessage
@@ -63,7 +62,7 @@ class CourierTests {
         var exception: Exception? = null
 
         try {
-            Courier.instance.setCredentials(
+            Courier.instance.setUser(
                 accessToken = COURIER_ACCESS_TOKEN,
                 userId = COURIER_USER_ID
             )
@@ -95,7 +94,7 @@ class CourierTests {
         val app = FirebaseApp.getInstance()
         assertEquals(app.options.apiKey, FIREBASE_API_KEY)
 
-        Courier.instance.setCredentials(
+        Courier.instance.setUser(
             accessToken = COURIER_ACCESS_TOKEN,
             userId = COURIER_USER_ID
         )

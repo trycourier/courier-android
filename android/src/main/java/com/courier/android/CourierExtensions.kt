@@ -26,6 +26,12 @@ internal fun Courier.Companion.log(data: String) {
     }
 }
 
+internal fun Courier.Companion.warn(data: String) {
+    if (instance.isDebugging) {
+        Log.e(TAG, data)
+    }
+}
+
 suspend fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList()): String {
     return MessagingRepository().send(
         authKey = authKey,

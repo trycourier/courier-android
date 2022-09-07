@@ -68,7 +68,7 @@ class MainActivity : CourierActivity() {
             }
         }
 
-        Courier.instance.setCredentials(
+        Courier.instance.setUser(
             accessToken = prefs.getString("COURIER_ACCESS_TOKEN", "") ?: "",
             userId = prefs.getString("COURIER_USER_ID", "") ?: ""
         )
