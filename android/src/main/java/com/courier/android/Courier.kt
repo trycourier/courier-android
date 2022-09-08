@@ -1,11 +1,8 @@
 package com.courier.android
 
-import android.app.ActivityManager
-import android.content.ComponentName
+import android.annotation.SuppressLint
 import android.content.Context
-import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.getSystemService
+import com.courier.android.managers.UserManager
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierProvider
 import com.courier.android.repositories.TokenRepository
@@ -18,32 +15,59 @@ import kotlin.coroutines.suspendCoroutine
 class Courier private constructor() {
 
     companion object {
+
         internal val AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "1.0.2"
+        internal const val VERSION = "1.0.3"
         internal const val TAG = "Courier SDK"
         internal val COURIER_COROUTINE_CONTEXT by lazy { Job() }
         const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
         internal val eventBus by lazy { NotificationEventBus() }
-        val instance = Courier()
-    }
 
-    var isDebugging = false
+        /**
+         * Initializes the SDK with a static reference to a Courier singleton
+         * This function must be called before you can use the Courier.instance value
+         * Courier.instance is required for nearly all features of the SDK
+         */
+        fun initialize(context: Context) {
+            mInstance = Courier().apply {
+                this.context = context
+            }
+        }
+
+        // This will not create a memory leak
+        // Please call Courier.initialize(...) before using Courier.instance
+        @SuppressLint("StaticFieldLeak")
+        private var mInstance: Courier? = null
+        val instance: Courier get() {
+            mInstance?.let { return it }
+            throw Exception("Instance does not exist")
+        }
+
+    }
 
     // Repos
     private val tokenRepo by lazy { TokenRepository() }
 
     /**
+     * Shows or hides Android console logs
+     */
+    var isDebugging = false
+
+    /**
+     * Handles interfacing between shared preferences and the Courier SDK
+     */
+    private lateinit var context: Context
+
+    /**
      * The key required to initialized the SDK
      * [Issue Tokens](https://www.courier.com/docs/reference/auth/issue-token/)
      */
-    internal var accessToken: String? = null
-        private set
+    internal val accessToken: String? get() = UserManager.getAccessToken(context)
 
     /**
      * A read only value set to the current user id
      */
-    var userId: String? = null
-        private set
+    val userId: String? get() = UserManager.getUserId(context)
 
     init {
 
@@ -64,9 +88,12 @@ class Courier private constructor() {
         Courier.log("Access Token: $accessToken")
         Courier.log("User Id: $userId")
 
-        // Set the user's current credentials
-        this@Courier.accessToken = accessToken
-        this@Courier.userId = userId
+        // Update user manager
+        UserManager.setCredentials(
+            context = context,
+            accessToken = accessToken,
+            userId = userId
+        )
 
         // Post the fcm token if we can
         // If this SDK supports more tokens
@@ -103,8 +130,8 @@ class Courier private constructor() {
             tokenRepo.deleteUserToken(token)
         }
 
-        this@Courier.accessToken = null
-        this@Courier.userId = null
+        // Remove credentials
+        UserManager.removeCredentials(context)
 
     }
 

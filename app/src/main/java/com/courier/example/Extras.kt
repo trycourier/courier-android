@@ -45,8 +45,6 @@ suspend fun showSDKConfig(activity: Activity, items: List<DialogItem>) = suspend
             continuation.resume(sharedPrefs)
         }
 
-        Toast.makeText(activity, "SDK Configured", Toast.LENGTH_LONG).show()
-
     }
 
     alert.setCancelable(false)

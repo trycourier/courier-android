@@ -22,56 +22,60 @@ class MainActivity : CourierActivity() {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
-
-            try {
-                setup()
-            } catch (e: Exception) {
-                Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
-                setup()
-            }
-
+            setup()
         }
 
     }
 
     private suspend fun setup() {
 
-        val prefs = showSDKConfig(
-            activity = this@MainActivity,
-            items = listOf(
-                DialogItem("FIREBASE_API_KEY", "Firebase API Key"),
-                DialogItem("FIREBASE_APP_ID", "Firebase App ID"),
-                DialogItem("FIREBASE_PROJECT_ID", "Firebase Project ID"),
-                DialogItem("FIREBASE_GCM_SENDER_ID", "Firebase GCM Sender ID"),
-                DialogItem("COURIER_ACCESS_TOKEN", "Courier Access Token"),
-                DialogItem("COURIER_AUTH_KEY", "Courier Auth Key"),
-                DialogItem("COURIER_USER_ID", "Courier User ID"),
+        try {
+
+            val prefs = showSDKConfig(
+                activity = this@MainActivity,
+                items = listOf(
+                    DialogItem("FIREBASE_API_KEY", "Firebase API Key"),
+                    DialogItem("FIREBASE_APP_ID", "Firebase App ID"),
+                    DialogItem("FIREBASE_PROJECT_ID", "Firebase Project ID"),
+                    DialogItem("FIREBASE_GCM_SENDER_ID", "Firebase GCM Sender ID"),
+                    DialogItem("COURIER_ACCESS_TOKEN", "Courier Access Token"),
+                    DialogItem("COURIER_AUTH_KEY", "Courier Auth Key"),
+                    DialogItem("COURIER_USER_ID", "Courier User ID"),
+                )
             )
-        )
 
-        // Start firebase
-        // This must be set before you can sync FCM tokens in Courier
-        val options = FirebaseOptions.Builder().apply {
-            setApiKey(prefs.getString("FIREBASE_API_KEY", "") ?: "")
-            setApplicationId(prefs.getString("FIREBASE_APP_ID", "") ?: "")
-            setProjectId(prefs.getString("FIREBASE_PROJECT_ID", "") ?: "")
-            setGcmSenderId(prefs.getString("FIREBASE_GCM_SENDER_ID", "") ?: "")
-        }.build()
+            // Start firebase
+            // This must be set before you can sync FCM tokens in Courier
+            val options = FirebaseOptions.Builder().apply {
+                setApiKey(prefs.getString("FIREBASE_API_KEY", "") ?: "")
+                setApplicationId(prefs.getString("FIREBASE_APP_ID", "") ?: "")
+                setProjectId(prefs.getString("FIREBASE_PROJECT_ID", "") ?: "")
+                setGcmSenderId(prefs.getString("FIREBASE_GCM_SENDER_ID", "") ?: "")
+            }.build()
 
-        FirebaseApp.initializeApp(this@MainActivity, options)
+            FirebaseApp.initializeApp(this@MainActivity, options)
 
-        // Set layout
-        ActivityMainBinding.inflate(layoutInflater).apply {
-            setContentView(root)
-            sendPushButton.setOnClickListener {
-                sendPush(prefs)
+            // Set layout
+            ActivityMainBinding.inflate(layoutInflater).apply {
+                setContentView(root)
+                sendPushButton.setOnClickListener {
+                    sendPush(prefs)
+                }
             }
-        }
 
-        Courier.instance.setUser(
-            accessToken = prefs.getString("COURIER_ACCESS_TOKEN", "") ?: "",
-            userId = prefs.getString("COURIER_USER_ID", "") ?: ""
-        )
+            Courier.initialize(context = this)
+
+            Courier.instance.setUser(
+                accessToken = prefs.getString("COURIER_ACCESS_TOKEN", "") ?: "",
+                userId = prefs.getString("COURIER_USER_ID", "") ?: ""
+            )
+
+            Toast.makeText(this, "SDK Configured", Toast.LENGTH_LONG).show()
+
+        } catch (e: Exception) {
+            Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
+            setup()
+        }
 
     }
 

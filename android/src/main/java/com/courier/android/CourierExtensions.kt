@@ -19,7 +19,6 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-
 internal fun Courier.Companion.log(data: String) {
     if (instance.isDebugging) {
         Log.d(TAG, data)
