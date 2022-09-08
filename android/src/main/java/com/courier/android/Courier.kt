@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import com.courier.android.managers.UserManager
 import com.courier.android.models.CourierAgent
+import com.courier.android.models.CourierException
 import com.courier.android.models.CourierProvider
 import com.courier.android.repositories.TokenRepository
 import com.courier.android.utils.NotificationEventBus
@@ -35,12 +36,12 @@ class Courier private constructor() {
         }
 
         // This will not create a memory leak
-        // Please call Courier.initialize(...) before using Courier.instance
+        // Please call Courier.initialize(context) before using Courier.instance
         @SuppressLint("StaticFieldLeak")
         private var mInstance: Courier? = null
         val instance: Courier get() {
             mInstance?.let { return it }
-            throw Exception("Instance does not exist")
+            throw CourierException.initializationError
         }
 
     }

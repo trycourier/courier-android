@@ -6,12 +6,9 @@ import com.courier.android.models.CourierDevice
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierToken
-import okhttp3.Call
-import okhttp3.Callback
+import com.courier.android.utils.dispatch
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -48,18 +45,11 @@ internal class TokenRepository : Repository() {
             .put(json.toRequestBody())
             .build()
 
-        http.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                continuation.resumeWithException(e)
-            }
-            override fun onResponse(call: Call, response: Response) {
-                if (!listOf(202, 204).contains(response.code)) {
-                    continuation.resumeWithException(CourierException.requestError)
-                } else {
-                    continuation.resume(Unit)
-                }
-            }
-        })
+        http.newCall(request).dispatch<Unit>(
+            validCodes = listOf(202, 204),
+            onSuccess = { continuation.resume(it) },
+            onFailure = { continuation.resumeWithException(it) }
+        )
 
     }
 
@@ -88,18 +78,11 @@ internal class TokenRepository : Repository() {
             .delete()
             .build()
 
-        http.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                continuation.resumeWithException(e)
-            }
-            override fun onResponse(call: Call, response: Response) {
-                if (!listOf(202, 204).contains(response.code)) {
-                    continuation.resumeWithException(CourierException.requestError)
-                } else {
-                    continuation.resume(Unit)
-                }
-            }
-        })
+        http.newCall(request).dispatch<Unit>(
+            validCodes = listOf(202, 204),
+            onSuccess = { continuation.resume(it) },
+            onFailure = { continuation.resumeWithException(it) }
+        )
 
     }
 
