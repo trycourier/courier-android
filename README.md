@@ -96,13 +96,13 @@ Want to try a demo? Here is a link to a full sample project:
 
 Misc info about the SDK:
 - All async functionality is executed on background threads
-- All functions support Coroutines!
 - The SDK does support runtime push notification permissions found in Android 13+ (API 33)
 - The SDK automatically maintains your user's state between app sessions using `SharedPreferences`
 - To best test the SDK, you should use a physical Android device
+- All functions support Coroutines!
 
 Supported Courier Providers:
-✅ Firebase Cloud Messaging (FCM)
+- ✅ Firebase Cloud Messaging (FCM)
 
 &emsp;
 
