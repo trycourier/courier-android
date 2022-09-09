@@ -30,7 +30,7 @@ internal inline fun <reified T>Call.dispatch(validCodes: List<Int> = listOf(200)
 
                 try {
 
-                    if (T::class == Unit::class) {
+                    if (T::class == Any::class) {
                         onSuccess(T::class.java.newInstance())
                         return
                     }

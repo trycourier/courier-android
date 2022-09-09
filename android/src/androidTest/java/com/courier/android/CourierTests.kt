@@ -62,7 +62,7 @@ class CourierTests {
         var exception: Exception? = null
 
         try {
-            Courier.instance.setUser(
+            Courier.instance.signIn(
                 accessToken = COURIER_ACCESS_TOKEN,
                 userId = COURIER_USER_ID
             )
@@ -94,7 +94,7 @@ class CourierTests {
         val app = FirebaseApp.getInstance()
         assertEquals(app.options.apiKey, FIREBASE_API_KEY)
 
-        Courier.instance.setUser(
+        Courier.instance.signIn(
             accessToken = COURIER_ACCESS_TOKEN,
             userId = COURIER_USER_ID
         )

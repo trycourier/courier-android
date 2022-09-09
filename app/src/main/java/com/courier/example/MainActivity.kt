@@ -18,11 +18,23 @@ import kotlinx.coroutines.launch
 
 class MainActivity : CourierActivity() {
 
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var prefs: SharedPreferences
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        binding = ActivityMainBinding.inflate(layoutInflater).apply {
+            setContentView(root)
+        }
+
         lifecycleScope.launch {
             setup()
+            refresh()
+        }
+
+        binding.sendPushButton.setOnClickListener {
+            sendPush()
         }
 
     }
@@ -31,7 +43,7 @@ class MainActivity : CourierActivity() {
 
         try {
 
-            val prefs = showSDKConfig(
+            prefs = showSDKConfig(
                 activity = this@MainActivity,
                 items = listOf(
                     DialogItem("FIREBASE_API_KEY", "Firebase API Key"),
@@ -55,20 +67,8 @@ class MainActivity : CourierActivity() {
 
             FirebaseApp.initializeApp(this@MainActivity, options)
 
-            // Set layout
-            ActivityMainBinding.inflate(layoutInflater).apply {
-                setContentView(root)
-                sendPushButton.setOnClickListener {
-                    sendPush(prefs)
-                }
-            }
-
+            // Init Courier
             Courier.initialize(context = this)
-
-            Courier.instance.setUser(
-                accessToken = prefs.getString("COURIER_ACCESS_TOKEN", "") ?: "",
-                userId = prefs.getString("COURIER_USER_ID", "") ?: ""
-            )
 
             Toast.makeText(this, "SDK Configured", Toast.LENGTH_LONG).show()
 
@@ -79,9 +79,11 @@ class MainActivity : CourierActivity() {
 
     }
 
-    private fun sendPush(prefs: SharedPreferences) {
+    private fun sendPush() {
 
         lifecycleScope.launch {
+
+            binding.sendPushButton.isEnabled = false
 
             try {
 
@@ -92,8 +94,8 @@ class MainActivity : CourierActivity() {
                     Courier.instance.sendPush(
                         authKey = prefs.getString("COURIER_AUTH_KEY", "") ?: "",
                         userId = prefs.getString("COURIER_USER_ID", "") ?: "",
-                        title = "This is a title",
-                        body = "This is a message",
+                        title = "Hey ${Courier.instance.userId}!",
+                        body = "This is a test message",
                         providers = listOf(CourierProvider.FCM),
                     )
 
@@ -104,6 +106,8 @@ class MainActivity : CourierActivity() {
                 Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
 
             }
+
+            binding.sendPushButton.isEnabled = true
 
         }
 
@@ -117,6 +121,63 @@ class MainActivity : CourierActivity() {
     override fun onPushNotificationDelivered(message: RemoteMessage) {
         print(message)
         Toast.makeText(this, "Message delivered:\n${message.data}", Toast.LENGTH_LONG).show()
+    }
+
+    private fun refresh() {
+
+        if (Courier.instance.userId == null) {
+            binding.authTextView.text = "User not signed in"
+            binding.authButton.text = "Sign In"
+            binding.authButton.setOnClickListener {
+                signIn()
+            }
+        } else {
+            binding.authTextView.text = "User signed in: ${Courier.instance.userId}"
+            binding.authButton.text = "Sign Out"
+            binding.authButton.setOnClickListener {
+                signOut()
+            }
+        }
+
+    }
+
+    private fun signIn() {
+        lifecycleScope.launch {
+
+            binding.authButton.isEnabled = false
+
+            try {
+                Courier.instance.signIn(
+                    accessToken = prefs.getString("COURIER_ACCESS_TOKEN", "") ?: "",
+                    userId = prefs.getString("COURIER_USER_ID", "") ?: ""
+                )
+                refresh()
+                Toast.makeText(this@MainActivity, "Courier user signed in", Toast.LENGTH_LONG).show()
+            } catch (e: Exception) {
+                Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
+            }
+
+            binding.authButton.isEnabled = true
+
+        }
+    }
+
+    private fun signOut() {
+        lifecycleScope.launch {
+
+            binding.authButton.isEnabled = false
+
+            try {
+                Courier.instance.signOut()
+                refresh()
+                Toast.makeText(this@MainActivity, "Courier user signed out", Toast.LENGTH_LONG).show()
+            } catch (e: Exception) {
+                Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
+            }
+
+            binding.authButton.isEnabled = true
+
+        }
     }
 
 }

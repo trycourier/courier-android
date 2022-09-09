@@ -45,9 +45,9 @@ internal class TokenRepository : Repository() {
             .put(json.toRequestBody())
             .build()
 
-        http.newCall(request).dispatch<Unit>(
+        http.newCall(request).dispatch<Any>(
             validCodes = listOf(202, 204),
-            onSuccess = { continuation.resume(it) },
+            onSuccess = { continuation.resume(Unit) },
             onFailure = { continuation.resumeWithException(it) }
         )
 
@@ -78,9 +78,9 @@ internal class TokenRepository : Repository() {
             .delete()
             .build()
 
-        http.newCall(request).dispatch<Unit>(
+        http.newCall(request).dispatch<Any>(
             validCodes = listOf(202, 204),
-            onSuccess = { continuation.resume(it) },
+            onSuccess = { continuation.resume(Unit) },
             onFailure = { continuation.resumeWithException(it) }
         )
 
