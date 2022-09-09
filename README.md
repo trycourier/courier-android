@@ -20,13 +20,13 @@ FirebaseApp.initializeApp(...)
 val userId = "asdfasdf"
 
 // The key used to make requests to Courier
-// This key should NOT live in your production app
+// THIS KEY SHOULD NOT LIVE IN YOUR PRODUCTION APP
 // You should only use this key to test with
 // https://app.courier.com/settings/api-keys
 val authKey = "pk_prod_ABCD..."
 
 // The access token used to make user specific changes to Courier data
-// This token is safe to be used in your production app
+// This token is safe to be used in your production app and should be generate by your backend
 val accessToken = "eyJhbGciOiJIUzI..."
 
 // Set your Courier credentials
@@ -90,21 +90,25 @@ class YourMessagingService: CourierService() {
 }
 
 ```
-&emsp;
-
-## **Full Installation (6 Steps)**
-
-The following steps will get the Courier Android SDK setup and allow support for sending push notifications from Courier to your device. The following messaging providers are supported
-
-Supported Providers:
-✅ Firebase Cloud Messaging (FCM)
 
 Want to try a demo? Here is a link to a full sample project:
 [Courier Android Sample App](https://github.com/trycourier/courier-android/tree/master/app)
 
-⚠️ You should test this SDK on a physical device. You cannot test this effectively using the Android emulator.
+Misc info about the SDK:
+- All async functionality is executed on background threads
+- All functions support Coroutines!
+- The SDK does support runtime push notification permissions found in Android 13+ (API 33)
+- The SDK automatically maintains your user's state between app sessions using `SharedPreferences`
+- To best test the SDK, you should use a physical Android device
 
-This SDK supports kotlin coroutines for all major functions and has simple helpers for Android 13+ runtime push notification permissions.
+Supported Courier Providers:
+✅ Firebase Cloud Messaging (FCM)
+
+&emsp;
+
+## **Full Installation (6 Steps)**
+
+The following steps will get the Courier Android SDK setup and allow support for sending push notifications from Courier to your device.
 
 &emsp;
 
@@ -326,6 +330,11 @@ class YourActivity : CourierActivity() {
 
 To get pushes to appear, add support for the provider you would like to use. Here are links to get your providers configured:
 - [Firebase Cloud Messaging](https://www.courier.com/docs/guides/providers/push/firebase-fcm/)
+
+You will need to get your Firebase Service Account key from this link:
+```
+https://console.firebase.google.com/project/${your_firebase_project_id}/settings/serviceaccounts/adminsdk
+```
 
 &emsp;
 
