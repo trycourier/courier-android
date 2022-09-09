@@ -12,12 +12,12 @@ import kotlin.coroutines.suspendCoroutine
 
 data class DialogItem(val key: String, val title: String)
 
-suspend fun showSDKConfig(activity: Activity, items: List<DialogItem>) = suspendCoroutine<SharedPreferences> { continuation ->
+suspend fun showSDKConfig(activity: Activity, title: String, items: List<DialogItem>) = suspendCoroutine<SharedPreferences> { continuation ->
 
     val sharedPrefs = activity.getPreferences(Context.MODE_PRIVATE)
 
     val alert = AlertDialog.Builder(activity)
-    alert.setTitle("Configure SDK")
+    alert.setTitle(title)
 
     val layout = LinearLayout(activity)
     layout.orientation = LinearLayout.VERTICAL

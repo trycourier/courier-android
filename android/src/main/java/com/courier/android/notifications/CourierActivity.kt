@@ -41,7 +41,7 @@ open class CourierActivity : AppCompatActivity() {
             extras?.remove(key)
 
             // Track when the notification was clicked
-            Courier.instance.trackNotification(
+            Courier.shared.trackNotification(
                 message = message,
                 event = CourierPushEvent.CLICKED,
                 onSuccess = { Courier.log("Event tracked") },

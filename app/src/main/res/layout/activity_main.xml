@@ -24,13 +24,14 @@
                 android:id="@+id/auth_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp" />
+                android:layout_marginBottom="16dp"
+                android:typeface="monospace" />
 
             <Button
                 android:id="@+id/auth_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/sign_in" />
+                android:text="Sign In" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 

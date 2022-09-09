@@ -19,13 +19,13 @@ internal class TokenRepository : Repository() {
 
         Courier.log("Putting Messaging Token")
 
-        val accessToken = Courier.instance.accessToken
+        val accessToken = Courier.shared.accessToken
         if (accessToken == null) {
             continuation.resumeWithException(CourierException.missingAccessToken)
             return@suspendCoroutine
         }
 
-        val userId = Courier.instance.userId
+        val userId = Courier.shared.userId
         if (userId == null) {
             continuation.resumeWithException(CourierException.missingUserId)
             return@suspendCoroutine
@@ -57,13 +57,13 @@ internal class TokenRepository : Repository() {
 
         Courier.log("Deleting Messaging Token")
 
-        val accessToken = Courier.instance.accessToken
+        val accessToken = Courier.shared.accessToken
         if (accessToken == null) {
             continuation.resumeWithException(CourierException.missingAccessToken)
             return@suspendCoroutine
         }
 
-        val userId = Courier.instance.userId
+        val userId = Courier.shared.userId
         if (userId == null) {
             continuation.resumeWithException(CourierException.missingUserId)
             return@suspendCoroutine

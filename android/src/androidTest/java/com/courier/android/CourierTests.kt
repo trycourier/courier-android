@@ -41,7 +41,7 @@ class CourierTests {
         var exception: Exception? = null
 
         try {
-            Courier.instance.setFCMToken(
+            Courier.shared.setFCMToken(
                 token = "something_that_will_fail"
             )
         } catch (e: Exception) {
@@ -49,8 +49,8 @@ class CourierTests {
         }
 
         assertEquals(exception?.message, CourierException.missingAccessToken.message)
-        assertEquals(Courier.instance.userId, null)
-        assertEquals(Courier.instance.accessToken, null)
+        assertEquals(Courier.shared.userId, null)
+        assertEquals(Courier.shared.accessToken, null)
 
     }
 
@@ -62,7 +62,7 @@ class CourierTests {
         var exception: Exception? = null
 
         try {
-            Courier.instance.signIn(
+            Courier.shared.signIn(
                 accessToken = COURIER_ACCESS_TOKEN,
                 userId = COURIER_USER_ID
             )
@@ -71,8 +71,8 @@ class CourierTests {
         }
 
         assert(exception is IllegalStateException)
-        assertEquals(Courier.instance.userId, COURIER_USER_ID)
-        assertEquals(Courier.instance.accessToken, COURIER_ACCESS_TOKEN)
+        assertEquals(Courier.shared.userId, COURIER_USER_ID)
+        assertEquals(Courier.shared.accessToken, COURIER_ACCESS_TOKEN)
 
     }
 
@@ -94,14 +94,14 @@ class CourierTests {
         val app = FirebaseApp.getInstance()
         assertEquals(app.options.apiKey, FIREBASE_API_KEY)
 
-        Courier.instance.signIn(
+        Courier.shared.signIn(
             accessToken = COURIER_ACCESS_TOKEN,
             userId = COURIER_USER_ID
         )
 
-        assertEquals(Courier.instance.userId, COURIER_USER_ID)
-        assertEquals(Courier.instance.accessToken, COURIER_ACCESS_TOKEN)
-        assertNotNull(Courier.instance.fcmToken)
+        assertEquals(Courier.shared.userId, COURIER_USER_ID)
+        assertEquals(Courier.shared.accessToken, COURIER_ACCESS_TOKEN)
+        assertNotNull(Courier.shared.fcmToken)
 
     }
 
@@ -110,11 +110,11 @@ class CourierTests {
 
         print("🔬 Setting FCM Token")
 
-        Courier.instance.setFCMToken(
+        Courier.shared.setFCMToken(
             token = "something_that_will_succeed"
         )
 
-        assertNotNull(Courier.instance.fcmToken)
+        assertNotNull(Courier.shared.fcmToken)
 
     }
 
@@ -123,7 +123,7 @@ class CourierTests {
 
         print("🔬 Sending Push")
 
-        val requestId = Courier.instance.sendPush(
+        val requestId = Courier.shared.sendPush(
             authKey = COURIER_ACCESS_TOKEN,
             userId = COURIER_USER_ID,
             title = "🐤 Chirp Chirp!",
@@ -145,12 +145,12 @@ class CourierTests {
             .addData("trackingUrl", "https://af6303be-0e1e-40b5-bb80-e1d9299cccff.ct0.app/t/tzgspbr4jcmcy1qkhw96m0034bvy")
             .build()
 
-        Courier.instance.trackNotification(
+        Courier.shared.trackNotification(
             message = message,
             event = CourierPushEvent.DELIVERED
         )
 
-        Courier.instance.trackNotification(
+        Courier.shared.trackNotification(
             message = message,
             event = CourierPushEvent.CLICKED
         )
@@ -164,11 +164,11 @@ class CourierTests {
 
         print("🔬 Signing Out")
 
-        Courier.instance.signOut()
+        Courier.shared.signOut()
 
-        assertNotNull(Courier.instance.fcmToken)
-        assertEquals(Courier.instance.userId, null)
-        assertEquals(Courier.instance.accessToken, null)
+        assertNotNull(Courier.shared.fcmToken)
+        assertEquals(Courier.shared.userId, null)
+        assertEquals(Courier.shared.accessToken, null)
 
     }
 

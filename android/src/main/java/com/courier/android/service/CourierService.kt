@@ -18,7 +18,7 @@ open class CourierService: FirebaseMessagingService() {
         // If the payload contains title and body, there will be
         // issues tracking the event
         // More info: https://stackoverflow.com/a/71253912/2415921
-        Courier.instance.trackNotification(
+        Courier.shared.trackNotification(
             message = message,
             event = CourierPushEvent.DELIVERED,
             onSuccess = { Courier.log("Event tracked") },
@@ -27,7 +27,7 @@ open class CourierService: FirebaseMessagingService() {
 
         // Broadcast the message to the app
         // This will allow us to handle when it's delivered
-        Courier.instance.broadcastMessage(message)
+        Courier.shared.broadcastMessage(message)
 
         // Try and show the notification
         showNotification(message)
@@ -36,7 +36,7 @@ open class CourierService: FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        Courier.instance.setFCMToken(
+        Courier.shared.setFCMToken(
             token = token,
             onSuccess = { Courier.log("Courier FCM token refreshed") },
             onFailure = { Courier.log(it.toString()) }

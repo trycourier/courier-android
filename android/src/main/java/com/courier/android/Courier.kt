@@ -39,7 +39,7 @@ class Courier private constructor() {
         // Please call Courier.initialize(context) before using Courier.instance
         @SuppressLint("StaticFieldLeak")
         private var mInstance: Courier? = null
-        val instance: Courier get() {
+        val shared: Courier get() {
             mInstance?.let { return it }
             throw CourierException.initializationError
         }
@@ -127,7 +127,8 @@ class Courier private constructor() {
         Courier.log("Clearing Courier User Credentials")
 
         // Attempt to delete the current fcm token from the user
-        this@Courier.fcmToken?.let { token ->
+        val fcmToken = this@Courier.fcmToken ?: getCurrentFcmToken()
+        fcmToken?.let { token ->
             tokenRepo.deleteUserToken(token)
         }
 

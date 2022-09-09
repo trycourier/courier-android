@@ -20,13 +20,13 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 internal fun Courier.Companion.log(data: String) {
-    if (instance.isDebugging) {
+    if (shared.isDebugging) {
         Log.d(TAG, data)
     }
 }
 
 internal fun Courier.Companion.warn(data: String) {
-    if (instance.isDebugging) {
+    if (shared.isDebugging) {
         Log.e(TAG, data)
     }
 }
@@ -44,7 +44,7 @@ suspend fun Courier.sendPush(authKey: String, userId: String, title: String, bod
 
 fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList(), onSuccess: (requestId: String) -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
     try {
-        val messageId = Courier.instance.sendPush(
+        val messageId = Courier.shared.sendPush(
             authKey = authKey,
             userId = userId,
             title = title,
@@ -67,7 +67,7 @@ suspend fun Courier.trackNotification(message: RemoteMessage, event: CourierPush
 
 fun Courier.trackNotification(message: RemoteMessage, event: CourierPushEvent, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
     try {
-        Courier.instance.trackNotification(
+        Courier.shared.trackNotification(
             message = message,
             event = event
         )
@@ -86,7 +86,7 @@ suspend fun Courier.trackNotification(trackingUrl: String, event: CourierPushEve
 
 fun Courier.trackNotification(trackingUrl: String, event: CourierPushEvent, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
     try {
-        Courier.instance.trackNotification(
+        Courier.shared.trackNotification(
             trackingUrl = trackingUrl,
             event = event
         )
