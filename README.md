@@ -363,7 +363,7 @@ Courier.shared.signOut(
 
 ```kotlin
 Courier.shared.sendPush(
-    authKey = "your_api_key_that_should_not_stay_in_your_production_app",
+    authKey = authKey, // DO NOT LEAVE THE AUTH KEY IN YOUR PRODUCTION APP
     userId = "example_user",
     title = "Test message!",
     body = "Chrip Chirp!",
@@ -402,22 +402,6 @@ Or generate one here:
 [Issue Courier Access Token](https://www.courier.com/docs/reference/auth/issue-token/)
 
 This request to issue a token should likely exist in a separate endpoint served on your backend.
-
-```kotlin
-Courier.shared.sendPush(
-    authKey = "your_api_key_that_should_not_stay_in_your_production_app",
-    userId = "example_user",
-    title = "Test message!",
-    body = "Chrip Chirp!",
-    providers = listOf(CourierProvider.FCM),
-    onSuccess = { requestId ->
-        print(requestId)
-    },
-    onFailure = { e ->
-        print(e)
-    }
-)
-```
 
 &emsp;
 
