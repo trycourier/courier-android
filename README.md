@@ -15,6 +15,10 @@ Courier helps you spend less time building notification infrastructure, and more
 // because Courier Android depends on Firebase Cloud Messaging (FCM)
 FirebaseApp.initializeApp(...)
 
+// Initialize Courier
+// Must be called before you can use the SDK
+Courier.initialize(context)
+
 // The user id you wish to register data with in Courier
 // You likely want this to match your existing authentication system user ids
 val userId = "asdfasdf"
@@ -154,10 +158,24 @@ A user must be "signed in" with Courier before they can receive push notificatio
 ⚠️ Courier holds a local reference to the `accessToken` and `userId` you set using `Courier.shared.signIn(...)`. This allows your user to still be "signed in" between app sessions.
 
 ```kotlin
-fun signInWithCourier() {
+class YourApplication : Application() or YourActivity : AppCompatActivity() {
+    
+    fun initializeSDKs() {
 
-    // Firebase must be initialized before Courier to receive messages via FCM (Firebase Cloud Messaging)
-    // FirebaseApp.initializeApp(...)
+        // Firebase must be initialized before Courier to receive messages via FCM (Firebase Cloud Messaging)
+        FirebaseApp.initializeApp(...)
+
+        // Initialize Courier
+        // Must be called before you can use the Courier SDK
+        // You are safe to move this to another place in your 
+        // project where you normally initialize other SDKs
+        Courier.initialize(context = this)
+        
+    }
+    
+}
+
+fun signInWithCourier() {
     
     val userId = "your_user_id"
     
