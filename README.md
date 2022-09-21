@@ -158,7 +158,9 @@ A user must be "signed in" with Courier before they can receive push notificatio
 ⚠️ Courier holds a local reference to the `accessToken` and `userId` you set using `Courier.shared.signIn(...)`. This allows your user to still be "signed in" between app sessions.
 
 ```kotlin
-class YourApplication : Application() or YourActivity : AppCompatActivity() {
+class YourApplication: Application() or YourActivity: AppCompatActivity() {
+    
+    ...
     
     fun initializeSDKs() {
 
