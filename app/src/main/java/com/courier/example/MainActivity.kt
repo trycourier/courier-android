@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
+import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierProvider
 import com.courier.android.notifications.CourierActivity
 import com.courier.android.notifications.CourierPushNotificationCallbacks

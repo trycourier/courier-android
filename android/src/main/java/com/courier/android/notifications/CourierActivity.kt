@@ -4,11 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.courier.android.Courier
-import com.courier.android.detectPushNotificationClick
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import com.courier.android.models.CourierAgent
+import com.courier.android.trackPushNotificationClick
 
 open class CourierActivity : AppCompatActivity() {
 
@@ -18,27 +15,23 @@ open class CourierActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // See if there is a pending click event
-        intent.detectPushNotificationClick { message ->
-            pushNotificationCallbacks?.onPushNotificationClicked(message)
-        }
+        checkIntentForPushNotificationClick(intent)
 
         // Handle delivered messages on the main thread
-        handlePushDeliveredEvent()
+        Courier.getLastDeliveredMessage { message ->
+            pushNotificationCallbacks?.onPushNotificationDelivered(message)
+        }
 
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        intent?.detectPushNotificationClick { message ->
-            pushNotificationCallbacks?.onPushNotificationClicked(message)
-        }
+        checkIntentForPushNotificationClick(intent)
     }
 
-    private fun handlePushDeliveredEvent() {
-        CoroutineScope(Courier.COURIER_COROUTINE_CONTEXT).launch(Dispatchers.Main) {
-            Courier.eventBus.events.collectLatest { message ->
-                pushNotificationCallbacks?.onPushNotificationDelivered(message)
-            }
+    private fun checkIntentForPushNotificationClick(intent: Intent?) {
+        intent?.trackPushNotificationClick { message ->
+            pushNotificationCallbacks?.onPushNotificationClicked(message)
         }
     }
 

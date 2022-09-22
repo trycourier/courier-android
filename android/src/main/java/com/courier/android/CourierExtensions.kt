@@ -13,7 +13,6 @@ import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierPushEvent
 import com.courier.android.repositories.MessagingRepository
 import com.google.firebase.messaging.RemoteMessage
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -32,11 +31,11 @@ internal fun Courier.Companion.warn(data: String) {
     }
 }
 
-fun Intent.detectPushNotificationClick(onClick: (message: RemoteMessage) -> Unit) {
+fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit) {
 
     try {
 
-        // Check to see if we have an intent to workc
+        // Check to see if we have an intent to work
         val key = Courier.COURIER_PENDING_NOTIFICATION_KEY
         (extras?.get(key) as? RemoteMessage)?.let { message ->
 
@@ -74,7 +73,7 @@ suspend fun Courier.sendPush(authKey: String, userId: String, title: String, bod
     )
 }
 
-fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList(), onSuccess: (requestId: String) -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
+fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList(), onSuccess: (requestId: String) -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
     try {
         val messageId = Courier.shared.sendPush(
             authKey = authKey,
@@ -97,7 +96,7 @@ suspend fun Courier.trackNotification(message: RemoteMessage, event: CourierPush
     )
 }
 
-fun Courier.trackNotification(message: RemoteMessage, event: CourierPushEvent, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
+fun Courier.trackNotification(message: RemoteMessage, event: CourierPushEvent, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
     try {
         Courier.shared.trackNotification(
             message = message,
@@ -116,7 +115,7 @@ suspend fun Courier.trackNotification(trackingUrl: String, event: CourierPushEve
     )
 }
 
-fun Courier.trackNotification(trackingUrl: String, event: CourierPushEvent, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
+fun Courier.trackNotification(trackingUrl: String, event: CourierPushEvent, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
     try {
         Courier.shared.trackNotification(
             trackingUrl = trackingUrl,
@@ -128,7 +127,7 @@ fun Courier.trackNotification(trackingUrl: String, event: CourierPushEvent, onSu
     }
 }
 
-internal fun Courier.broadcastMessage(message: RemoteMessage) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
+internal fun Courier.broadcastMessage(message: RemoteMessage) = Courier.coroutineScope.launch(Dispatchers.IO) {
     try {
         eventBus.emitEvent(message)
     } catch (e: Exception) {

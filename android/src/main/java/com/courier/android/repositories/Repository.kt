@@ -14,7 +14,7 @@ sealed class Repository {
             chain.proceed(
                 chain.request()
                     .newBuilder()
-                    .header("User-Agent", "${Courier.AGENT.value}/${Courier.VERSION}")
+                    .header("User-Agent", "${Courier.USER_AGENT.value}/${Courier.VERSION}")
                     .build()
             )
         }.build()

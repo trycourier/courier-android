@@ -9,7 +9,9 @@ import com.courier.android.models.CourierProvider
 import com.courier.android.repositories.TokenRepository
 import com.courier.android.utils.NotificationEventBus
 import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collectLatest
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -17,12 +19,13 @@ class Courier private constructor() {
 
     companion object {
 
-        internal val AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "1.0.3"
+        var USER_AGENT = CourierAgent.NATIVE_ANDROID
+        internal const val VERSION = "1.0.14"
         internal const val TAG = "Courier SDK"
-        internal val COURIER_COROUTINE_CONTEXT by lazy { Job() }
-        const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
+        internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
         internal val eventBus by lazy { NotificationEventBus() }
+        internal val COURIER_COROUTINE_CONTEXT by lazy { Job() }
+        internal val coroutineScope = CoroutineScope(COURIER_COROUTINE_CONTEXT)
 
         /**
          * Initializes the SDK with a static reference to a Courier singleton
@@ -42,6 +45,13 @@ class Courier private constructor() {
         val shared: Courier get() {
             mInstance?.let { return it }
             throw CourierException.initializationError
+        }
+
+        // Returns the last message that was delivered via the event bus
+        fun getLastDeliveredMessage(onMessageFound: (message: RemoteMessage) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
+            eventBus.events.collectLatest { message ->
+                onMessageFound(message)
+            }
         }
 
     }
@@ -105,7 +115,7 @@ class Courier private constructor() {
 
     }
 
-    fun signIn(accessToken: String, userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
+    fun signIn(accessToken: String, userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
         try {
             signIn(
                 accessToken = accessToken,
@@ -137,7 +147,7 @@ class Courier private constructor() {
 
     }
 
-    fun signOut(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
+    fun signOut(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
         try {
             signOut()
             onSuccess()
@@ -179,7 +189,7 @@ class Courier private constructor() {
 
     }
 
-    fun setFCMToken(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
+    fun setFCMToken(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
         try {
             setFCMToken(token)
             onSuccess()
