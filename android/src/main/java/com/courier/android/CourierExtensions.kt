@@ -110,19 +110,16 @@ fun AppCompatActivity.requestNotificationPermission(onStatusChange: (granted: Bo
     val notificationManagerCompat = NotificationManagerCompat.from(this)
     val areNotificationsEnabled = notificationManagerCompat.areNotificationsEnabled()
 
-    onStatusChange(areNotificationsEnabled)
-
-//    TODO: Add support after React Native and Flutter SDKs
-//    // Handle granting notification permission if possible
-//    if (Build.VERSION.SDK_INT >= 33) {
-//        val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-//            val canReceivePushes = granted && areNotificationsEnabled
-//            onStatusChange(canReceivePushes)
-//        }
-//        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-//    } else {
-//        onStatusChange(areNotificationsEnabled)
-//    }
+    // Handle granting notification permission if possible
+    if (Build.VERSION.SDK_INT >= 33) {
+        val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            val canReceivePushes = granted && areNotificationsEnabled
+            onStatusChange(canReceivePushes)
+        }
+        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    } else {
+        onStatusChange(areNotificationsEnabled)
+    }
 
 }
 
