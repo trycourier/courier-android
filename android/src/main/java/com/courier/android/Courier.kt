@@ -83,7 +83,7 @@ class Courier private constructor() {
      * Function to set the current credentials for the user and their access token
      * You should consider using this in areas where you update your local user's state
      */
-    suspend fun signInAsync(accessToken: String, userId: String) = withContext(COURIER_COROUTINE_CONTEXT) {
+    suspend fun signIn(accessToken: String, userId: String) = withContext(COURIER_COROUTINE_CONTEXT) {
 
         Courier.log("Updating Courier User Profile")
         Courier.log("Access Token: $accessToken")
@@ -107,7 +107,7 @@ class Courier private constructor() {
 
     fun signIn(accessToken: String, userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = CoroutineScope(COURIER_COROUTINE_CONTEXT).launch(Dispatchers.IO) {
         try {
-            signInAsync(
+            signIn(
                 accessToken = accessToken,
                 userId = userId
             )

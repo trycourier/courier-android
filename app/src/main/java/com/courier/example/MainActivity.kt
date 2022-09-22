@@ -167,7 +167,7 @@ class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
                     )
                 )
 
-                Courier.shared.signInAsync(
+                Courier.shared.signIn(
                     accessToken = prefs.getString("COURIER_ACCESS_TOKEN", "") ?: "",
                     userId = prefs.getString("COURIER_USER_ID", "") ?: ""
                 )
