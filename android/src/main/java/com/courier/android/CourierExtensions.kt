@@ -1,6 +1,7 @@
 package com.courier.android
 
 import android.Manifest
+import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,6 +30,37 @@ internal fun Courier.Companion.warn(data: String) {
     if (shared.isDebugging) {
         Log.e(TAG, data)
     }
+}
+
+fun Intent.detectPushNotificationClick(onClick: (message: RemoteMessage) -> Unit) {
+
+    try {
+
+        // Check to see if we have an intent to workc
+        val key = Courier.COURIER_PENDING_NOTIFICATION_KEY
+        (extras?.get(key) as? RemoteMessage)?.let { message ->
+
+            // Clear the intent extra
+            extras?.remove(key)
+
+            // Track when the notification was clicked
+            Courier.shared.trackNotification(
+                message = message,
+                event = CourierPushEvent.CLICKED,
+                onSuccess = { Courier.log("Event tracked") },
+                onFailure = { Courier.log(it.toString()) }
+            )
+
+            onClick(message)
+
+        }
+
+    } catch (e: Exception) {
+
+        Courier.log(e.toString())
+
+    }
+
 }
 
 suspend fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList()): String {

@@ -7,6 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.models.CourierProvider
 import com.courier.android.notifications.CourierActivity
+import com.courier.android.notifications.CourierPushNotificationCallbacks
 import com.courier.android.requestNotificationPermission
 import com.courier.android.sendPush
 import com.courier.example.databinding.ActivityMainBinding
@@ -16,13 +17,15 @@ import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.launch
 
 
-class MainActivity : CourierActivity() {
+class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var prefs: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        pushNotificationCallbacks = this
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             setContentView(root)
@@ -164,7 +167,7 @@ class MainActivity : CourierActivity() {
                     )
                 )
 
-                Courier.shared.signIn(
+                Courier.shared.signInAsync(
                     accessToken = prefs.getString("COURIER_ACCESS_TOKEN", "") ?: "",
                     userId = prefs.getString("COURIER_USER_ID", "") ?: ""
                 )
