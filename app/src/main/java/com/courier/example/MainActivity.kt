@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
-import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierProvider
 import com.courier.android.notifications.CourierActivity
 import com.courier.android.notifications.CourierPushNotificationCallbacks
@@ -49,6 +48,9 @@ class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
     private suspend fun setup() {
 
         try {
+
+            val hasNotificationPermissions = requestNotificationPermission()
+            Toast.makeText(this@MainActivity, "Notification permissions are granted: $hasNotificationPermissions", Toast.LENGTH_LONG).show()
 
             prefs = showSDKConfig(
                 activity = this@MainActivity,
@@ -95,19 +97,13 @@ class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
 
             try {
 
-                val granted = requestNotificationPermission()
-
-                if (granted) {
-
-                    Courier.shared.sendPush(
-                        authKey = prefs.getString("COURIER_AUTH_KEY", "") ?: "",
-                        userId = prefs.getString("COURIER_USER_ID", "") ?: "",
-                        title = "Hey ${Courier.shared.userId}!",
-                        body = "This is a test message",
-                        providers = listOf(CourierProvider.FCM),
-                    )
-
-                }
+                Courier.shared.sendPush(
+                    authKey = prefs.getString("COURIER_AUTH_KEY", "") ?: "",
+                    userId = prefs.getString("COURIER_USER_ID", "") ?: "",
+                    title = "Hey ${Courier.shared.userId}!",
+                    body = "This is a test message",
+                    providers = listOf(CourierProvider.FCM),
+                )
 
             } catch (e: Exception) {
 

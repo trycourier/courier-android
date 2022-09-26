@@ -10,24 +10,42 @@ import com.google.firebase.messaging.RemoteMessage
 
 open class CourierService: FirebaseMessagingService() {
 
+    override fun onCreate() {
+        super.onCreate()
+
+        // Init the SDK if needed
+        Courier.initialize(context = this)
+
+    }
+
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        // Track the event in Courier
-        // The payload being sent to the device must contain only data
-        // If the payload contains title and body, there will be
-        // issues tracking the event
-        // More info: https://stackoverflow.com/a/71253912/2415921
-        Courier.shared.trackNotification(
-            message = message,
-            event = CourierPushEvent.DELIVERED,
-            onSuccess = { Courier.log("Event tracked") },
-            onFailure = { Courier.log(it.toString()) }
-        )
+        // Unlikely to fail, but in case it does
+        // we can still hit the show notification function
+        try {
 
-        // Broadcast the message to the app
-        // This will allow us to handle when it's delivered
-        Courier.shared.broadcastMessage(message)
+            // Track the event in Courier
+            // The payload being sent to the device must contain only data
+            // If the payload contains title and body, there will be
+            // issues tracking the event
+            // More info: https://stackoverflow.com/a/71253912/2415921
+            Courier.shared.trackNotification(
+                message = message,
+                event = CourierPushEvent.DELIVERED,
+                onSuccess = { Courier.log("Event tracked") },
+                onFailure = { Courier.log(it.toString()) }
+            )
+
+            // Broadcast the message to the app
+            // This will allow us to handle when it's delivered
+            Courier.shared.broadcastMessage(message)
+
+        } catch (e: Exception) {
+
+            Courier.log(e.toString())
+
+        }
 
         // Try and show the notification
         showNotification(message)

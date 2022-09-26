@@ -6,6 +6,8 @@ import com.courier.android.managers.UserManager
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierProvider
+import com.courier.android.models.CourierPushEvent
+import com.courier.android.repositories.MessagingRepository
 import com.courier.android.repositories.TokenRepository
 import com.courier.android.utils.NotificationEventBus
 import com.google.firebase.messaging.FirebaseMessaging
@@ -33,9 +35,10 @@ class Courier private constructor() {
          * Courier.instance is required for nearly all features of the SDK
          */
         fun initialize(context: Context) {
-            mInstance = Courier().apply {
-                this.context = context
+            if (mInstance == null) {
+                mInstance = Courier()
             }
+            mInstance?.context = context
         }
 
         // This will not create a memory leak
@@ -137,9 +140,10 @@ class Courier private constructor() {
         Courier.log("Clearing Courier User Credentials")
 
         // Attempt to delete the current fcm token from the user
+        // If there is no access token and messaging token, skip this
         val fcmToken = this@Courier.fcmToken ?: getCurrentFcmToken()
-        fcmToken?.let { token ->
-            tokenRepo.deleteUserToken(token)
+        if (accessToken != null && fcmToken != null) {
+            tokenRepo.deleteUserToken(fcmToken)
         }
 
         // Remove credentials

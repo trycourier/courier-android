@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.courier.android.Courier
-import com.courier.android.models.CourierAgent
 import com.courier.android.trackPushNotificationClick
 
 open class CourierActivity : AppCompatActivity() {
