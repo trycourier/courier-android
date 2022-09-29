@@ -22,12 +22,7 @@ import kotlin.coroutines.suspendCoroutine
 internal fun Courier.Companion.log(data: String) {
     if (shared.isDebugging) {
         Log.d(TAG, data)
-    }
-}
-
-internal fun Courier.Companion.warn(data: String) {
-    if (shared.isDebugging) {
-        Log.e(TAG, data)
+        shared.logListener?.invoke(data)
     }
 }
 
@@ -156,6 +151,18 @@ fun AppCompatActivity.requestNotificationPermission(onStatusChange: (granted: Bo
 
 suspend fun AppCompatActivity.requestNotificationPermission() = suspendCoroutine { continuation ->
     requestNotificationPermission { granted ->
+        continuation.resume(granted)
+    }
+}
+
+fun AppCompatActivity.getNotificationPermissionStatus(onStatusChange: (granted: Boolean) -> Unit) {
+    val notificationManagerCompat = NotificationManagerCompat.from(this)
+    val areNotificationsEnabled = notificationManagerCompat.areNotificationsEnabled()
+    onStatusChange(areNotificationsEnabled)
+}
+
+suspend fun AppCompatActivity.getNotificationPermissionStatus() = suspendCoroutine { continuation ->
+    getNotificationPermissionStatus { granted ->
         continuation.resume(granted)
     }
 }

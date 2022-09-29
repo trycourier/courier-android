@@ -21,8 +21,6 @@ open class CourierService: FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        // Unlikely to fail, but in case it does
-        // we can still hit the show notification function
         try {
 
             // Track the event in Courier
@@ -54,11 +52,21 @@ open class CourierService: FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        Courier.shared.setFCMToken(
-            token = token,
-            onSuccess = { Courier.log("Courier FCM token refreshed") },
-            onFailure = { Courier.log(it.toString()) }
-        )
+
+        try {
+
+            Courier.shared.setFCMToken(
+                token = token,
+                onSuccess = { Courier.log("Courier FCM token refreshed") },
+                onFailure = { Courier.log(it.toString()) }
+            )
+
+        } catch (e: Exception) {
+
+            Courier.log(e.toString())
+
+        }
+
     }
 
     open fun showNotification(message: RemoteMessage) {

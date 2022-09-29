@@ -6,8 +6,6 @@ import com.courier.android.managers.UserManager
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierProvider
-import com.courier.android.models.CourierPushEvent
-import com.courier.android.repositories.MessagingRepository
 import com.courier.android.repositories.TokenRepository
 import com.courier.android.utils.NotificationEventBus
 import com.google.firebase.messaging.FirebaseMessaging
@@ -22,7 +20,7 @@ class Courier private constructor() {
     companion object {
 
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "1.0.14"
+        internal const val VERSION = "1.0.16"
         internal const val TAG = "Courier SDK"
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
         internal val eventBus by lazy { NotificationEventBus() }
@@ -31,8 +29,8 @@ class Courier private constructor() {
 
         /**
          * Initializes the SDK with a static reference to a Courier singleton
-         * This function must be called before you can use the Courier.instance value
-         * Courier.instance is required for nearly all features of the SDK
+         * This function must be called before you can use the Courier.shared value
+         * Courier.shared is required for nearly all features of the SDK
          */
         fun initialize(context: Context) {
             if (mInstance == null) {
@@ -42,7 +40,7 @@ class Courier private constructor() {
         }
 
         // This will not create a memory leak
-        // Please call Courier.initialize(context) before using Courier.instance
+        // Please call Courier.initialize(context) before using Courier.shared
         @SuppressLint("StaticFieldLeak")
         private var mInstance: Courier? = null
         val shared: Courier get() {
@@ -82,6 +80,11 @@ class Courier private constructor() {
      * A read only value set to the current user id
      */
     val userId: String? get() = UserManager.getUserId(context)
+
+    /**
+     * Gets called if set and a log is posted
+     */
+    var logListener: ((data: String) -> Unit)? = null
 
     init {
 
