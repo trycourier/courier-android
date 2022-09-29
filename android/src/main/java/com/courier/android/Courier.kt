@@ -20,7 +20,7 @@ class Courier private constructor() {
     companion object {
 
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "1.0.16"
+        internal const val VERSION = "1.0.17"
         internal const val TAG = "Courier SDK"
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
         internal val eventBus by lazy { NotificationEventBus() }
@@ -89,9 +89,7 @@ class Courier private constructor() {
     init {
 
         // Set app debugging
-        if (BuildConfig.DEBUG) {
-            isDebugging = true
-        }
+        isDebugging = BuildConfig.DEBUG
 
     }
 
@@ -101,9 +99,9 @@ class Courier private constructor() {
      */
     suspend fun signIn(accessToken: String, userId: String) = withContext(COURIER_COROUTINE_CONTEXT) {
 
-        Courier.log("Updating Courier User Profile")
-        Courier.log("Access Token: $accessToken")
-        Courier.log("User Id: $userId")
+        Courier.log("Updating Courier User Profile:\n" +
+                "Access Token: $accessToken\n" +
+                "User Id: $userId")
 
         // Update user manager
         UserManager.setCredentials(
@@ -189,8 +187,7 @@ class Courier private constructor() {
         // Set the new token and put in Courier
         this@Courier.fcmToken = token
 
-        Courier.log("Firebase Cloud Messaging Token")
-        Courier.log(token)
+        Courier.log("Firebase Cloud Messaging Token:\n$token")
 
         return tokenRepo.putUserToken(token, CourierProvider.FCM)
 

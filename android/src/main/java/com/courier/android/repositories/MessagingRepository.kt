@@ -74,10 +74,10 @@ internal class MessagingRepository : Repository() {
             validCodes = listOf(200, 202),
             onSuccess = {  res ->
                 val requestId = res.requestId
-                Courier.log("New Courier message sent. View logs here:")
-                Courier.log("https://app.courier.com/logs/messages?message=${requestId}")
-                Courier.log("If you do not receive this message, you may need to configure the Firebase Cloud Messaging provider. More info:")
-                Courier.log("https://app.courier.com/channels/firebase-fcm")
+                Courier.log("New Courier message sent. View logs here:\n" +
+                        "https://app.courier.com/logs/messages?message=${requestId}\n" +
+                        "If you do not receive this message, you may need to configure the Firebase Cloud Messaging provider. More info:\n" +
+                        "https://app.courier.com/channels/firebase-fcm")
                 continuation.resume(requestId)
             },
             onFailure = {
