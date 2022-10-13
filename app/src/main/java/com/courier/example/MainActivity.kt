@@ -102,6 +102,7 @@ class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
                     userId = prefs.getString("COURIER_USER_ID", "") ?: "",
                     title = "Hey ${Courier.shared.userId}!",
                     body = "This is a test message",
+                    isProduction = false,
                     providers = listOf(CourierProvider.FCM),
                 )
 

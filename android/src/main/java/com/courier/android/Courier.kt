@@ -20,7 +20,7 @@ class Courier private constructor() {
     companion object {
 
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "1.0.17"
+        internal const val VERSION = "1.0.18"
         internal const val TAG = "Courier SDK"
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
         internal val eventBus by lazy { NotificationEventBus() }
