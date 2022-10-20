@@ -3,6 +3,9 @@ package com.courier.android.managers
 import android.content.Context
 import android.content.SharedPreferences
 import com.courier.android.Courier
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 sealed class UserManager {
 
@@ -15,12 +18,11 @@ sealed class UserManager {
             return getSharedPreferences(Courier.TAG, Context.MODE_PRIVATE)
         }
 
-        fun setCredentials(context: Context, accessToken: String, userId: String) {
-            with (context.sharedPrefs.edit()) {
-                putString(ACCESS_TOKEN, accessToken)
-                putString(USER_ID, userId)
-                apply()
-            }
+        suspend fun setCredentials(context: Context, accessToken: String, userId: String) = withContext(Dispatchers.IO) {
+            val prefs = context.sharedPrefs.edit()
+            prefs.putString(ACCESS_TOKEN, accessToken)
+            prefs.putString(USER_ID, userId)
+            prefs.commit()
         }
 
         fun getAccessToken(context: Context): String? {
@@ -31,12 +33,11 @@ sealed class UserManager {
             return context.sharedPrefs.getString(USER_ID, null)
         }
 
-        fun removeCredentials(context: Context) {
-            with (context.sharedPrefs.edit()) {
-                putString(ACCESS_TOKEN, null)
-                putString(USER_ID, null)
-                apply()
-            }
+        suspend fun removeCredentials(context: Context) = withContext(Dispatchers.IO) {
+            val prefs = context.sharedPrefs.edit()
+            prefs.putString(ACCESS_TOKEN, null)
+            prefs.putString(USER_ID, null)
+            prefs.commit()
         }
 
     }
