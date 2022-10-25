@@ -8,6 +8,7 @@ import com.courier.android.models.CourierException
 import com.courier.android.models.CourierProvider
 import com.courier.android.repositories.TokenRepository
 import com.courier.android.utils.NotificationEventBus
+import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.*
@@ -20,7 +21,7 @@ class Courier private constructor() {
     companion object {
 
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "1.0.20"
+        internal const val VERSION = "1.0.21"
         internal const val TAG = "Courier SDK"
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
         internal val eventBus by lazy { NotificationEventBus() }
@@ -203,6 +204,13 @@ class Courier private constructor() {
     }
 
     private suspend fun getCurrentFcmToken() = suspendCoroutine { continuation ->
+
+        // Check if we can get the FCM token
+        if (!::context.isInitialized || FirebaseApp.getApps(context).isEmpty()) {
+            Courier.log("Firebase is not initialized. Courier will not be able to get the FCM token until Firebase is initialized.")
+            continuation.resume(null)
+            return@suspendCoroutine
+        }
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
 
