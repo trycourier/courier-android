@@ -47,12 +47,45 @@ class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
 
     private suspend fun setup() {
 
-        // Init Courier
-        Courier.initialize(context = this)
+        try {
 
-        // Request push notification permissions
-        val hasNotificationPermissions = requestNotificationPermission()
-        Toast.makeText(this@MainActivity, "Notification permissions are granted: $hasNotificationPermissions", Toast.LENGTH_LONG).show()
+            val hasNotificationPermissions = requestNotificationPermission()
+            Toast.makeText(this@MainActivity, "Notification permissions are granted: $hasNotificationPermissions", Toast.LENGTH_LONG).show()
+
+            prefs = showSDKConfig(
+                activity = this@MainActivity,
+                title = "Configure SDK",
+                items = listOf(
+                    DialogItem("FIREBASE_API_KEY", "Firebase API Key"),
+                    DialogItem("FIREBASE_APP_ID", "Firebase App ID"),
+                    DialogItem("FIREBASE_PROJECT_ID", "Firebase Project ID"),
+                    DialogItem("FIREBASE_GCM_SENDER_ID", "Firebase GCM Sender ID"),
+                    DialogItem("COURIER_AUTH_KEY", "Courier Auth Key"),
+                )
+            )
+
+            // Start firebase
+            // This must be set before you can sync FCM tokens in Courier
+            val options = FirebaseOptions.Builder().apply {
+                setApiKey(prefs.getString("FIREBASE_API_KEY", "") ?: "")
+                setApplicationId(prefs.getString("FIREBASE_APP_ID", "") ?: "")
+                setProjectId(prefs.getString("FIREBASE_PROJECT_ID", "") ?: "")
+                setGcmSenderId(prefs.getString("FIREBASE_GCM_SENDER_ID", "") ?: "")
+            }.build()
+
+            FirebaseApp.initializeApp(this@MainActivity, options)
+
+            // Init Courier
+            Courier.initialize(context = this)
+
+            Toast.makeText(this, "SDK Initialized", Toast.LENGTH_LONG).show()
+
+        } catch (e: Exception) {
+
+            Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
+            setup()
+
+        }
 
     }
 
@@ -127,7 +160,6 @@ class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
                     activity = this@MainActivity,
                     title = "Sign into Courier",
                     items = listOf(
-                        DialogItem("COURIER_AUTH_KEY", "Courier Auth Key"),
                         DialogItem("COURIER_ACCESS_TOKEN", "Courier Access Token"),
                         DialogItem("COURIER_USER_ID", "Courier User ID"),
                     )
