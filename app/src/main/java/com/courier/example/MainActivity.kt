@@ -196,6 +196,9 @@ class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
 
                 refresh()
 
+                val token = Courier.shared.fcmToken
+                print(token)
+
                 Toast.makeText(this@MainActivity, "Courier user signed out", Toast.LENGTH_LONG).show()
 
             } catch (e: Exception) {

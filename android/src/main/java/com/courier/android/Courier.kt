@@ -34,10 +34,19 @@ class Courier private constructor() {
          * Courier.shared is required for nearly all features of the SDK
          */
         fun initialize(context: Context) {
+
+            // Create the new instance
             if (mInstance == null) {
                 mInstance = Courier()
             }
+
+            // Update the instance context
             mInstance?.context = context
+
+            // Force refresh to grab the latest fcm token
+            // and hold a local reference to it
+            mInstance?.refreshLocalFcmToken()
+
         }
 
         // This will not create a memory leak
@@ -87,6 +96,11 @@ class Courier private constructor() {
      */
     var logListener: ((data: String) -> Unit)? = null
 
+    /**
+     * Determine user state
+     */
+    private val isUserSignedIn get() = accessToken != null && userId != null
+
     init {
 
         // Set app debugging
@@ -100,7 +114,7 @@ class Courier private constructor() {
      */
     suspend fun signIn(accessToken: String, userId: String) = withContext(COURIER_COROUTINE_CONTEXT) {
 
-        Courier.log("Updating Courier User Profile:\n" +
+        Courier.log("Signing User In:\n" +
                 "Access Token: $accessToken\n" +
                 "User Id: $userId")
 
@@ -111,12 +125,11 @@ class Courier private constructor() {
             userId = userId
         )
 
-        // Post the fcm token if we can
-        // If this SDK supports more tokens
-        // this return will need to change
-        return@withContext getCurrentFcmToken()?.let { token ->
-            setFCMToken(token)
-        }
+        // Refresh the current token
+        updateCurrentFcmToken()
+
+        // Update token management
+        return@withContext fcmToken?.let { setFCMToken(it) }
 
     }
 
@@ -139,17 +152,23 @@ class Courier private constructor() {
      */
     suspend fun signOut() = withContext(COURIER_COROUTINE_CONTEXT) {
 
-        Courier.log("Clearing Courier User Credentials")
+        Courier.log("Signing User Out")
 
-        // Attempt to delete the current fcm token from the user
-        // If there is no access token and messaging token, skip this
-        val fcmToken = this@Courier.fcmToken ?: getCurrentFcmToken()
-        if (accessToken != null && fcmToken != null) {
-            tokenRepo.deleteUserToken(fcmToken)
+        // Clear Courier tokens if possible
+        if (isUserSignedIn) {
+
+            // FCM
+            this@Courier.fcmToken?.let { token ->
+                tokenRepo.deleteUserToken(token)
+            }
+
         }
 
+        // Refresh FCM Token
+        updateCurrentFcmToken()
+
         // Remove credentials
-        UserManager.removeCredentials(context)
+        return@withContext UserManager.removeCredentials(context)
 
     }
 
@@ -166,7 +185,17 @@ class Courier private constructor() {
      * The current firebase token associated with this user
      */
     var fcmToken: String? = null
-        private set
+        private set(value) {
+
+            // Set the value
+            field = value
+
+            // Print the current token
+            value?.let { token ->
+                Courier.log("Firebase Cloud Messaging Token:\n$token")
+            }
+
+        }
 
     /**
      * Upserts the FCM token in Courier for the current user
@@ -177,20 +206,24 @@ class Courier private constructor() {
         // Delete the previous token if possible
         // If we fail the delete, skip and move on
         // We want to ensure the user has a new token in Courier
-        this@Courier.fcmToken?.let { currentToken ->
-            try {
-                tokenRepo.deleteUserToken(currentToken)
-            } catch (e: Exception) {
-                Courier.log(e.toString())
+        if (token != fcmToken) {
+
+            // Delete the current token in Courier
+            fcmToken?.let { currentToken ->
+                try {
+                    tokenRepo.deleteUserToken(currentToken)
+                } catch (e: Exception) {
+                    Courier.log(e.toString())
+                }
             }
+
         }
 
-        // Set the new token and put in Courier
+        // Set the new token locally
         this@Courier.fcmToken = token
 
-        Courier.log("Firebase Cloud Messaging Token:\n$token")
-
-        return tokenRepo.putUserToken(token, CourierProvider.FCM)
+        // Put the new token in Courier token management
+        tokenRepo.putUserToken(token, CourierProvider.FCM)
 
     }
 
@@ -203,7 +236,15 @@ class Courier private constructor() {
         }
     }
 
-    private suspend fun getCurrentFcmToken() = suspendCoroutine { continuation ->
+    private fun refreshLocalFcmToken() = coroutineScope.launch(Dispatchers.IO) {
+        try {
+            updateCurrentFcmToken()
+        } catch (e: Exception) {
+            Courier.log(e.toString())
+        }
+    }
+
+    private suspend fun updateCurrentFcmToken() = suspendCoroutine { continuation ->
 
         // Check if we can get the FCM token
         if (!::context.isInitialized || FirebaseApp.getApps(context).isEmpty()) {
@@ -220,8 +261,9 @@ class Courier private constructor() {
                 return@addOnCompleteListener
             }
 
-            val fcmToken = task.result
-            continuation.resume(fcmToken)
+            // **Important** Sets the local token
+            this@Courier.fcmToken = task.result
+            continuation.resume(this@Courier.fcmToken)
 
         }
 
