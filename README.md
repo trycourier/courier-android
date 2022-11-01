@@ -95,6 +95,16 @@ class YourMessagingService: CourierService() {
 
 ```
 
+# Requirements & Support
+
+| Min SDK | Compile SDK | Kotlin | Java | Firebase Cloud Messaging | Expo | OneSignal | Courier Inbox | Courier Toast |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| `21` |     `33` |  ✅ |    ✅ |✅ |   ❌ |         ❌ |            ❌ |            ❌ |
+
+> Most of this SDK depends on a Courier account: [`Create a Courier account here`](https://app.courier.com/signup)
+
+> Testing push notifications requires a physical device. Simulators will not work.
+
 Want to try a demo? Here is a link to a full sample project:
 [Courier Android Sample App](https://github.com/trycourier/courier-android/tree/master/app)
 
@@ -104,9 +114,6 @@ Misc info about the SDK:
 - The SDK automatically maintains your user's state between app sessions using `SharedPreferences`
 - To best test the SDK, you should use a physical Android device
 - All functions support Coroutines!
-
-Supported Courier Providers:
-- ✅ Firebase Cloud Messaging (FCM)
 
 &emsp;
 
