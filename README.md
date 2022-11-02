@@ -75,7 +75,7 @@ class YourActivity : CourierActivity() {
 
 }
 
-// Handling notification presentation
+// Handling push notification presentation and automatic token syncing
 class YourMessagingService: CourierService() {
 
     // Called when you are safe to show your notification to the user
