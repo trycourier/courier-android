@@ -147,10 +147,6 @@ dependencyResolutionManagement {
 ``` gradle
 dependencies {
     implementation 'com.github.trycourier:courier-android:1.0.33'
-
-    // The firebase messaging dependency is also required
-    implementation platform('com.google.firebase:firebase-bom:30.3.1')
-    implementation 'com.google.firebase:firebase-messaging-ktx'
 }
 ```
 
