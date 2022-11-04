@@ -16,6 +16,9 @@ cat android/src/main/java/com/courier/android/Courier.kt | while read LINE; do
       fi
     done
 
+    # Delete backup file
+    rm "README.md.bak"
+
     # Bump the version
     git add .
     git commit -m "Bump"
