@@ -9,8 +9,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
+import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -31,6 +30,15 @@ class CourierTests {
         const val FIREBASE_APP_ID = "<YOUR_KEY>"
         const val FIREBASE_PROJECT_ID = "<YOUR_KEY>"
         const val FIREBASE_GCM_SENDER_ID = "<YOUR_KEY>"
+    }
+
+    @Test
+    fun test0() = runBlocking {
+
+        print("🔬 Start Courier SDK")
+
+        Courier.initialize(context)
+
     }
 
     @Test
