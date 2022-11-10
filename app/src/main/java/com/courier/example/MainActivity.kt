@@ -22,7 +22,9 @@ class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Courier.initialize(this)
+
+        Courier.initialize(context = this)
+
         pushNotificationCallbacks = this
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
@@ -50,7 +52,6 @@ class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
             val hasNotificationPermissions = requestNotificationPermission()
             Toast.makeText(this@MainActivity, "Notification permissions are granted: $hasNotificationPermissions", Toast.LENGTH_LONG).show()
 
-
             // Start firebase
             // This must be set before you can sync FCM tokens in Courier
             val options = FirebaseOptions.Builder().apply {
@@ -61,9 +62,6 @@ class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
             }.build()
 
             FirebaseApp.initializeApp(this@MainActivity, options)
-
-            // Init Courier
-            Courier.initialize(context = this)
 
             Toast.makeText(this, "SDK Initialized", Toast.LENGTH_LONG).show()
 

@@ -4,7 +4,7 @@
     package="com.courier.example">
 
     <!-- Needed to handle notification permission requests -->
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.Per4OST_NOTIFICATIONS"/>
 
     <application
         android:allowBackup="false"
