@@ -3,8 +3,11 @@
 ## Getting Started
 
 1. Clone the repo and open `courier-android` with android studio.
-2. Navigate to `android/app/java/com.courier.example` , create a new Kotlin class named `Env`
-3. Copy contents from `EnvSample.kt` and paste it in `Env.kt`
+2. Open terminal navigate to root directory run 
+ 	```bash 
+	sh env-setup.sh
+	```
+3. Navigate to ``android/app/java/com.courier.example/Env``
 4. Provide your fcm and courier credentials
 
 From here, you are all set to start working on the package! 🙌
