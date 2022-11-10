@@ -1,12 +1,11 @@
 package com.courier.example
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.models.CourierProvider
-import com.courier.android.notifications.CourierActivity
+import com.courier.android.activity.CourierActivity
 import com.courier.android.notifications.CourierPushNotificationCallbacks
 import com.courier.android.requestNotificationPermission
 import com.courier.android.sendPush
@@ -20,10 +19,11 @@ import kotlinx.coroutines.launch
 class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var prefs: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Courier.initialize(context = this)
 
         pushNotificationCallbacks = this
 
@@ -52,31 +52,16 @@ class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
             val hasNotificationPermissions = requestNotificationPermission()
             Toast.makeText(this@MainActivity, "Notification permissions are granted: $hasNotificationPermissions", Toast.LENGTH_LONG).show()
 
-            prefs = showSDKConfig(
-                activity = this@MainActivity,
-                title = "Configure SDK",
-                items = listOf(
-                    DialogItem("FIREBASE_API_KEY", "Firebase API Key"),
-                    DialogItem("FIREBASE_APP_ID", "Firebase App ID"),
-                    DialogItem("FIREBASE_PROJECT_ID", "Firebase Project ID"),
-                    DialogItem("FIREBASE_GCM_SENDER_ID", "Firebase GCM Sender ID"),
-                    DialogItem("COURIER_AUTH_KEY", "Courier Auth Key"),
-                )
-            )
-
             // Start firebase
             // This must be set before you can sync FCM tokens in Courier
             val options = FirebaseOptions.Builder().apply {
-                setApiKey(prefs.getString("FIREBASE_API_KEY", "") ?: "")
-                setApplicationId(prefs.getString("FIREBASE_APP_ID", "") ?: "")
-                setProjectId(prefs.getString("FIREBASE_PROJECT_ID", "") ?: "")
-                setGcmSenderId(prefs.getString("FIREBASE_GCM_SENDER_ID", "") ?: "")
+                setApiKey(Env.FIREBASE_API_KEY)
+                setApplicationId(Env.FIREBASE_APP_ID)
+                setProjectId(Env.FIREBASE_PROJECT_ID)
+                setGcmSenderId(Env.FIREBASE_GCM_SENDER_ID)
             }.build()
 
             FirebaseApp.initializeApp(this@MainActivity, options)
-
-            // Init Courier
-            Courier.initialize(context = this)
 
             Toast.makeText(this, "SDK Initialized", Toast.LENGTH_LONG).show()
 
@@ -98,8 +83,8 @@ class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
             try {
 
                 Courier.shared.sendPush(
-                    authKey = prefs.getString("COURIER_AUTH_KEY", "") ?: "",
-                    userId = prefs.getString("COURIER_USER_ID", "") ?: "",
+                    authKey = Env.COURIER_AUTH_KEY,
+                    userId = Env.COURIER_USER_ID,
                     title = "Hey ${Courier.shared.userId}!",
                     body = "This is a test message",
                     isProduction = false,
@@ -155,19 +140,9 @@ class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
             binding.authButton.isEnabled = false
 
             try {
-
-                prefs = showSDKConfig(
-                    activity = this@MainActivity,
-                    title = "Sign into Courier",
-                    items = listOf(
-                        DialogItem("COURIER_ACCESS_TOKEN", "Courier Access Token"),
-                        DialogItem("COURIER_USER_ID", "Courier User ID"),
-                    )
-                )
-
                 Courier.shared.signIn(
-                    accessToken = prefs.getString("COURIER_ACCESS_TOKEN", "") ?: "",
-                    userId = prefs.getString("COURIER_USER_ID", "") ?: ""
+                    accessToken = Env.COURIER_AUTH_KEY,
+                    userId = Env.COURIER_USER_ID
                 )
 
                 refresh()
