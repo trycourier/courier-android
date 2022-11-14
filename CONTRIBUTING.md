@@ -35,3 +35,4 @@ To release a new build of the SDK:
 1. Change the `VERSION` of `android/java/com/courier/android/Courier.kt` to the SDK value you'd like to use
 2. Run `sh release.sh` from root
 	- Required access to create builds in Github with Github CLI
+	- Release are distributed via Jitpack.io. You can check on the progress of the release [here](https://jitpack.io/#trycourier/courier-android)
