@@ -9,28 +9,27 @@
 sh env-setup.sh
 ```
 
-3. Navigate to `android/app/java/com.courier.example/Env`
+3. Navigate to `android/app/java/com/courier/example/Env.kt`
 4. Provide your FCM (Firebase Cloud Messaging) and Courier credentials
-	- You can get your Courier keys [here][https://www.courier.com/docs/reference/auth/issue-token/]
+	- [Courier API Keys](https://app.courier.com/settings/api-keys)
+	- [Courier JWT](https://www.courier.com/docs/reference/auth/issue-token/)
 
 From here, you are all set to start working on the package! 🙌
 
-## Testing & Debugging
+## Testing, Debugging & Release
 
-While developing, you can run the project from android studio to test your changes. To see
-Any changes you make in your library code will be reflected in the example app everytime you rebuild the app.
+While developing, you can run the project from Android Studio to test your changes. To see any changes you make in your library code will be reflected in the example app everytime you rebuild the app.
 
-To debug the Android package:
-1. Open `android` in Android Studio
-2. Click Debug
+To make package changes:
+1. Edit code inside of the `android` directory
 
-To start the packager:
+To test the package changes in the example app:
+1. Run `app`
 
-connect your android device
+To run automated tests:
+1. Run `android/src/androidTest/com/courier/android/CourierTests`
+	- Requires proper `Env.kt` settings
 
-check if your device is available under adb devices, run:
-
-```sh
-adb devices
-```
-you can write and run test cases in ``android/java/com.courier.android/CourierTests``
+To release a new build of the SDK:
+1. Run `sh release.sh` from root
+	- Required access to create builds in Github with Github CLI
