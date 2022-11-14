@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-1. Clone the repo and open `courier-android` with Android Studio.
+1. Clone the repo and open `courier-android` with Android Studio
 2. Open terminal navigate to root directory run 
 
 ```bash 
@@ -11,6 +11,7 @@ sh env-setup.sh
 
 3. Navigate to `android/app/java/com/courier/example/Env.kt`
 4. Provide your FCM (Firebase Cloud Messaging) and Courier credentials
+	- [Firebase Setup](https://firebase.google.com/docs/android/setup#console)
 	- [Courier API Keys](https://app.courier.com/settings/api-keys)
 	- [Courier JWT](https://www.courier.com/docs/reference/auth/issue-token/)
 
