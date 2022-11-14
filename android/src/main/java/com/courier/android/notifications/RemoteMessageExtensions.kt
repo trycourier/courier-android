@@ -16,10 +16,13 @@ fun RemoteMessage.presentNotification(context: Context, handlingClass: Class<*>?
         val pendingIntent = CourierIntent(context, handlingClass, this).pendingIntent
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
+        val title = data["title"] ?: notification?.title ?: "Empty Title"
+        val body = data["body"] ?: notification?.body ?: "Empty Body"
+
         val notificationBuilder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(icon)
-            .setContentTitle(data["title"].orEmpty())
-            .setContentText(data["body"].orEmpty())
+            .setContentTitle(title)
+            .setContentText(body)
             .setAutoCancel(true)
             .setSound(defaultSoundUri)
             .setPriority(NotificationCompat.PRIORITY_MAX)
