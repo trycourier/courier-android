@@ -36,6 +36,7 @@ cat android/src/main/java/com/courier/android/Courier.kt | while read LINE; do
     gh release create $VERSION --generate-notes
 
     # Jitpack will automatically create a new build for use
+    echo "You can check the Jitpack distribution here: https://jitpack.io/#trycourier/courier-android"
 
   fi
 done
