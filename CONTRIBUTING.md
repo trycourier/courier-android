@@ -9,7 +9,7 @@
 sh env-setup.sh
 ```
 
-3. Navigate to `android/app/java/com/courier/example/Env.kt`
+3. Navigate to `app/java/com/courier/example/Env.kt`
 4. Provide your FCM (Firebase Cloud Messaging) and Courier credentials
 	- [Firebase Setup](https://firebase.google.com/docs/android/setup#console)
 	- [Courier API Keys](https://app.courier.com/settings/api-keys)
@@ -32,5 +32,6 @@ To run automated tests:
 	- Requires proper `Env.kt` settings
 
 To release a new build of the SDK:
-1. Run `sh release.sh` from root
+1. Change the `VERSION` of `android/java/com/courier/android/Courier.kt` to the SDK value you'd like to use
+2. Run `sh release.sh` from root
 	- Required access to create builds in Github with Github CLI
