@@ -4,12 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.courier.android.Courier
-import com.courier.android.notifications.CourierPushNotificationCallbacks
 import com.courier.android.trackPushNotificationClick
+import com.google.firebase.messaging.RemoteMessage
 
 open class CourierActivity : AppCompatActivity() {
-
-    var pushNotificationCallbacks: CourierPushNotificationCallbacks? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,7 +17,7 @@ open class CourierActivity : AppCompatActivity() {
 
         // Handle delivered messages on the main thread
         Courier.getLastDeliveredMessage { message ->
-            pushNotificationCallbacks?.onPushNotificationDelivered(message)
+            onPushNotificationDelivered(message)
         }
 
     }
@@ -31,8 +29,12 @@ open class CourierActivity : AppCompatActivity() {
 
     private fun checkIntentForPushNotificationClick(intent: Intent?) {
         intent?.trackPushNotificationClick { message ->
-            pushNotificationCallbacks?.onPushNotificationClicked(message)
+            onPushNotificationClicked(message)
         }
     }
+
+    open fun onPushNotificationClicked(message: RemoteMessage) {}
+
+    open fun onPushNotificationDelivered(message: RemoteMessage) {}
 
 }
