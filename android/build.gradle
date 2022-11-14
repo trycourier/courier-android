@@ -9,8 +9,6 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 from components.release
-                groupId = "com.courier.android"
-                artifactId = "courier-core"
             }
         }
     }
@@ -42,6 +40,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
     namespace 'com.courier.android'
 
 }
