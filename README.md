@@ -6,9 +6,7 @@ Courier helps you spend less time building notification infrastructure, and more
 
 ⚠️ This SDK is in Beta and actively maintained
 
-&emsp;
-
-## **SDK Overview**
+# Courier Android Overview
 
 ```kotlin
 // Must be initialized before Courier is started
@@ -33,6 +31,9 @@ val authKey = "pk_prod_ABCD..."
 // This token is safe to be used in your production app and should be generate by your backend
 val accessToken = "eyJhbGciOiJIUzI..."
 
+// Enables debug log for Courier
+Courier.shared.isDebugging = true
+
 // Set your Courier credentials
 // These credentials will persist between app sessions
 // If you close your app and open it again, your accessToken and userId will still be there
@@ -41,11 +42,14 @@ Courier.shared.signIn(
     userId = userId
 )
 
+// Get your fcmToken
+val fcmToken= Courier.shared.fcmToken
+
 // Send a message to your device
 // This should only be used for testing purposes
 // Calling this will send a push notification to all valid tokens
-// for this userId and the providers you declare
-Courier.shared.sendPush(
+// For this userId and the providers you declare
+val requestId = Courier.shared.sendPush(
     authKey = authKey,
     userId = userId,
     title = "This is a title",
@@ -58,7 +62,17 @@ Courier.shared.sendPush(
 // Then it will remove all local user state for the current user
 Courier.shared.signOut()
 
+// Requests notification permission 
+// Returns permission status
+import com.courier.android.requestNotificationPermission
+val requestPermissionStatus = requestNotificationPermission()
+
+// Returns notification permission status
+import com.courier.android.getNotificationPermissionStatus
+val currentPermissionStatus = await Courier.shared.getNotificationPermissionStatus()
+
 // Handling push notification interactions
+import com.courier.android.activity.CourierActivity
 class YourActivity : CourierActivity() {
 
     // Called when a push notification is tapped
@@ -105,9 +119,6 @@ class YourMessagingService: CourierService() {
 
 > Testing push notifications requires a physical device. Simulators will not work.
 
-Want to try a demo? Here is a link to a full sample project:
-[Courier Android Sample App](https://github.com/trycourier/courier-android/tree/master/app)
-
 Misc info about the SDK:
 - All async functionality is executed on background threads
 - The SDK does support runtime push notification permissions found in Android 13+ (API 33)
@@ -115,19 +126,24 @@ Misc info about the SDK:
 - To best test the SDK, you should use a physical Android device
 - All functions support Coroutines!
 
+# **Installation**
+
+>
+> Link to [`Example App`](https://github.com/trycourier/courier-android)
+>
+
+1. [`Add dependency`](#1-install-the-package)
+2. [`Setup`](#2-setup)
+3. [`Configure Push Provider`](#3-configure-push-provider)
+4. [`Managing User State`](#4-managing-user-state)
+5. [`Testing Push Notifications`](#5-testing-push-notifications)
+
 &emsp;
 
-## **Full Installation (6 Steps)**
-
-The following steps will get the Courier Android SDK setup and allow support for sending push notifications from Courier to your device.
-
-&emsp;
-
-### **1. Add the Dependency**
-
-Courier Android is currently distributed via Jitpack. Maven Central support will be coming in a future update.
+## **1. Add dependency**
 
 #### 1. Add Jitpack repository support in your settings.gradle file
+Courier Android is currently distributed via Jitpack. Maven Central support will be coming in a future update.
 ```gradle
 pluginManagement {
     repositories {
@@ -149,79 +165,35 @@ dependencies {
     implementation 'com.github.trycourier:courier-android:1.1.0'
 }
 ```
-
 &emsp;
 
-### **2.Sign in with Courier**
-
-A user must be "signed in" with Courier before they can receive push notifications. This should be handled where you normally manage your user's state.
-
-⚠️ Users should be [signed out](#6-signing-users-out) when you no longer want that user to receive push notifications on that device.
-
-⚠️ Courier holds a local reference to the `accessToken` and `userId` you set using `Courier.shared.signIn(...)`. This allows your user to still be "signed in" between app sessions.
-
-```kotlin
-class YourApplication: Application() or YourActivity: AppCompatActivity() {
-    
-    ...
-    
-    fun initializeSDKs() {
-
-        // Firebase must be initialized before Courier to receive messages via FCM (Firebase Cloud Messaging)
-        FirebaseApp.initializeApp(...)
-
-        // Initialize Courier
-        // Must be called before you can use the Courier SDK
-        // You are safe to move this to another place in your 
-        // project where you normally initialize other SDKs
-        Courier.initialize(context = this)
-        
-    }
-    
-}
-
-fun signInWithCourier() {
-    
-    val userId = "your_user_id"
-    
-    // This key should only be used for testing and not be saved in your production app
-    // Go to step 8 for more information about this
-    val authKey = "pk_prod_ABCD..."
-
-    // Set Courier user credentials
-    Courier.shared.signIn(
-        accessToken = authKey, 
-        userId = userId, 
-        onSuccess = {
-            print("Courier user signed in")
-        }, 
-        onFailure = { e ->
-            print(e)
-        }
-    )
-    
-}
-```
-
-⚠️ `authKey`s are safe to test with, but not safe to leave in you production app. When you are ready for production, make sure you complete this step: [Generate Production Access Token](#8-getting-production-ready)
-
-&emsp;
-
-### **3. Add the Courier Service**
-
-#### 1. Create a new class extending `CourierService`
-
-This class will automatically manage Firebase Cloud Messaging (FCM) tokens and handle tracking Courier message delivery analytics.
+## **2. Setup**
+1. Run Gradle sync
+2. Change your `MainActivity` to extend the `CourierActivity`
+    - This allows Courier to handle when push notifications are delivered and clicked
+3. Setup a new Notification Service by creating a new file and pasting the code below in it
+    - This allows you to present a notification to your user when a new notification arrives
 
 ```kotlin
-class YourMessagingService: CourierService() {
+import android.annotation.SuppressLint
+import com.courier.android.notifications.presentNotification
+import com.courier.android.service.CourierService
+import com.google.firebase.messaging.RemoteMessage
+
+// This is safe. `CourierService` will automatically handle token refreshes.
+@SuppressLint("MissingFirebaseInstanceTokenRefresh")
+class YourNotificationService: CourierService() {
 
     override fun showNotification(message: RemoteMessage) {
         super.showNotification(message)
 
-        // A simple function for showing a push notification
-        // You likely want this to be something custom for your app
-        // Full Android docs: https://developer.android.com/develop/ui/views/notifications/build-notification
+        // TODO: This is where you will customize the notification that is shown to your users
+        // The function below is used to get started quickly.
+        // You likely do not want to use `message.presentNotification(...)`
+        // For Flutter, you likely do not want to change the handlingClass
+        // More information on how to customize an Android notification here:
+        // https://developer.android.com/develop/ui/views/notifications/build-notification
+
         message.presentNotification(
             context = this,
             handlingClass = MainActivity::class.java,
@@ -233,30 +205,32 @@ class YourMessagingService: CourierService() {
 }
 ```
 
-#### 2. Add the new service class to your `AndroidManifest`
+
+4. Add the Notification Service entry in your `AndroidManifest.xml` file
 
 ```xml
-<manifest ... >
+<manifest>
+    <application>
 
-    <application ... >
+        <activity>
+            ..
+        </activity>
 
-        <activity ... />
-
-        <!-- Add this 👇 -->
+        // Add this 👇
         <service
-            android:name=".YourMessagingService"
+            android:name=".YourNotificationService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <!-- Add this 👆 -->
+        // Add this 👆
+
+        ..
 
     </application>
-
 </manifest>
 ```
-
 #### **Important: Payload Data Override**
 
 To ensure `CourierService.showNotification()` gets triggered for every possible state your app can be in (foreground, background & killed), you need to structure your `firebase-fcm` payload in the Courier Send endpoint like the following.
@@ -301,108 +275,98 @@ _[More about the Send API](https://www.courier.com/docs/reference/send/message/)
 If you do not override the `firebase-fcm` body your app will still receive the notification, but the notification will be handled by the Android system tray rather than the Service you implemented above.
 
 This will not track the delivery of the notification properly and will not present the notification customizations you likely want to be applied.
-
 &emsp;
 
-It's not recommended, but is possible to sync tokens and track notification delivery manually with the following functions.
+## **3. Configure Push Provider**
 
-```kotlin
-// Set the token to the current user credentials
-Courier.shared.setFCMToken(
-    token = token,
-    onSuccess = { Courier.log("Token set") },
-    onFailure = { Courier.log(it.toString()) }
-)
+> If you don't need push notification support, you can skip this step.
 
-// Track a remote message payload
-Courier.shared.trackNotification(
-    message = message,
-    event = CourierPushEvent.DELIVERED,
-    onSuccess = { Courier.log("Event tracked") },
-    onFailure = { Courier.log(it.toString()) }
-)
-```
-
-`CourierActivity` and `CourierService` handle this functionality for you automatically.
-
-&emsp;
-
-### **4. Handling Push Notifications**
-
-The SDK has simple functions you can override to handle when a user receives or taps on a notification.
-
-If you skip this step you will have to handle the following functionality yourself.
-
-```kotlin
-class YourActivity : CourierActivity() {
-
-    override fun onPushNotificationClicked(message: RemoteMessage) {
-        print(message)
-    }
-
-    override fun onPushNotificationDelivered(message: RemoteMessage) {
-        print(message)
-    }
-
-}
-```
-
-&emsp;
-
-### **5. Configure a Provider**
-
-To get pushes to appear, add support for the provider you would like to use. Here are links to get your providers configured:
-- [Firebase Cloud Messaging](https://www.courier.com/docs/guides/providers/push/firebase-fcm/)
+To get push notification to appear in your app, add support for the provider you would like to use:
+- [`FCM (Firebase Cloud Messaging)`](https://www.courier.com/docs/guides/providers/push/firebase-fcm/)
 
 You will need to get your Firebase Service Account key from this link:
 ```
 https://console.firebase.google.com/project/${your_firebase_project_id}/settings/serviceaccounts/adminsdk
 ```
-
 &emsp;
 
-### **6. Signing Users Out**
+## **4. Managing User State**
 
-Best user experience practice is to synchronize the current user's push notification tokens with the user's state. This should be called where you normally manage your user's state.
+Best user experience practice is to synchronize the current user's push notification tokens and the user's state. Courier does most of this for you automatically!
 
-When calling this function, Courier will delete the device token associated with the the current user, and then remove the locally stored user credentials.
+> You can use a Courier Auth Key [`found here`](https://app.courier.com/settings/api-keys) when developing.
+
+> When you are ready for production release, you should be using a JWT as the `accessToken`.
+> Here is more info about [`Going to Production`](#going-to-production)
+
+Place these functions where you normally manage your user's state:
+```kotlin
+// Saves accessToken and userId to native level local storage
+// This will persist between app sessions
+Courier.shared.signIn(
+    accessToken = authKey or accessToken,
+    userId = userId
+)
+
+Courier.shared.signOut()
+```
+
+If you followed the steps above FCM tokens on Android will automatically be synced to Courier
+&emsp;
+
+## **5. Testing Push Notifications**
+
+> If you don't need push notification support, you can skip this step.
+
+Courier allows you to send a push notification directly from the SDK to a user id. No tokens juggling or backend needed!
 
 ```kotlin
-Courier.shared.signOut(
-    onSuccess = {
-        print("User signed out")
-    },
-    onFailure = { e ->
-        print(e)
+import kotlinx.coroutines.launch
+import com.courier.android.activity.CourierActivity
+import com.courier.android.notifications.CourierPushNotificationCallbacks
+import com.courier.android.requestNotificationPermission
+
+class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+    ...
+        super.onCreate(savedInstanceState)
+        Courier.initialize(context = this)
+        pushNotificationCallbacks = this
+        
+        lifecycleScope.launch {
+// Notification permissions must be true
+            val hasNotificationPermissions = requestNotificationPermission();
+            print(requestedNotificationPermission);
+        }
+    ...
     }
-)
+
+// Will be called if the app is in the foreground and a push notification arrives
+    override fun onPushNotificationClicked(message: RemoteMessage) {
+        print(message)
+    }
+
+// Will be called when a user clicks a push notification
+    override fun onPushNotificationDelivered(message: RemoteMessage) {
+        print(message)
+    }
+}
+
+// Sends a test push
+val messageId =  Courier.shared.sendPush(
+    authKey: 'a_courier_auth_key_that_should_only_be_used_for_testing',
+    userId: 'example_user',
+    title: 'Chirp Chrip!',
+    body: 'Hello from Courier 🐣',
+    isProduction: false, // This only affects APNS pushes. false == sandbox / true == production
+    providers: [CourierProvider.fcm],
+);
 ```
 
 &emsp;
 
-### **7. Sending a Test Push Notification**
-
-⚠️ This is only for testing purposes and should not be in your production app.
-
-```kotlin
-Courier.shared.sendPush(
-    authKey = authKey, // DO NOT LEAVE THE AUTH KEY IN YOUR PRODUCTION APP
-    userId = "example_user",
-    title = "Test message!",
-    body = "Chrip Chirp!",
-    providers = listOf(CourierProvider.FCM),
-    onSuccess = { requestId ->
-        print(requestId)
-    },
-    onFailure = { e ->
-        print(e)
-    }
-)
-```
-
-&emsp;
-
-### **8. Getting Production Ready**
+## **Going to Production**
 
 For security reasons, you should not keep your `authKey` (which looks like: `pk_prod_ABCD...`) in your production app. The `authKey` is safe to test with, but you will want to use an `accessToken` in production.
 
@@ -422,15 +386,16 @@ curl --request POST \
 ```
 
 Or generate one here:
-[Issue Courier Access Token](https://www.courier.com/docs/reference/auth/issue-token/)
+[`Issue Courier Access Token`](https://www.courier.com/docs/reference/auth/issue-token/)
 
-This request to issue a token should likely exist in a separate endpoint served on your backend.
+> This request to issue a token should likely exist in a separate endpoint served on your backend.
 
 &emsp;
 
-### **Share feedback with Courier**
+## **Share feedback with Courier**
 
 We want to make this the best SDK for managing notifications! Have an idea or feedback about our SDKs? Here are some links to contact us:
 
 - [Courier Feedback](https://feedback.courier.com/)
 - [Courier Android Issues](https://github.com/trycourier/courier-android/issues)
+
