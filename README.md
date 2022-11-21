@@ -326,42 +326,49 @@ import com.courier.android.activity.CourierActivity
 import com.courier.android.notifications.CourierPushNotificationCallbacks
 import com.courier.android.requestNotificationPermission
 
-class MainActivity : CourierActivity(), CourierPushNotificationCallbacks {
+class MainActivity : CourierActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-    ...
         super.onCreate(savedInstanceState)
+        
         Courier.initialize(context = this)
-        pushNotificationCallbacks = this
         
         lifecycleScope.launch {
-// Notification permissions must be true
+            // Notification permissions must be true
             val hasNotificationPermissions = requestNotificationPermission();
             print(requestedNotificationPermission);
         }
-    ...
+
     }
 
-// Will be called if the app is in the foreground and a push notification arrives
+    // Will be called if the app is in the foreground and a push notification arrives
     override fun onPushNotificationClicked(message: RemoteMessage) {
         print(message)
     }
 
-// Will be called when a user clicks a push notification
+    // Will be called when a user clicks a push notification
     override fun onPushNotificationDelivered(message: RemoteMessage) {
         print(message)
     }
+    
+    fun sendTestPush() {
+    
+        lifecycleScope.launch {
+            
+            val messageId =  Courier.shared.sendPush(
+                authKey: 'a_courier_auth_key_that_should_only_be_used_for_testing',
+                userId: 'example_user',
+                title: 'Chirp Chrip!',
+                body: 'Hello from Courier 🐣',
+                isProduction: false, // This only affects APNS pushes. false == sandbox / true == production
+                providers: [CourierProvider.fcm],
+            );
+            
+        }
+        
+    }
+    
 }
-
-// Sends a test push
-val messageId =  Courier.shared.sendPush(
-    authKey: 'a_courier_auth_key_that_should_only_be_used_for_testing',
-    userId: 'example_user',
-    title: 'Chirp Chrip!',
-    body: 'Hello from Courier 🐣',
-    isProduction: false, // This only affects APNS pushes. false == sandbox / true == production
-    providers: [CourierProvider.fcm],
-);
 ```
 
 &emsp;
