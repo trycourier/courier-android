@@ -362,7 +362,7 @@ class MainActivity : CourierActivity() {
                 body: 'Hello from Courier 🐣',
                 isProduction: false, // This only affects APNS pushes. false == sandbox / true == production
                 providers: [CourierProvider.fcm],
-            );
+            )
             
         }
         
