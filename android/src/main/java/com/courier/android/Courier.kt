@@ -186,21 +186,38 @@ class Courier private constructor() {
 
         Courier.log("Signing User Out")
 
+        // Bundle all deferred requests
+        val updates = mutableListOf<Deferred<Any?>>()
+
         // Clear Courier tokens if possible
         if (isUserSignedIn) {
 
-            // FCM
-            this@Courier.fcmToken?.let { token ->
-                tokenRepo.deleteUserToken(token)
-            }
+            // Delete the FCM token
+            // Can continue if the request fails
+            updates.add(async(Dispatchers.IO) {
+                try {
+                    this@Courier.fcmToken?.let { token ->
+                        tokenRepo.deleteUserToken(token)
+                    }
+                } catch (e: Exception) {
+                    Courier.log(e.toString())
+                }
+            })
 
         }
 
-        // Refresh FCM Token
-        updateCurrentFcmToken()
+        // Refresh the current token
+        updates.add(async(Dispatchers.IO) {
+            updateCurrentFcmToken()
+        })
 
-        // Remove credentials
-        return@withContext UserManager.removeCredentials(context)
+        // Remove the current user from local storage
+        updates.add(async(Dispatchers.IO) {
+            UserManager.removeCredentials(context)
+        })
+
+        // Await all updates
+        return@withContext updates.awaitAll()
 
     }
 
