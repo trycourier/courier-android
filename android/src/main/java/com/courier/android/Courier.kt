@@ -6,7 +6,7 @@ import com.courier.android.managers.UserManager
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierProvider
-import com.courier.android.repositories.ProfileRepository
+import com.courier.android.repositories.UserRepository
 import com.courier.android.repositories.TokenRepository
 import com.courier.android.utils.NotificationEventBus
 import com.google.firebase.FirebaseApp
@@ -72,7 +72,7 @@ class Courier private constructor() {
 
     // Repos
     private val tokenRepo by lazy { TokenRepository() }
-    private val userRepo by lazy { ProfileRepository() }
+    private val userRepo by lazy { UserRepository() }
 
     /**
      * Shows or hides Android console logs
@@ -116,34 +116,60 @@ class Courier private constructor() {
      * Function to set the current credentials for the user and their access token
      * You should consider using this in areas where you update your local user's state
      */
-    suspend fun signIn(accessToken: String, userId: String) =
-        withContext(COURIER_COROUTINE_CONTEXT) {
+    suspend fun signIn(accessToken: String, userId: String) = withContext(COURIER_COROUTINE_CONTEXT) {
 
-            Courier.log(
-                "Signing User In:\n" + "Access Token: $accessToken\n" + "User Id: $userId"
+        Courier.log("Signing User In:\nAccess Token: $accessToken\nUser Id: $userId")
+
+        // Update user manager
+        UserManager.setCredentials(
+            context = context,
+            accessToken = accessToken,
+            userId = userId
+        )
+
+        // Try and update the user
+        // If this fails, rethrow the exception
+        return@withContext try {
+
+            // Bundle all deferred requests
+            val updates = listOf(
+                async(Dispatchers.IO) {
+
+                    // Patch the user
+                    // This will create a new user in Courier
+                    // if a user does not exist
+                    return@async userRepo.patchUser(userId)
+
+                },
+                async(Dispatchers.IO) {
+
+                    // Refresh & update the current fcm token
+                    val fcmToken = updateCurrentFcmToken()
+                    return@async fcmToken?.let { setFCMToken(it) }
+
+                }
             )
 
-            // Update user manager
-            UserManager.setCredentials(
-                context = context, accessToken = accessToken, userId = userId
-            )
+            // Await all results
+            updates.awaitAll()
 
-            userRepo.patchUser(userId = userId)
+        } catch (e: Exception) {
 
-            // Refresh the current token
-            updateCurrentFcmToken()
+            // Log user out if failed
+            signOut()
 
-            // Update token management
-            return@withContext fcmToken?.let { setFCMToken(it) }
+            Courier.log(e.toString())
+            throw e
 
         }
 
-    fun signIn(
-        accessToken: String, userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit
-    ) = coroutineScope.launch(Dispatchers.IO) {
+    }
+
+    fun signIn(accessToken: String, userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
         try {
             signIn(
-                accessToken = accessToken, userId = userId
+                accessToken = accessToken,
+                userId = userId
             )
             onSuccess()
         } catch (e: Exception) {
