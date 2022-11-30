@@ -6,7 +6,6 @@ import com.courier.android.managers.UserManager
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierProvider
-import com.courier.android.repositories.UserRepository
 import com.courier.android.repositories.TokenRepository
 import com.courier.android.utils.NotificationEventBus
 import com.google.firebase.FirebaseApp
@@ -72,7 +71,6 @@ class Courier private constructor() {
 
     // Repos
     private val tokenRepo by lazy { TokenRepository() }
-    private val userRepo by lazy { UserRepository() }
 
     /**
      * Shows or hides Android console logs
@@ -133,14 +131,6 @@ class Courier private constructor() {
 
             // Bundle all deferred requests
             val updates = listOf(
-                async(Dispatchers.IO) {
-
-                    // Patch the user
-                    // This will create a new user in Courier
-                    // if a user does not exist
-                    return@async userRepo.patchUser(userId)
-
-                },
                 async(Dispatchers.IO) {
 
                     // Refresh & update the current fcm token
