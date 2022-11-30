@@ -41,20 +41,8 @@ internal class MessagingRepository : Repository() {
                             "override" to mapOf(
                                 "body" to mapOf(
                                     "notification" to null,
-                                    "data" to mapOf(
-                                        "title" to title,
-                                        "body" to body
-                                    )
-                                )
-                            )
-                        ),
-                        "apn" to mapOf(
-                            "override" to mapOf(
-                                "config" to mapOf(
-                                    "isProduction" to isProduction
-                                ),
-                                "body" to mapOf(
-                                    "mutableContent" to 1
+                                    "data" to CourierProvider.FCM.generatePayload(title, body),
+                                    "apns" to CourierProvider.APNS.generatePayload(title, body)
                                 )
                             )
                         )
