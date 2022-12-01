@@ -53,17 +53,19 @@ class Courier private constructor() {
         // Please call Courier.initialize(context) before using Courier.shared
         @SuppressLint("StaticFieldLeak")
         private var mInstance: Courier? = null
-        val shared: Courier get() {
-            mInstance?.let { return it }
-            throw CourierException.initializationError
-        }
+        val shared: Courier
+            get() {
+                mInstance?.let { return it }
+                throw CourierException.initializationError
+            }
 
         // Returns the last message that was delivered via the event bus
-        fun getLastDeliveredMessage(onMessageFound: (message: RemoteMessage) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
-            eventBus.events.collectLatest { message ->
-                onMessageFound(message)
+        fun getLastDeliveredMessage(onMessageFound: (message: RemoteMessage) -> Unit) =
+            coroutineScope.launch(Dispatchers.Main) {
+                eventBus.events.collectLatest { message ->
+                    onMessageFound(message)
+                }
             }
-        }
 
     }
 
@@ -114,9 +116,7 @@ class Courier private constructor() {
      */
     suspend fun signIn(accessToken: String, userId: String) = withContext(COURIER_COROUTINE_CONTEXT) {
 
-        Courier.log("Signing User In:\n" +
-                "Access Token: $accessToken\n" +
-                "User Id: $userId")
+        Courier.log("Signing User In:\nAccess Token: $accessToken\nUser Id: $userId")
 
         // Update user manager
         UserManager.setCredentials(
@@ -125,11 +125,33 @@ class Courier private constructor() {
             userId = userId
         )
 
-        // Refresh the current token
-        updateCurrentFcmToken()
+        // Try and update the user
+        // If this fails, rethrow the exception
+        return@withContext try {
 
-        // Update token management
-        return@withContext fcmToken?.let { setFCMToken(it) }
+            // Bundle all deferred requests
+            val updates = listOf(
+                async(Dispatchers.IO) {
+
+                    // Refresh & update the current fcm token
+                    val fcmToken = updateCurrentFcmToken()
+                    return@async fcmToken?.let { setFCMToken(it) }
+
+                }
+            )
+
+            // Await all results
+            updates.awaitAll()
+
+        } catch (e: Exception) {
+
+            // Log user out if failed
+            signOut()
+
+            Courier.log(e.toString())
+            throw e
+
+        }
 
     }
 
@@ -154,32 +176,50 @@ class Courier private constructor() {
 
         Courier.log("Signing User Out")
 
+        // Bundle all deferred requests
+        val updates = mutableListOf<Deferred<Any?>>()
+
         // Clear Courier tokens if possible
         if (isUserSignedIn) {
 
-            // FCM
-            this@Courier.fcmToken?.let { token ->
-                tokenRepo.deleteUserToken(token)
+            // Delete the FCM token
+            // Can continue if the request fails
+            updates.add(async(Dispatchers.IO) {
+                try {
+                    this@Courier.fcmToken?.let { token ->
+                        tokenRepo.deleteUserToken(token)
+                    }
+                } catch (e: Exception) {
+                    Courier.log(e.toString())
+                }
+            })
+
+        }
+
+        // Refresh the current token
+        updates.add(async(Dispatchers.IO) {
+            updateCurrentFcmToken()
+        })
+
+        // Remove the current user from local storage
+        updates.add(async(Dispatchers.IO) {
+            UserManager.removeCredentials(context)
+        })
+
+        // Await all updates
+        return@withContext updates.awaitAll()
+
+    }
+
+    fun signOut(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) =
+        coroutineScope.launch(Dispatchers.IO) {
+            try {
+                signOut()
+                onSuccess()
+            } catch (e: Exception) {
+                onFailure(e)
             }
-
         }
-
-        // Refresh FCM Token
-        updateCurrentFcmToken()
-
-        // Remove credentials
-        return@withContext UserManager.removeCredentials(context)
-
-    }
-
-    fun signOut(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
-        try {
-            signOut()
-            onSuccess()
-        } catch (e: Exception) {
-            onFailure(e)
-        }
-    }
 
     /**
      * The current firebase token associated with this user
@@ -227,14 +267,15 @@ class Courier private constructor() {
 
     }
 
-    fun setFCMToken(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
-        try {
-            setFCMToken(token)
-            onSuccess()
-        } catch (e: Exception) {
-            onFailure(e)
+    fun setFCMToken(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) =
+        coroutineScope.launch(Dispatchers.IO) {
+            try {
+                setFCMToken(token)
+                onSuccess()
+            } catch (e: Exception) {
+                onFailure(e)
+            }
         }
-    }
 
     private fun refreshLocalFcmToken() = coroutineScope.launch(Dispatchers.IO) {
         try {
