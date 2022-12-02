@@ -5,6 +5,7 @@ import com.courier.android.log
 import com.courier.android.models.CourierMessageResponse
 import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierPushEvent
+import com.courier.android.models.override
 import com.courier.android.utils.dispatch
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -37,15 +38,8 @@ internal class MessagingRepository : Repository() {
                         "channels" to providers.map { it.value }
                     ),
                     "providers" to mapOf(
-                        "firebase-fcm" to mapOf(
-                            "override" to mapOf(
-                                "body" to mapOf(
-                                    "notification" to null,
-                                    "data" to CourierProvider.FCM.generatePayload(title, body),
-                                    "apns" to CourierProvider.APNS.generatePayload(title, body)
-                                )
-                            )
-                        )
+                        "apn" to CourierProvider.APNS.override(title, body, isProduction),
+                        "firebase-fcm" to CourierProvider.FCM.override(title, body, isProduction)
                     )
                 )
             )

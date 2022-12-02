@@ -75,6 +75,19 @@ class MainActivity : CourierActivity() {
 
         lifecycleScope.launch {
 
+            val checkboxes = listOf(
+                binding.checkFcm,
+                binding.checkApns
+            )
+
+            val providers = checkboxes.filter { it.isChecked }.map { checkbox ->
+                return@map when (checkbox.id) {
+                    binding.checkFcm.id -> CourierProvider.FCM
+                    binding.checkApns.id -> CourierProvider.APNS
+                    else -> CourierProvider.FCM
+                }
+            }
+
             binding.sendPushButton.isEnabled = false
 
             try {
@@ -83,9 +96,9 @@ class MainActivity : CourierActivity() {
                     authKey = Env.COURIER_AUTH_KEY,
                     userId = Env.COURIER_USER_ID,
                     title = "Hey ${Courier.shared.userId}!",
-                    body = "This is a test message",
+                    body = "This is a test push sent through ${providers.joinToString(" and ") { it.value }}",
                     isProduction = false,
-                    providers = listOf(CourierProvider.FCM),
+                    providers = providers,
                 )
 
             } catch (e: Exception) {

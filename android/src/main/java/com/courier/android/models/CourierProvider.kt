@@ -1,52 +1,50 @@
 package com.courier.android.models
 
-import org.json.JSONObject
-
-interface ProviderPayload {
-    fun generatePayload(title: String, body: String): JSONObject
+enum class CourierProvider(val value: String) {
+    APNS("apn"),
+    FCM("firebase-fcm"),
+//    EXPO("expo"),
+//    ONE_SIGNAL("onesignal")
 }
 
-enum class CourierProvider(val value: String) : ProviderPayload {
+// Creates the properly formatted payload needed to send to APNS and/or FCM
+internal fun CourierProvider.override(title: String, body: String, isProduction: Boolean): Map<String, Any> {
 
-    APNS("apn") {
-
-        override fun generatePayload(title: String, body: String): JSONObject {
-
-            return JSONObject(
-                mapOf(
-                    "payload" to mapOf(
-                        "aps" to mapOf(
-                            "mutable-content" to 1,
-                            "alert" to mapOf(
-                                "title" to title,
-                                "body" to body
-                            ),
-                            "sound" to "bingbong.aiff"
+    return when (this) {
+        CourierProvider.APNS -> mapOf(
+            "override" to mapOf(
+                "config" to mapOf(
+                    "isProduction" to isProduction
+                ),
+                "body" to mapOf(
+                    "mutable-content" to 1
+                )
+            )
+        )
+        CourierProvider.FCM -> mapOf(
+            "override" to mapOf(
+                "body" to mapOf(
+                    "notification" to null,
+                    "data" to mapOf(
+                        "title" to title,
+                        "body" to body
+                    ),
+                    "apns" to mapOf(
+                        "payload" to mapOf(
+                            "aps" to mapOf(
+                                "mutable-content" to 1,
+                                "alert" to mapOf(
+                                    "title" to title,
+                                    "body" to body,
+                                ),
+                                "sound" to "bingbong.aiff"
+                            )
                         )
                     )
                 )
             )
+        )
+    }
 
-        }
-
-    },
-
-    FCM("firebase-fcm") {
-
-        override fun generatePayload(title: String, body: String): JSONObject {
-
-            return JSONObject(
-                mapOf(
-                    "title" to title,
-                    "body" to body
-                )
-            )
-
-        }
-
-    },
-
-//    EXPO("expo"),
-//    ONE_SIGNAL("onesignal")
 }
 

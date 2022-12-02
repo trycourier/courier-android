@@ -145,10 +145,8 @@ class Courier private constructor() {
 
         } catch (e: Exception) {
 
-            // Log user out if failed
-            signOut()
-
             Courier.log(e.toString())
+            signOut()
             throw e
 
         }
