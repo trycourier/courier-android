@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Example</string>
+    <string name="app_name">Courier</string>
     <string name="send_push">Send Push</string>
 </resources>
