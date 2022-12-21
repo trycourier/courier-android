@@ -1,5 +1,6 @@
 package com.courier.example
 
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
@@ -47,7 +48,11 @@ class MainActivity : CourierActivity() {
         try {
 
             val hasNotificationPermissions = requestNotificationPermission()
-            Toast.makeText(this@MainActivity, "Notification permissions are granted: $hasNotificationPermissions", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                this@MainActivity,
+                "Notification permissions are granted: $hasNotificationPermissions",
+                Toast.LENGTH_LONG
+            ).show()
 
             // Start firebase
             // This must be set before you can sync FCM tokens in Courier
@@ -76,8 +81,7 @@ class MainActivity : CourierActivity() {
         lifecycleScope.launch {
 
             val checkboxes = listOf(
-                binding.checkFcm,
-                binding.checkApns
+                binding.checkFcm, binding.checkApns
             )
 
             val providers = checkboxes.filter { it.isChecked }.map { checkbox ->
@@ -92,14 +96,20 @@ class MainActivity : CourierActivity() {
 
             try {
 
-                Courier.shared.sendPush(
-                    authKey = Env.COURIER_AUTH_KEY,
-                    userId = Env.COURIER_USER_ID,
-                    title = "Hey ${Courier.shared.userId}!",
-                    body = "This is a test push sent through ${providers.joinToString(" and ") { it.value }}",
-                    isProduction = false,
-                    providers = providers,
-                )
+                var courierUserId = Courier.shared.userId
+
+                if (!courierUserId.isNullOrBlank() && courierUserId.isNotEmpty()) {
+                    Courier.shared.sendPush(
+                        authKey = Env.COURIER_AUTH_KEY,
+                        userId = courierUserId,
+                        title = "Hey ${Courier.shared.userId}!",
+                        body = "This is a test push sent through ${providers.joinToString(" and ") { it.value }}",
+                        isProduction = false,
+                        providers = providers,
+                    )
+                } else {
+                    Toast.makeText(this@MainActivity, "No Courier UserId Found", Toast.LENGTH_LONG)
+                }
 
             } catch (e: Exception) {
 
@@ -150,14 +160,28 @@ class MainActivity : CourierActivity() {
             binding.authButton.isEnabled = false
 
             try {
-                Courier.shared.signIn(
-                    accessToken = Env.COURIER_AUTH_KEY,
-                    userId = Env.COURIER_USER_ID
-                )
 
-                refresh()
+                var courierUserId = showSDKConfig(
+                    activity = this@MainActivity, title = "Configure SDK", items = listOf(
+                        DialogItem("COURIER_USER_ID", "Courier UserId"),
+                    )
+                ).getString("COURIER_USER_ID", "")
 
-                Toast.makeText(this@MainActivity, "Courier user signed in", Toast.LENGTH_LONG).show()
+                if (!courierUserId.isNullOrBlank() && courierUserId.isNotEmpty()) {
+                    Courier.shared.signIn(
+                        accessToken = Env.COURIER_AUTH_KEY, userId = courierUserId
+                    )
+
+                    refresh()
+
+                    Toast.makeText(this@MainActivity, "Courier user signed in", Toast.LENGTH_LONG)
+                        .show()
+                } else {
+                    Toast.makeText(
+                        this@MainActivity, "Please Enter a valid UserId", Toast.LENGTH_LONG
+                    )
+                }
+
 
             } catch (e: Exception) {
 
@@ -181,7 +205,8 @@ class MainActivity : CourierActivity() {
 
                 refresh()
 
-                Toast.makeText(this@MainActivity, "Courier user signed out", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@MainActivity, "Courier user signed out", Toast.LENGTH_LONG)
+                    .show()
 
             } catch (e: Exception) {
 
