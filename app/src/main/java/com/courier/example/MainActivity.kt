@@ -1,6 +1,5 @@
 package com.courier.example
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
@@ -161,7 +160,7 @@ class MainActivity : CourierActivity() {
 
             try {
 
-                var courierUserId = showSDKConfig(
+                var courierUserId = showDialog(
                     activity = this@MainActivity, title = "Configure SDK", items = listOf(
                         DialogItem("COURIER_USER_ID", "Courier UserId"),
                     )

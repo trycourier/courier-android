@@ -5,14 +5,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 data class DialogItem(val key: String, val title: String)
 
-suspend fun showSDKConfig(activity: Activity, title: String, items: List<DialogItem>) = suspendCoroutine<SharedPreferences> { continuation ->
+suspend fun showDialog(activity: Activity, title: String, items: List<DialogItem>) = suspendCoroutine<SharedPreferences> { continuation ->
 
     val sharedPrefs = activity.getPreferences(Context.MODE_PRIVATE)
 
