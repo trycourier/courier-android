@@ -67,18 +67,17 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
  * For FCM (Firebase Cloud Messaging) you do not need to worry about this
  *
  */
-suspend fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList(), isProduction: Boolean): String {
+suspend fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList()): String {
     return MessagingRepository().send(
         authKey = authKey,
         userId = userId,
         title = title,
         body = body,
         providers = providers,
-        isProduction = isProduction
     )
 }
 
-fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList(), isProduction: Boolean, onSuccess: (requestId: String) -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
+fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList(), onSuccess: (requestId: String) -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
     try {
         val messageId = Courier.shared.sendPush(
             authKey = authKey,
@@ -86,7 +85,6 @@ fun Courier.sendPush(authKey: String, userId: String, title: String, body: Strin
             title = title,
             body = body,
             providers = providers,
-            isProduction = isProduction,
         )
         onSuccess(messageId)
     } catch (e: Exception) {

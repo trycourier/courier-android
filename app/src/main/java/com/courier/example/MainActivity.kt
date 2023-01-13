@@ -103,7 +103,6 @@ class MainActivity : CourierActivity() {
                         userId = courierUserId,
                         title = "Hey ${Courier.shared.userId}!",
                         body = "This is a test push sent through ${providers.joinToString(" and ") { it.value }}",
-                        isProduction = false,
                         providers = providers,
                     )
                 } else {

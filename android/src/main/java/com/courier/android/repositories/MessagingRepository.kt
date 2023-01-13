@@ -5,7 +5,6 @@ import com.courier.android.log
 import com.courier.android.models.CourierMessageResponse
 import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierPushEvent
-import com.courier.android.models.override
 import com.courier.android.utils.dispatch
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -17,7 +16,7 @@ import kotlin.coroutines.suspendCoroutine
 
 internal class MessagingRepository : Repository() {
 
-    internal suspend fun send(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider>, isProduction: Boolean) = suspendCoroutine { continuation ->
+    internal suspend fun send(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> ) = suspendCoroutine { continuation ->
 
         Courier.log("Sending Courier Message")
 
@@ -37,10 +36,6 @@ internal class MessagingRepository : Repository() {
                         "method" to "all",
                         "channels" to providers.map { it.value }
                     ),
-                    "providers" to mapOf(
-                        "apn" to CourierProvider.APNS.override(title, body, isProduction),
-                        "firebase-fcm" to CourierProvider.FCM.override(title, body, isProduction)
-                    )
                 )
             )
         ).toString()
