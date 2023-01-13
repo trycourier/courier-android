@@ -62,10 +62,6 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
  * Sends a test push to a user id you provider.
  * It is not recommended to keep this in your production app for authKey security reasons.
  *
- * @param isProduction used for APNS (Apple Push Notification Service)
- * to declare with entitlement environment to use
- * For FCM (Firebase Cloud Messaging) you do not need to worry about this
- *
  */
 suspend fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList()): String {
     return MessagingRepository().send(
