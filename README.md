@@ -360,7 +360,6 @@ class MainActivity : CourierActivity() {
                 userId: 'example_user',
                 title: 'Chirp Chrip!',
                 body: 'Hello from Courier 🐣',
-                isProduction: false, // This only affects APNS pushes. false == sandbox / true == production
                 providers: [CourierProvider.fcm],
             )
             

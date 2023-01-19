@@ -106,7 +106,6 @@ class CourierTests {
             title = "🐤 Chirp Chirp!",
             body = "Message sent from Android Studio tests",
             providers = listOf(CourierProvider.FCM),
-            isProduction = false,
         )
 
         print("Request ID: $requestId")
