@@ -95,7 +95,7 @@ class MainActivity : CourierActivity() {
 
             try {
 
-                var courierUserId = Courier.shared.userId
+                val courierUserId = Courier.shared.userId
 
                 if (!courierUserId.isNullOrBlank() && courierUserId.isNotEmpty()) {
                     Courier.shared.sendPush(
@@ -107,7 +107,7 @@ class MainActivity : CourierActivity() {
                         providers = providers,
                     )
                 } else {
-                    Toast.makeText(this@MainActivity, "No Courier UserId Found", Toast.LENGTH_LONG)
+                    Toast.makeText(this@MainActivity, "No Courier UserId Found", Toast.LENGTH_LONG).show()
                 }
 
             } catch (e: Exception) {
