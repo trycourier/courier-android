@@ -4,13 +4,16 @@ plugins {
     id 'maven-publish'
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = 'org.gradle.sample'
-            artifactId = 'library'
-            version = '1.1'
-            from components.java
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release".
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.courier.android'
+                artifactId = 'android'
+                version = '1.1.4'
+            }
         }
     }
 }
