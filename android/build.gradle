@@ -4,19 +4,6 @@ plugins {
     id 'maven-publish'
 }
 
-afterEvaluate {
-    publishing {
-        publications {
-            // Creates a Maven publication called "release".
-            release(MavenPublication) {
-                from components.release
-                groupId = 'com.courier.android'
-                version = '1.1.5'
-            }
-        }
-    }
-}
-
 android {
 
     compileSdk 33
@@ -66,4 +53,17 @@ dependencies {
     // Firebase Messaging
     api 'com.google.firebase:firebase-messaging-ktx:23.1.0'
 
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId = 'com.github.jitpack'
+                artifactId = 'android-example'
+                version = '1.0'
+            }
+        }
+    }
 }
