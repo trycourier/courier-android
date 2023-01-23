@@ -59,10 +59,10 @@ afterEvaluate {
     publishing {
         publications {
             release(MavenPublication) {
-                from components.release
-                groupId = 'com.github.jitpack'
-                artifactId = 'android-example'
-                version = '1.0'
+                groupId = 'com.courier.android'
+                artifactId = 'android'
+                version = '1.1.7'
+                from components.java
             }
         }
     }
