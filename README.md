@@ -162,7 +162,7 @@ dependencyResolutionManagement {
 #### 2. Add the implementation to your app build.gradle file
 ``` gradle
 dependencies {
-    implementation 'com.github.trycourier:courier-android:1.1.3'
+    implementation 'com.github.trycourier:courier-android:1.1.4'
 }
 ```
 &emsp;
