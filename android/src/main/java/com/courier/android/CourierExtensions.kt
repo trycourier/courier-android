@@ -139,16 +139,17 @@ fun AppCompatActivity.requestNotificationPermission(onStatusChange: (granted: Bo
 
     // Check if the notification manager can show push notifications
     val notificationManagerCompat = NotificationManagerCompat.from(this)
-    val areNotificationsEnabled = notificationManagerCompat.areNotificationsEnabled()
 
     // Handle granting notification permission if possible
     if (Build.VERSION.SDK_INT >= 33) {
         val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            val areNotificationsEnabled = notificationManagerCompat.areNotificationsEnabled()
             val canReceivePushes = granted && areNotificationsEnabled
             onStatusChange(canReceivePushes)
         }
         permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     } else {
+        val areNotificationsEnabled = notificationManagerCompat.areNotificationsEnabled()
         onStatusChange(areNotificationsEnabled)
     }
 
