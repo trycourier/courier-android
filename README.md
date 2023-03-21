@@ -4,8 +4,6 @@ Courier helps you spend less time building notification infrastructure, and more
 
 [https://courier.com](https://www.courier.com/)
 
-⚠️ This SDK is in Beta and actively maintained
-
 # Courier Android Overview
 
 ```kotlin
