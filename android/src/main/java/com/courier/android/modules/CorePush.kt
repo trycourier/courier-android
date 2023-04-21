@@ -4,9 +4,9 @@ import com.courier.android.Courier
 import com.courier.android.friendlyMessage
 import com.courier.android.models.CourierProvider
 import com.courier.android.repositories.TokenRepository
+import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -17,45 +17,71 @@ internal class CorePush {
     private val tokenRepo by lazy { TokenRepository() }
 //    private lateinit var trackingRepo = TrackingRepository()
 
-    internal suspend fun getFcmToken() = suspendCoroutine { continuation ->
+    // Stores a local copy of the fcmToken
+    private var fcmToken: String? = null
 
-        if (!Courier.shared.isFirebaseInitialized) {
+    // Ensures we can use firebase functions
+    private val isFirebaseInitialized get() = FirebaseApp.getApps(Courier.shared.context).isNotEmpty()
+
+    internal suspend fun getFcmToken(): String? {
+
+        if (!isFirebaseInitialized) {
             Courier.log("Firebase is not initialized. Courier will not be able to get the FCM token until Firebase is initialized.")
-            continuation.resume(null)
-            return@suspendCoroutine
+            return null
         }
 
-        // Get the current FCM token
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+        // Get the existing fcm token
+        fcmToken?.let { existingToken ->
+            return existingToken
+        }
 
-            if (!task.isSuccessful) {
-                Courier.log(task.exception.toString())
+        // Get the latest token
+        val latestFcmToken = suspendCoroutine { continuation ->
+
+            // Get the current FCM token
+            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+
+                if (!task.isSuccessful) {
+                    Courier.log(task.exception.toString())
+                }
+
+                // Save and return the token
+                continuation.resume(task.result)
+
             }
 
-            // Return the token
-            continuation.resume(task.result)
-
         }
+
+        // Update the fcm token
+        fcmToken = latestFcmToken
+
+        return latestFcmToken
 
     }
 
-    suspend fun setFCMToken(token: String?) {
+    suspend fun setFCMToken(newToken: String?) {
 
-        Courier.log("Firebase Cloud Messaging Token: $token")
+        Courier.log("Firebase Cloud Messaging Token: $newToken")
+
+        // Delete the old token
+        val oldToken = getFcmToken()
+        deleteToken(oldToken)
+
+        // Set the new token
+        fcmToken = newToken
 
         // Put the new token
-        putToken(CourierProvider.FCM, token)
+        putToken(CourierProvider.FCM, newToken)
 
     }
 
     internal suspend fun putPushTokens() = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
 
-        return@withContext awaitAll(
-            async(Dispatchers.IO) {
-                val fcmToken = getFcmToken()
-                putToken(CourierProvider.FCM, fcmToken)
-            }
-        )
+        // Refresh the tokens
+        fcmToken = getFcmToken()
+
+        // Put the new tokens in Courier
+        putToken(CourierProvider.FCM, fcmToken)
 
     }
 
@@ -63,12 +89,11 @@ internal class CorePush {
     // Done like this in case we have other tokens for the user at some point
     internal suspend fun deletePushTokens() = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
 
-        return@withContext awaitAll(
-            async(Dispatchers.IO) {
-                val fcmToken = getFcmToken()
-                deleteToken(fcmToken)
-            }
-        )
+        // Refresh the tokens
+        fcmToken = getFcmToken()
+
+        // Remove the old tokens
+        deleteToken(fcmToken)
 
     }
 
@@ -103,7 +128,7 @@ internal class CorePush {
             return
         }
 
-        Courier.log("Deleting Messaging Token")
+        Courier.log("Deleting Messaging Token: $token")
 
         try {
             tokenRepo.deleteUserToken(
@@ -126,9 +151,7 @@ internal class CorePush {
 /**
  * The current firebase cloud messaging token for the device
  */
-suspend fun Courier.getFCMToken(): String? {
-    return push.getFcmToken()
-}
+suspend fun Courier.getFCMToken() = push.getFcmToken()
 
 fun Courier.getFCMToken(onSuccess: (String?) -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
     try {

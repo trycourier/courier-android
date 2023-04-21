@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
+import com.courier.android.modules.*
 import com.courier.android.modules.CoreAuth
+import com.courier.android.modules.CoreInbox
 import com.courier.android.modules.CoreLogging
 import com.courier.android.modules.CorePush
 import com.courier.android.utils.NotificationEventBus
@@ -37,6 +39,15 @@ Y8,           i8'    ,8I   I8,    ,8I  ,8'    8I   88   I8, ,8I  ,8'    8I
 
 class Courier private constructor(internal val context: Context) {
 
+    /**
+     * Modules
+     */
+    internal val logging = CoreLogging()
+    internal val auth by lazy { CoreAuth() }
+    internal val push by lazy { CorePush() }
+    internal val inbox by lazy { CoreInbox() }
+    internal val messaging by lazy { CoreMessaging() }
+
     companion object {
 
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
@@ -46,6 +57,16 @@ class Courier private constructor(internal val context: Context) {
         internal val eventBus by lazy { NotificationEventBus() }
         internal val COURIER_COROUTINE_CONTEXT by lazy { Job() }
         internal val coroutineScope = CoroutineScope(COURIER_COROUTINE_CONTEXT)
+
+        // This will not create a memory leak
+        // Please call Courier.initialize(context) before using Courier.shared
+        @SuppressLint("StaticFieldLeak")
+        private var mInstance: Courier? = null
+        val shared: Courier
+            get() {
+                mInstance?.let { return it }
+                throw CourierException.initializationError
+            }
 
         /**
          * Initializes the SDK with a static reference to a Courier singleton
@@ -68,16 +89,6 @@ class Courier private constructor(internal val context: Context) {
             shared.logging.log(data)
         }
 
-        // This will not create a memory leak
-        // Please call Courier.initialize(context) before using Courier.shared
-        @SuppressLint("StaticFieldLeak")
-        private var mInstance: Courier? = null
-        val shared: Courier
-            get() {
-                mInstance?.let { return it }
-                throw CourierException.initializationError
-            }
-
         // Returns the last message that was delivered via the event bus
         fun getLastDeliveredMessage(onMessageFound: (message: RemoteMessage) -> Unit) =
             coroutineScope.launch(Dispatchers.Main) {
@@ -87,17 +98,5 @@ class Courier private constructor(internal val context: Context) {
             }
 
     }
-
-    /**
-     * Check for initialization
-     */
-    internal val isFirebaseInitialized get() = FirebaseApp.getApps(context).isNotEmpty()
-
-    /**
-     * Modules
-     */
-    internal val logging = CoreLogging()
-    internal val auth by lazy { CoreAuth() }
-    internal val push by lazy { CorePush() }
 
 }

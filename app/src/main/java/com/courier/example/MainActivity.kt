@@ -9,10 +9,7 @@ import com.courier.android.models.CourierProvider
 import com.courier.android.activity.CourierActivity
 import com.courier.android.modules.*
 import com.courier.android.requestNotificationPermission
-import com.courier.android.sendPush
 import com.courier.example.databinding.ActivityMainBinding
-import com.google.firebase.FirebaseApp
-import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.launch
 
@@ -48,19 +45,12 @@ class MainActivity : CourierActivity() {
 
         try {
 
-            Courier.shared.addAuthenticationListener { userId ->
-                print(userId)
-            }
-
             val hasNotificationPermissions = requestNotificationPermission()
             Toast.makeText(
                 this@MainActivity,
                 "Notification permissions are granted: $hasNotificationPermissions",
                 Toast.LENGTH_LONG
             ).show()
-
-            val fcmToken = Courier.shared.getFCMToken()
-            Toast.makeText(this, fcmToken, Toast.LENGTH_LONG).show()
 
         } catch (e: Exception) {
 
@@ -91,19 +81,15 @@ class MainActivity : CourierActivity() {
 
             try {
 
-                val courierUserId = Courier.shared.userId
+                val userId = Env.COURIER_USER_ID
 
-                if (!courierUserId.isNullOrBlank() && courierUserId.isNotEmpty()) {
-                    Courier.shared.sendPush(
-                        authKey = Env.COURIER_AUTH_KEY,
-                        userId = courierUserId,
-                        title = "Hey ${Courier.shared.userId}!",
-                        body = "This is a test push sent through ${providers.joinToString(" and ") { it.value }}",
-                        providers = providers,
-                    )
-                } else {
-                    Toast.makeText(this@MainActivity, "No Courier UserId Found", Toast.LENGTH_LONG).show()
-                }
+                Courier.shared.sendMessage(
+                    authKey = Env.COURIER_AUTH_KEY,
+                    userIds = listOf(userId),
+                    title = "Hey ${userId}!",
+                    body = "This is a test push sent through ${providers.joinToString(" and ") { it.value }}",
+                    channels = providers,
+                )
 
             } catch (e: Exception) {
 
@@ -155,30 +141,14 @@ class MainActivity : CourierActivity() {
 
             try {
 
-                val courierUserId = showDialog(
-                    activity = this@MainActivity,
-                    title = "Configure SDK",
-                    items = listOf(
-                        DialogItem("COURIER_USER_ID", "Courier UserId"),
-                    )
-                ).getString("COURIER_USER_ID", "")
+                Courier.shared.signIn(
+                    accessToken = Env.COURIER_ACCESS_TOKEN,
+                    userId = Env.COURIER_USER_ID
+                )
 
-                if (!courierUserId.isNullOrBlank() && courierUserId.isNotEmpty()) {
+                refresh()
 
-                    Courier.shared.signIn(
-                        accessToken = Env.COURIER_AUTH_KEY,
-                        userId = courierUserId
-                    )
-
-                    refresh()
-
-                    Toast.makeText(this@MainActivity, "Courier user signed in", Toast.LENGTH_LONG).show()
-
-                } else {
-
-                    Toast.makeText(this@MainActivity, "Please Enter a valid UserId", Toast.LENGTH_LONG).show()
-
-                }
+                Toast.makeText(this@MainActivity, "Courier user signed in", Toast.LENGTH_LONG).show()
 
 
             } catch (e: Exception) {
@@ -203,8 +173,7 @@ class MainActivity : CourierActivity() {
 
                 refresh()
 
-                Toast.makeText(this@MainActivity, "Courier user signed out", Toast.LENGTH_LONG)
-                    .show()
+                Toast.makeText(this@MainActivity, "Courier user signed out", Toast.LENGTH_LONG).show()
 
             } catch (e: Exception) {
 

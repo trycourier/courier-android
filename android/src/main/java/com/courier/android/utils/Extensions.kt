@@ -8,12 +8,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
 import com.courier.android.Courier.Companion.COURIER_COROUTINE_CONTEXT
 import com.courier.android.Courier.Companion.eventBus
-import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierPushEvent
 import com.courier.android.repositories.MessagingRepository
 import com.google.firebase.messaging.RemoteMessage
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
@@ -25,8 +24,7 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
 
         // Check to see if we have an intent to work
         val key = Courier.COURIER_PENDING_NOTIFICATION_KEY
-        val removeMessage = Gson().fromJson(extras?.getString(key), RemoteMessage::class.java)
-        removeMessage?.let { message ->
+        (extras?.get(key) as? RemoteMessage)?.let { message ->
 
             // Clear the intent extra
             extras?.remove(key)
@@ -49,37 +47,6 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
 
     }
 
-}
-
-/**
- *
- * Sends a test push to a user id you provider.
- * It is not recommended to keep this in your production app for authKey security reasons.
- *
- */
-suspend fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList()): String {
-    return MessagingRepository().send(
-        authKey = authKey,
-        userId = userId,
-        title = title,
-        body = body,
-        providers = providers,
-    )
-}
-
-fun Courier.sendPush(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider> = CourierProvider.values().toList(), onSuccess: (requestId: String) -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
-    try {
-        val messageId = Courier.shared.sendPush(
-            authKey = authKey,
-            userId = userId,
-            title = title,
-            body = body,
-            providers = providers,
-        )
-        onSuccess(messageId)
-    } catch (e: Exception) {
-        onFailure(e)
-    }
 }
 
 suspend fun Courier.trackNotification(message: RemoteMessage, event: CourierPushEvent) = withContext(COURIER_COROUTINE_CONTEXT) {

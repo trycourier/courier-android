@@ -12,18 +12,18 @@ import org.json.JSONObject
 
 internal class MessagingRepository : Repository() {
 
-    internal suspend fun send(authKey: String, userId: String, title: String, body: String, providers: List<CourierProvider>): String {
+    internal suspend fun send(authKey: String, userIds: List<String>, title: String, body: String, providers: List<CourierProvider>): String {
 
-        Courier.log("Sending Courier Message")
+        // TODO: Update channels
 
         val url = "$baseUrl/send"
 
         val json = JSONObject(
             mapOf(
                 "message" to mapOf(
-                    "to" to mapOf(
-                        "user_id" to userId
-                    ),
+                    "to" to userIds.map {
+                        mapOf("user_id" to it)
+                    },
                     "content" to mapOf(
                         "title" to title,
                         "body" to body

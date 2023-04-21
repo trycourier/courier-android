@@ -23,28 +23,18 @@ internal class CoreAuth {
         Courier.log("Client Key: $clientKey")
         Courier.log("User Id: $userId")
 
-        return@withContext try {
+        // Set the current user
+        UserManager.setCredentials(
+            context = Courier.shared.context,
+            userId = userId,
+            accessToken = accessToken,
+            clientKey = clientKey
+        )
 
-            // Batch all functions together
-            awaitAll(
-                async(Dispatchers.IO) {
-                    UserManager.setCredentials(
-                        context = Courier.shared.context,
-                        userId = userId,
-                        accessToken = accessToken,
-                        clientKey = clientKey
-                    )
-                },
-                async(Dispatchers.IO) {
-                    push.putPushTokens()
-                }
-            )
-
-// TODO            async let connectInbox: () = inbox.restartInboxIfNeeded()
-
-            // Notify
+        try {
+            push.putPushTokens()
+            // inbox.restartInboxIfNeeded()
             notifyListeners()
-
         } catch (e: Exception) {
             Courier.log(e.friendlyMessage)
             signOut(push)
@@ -62,15 +52,11 @@ internal class CoreAuth {
 
         Courier.log("Signing user out")
 
-        // Await all updates
-        awaitAll(
-            async(Dispatchers.IO) {
-                UserManager.removeCredentials(Courier.shared.context)
-            },
-            async(Dispatchers.IO) {
-                push.deletePushTokens()
-            }
-        )
+        // Delete the push tokens
+        push.deletePushTokens()
+
+        // Clear the user
+        UserManager.removeCredentials(Courier.shared.context)
 
         notifyListeners()
 
