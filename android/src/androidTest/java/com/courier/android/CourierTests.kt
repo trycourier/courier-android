@@ -5,6 +5,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierPushEvent
+import com.courier.android.modules.*
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.RemoteMessage

@@ -1,11 +1,13 @@
 package com.courier.example
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.models.CourierProvider
 import com.courier.android.activity.CourierActivity
+import com.courier.android.modules.*
 import com.courier.android.requestNotificationPermission
 import com.courier.android.sendPush
 import com.courier.example.databinding.ActivityMainBinding
@@ -46,6 +48,10 @@ class MainActivity : CourierActivity() {
 
         try {
 
+            Courier.shared.addAuthenticationListener { userId ->
+                print(userId)
+            }
+
             val hasNotificationPermissions = requestNotificationPermission()
             Toast.makeText(
                 this@MainActivity,
@@ -53,18 +59,8 @@ class MainActivity : CourierActivity() {
                 Toast.LENGTH_LONG
             ).show()
 
-            // Start firebase
-            // This must be set before you can sync FCM tokens in Courier
-            val options = FirebaseOptions.Builder().apply {
-                setApiKey(Env.FIREBASE_API_KEY)
-                setApplicationId(Env.FIREBASE_APP_ID)
-                setProjectId(Env.FIREBASE_PROJECT_ID)
-                setGcmSenderId(Env.FIREBASE_GCM_SENDER_ID)
-            }.build()
-
-            FirebaseApp.initializeApp(this@MainActivity, options)
-
-            Toast.makeText(this, "SDK Initialized", Toast.LENGTH_LONG).show()
+            val fcmToken = Courier.shared.getFCMToken()
+            Toast.makeText(this, fcmToken, Toast.LENGTH_LONG).show()
 
         } catch (e: Exception) {
 
@@ -122,12 +118,12 @@ class MainActivity : CourierActivity() {
     }
 
     override fun onPushNotificationClicked(message: RemoteMessage) {
-        print(message)
+        Log.d("Courier", message.toJsonString())
         Toast.makeText(this, "Message clicked:\n${message.data}", Toast.LENGTH_LONG).show()
     }
 
     override fun onPushNotificationDelivered(message: RemoteMessage) {
-        print(message)
+        Log.d("Courier", message.toJsonString())
         Toast.makeText(this, "Message delivered:\n${message.data}", Toast.LENGTH_LONG).show()
     }
 
@@ -159,25 +155,29 @@ class MainActivity : CourierActivity() {
 
             try {
 
-                var courierUserId = showDialog(
-                    activity = this@MainActivity, title = "Configure SDK", items = listOf(
+                val courierUserId = showDialog(
+                    activity = this@MainActivity,
+                    title = "Configure SDK",
+                    items = listOf(
                         DialogItem("COURIER_USER_ID", "Courier UserId"),
                     )
                 ).getString("COURIER_USER_ID", "")
 
                 if (!courierUserId.isNullOrBlank() && courierUserId.isNotEmpty()) {
+
                     Courier.shared.signIn(
-                        accessToken = Env.COURIER_AUTH_KEY, userId = courierUserId
+                        accessToken = Env.COURIER_AUTH_KEY,
+                        userId = courierUserId
                     )
 
                     refresh()
 
-                    Toast.makeText(this@MainActivity, "Courier user signed in", Toast.LENGTH_LONG)
-                        .show()
+                    Toast.makeText(this@MainActivity, "Courier user signed in", Toast.LENGTH_LONG).show()
+
                 } else {
-                    Toast.makeText(
-                        this@MainActivity, "Please Enter a valid UserId", Toast.LENGTH_LONG
-                    )
+
+                    Toast.makeText(this@MainActivity, "Please Enter a valid UserId", Toast.LENGTH_LONG).show()
+
                 }
 
 

@@ -4,13 +4,16 @@ import com.courier.android.models.CourierServerError
 import com.google.gson.Gson
 import okhttp3.*
 import java.io.IOException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
-internal inline fun <reified T>Call.dispatch(validCodes: List<Int> = listOf(200), crossinline onSuccess: (T) -> Unit, crossinline onFailure: (Exception) -> Unit) {
+internal suspend inline fun <reified T>Call.dispatch(validCodes: List<Int> = listOf(200)) = suspendCoroutine<T> { continuation ->
 
     enqueue(object : Callback {
 
         override fun onFailure(call: Call, e: IOException) {
-            onFailure(e)
+            continuation.resumeWithException(e)
         }
 
         override fun onResponse(call: Call, response: Response) {
@@ -20,10 +23,10 @@ internal inline fun <reified T>Call.dispatch(validCodes: List<Int> = listOf(200)
             if (!validCodes.contains(response.code)) {
 
                 try {
-                    val error = gson.fromJson(response.body?.string(), CourierServerError::class.java)
-                    onFailure(error.toException)
+                    val error = gson.fromJson(response.body?.string(), CourierServerError::class.java).toException
+                    continuation.resumeWithException(error)
                 } catch (e: Exception) {
-                    onFailure(e)
+                    continuation.resumeWithException(e)
                 }
 
             } else {
@@ -31,15 +34,15 @@ internal inline fun <reified T>Call.dispatch(validCodes: List<Int> = listOf(200)
                 try {
 
                     if (T::class == Any::class) {
-                        onSuccess(T::class.java.newInstance())
+                        continuation.resume(T::class.java.newInstance())
                         return
                     }
 
                     val res = gson.fromJson(response.body?.string(), T::class.java)
-                    onSuccess(res)
+                    continuation.resume(res)
 
                 } catch (e: Exception) {
-                    onFailure(e)
+                    continuation.resumeWithException(e)
                 }
 
             }

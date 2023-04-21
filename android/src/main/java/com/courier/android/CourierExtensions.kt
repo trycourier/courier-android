@@ -3,7 +3,6 @@ package com.courier.android
 import android.Manifest
 import android.content.Intent
 import android.os.Build
-import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationManagerCompat
@@ -13,18 +12,12 @@ import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierPushEvent
 import com.courier.android.repositories.MessagingRepository
 import com.google.firebase.messaging.RemoteMessage
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-
-internal fun Courier.Companion.log(data: String) {
-    if (shared.isDebugging) {
-        Log.d(TAG, data)
-        shared.logListener?.invoke(data)
-    }
-}
 
 fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit) {
 
@@ -32,7 +25,8 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
 
         // Check to see if we have an intent to work
         val key = Courier.COURIER_PENDING_NOTIFICATION_KEY
-        (extras?.get(key) as? RemoteMessage)?.let { message ->
+        val removeMessage = Gson().fromJson(extras?.getString(key), RemoteMessage::class.java)
+        removeMessage?.let { message ->
 
             // Clear the intent extra
             extras?.remove(key)
@@ -198,3 +192,5 @@ val RemoteMessage.pushNotification: Map<String, Any?>
         return payload
 
     }
+
+internal val Exception.friendlyMessage get() = "UPDATE ME"

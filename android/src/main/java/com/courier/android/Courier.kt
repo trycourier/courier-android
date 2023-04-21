@@ -2,26 +2,45 @@ package com.courier.android
 
 import android.annotation.SuppressLint
 import android.content.Context
-import com.courier.android.managers.UserManager
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
-import com.courier.android.models.CourierProvider
-import com.courier.android.repositories.TokenRepository
+import com.courier.android.modules.CoreAuth
+import com.courier.android.modules.CoreLogging
+import com.courier.android.modules.CorePush
 import com.courier.android.utils.NotificationEventBus
 import com.google.firebase.FirebaseApp
-import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
-class Courier private constructor() {
+/**
+
+     ,gggg,
+   ,88"""Y8b,
+  d8"     `Y8
+ d8'   8b  d8                                      gg
+,8I    "Y88P'                                      ""
+I8'             ,ggggg,    gg      gg   ,gggggg,   gg    ,ggg,    ,gggggg,
+d8             dP"  "Y8ggg I8      8I   dP""""8I   88   i8" "8i   dP""""8I
+Y8,           i8'    ,8I   I8,    ,8I  ,8'    8I   88   I8, ,8I  ,8'    8I
+`Yba,,_____, ,d8,   ,d8'  ,d8b,  ,d8b,,dP     Y8,_,88,_ `YbadP' ,dP     Y8,
+  `"Y8888888 P"Y8888P"    8P'"Y88P"`Y88P      `Y88P""Y8888P"Y8888P      `Y8
+
+===========================================================================
+
+ More about Courier: https://courier.com
+ Android Documentation: https://github.com/trycourier/courier-android
+
+===========================================================================
+
+*/
+
+class Courier private constructor(internal val context: Context) {
 
     companion object {
 
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "1.2.0"
+        internal const val VERSION = "2.0.0"
         internal const val TAG = "Courier SDK"
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
         internal val eventBus by lazy { NotificationEventBus() }
@@ -35,18 +54,18 @@ class Courier private constructor() {
          */
         fun initialize(context: Context) {
 
-            // Create the new instance
+            // Create the new instance if needed
             if (mInstance == null) {
-                mInstance = Courier()
+                mInstance = Courier(context)
             }
 
-            // Update the instance context
-            mInstance?.context = context
+        }
 
-            // Force refresh to grab the latest fcm token
-            // and hold a local reference to it
-            mInstance?.refreshLocalFcmToken()
-
+        /**
+         * Logs to the console
+         */
+        fun log(data: String) {
+            shared.logging.log(data)
         }
 
         // This will not create a memory leak
@@ -69,243 +88,16 @@ class Courier private constructor() {
 
     }
 
-    // Repos
-    private val tokenRepo by lazy { TokenRepository() }
+    /**
+     * Check for initialization
+     */
+    internal val isFirebaseInitialized get() = FirebaseApp.getApps(context).isNotEmpty()
 
     /**
-     * Shows or hides Android console logs
+     * Modules
      */
-    var isDebugging = false
-
-    /**
-     * Handles interfacing between shared preferences and the Courier SDK
-     */
-    private lateinit var context: Context
-
-    /**
-     * The key required to initialized the SDK
-     * [Issue Tokens](https://www.courier.com/docs/reference/auth/issue-token/)
-     */
-    internal val accessToken: String? get() = UserManager.getAccessToken(context)
-
-    /**
-     * A read only value set to the current user id
-     */
-    val userId: String? get() = UserManager.getUserId(context)
-
-    /**
-     * Gets called if set and a log is posted
-     */
-    var logListener: ((data: String) -> Unit)? = null
-
-    /**
-     * Determine user state
-     */
-    private val isUserSignedIn get() = accessToken != null && userId != null
-
-    init {
-
-        // Set app debugging
-        isDebugging = BuildConfig.DEBUG
-
-    }
-
-    /**
-     * Function to set the current credentials for the user and their access token
-     * You should consider using this in areas where you update your local user's state
-     */
-    suspend fun signIn(accessToken: String, userId: String) = withContext(COURIER_COROUTINE_CONTEXT) {
-
-        Courier.log("Signing User In:\nAccess Token: $accessToken\nUser Id: $userId")
-
-        // Update user manager
-        UserManager.setCredentials(
-            context = context,
-            accessToken = accessToken,
-            userId = userId
-        )
-
-        // Try and update the user
-        // If this fails, rethrow the exception
-        return@withContext try {
-
-            // Bundle all deferred requests
-            val updates = listOf(
-                async(Dispatchers.IO) {
-
-                    // Refresh & update the current fcm token
-                    val fcmToken = updateCurrentFcmToken()
-                    return@async fcmToken?.let { setFCMToken(it) }
-
-                }
-            )
-
-            // Await all results
-            updates.awaitAll()
-
-        } catch (e: Exception) {
-
-            Courier.log(e.toString())
-            signOut()
-            throw e
-
-        }
-
-    }
-
-    fun signIn(accessToken: String, userId: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
-        try {
-            signIn(
-                accessToken = accessToken,
-                userId = userId
-            )
-            onSuccess()
-        } catch (e: Exception) {
-            onFailure(e)
-        }
-    }
-
-    /**
-     * Function that clears the current user id and access token
-     * You should call this when your user signs out
-     * It will remove the current tokens used for this user in Courier so they do not receive pushes they should not get
-     */
-    suspend fun signOut() = withContext(COURIER_COROUTINE_CONTEXT) {
-
-        Courier.log("Signing User Out")
-
-        // Bundle all deferred requests
-        val updates = mutableListOf<Deferred<Any?>>()
-
-        // Clear Courier tokens if possible
-        if (isUserSignedIn) {
-
-            // Delete the FCM token
-            // Can continue if the request fails
-            updates.add(async(Dispatchers.IO) {
-                try {
-                    this@Courier.fcmToken?.let { token ->
-                        tokenRepo.deleteUserToken(token)
-                    }
-                } catch (e: Exception) {
-                    Courier.log(e.toString())
-                }
-            })
-
-        }
-
-        // Refresh the current token
-        updates.add(async(Dispatchers.IO) {
-            updateCurrentFcmToken()
-        })
-
-        // Remove the current user from local storage
-        updates.add(async(Dispatchers.IO) {
-            UserManager.removeCredentials(context)
-        })
-
-        // Await all updates
-        return@withContext updates.awaitAll()
-
-    }
-
-    fun signOut(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) =
-        coroutineScope.launch(Dispatchers.IO) {
-            try {
-                signOut()
-                onSuccess()
-            } catch (e: Exception) {
-                onFailure(e)
-            }
-        }
-
-    /**
-     * The current firebase token associated with this user
-     */
-    var fcmToken: String? = null
-        private set(value) {
-
-            // Set the value
-            field = value
-
-            // Print the current token
-            value?.let { token ->
-                Courier.log("Firebase Cloud Messaging Token:\n$token")
-            }
-
-        }
-
-    /**
-     * Upserts the FCM token in Courier for the current user
-     * To get started with FCM, checkout the firebase docs [Here](https://firebase.google.com/docs/cloud-messaging/android/client)
-     */
-    suspend fun setFCMToken(token: String) {
-
-        // Delete the previous token if possible
-        // If we fail the delete, skip and move on
-        // We want to ensure the user has a new token in Courier
-        if (token != fcmToken) {
-
-            // Delete the current token in Courier
-            fcmToken?.let { currentToken ->
-                try {
-                    tokenRepo.deleteUserToken(currentToken)
-                } catch (e: Exception) {
-                    Courier.log(e.toString())
-                }
-            }
-
-        }
-
-        // Set the new token locally
-        this@Courier.fcmToken = token
-
-        // Put the new token in Courier token management
-        tokenRepo.putUserToken(token, CourierProvider.FCM)
-
-    }
-
-    fun setFCMToken(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) =
-        coroutineScope.launch(Dispatchers.IO) {
-            try {
-                setFCMToken(token)
-                onSuccess()
-            } catch (e: Exception) {
-                onFailure(e)
-            }
-        }
-
-    private fun refreshLocalFcmToken() = coroutineScope.launch(Dispatchers.IO) {
-        try {
-            updateCurrentFcmToken()
-        } catch (e: Exception) {
-            Courier.log(e.toString())
-        }
-    }
-
-    private suspend fun updateCurrentFcmToken() = suspendCoroutine { continuation ->
-
-        // Check if we can get the FCM token
-        if (!::context.isInitialized || FirebaseApp.getApps(context).isEmpty()) {
-            Courier.log("Firebase is not initialized. Courier will not be able to get the FCM token until Firebase is initialized.")
-            continuation.resume(null)
-            return@suspendCoroutine
-        }
-
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-
-            if (!task.isSuccessful) {
-                Courier.log(task.exception.toString())
-                continuation.resume(null)
-                return@addOnCompleteListener
-            }
-
-            // **Important** Sets the local token
-            this@Courier.fcmToken = task.result
-            continuation.resume(this@Courier.fcmToken)
-
-        }
-
-    }
+    internal val logging = CoreLogging()
+    internal val auth by lazy { CoreAuth() }
+    internal val push by lazy { CorePush() }
 
 }
