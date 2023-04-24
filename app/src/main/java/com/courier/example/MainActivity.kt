@@ -7,6 +7,7 @@ import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.models.CourierProvider
 import com.courier.android.activity.CourierActivity
+import com.courier.android.models.remove
 import com.courier.android.modules.*
 import com.courier.android.requestNotificationPermission
 import com.courier.example.databinding.ActivityMainBinding
@@ -23,7 +24,29 @@ class MainActivity : CourierActivity() {
 
         Courier.initialize(context = this)
 
-        Courier.shared.addInboxListener() // TODO
+        Courier.shared.addInboxListener(
+            onInitialLoad = {
+                print("Loading")
+            },
+            onError = { e ->
+                print(e)
+            },
+            onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
+                print(messages)
+            }
+        )
+
+        Courier.shared.addInboxListener(
+            onInitialLoad = {
+                print("Loading")
+            },
+            onError = { e ->
+                print(e)
+            },
+            onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
+                print(messages)
+            }
+        )
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             setContentView(root)

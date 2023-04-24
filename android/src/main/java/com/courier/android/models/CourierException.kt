@@ -8,6 +8,7 @@ class CourierException(message: String): Exception(message) {
         val missingUserId = CourierException("Missing user id")
         val initializationError = CourierException("Courier SDK not initialized. Run Courier.initialize(context) to fix this")
         val jsonParsingError = CourierException("Error Parsing JSON from Courier Server")
+        val inboxUserNotFound = CourierException("No user found")
     }
 
 }

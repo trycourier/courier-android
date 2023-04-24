@@ -57,4 +57,33 @@ internal class InboxRepository : Repository() {
 
     }
 
+    internal suspend fun getUnreadMessageCount(clientKey: String, userId: String): Int {
+
+        val query = """
+            query GetMessages(
+                ${'$'}params: FilterParamsInput = { status: "unread" }
+                ${'$'}limit: Int = ${1}
+                ${'$'}after: String
+            ) {
+                count(params: ${'$'}params)
+                messages(params: ${'$'}params, limit: ${'$'}limit, after: ${'$'}after) {
+                    nodes {
+                        messageId
+                    }
+                }
+            }
+        """.toGraphQuery()
+
+        val request = Request.Builder()
+            .url(inboxGraphQL)
+            .addHeader("x-courier-client-key", clientKey)
+            .addHeader("x-courier-user-id", userId)
+            .post(query.toRequestBody())
+            .build()
+
+        val res = http.newCall(request).dispatch<CourierInboxResponse>()
+        return res.data?.count ?: 0
+
+    }
+
 }
