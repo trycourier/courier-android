@@ -16,7 +16,7 @@ internal class MessagingRepository : Repository() {
 
         // TODO: Update channels
 
-        val url = "$baseUrl/send"
+        val url = "$baseRest/send"
 
         val json = JSONObject(
             mapOf(
@@ -39,7 +39,6 @@ internal class MessagingRepository : Repository() {
         val request = Request.Builder()
             .url(url)
             .addHeader("Authorization", "Bearer $authKey")
-            .addHeader("Content-Type", "application/json")
             .post(json.toRequestBody())
             .build()
 
@@ -56,7 +55,7 @@ internal class MessagingRepository : Repository() {
 
     }
 
-    internal suspend fun postTrackingUrl(url: String, event: CourierPushEvent): CourierMessageResponse {
+    internal suspend fun postTrackingUrl(url: String, event: CourierPushEvent): String {
 
         val json = JSONObject(
             mapOf("event" to event.value)
@@ -64,11 +63,12 @@ internal class MessagingRepository : Repository() {
 
         val request = Request.Builder()
             .url(url)
-            .addHeader("Content-Type", "application/json")
             .post(json.toRequestBody())
             .build()
 
-        return http.newCall(request).dispatch()
+        val res = http.newCall(request).dispatch<CourierMessageResponse>()
+
+        return res.requestId
 
     }
 

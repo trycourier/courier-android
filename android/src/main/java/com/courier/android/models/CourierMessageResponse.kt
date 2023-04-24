@@ -1,5 +1,5 @@
 package com.courier.android.models
 
-data class CourierMessageResponse(
+internal data class CourierMessageResponse(
     val requestId: String
 )

@@ -11,7 +11,7 @@ internal class TokenRepository : Repository() {
 
     suspend fun putUserToken(accessToken: String, userId: String, token: String, provider: CourierProvider) {
 
-        val url = "$baseUrl/users/$userId/tokens/$token"
+        val url = "$baseRest/users/$userId/tokens/$token"
 
         val json = gson.toJson(CourierToken(
             provider_key = provider.value,
@@ -21,7 +21,6 @@ internal class TokenRepository : Repository() {
         val request = Request.Builder()
             .url(url)
             .addHeader("Authorization", "Bearer $accessToken")
-            .addHeader("Content-Type", "application/json")
             .put(json.toRequestBody())
             .build()
 
@@ -31,12 +30,11 @@ internal class TokenRepository : Repository() {
 
     suspend fun deleteUserToken(accessToken: String, userId: String, token: String) {
 
-        val url = "$baseUrl/users/$userId/tokens/$token"
+        val url = "$baseRest/users/$userId/tokens/$token"
 
         val request = Request.Builder()
             .url(url)
             .addHeader("Authorization", "Bearer $accessToken")
-            .addHeader("Content-Type", "application/json")
             .delete()
             .build()
 

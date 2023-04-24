@@ -8,6 +8,8 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
+internal fun String.toGraphQuery(): String = "{\"query\": \"${this.trimIndent().replace("\n", "")}\"}"
+
 internal suspend inline fun <reified T>Call.dispatch(validCodes: List<Int> = listOf(200)) = suspendCoroutine<T> { continuation ->
 
     enqueue(object : Callback {

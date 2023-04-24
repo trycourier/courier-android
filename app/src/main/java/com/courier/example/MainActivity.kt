@@ -23,6 +23,8 @@ class MainActivity : CourierActivity() {
 
         Courier.initialize(context = this)
 
+        Courier.shared.addInboxListener() // TODO
+
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             setContentView(root)
         }
@@ -143,7 +145,8 @@ class MainActivity : CourierActivity() {
 
                 Courier.shared.signIn(
                     accessToken = Env.COURIER_ACCESS_TOKEN,
-                    userId = Env.COURIER_USER_ID
+                    userId = Env.COURIER_USER_ID,
+                    clientKey = Env.COURIER_CLIENT_KEY
                 )
 
                 refresh()

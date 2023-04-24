@@ -161,3 +161,10 @@ val RemoteMessage.pushNotification: Map<String, Any?>
     }
 
 internal val Exception.friendlyMessage get() = "UPDATE ME"
+
+// Returns the last message that was delivered via the event bus
+fun Courier.getLastDeliveredMessage(onMessageFound: (message: RemoteMessage) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
+    eventBus.events.collectLatest { message ->
+        onMessageFound(message)
+    }
+}

@@ -99,7 +99,7 @@ val Courier.userId: String? get() = UserManager.getUserId(context)
  * A read only value set to the current user client key
  * https://app.courier.com/channels/courier
  */
-internal val Courier.clientKey: String? get() = UserManager.getUserId(context)
+internal val Courier.clientKey: String? get() = UserManager.getClientKey(context)
 
 /**
  * Determine user state

@@ -63,7 +63,7 @@ internal class CorePush {
 
         Courier.log("Firebase Cloud Messaging Token: $newToken")
 
-        // Delete the old token
+        // Delete the old token if possible
         val oldToken = getFcmToken()
         deleteToken(oldToken)
 

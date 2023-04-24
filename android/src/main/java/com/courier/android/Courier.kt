@@ -89,14 +89,6 @@ class Courier private constructor(internal val context: Context) {
             shared.logging.log(data)
         }
 
-        // Returns the last message that was delivered via the event bus
-        fun getLastDeliveredMessage(onMessageFound: (message: RemoteMessage) -> Unit) =
-            coroutineScope.launch(Dispatchers.Main) {
-                eventBus.events.collectLatest { message ->
-                    onMessageFound(message)
-                }
-            }
-
     }
 
 }
