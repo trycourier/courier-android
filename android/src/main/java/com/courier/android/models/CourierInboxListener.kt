@@ -4,7 +4,7 @@ import com.courier.android.Courier
 
 data class CourierInboxListener(
     val onInitialLoad: (() -> Unit)?,
-    val onError: ((CourierException) -> Unit)?,
+    val onError: ((Exception) -> Unit)?,
     val onMessagesChanged: ((messages: List<InboxMessage>, unreadMessageCount: Int, totalMessageCount: Int, canPaginate: Boolean) -> Unit)?,
 ) {
     var isInitialized = false

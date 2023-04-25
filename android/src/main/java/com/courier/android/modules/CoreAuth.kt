@@ -16,7 +16,7 @@ internal class CoreAuth {
      * Function to set the current credentials for the user and their access token
      * You should consider using this in areas where you update your local user's state
      */
-    suspend fun signIn(accessToken: String, clientKey: String?, userId: String, push: CorePush) = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
+    suspend fun signIn(accessToken: String, clientKey: String?, userId: String, push: CorePush, inbox: CoreInbox) = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
 
         Courier.log("Signing user in")
         Courier.log("Access Token: $accessToken")
@@ -33,11 +33,11 @@ internal class CoreAuth {
 
         try {
             push.putPushTokens()
-            // inbox.restartInboxIfNeeded()
+            inbox.restart()
             notifyListeners()
         } catch (e: Exception) {
             Courier.log(e.friendlyMessage)
-            signOut(push)
+            signOut(push, inbox)
             throw e
         }
 
@@ -48,14 +48,21 @@ internal class CoreAuth {
      * You should call this when your user signs out
      * It will remove the current tokens used for this user in Courier so they do not receive pushes they should not get
      */
-    suspend fun signOut(push: CorePush) = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
+    suspend fun signOut(push: CorePush, inbox: CoreInbox) = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
 
         Courier.log("Signing user out")
 
-        // Delete the push tokens
-        push.deletePushTokens()
+        awaitAll(
+            async {
+                push.deletePushTokens()
+            },
+            async {
+                inbox.close()
+            }
+        )
 
         // Clear the user
+        // Must be called after tokens are deleted
         UserManager.removeCredentials(Courier.shared.context)
 
         notifyListeners()
@@ -111,7 +118,8 @@ suspend fun Courier.signIn(accessToken: String, userId: String, clientKey: Strin
         accessToken = accessToken,
         userId = userId,
         clientKey = clientKey,
-        push = push
+        push = push,
+        inbox = inbox,
     )
 }
 
@@ -135,7 +143,8 @@ It will remove the current tokens used for this user in Courier so they do not r
  */
 suspend fun Courier.signOut() {
     auth.signOut(
-        push = push
+        push = push,
+        inbox = inbox
     )
 }
 

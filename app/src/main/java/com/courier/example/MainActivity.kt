@@ -32,7 +32,7 @@ class MainActivity : CourierActivity() {
                 print(e)
             },
             onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
-                print(messages)
+                print(totalMessageCount)
             }
         )
 
