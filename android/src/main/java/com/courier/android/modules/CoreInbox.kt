@@ -14,12 +14,30 @@ internal class CoreInbox {
         var unreadCount: Int,
         var hasNextPage: Boolean?,
         var startCursor: String?
-    )
+    ) {
+
+        fun addNewMessage(message: InboxMessage) {
+            this.messages?.add(0, message)
+            this.totalCount += 1
+            this.unreadCount += 1
+        }
+
+        fun addPage(messages: List<InboxMessage>, startCursor: String?, hasNextPage: Boolean?) {
+            this.messages?.addAll(messages)
+            this.startCursor = startCursor
+            this.hasNextPage = hasNextPage
+        }
+
+    }
 
     private var setupPipe: Job? = null
+    private var isPaging = false
+
     private val inboxRepo by lazy { InboxRepository() }
     private var listeners: MutableList<CourierInboxListener> = mutableListOf()
     private var inbox: Inbox? = null
+
+    internal val inboxMessages get() = inbox?.messages
 
     fun restart() {
 
@@ -39,10 +57,10 @@ internal class CoreInbox {
         // Get all inbox data and start the websocket
         val result = awaitAll(
             async {
-                inboxRepo.getAllMessages(
+                inboxRepo.getMessages(
                     clientKey = Courier.shared.clientKey!!,
-                    userId = Courier.shared.userId!!
-                    // TODO: Pagination
+                    userId = Courier.shared.userId!!,
+                    paginationLimit = 24 // TODO
                 )
             },
             async {
@@ -57,14 +75,8 @@ internal class CoreInbox {
                     userId = Courier.shared.userId!!,
                     onMessageReceived = { message ->
 
-                        // Update local values
-                        this@CoreInbox.inbox?.let { inbox ->
-                            inbox.messages?.add(0, message)
-                            inbox.totalCount += 1
-                            inbox.unreadCount += 1
-                        }
-
-                        // Pass the change
+                        // Add new message and notify
+                        this@CoreInbox.inbox?.addNewMessage(message)
                         notifyMessagesChanged()
 
                     },
@@ -135,6 +147,65 @@ internal class CoreInbox {
 
     }
 
+    internal suspend fun fetchNextPage(): List<InboxMessage> {
+
+        if (inbox == null) {
+            throw CourierException.inboxNotInitialized
+        }
+
+        // Determine if we are safe to page
+        if (isPaging || this@CoreInbox.inbox?.hasNextPage == false) {
+            return emptyList()
+        }
+
+        isPaging = true
+
+        var messages = listOf<InboxMessage>()
+
+        try {
+            messages = fetchNextPageOfMessages()
+            notifyMessagesChanged()
+        } catch (error: CourierException) {
+            notifyError(error)
+        }
+
+        isPaging = false
+
+        return messages
+
+    }
+
+    private suspend fun fetchNextPageOfMessages(): List<InboxMessage> {
+
+        // Check for auth
+        if (!Courier.shared.isUserSignedIn || Courier.shared.clientKey == null || this@CoreInbox.inbox == null) {
+            throw CourierException.inboxUserNotFound
+        }
+
+        // Fetch the next page
+        val inboxData = inboxRepo.getMessages(
+            clientKey = Courier.shared.clientKey!!,
+            userId = Courier.shared.userId!!,
+            paginationLimit = 24, // TODO,
+            startCursor = this@CoreInbox.inbox!!.startCursor
+        )
+
+        val messages = inboxData.messages?.nodes.orEmpty()
+        val startCursor = inboxData.messages?.pageInfo?.startCursor
+        val hasNextPage = inboxData.messages?.pageInfo?.hasNextPage
+
+        // Add the page of messages
+        this@CoreInbox.inbox!!.addPage(
+            messages = messages,
+            startCursor = startCursor,
+            hasNextPage = hasNextPage,
+        )
+
+        // Return the new messages
+        return messages
+
+    }
+
     internal fun addInboxListener(onInitialLoad: (() -> Unit)? = null, onError: ((Exception) -> Unit)? = null, onMessagesChanged: ((messages: List<InboxMessage>, unreadMessageCount: Int, totalMessageCount: Int, canPaginate: Boolean) -> Unit)? = null): CourierInboxListener {
 
         // Create a new inbox listener
@@ -194,19 +265,19 @@ internal class CoreInbox {
         }
     }
 
-    private fun notifyMessagesChanged() {
+    private fun notifyMessagesChanged() = coroutineScope.launch(Dispatchers.Main) {
         listeners.forEach {
             it.notifyMessageChanged()
         }
     }
 
-    private fun notifyError(error: Exception) {
+    private fun notifyError(error: Exception) = coroutineScope.launch(Dispatchers.Main) {
         listeners.forEach {
             it.onError?.invoke(error)
         }
     }
 
-    private fun CourierInboxListener.notifyMessageChanged() {
+    private fun CourierInboxListener.notifyMessageChanged() = coroutineScope.launch(Dispatchers.Main) {
         onMessagesChanged?.invoke(
             inbox?.messages ?: emptyList(),
             inbox?.unreadCount ?: 0,
@@ -220,6 +291,25 @@ internal class CoreInbox {
 /**
  * Extensions
  */
+
+val Courier.inboxMessages get() = inbox.inboxMessages
+
+suspend fun Courier.fetchNextPageOfMessages(): List<InboxMessage> {
+    return inbox.fetchNextPage()
+}
+
+fun Courier.fetchNextPageOfMessages(onSuccess: ((List<InboxMessage>) -> Unit)? = null, onFailure: ((Exception) -> Void)? = null) = coroutineScope.launch(Dispatchers.IO) {
+    try {
+        val messages = fetchNextPageOfMessages()
+        coroutineScope.launch(Dispatchers.Main) {
+            onSuccess?.invoke(messages)
+        }
+    } catch (e: Exception) {
+        coroutineScope.launch(Dispatchers.Main) {
+            onFailure?.invoke(e)
+        }
+    }
+}
 
 /**
  * Creates a CourierInboxListener to watch changes from the Courier Inbox

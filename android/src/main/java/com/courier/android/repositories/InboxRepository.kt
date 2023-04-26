@@ -1,6 +1,5 @@
 package com.courier.android.repositories
 
-import com.courier.android.Courier
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxResponse
 import com.courier.android.models.InboxData
@@ -50,13 +49,13 @@ internal class InboxRepository : Repository() {
         webSocket?.disconnect()
     }
 
-    suspend fun getAllMessages(clientKey: String, userId: String, paginationLimit: Int = 24, startCursor: String? = null): InboxData {
+    suspend fun getMessages(clientKey: String, userId: String, paginationLimit: Int = 24, startCursor: String? = null): InboxData {
 
         val query = """
             query GetMessages(
                 ${'$'}params: FilterParamsInput
                 ${'$'}limit: Int = $paginationLimit
-                ${'$'}after: String ${if (startCursor != null) "= \"$startCursor\"" else ""}
+                ${'$'}after: String ${if (startCursor != null) "= \\\"${startCursor}\\\"" else ""}
             ) {
                 count(params: ${'$'}params)
                 messages(params: ${'$'}params, limit: ${'$'}limit, after: ${'$'}after) {

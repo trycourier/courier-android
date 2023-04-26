@@ -10,6 +10,7 @@ class CourierException(message: String): Exception(message) {
         val jsonParsingError = CourierException("Error Parsing JSON from Courier Server")
         val inboxUserNotFound = CourierException("No user found")
         val inboxWebSocketFail = CourierException("An error occurred. Please try again.")
+        val inboxNotInitialized = CourierException("The Courier Inbox is not setup. Please add a CourierInbox view or call Courier.shared.addInboxListener")
         val inboxWebSocketDisconnect = CourierException("An error occurred. Please try again.")
     }
 

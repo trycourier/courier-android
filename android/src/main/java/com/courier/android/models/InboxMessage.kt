@@ -11,4 +11,6 @@ data class InboxMessage(
     internal val archived: Boolean?,
     internal val read: String?,
     internal val opened: String?,
-)
+) {
+    val subtitle get() = body ?: preview
+}

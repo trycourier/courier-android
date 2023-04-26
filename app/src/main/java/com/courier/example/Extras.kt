@@ -8,6 +8,8 @@ import android.content.SharedPreferences
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
+import com.courier.android.models.InboxMessage
+import com.google.gson.GsonBuilder
 import org.json.JSONArray
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -111,4 +113,8 @@ fun Array<*>.toJsonArray(): JSONArray {
         json.put(item.toJsonValue())
     }
     return json
+}
+
+fun InboxMessage.toJson(): String? {
+    return GsonBuilder().setPrettyPrinting().create().toJson(this)
 }

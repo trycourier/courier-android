@@ -67,8 +67,6 @@ internal suspend inline fun <reified T>Call.dispatch(validCodes: List<Int> = lis
 
             if (!validCodes.contains(response.code)) {
 
-                val test = response.body?.string()
-
                 try {
                     val error = gson.fromJson(response.body?.string(), CourierServerError::class.java).toException
                     continuation.resumeWithException(error)
