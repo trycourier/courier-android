@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/auth"
+        android:icon="@android:drawable/sym_contact_card"
+        android:title="Auth" />
+    <item
+        android:id="@+id/customInbox"
+        android:icon="@android:drawable/sym_action_chat"
+        android:title="Custom Inbox" />
+    <item
+        android:id="@+id/send"
+        android:icon="@android:drawable/sym_action_email"
+        android:title="Send" />
+</menu>

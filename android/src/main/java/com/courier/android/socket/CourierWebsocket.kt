@@ -1,5 +1,6 @@
 package com.courier.android.socket
 
+import com.courier.android.Courier
 import com.courier.android.models.CourierException
 import okhttp3.*
 import java.util.concurrent.TimeUnit
@@ -84,7 +85,14 @@ internal class CourierWebsocket(url: String, private val onMessageReceived: (tex
         }
 
         // Disconnect
-        webSocket.close(code, null)
+        val didClose = webSocket.close(code, null)
+
+        // Handle websocket already closed
+        if (!didClose) {
+            webSocket.cancel()
+            connectionListener = null
+            continuation.resume(Unit)
+        }
 
     }
 
@@ -100,6 +108,7 @@ internal class CourierWebsocket(url: String, private val onMessageReceived: (tex
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
         super.onClosing(webSocket, code, reason)
+        Courier.log("Disconnecting Inbox Websocket")
     }
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {

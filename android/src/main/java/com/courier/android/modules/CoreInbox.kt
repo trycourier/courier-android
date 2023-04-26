@@ -221,6 +221,9 @@ internal class CoreInbox {
  * Extensions
  */
 
+/**
+ * Creates a CourierInboxListener to watch changes from the Courier Inbox
+ **/
 fun Courier.addInboxListener(onInitialLoad: (() -> Unit)? = null, onError: ((Exception) -> Unit)? = null, onMessagesChanged: ((messages: List<InboxMessage>, unreadMessageCount: Int, totalMessageCount: Int, canPaginate: Boolean) -> Unit)? = null): CourierInboxListener {
     return inbox.addInboxListener(
         onInitialLoad = onInitialLoad,
@@ -229,6 +232,9 @@ fun Courier.addInboxListener(onInitialLoad: (() -> Unit)? = null, onError: ((Exc
     )
 }
 
+/**
+ * Removes all the listeners from the Courier Inbox
+ **/
 fun Courier.removeAllListeners() {
     inbox.removeAllListeners()
 }
