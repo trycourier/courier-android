@@ -25,7 +25,7 @@ internal fun String.toGraphQuery(): String {
     return "{\"query\": \"${value}\"}"
 }
 
-internal fun Request.toPrettyJsonBody(): String? {
+internal fun Request.toPrettyJson(): String? {
 
     if (body == null) {
         return null
@@ -36,24 +36,24 @@ internal fun Request.toPrettyJsonBody(): String? {
         body?.writeTo(buffer)
         val body = buffer.readUtf8()
         if (body.isEmpty()) return null
-        val gson = GsonBuilder().setLenient().setPrettyPrinting().create()
-        val jsonObject = JsonParser.parseString(body).asJsonObject
-        return "\n${gson.toJson(jsonObject)}"
+        return body.toPrettyJson()
     } catch (e: Exception) {
         null
     }
 
 }
 
-internal suspend inline fun <reified T>Call.dispatch(validCodes: List<Int> = listOf(200)) = suspendCoroutine<T> { continuation ->
-
-    if (Courier.shared.isDebugging) {
-        val request = request()
-        Courier.log("📡 New Courier API Request")
-        Courier.log("URL: ${request.url}")
-        Courier.log("Method: ${request.method}")
-        Courier.log("Body: ${request.toPrettyJsonBody() ?: "Empty"}")
+internal fun String.toPrettyJson(): String? {
+    return try {
+        val gson = GsonBuilder().setLenient().setPrettyPrinting().create()
+        val jsonObject = JsonParser.parseString(this).asJsonObject
+        "\n${gson.toJson(jsonObject)}"
+    } catch (e: Exception) {
+        null
     }
+}
+
+internal suspend inline fun <reified T>Call.dispatch(validCodes: List<Int> = listOf(200)) = suspendCoroutine<T> { continuation ->
 
     enqueue(object : Callback {
 
@@ -62,6 +62,14 @@ internal suspend inline fun <reified T>Call.dispatch(validCodes: List<Int> = lis
         }
 
         override fun onResponse(call: Call, response: Response) {
+
+            if (Courier.shared.isDebugging) {
+                val request = request()
+                Courier.log("📡 New Courier API Request")
+                Courier.log("URL: ${request.url}")
+                Courier.log("Method: ${request.method}")
+                Courier.log("Body: ${request.toPrettyJson() ?: "Empty"}")
+            }
 
             val gson = Gson()
 
@@ -76,6 +84,9 @@ internal suspend inline fun <reified T>Call.dispatch(validCodes: List<Int> = lis
 
             } else {
 
+                val body = response.body?.string()
+                Courier.log("Response: ${body?.toPrettyJson() ?: "Empty"}")
+
                 try {
 
                     if (T::class == Any::class) {
@@ -83,7 +94,7 @@ internal suspend inline fun <reified T>Call.dispatch(validCodes: List<Int> = lis
                         return
                     }
 
-                    val res = gson.fromJson(response.body?.string(), T::class.java)
+                    val res = gson.fromJson(body, T::class.java)
                     continuation.resume(res)
 
                 } catch (e: Exception) {

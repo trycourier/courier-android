@@ -1,6 +1,8 @@
 package com.courier.example
 
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.annotation.IdRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -14,6 +16,7 @@ import com.courier.example.fragments.AuthFragment
 import com.courier.example.fragments.CustomInboxFragment
 import com.courier.example.fragments.SendFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.messaging.RemoteMessage
 
 
 class MainActivity : CourierActivity() {
@@ -87,76 +90,15 @@ class MainActivity : CourierActivity() {
         inboxListener.remove()
     }
 
-//    private suspend fun setup() {
-//
-//        try {
-//
-//            val hasNotificationPermissions = requestNotificationPermission()
-//            Toast.makeText(
-//                this@MainActivity,
-//                "Notification permissions are granted: $hasNotificationPermissions",
-//                Toast.LENGTH_LONG
-//            ).show()
-//
-//        } catch (e: Exception) {
-//
-//            Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
-//            setup()
-//
-//        }
-//
-//    }
-//
-//    private fun sendPush() {
-//
-//        lifecycleScope.launch {
-//
-//            val checkboxes = listOf(
-//                binding.checkFcm, binding.checkApns
-//            )
-//
-//            val providers = checkboxes.filter { it.isChecked }.map { checkbox ->
-//                return@map when (checkbox.id) {
-//                    binding.checkFcm.id -> CourierProvider.FCM
-//                    binding.checkApns.id -> CourierProvider.APNS
-//                    else -> CourierProvider.FCM
-//                }
-//            }
-//
-//            binding.sendPushButton.isEnabled = false
-//
-//            try {
-//
-//                val userId = Env.COURIER_USER_ID
-//
-//                Courier.shared.sendMessage(
-//                    authKey = Env.COURIER_AUTH_KEY,
-//                    userIds = listOf(userId),
-//                    title = "Hey ${userId}!",
-//                    body = "This is a test push sent through ${providers.joinToString(" and ") { it.value }}",
-//                    channels = providers,
-//                )
-//
-//            } catch (e: Exception) {
-//
-//                Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
-//
-//            }
-//
-//            binding.sendPushButton.isEnabled = true
-//
-//        }
-//
-//    }
-//
-//    override fun onPushNotificationClicked(message: RemoteMessage) {
-//        Log.d("Courier", message.toJsonString())
-//        Toast.makeText(this, "Message clicked:\n${message.data}", Toast.LENGTH_LONG).show()
-//    }
-//
-//    override fun onPushNotificationDelivered(message: RemoteMessage) {
-//        Log.d("Courier", message.toJsonString())
-//        Toast.makeText(this, "Message delivered:\n${message.data}", Toast.LENGTH_LONG).show()
-//    }
+
+    override fun onPushNotificationClicked(message: RemoteMessage) {
+        Log.d("Courier", message.toJsonString())
+        Toast.makeText(this, "Message clicked:\n${message.data}", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onPushNotificationDelivered(message: RemoteMessage) {
+        Log.d("Courier", message.toJsonString())
+        Toast.makeText(this, "Message delivered:\n${message.data}", Toast.LENGTH_LONG).show()
+    }
 
 }

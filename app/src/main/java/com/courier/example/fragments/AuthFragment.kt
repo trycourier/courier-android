@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
@@ -12,6 +13,7 @@ import com.courier.android.modules.isUserSignedIn
 import com.courier.android.modules.signIn
 import com.courier.android.modules.signOut
 import com.courier.android.modules.userId
+import com.courier.android.requestNotificationPermission
 import com.courier.example.Env
 import com.courier.example.R
 import kotlinx.coroutines.launch
@@ -28,26 +30,6 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
         authTextView = view.findViewById(R.id.authTextView)
 
         refresh()
-
-    }
-
-    private suspend fun setup() {
-
-//        try {
-//
-//            val hasNotificationPermissions = requestNotificationPermission()
-//            Toast.makeText(
-//                this@MainActivity,
-//                "Notification permissions are granted: $hasNotificationPermissions",
-//                Toast.LENGTH_LONG
-//            ).show()
-//
-//        } catch (e: Exception) {
-//
-//            Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
-//            setup()
-//
-//        }
 
     }
 
@@ -82,6 +64,9 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
                 userId = Env.COURIER_USER_ID,
                 clientKey = Env.COURIER_CLIENT_KEY
             )
+
+            val hasNotificationPermissions = (activity as AppCompatActivity).requestNotificationPermission()
+            Toast.makeText(context, "Notification permissions are granted: $hasNotificationPermissions", Toast.LENGTH_LONG).show()
 
             refresh()
 
