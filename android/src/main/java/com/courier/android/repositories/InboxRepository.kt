@@ -15,6 +15,8 @@ internal class InboxRepository : Repository() {
 
     private var webSocket: CourierWebsocket? = null
 
+    val isSocketConnected get() = webSocket?.state == CourierWebsocket.ConnectionState.OPENED
+
     suspend fun connectWebsocket(clientKey: String, userId: String, onMessageReceived: (InboxMessage) -> Unit, onMessageReceivedError: (Exception) -> Unit) {
 
         webSocket = CourierWebsocket(

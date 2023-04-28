@@ -10,13 +10,19 @@ import kotlin.coroutines.suspendCoroutine
 
 internal class CourierWebsocket(url: String, private val onMessageReceived: (text: String) -> Unit): WebSocketListener() {
 
-    private enum class ConnectionState {
+    internal enum class ConnectionState {
         OPENED,
         CLOSED,
         FAILURE
     }
 
     private val webSocket: WebSocket
+
+    internal var state = ConnectionState.CLOSED
+        private set(value) {
+            field = value
+            connectionListener?.invoke(value)
+        }
 
     private val client = OkHttpClient.Builder()
         .readTimeout(60, TimeUnit.SECONDS)
@@ -98,7 +104,7 @@ internal class CourierWebsocket(url: String, private val onMessageReceived: (tex
 
     override fun onOpen(webSocket: WebSocket, response: Response) {
         super.onOpen(webSocket, response)
-        connectionListener?.invoke(ConnectionState.OPENED)
+        state = ConnectionState.OPENED
     }
 
     override fun onMessage(webSocket: WebSocket, text: String) {
@@ -113,12 +119,12 @@ internal class CourierWebsocket(url: String, private val onMessageReceived: (tex
 
     override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
         super.onClosed(webSocket, code, reason)
-        connectionListener?.invoke(ConnectionState.CLOSED)
+        state = ConnectionState.CLOSED
     }
 
     override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
         super.onFailure(webSocket, t, response)
-        connectionListener?.invoke(ConnectionState.FAILURE)
+        state = ConnectionState.FAILURE
     }
 
 }

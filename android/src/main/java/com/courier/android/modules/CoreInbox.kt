@@ -1,9 +1,15 @@
 package com.courier.android.modules
 
+import android.content.Context
+import android.content.ContextWrapper
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.models.*
 import com.courier.android.repositories.InboxRepository
+import com.courier.android.socket.CourierWebsocket
 import kotlinx.coroutines.*
 
 internal class CoreInbox {
@@ -64,20 +70,7 @@ internal class CoreInbox {
                 )
             },
             async {
-                inboxRepo.connectWebsocket(
-                    clientKey = Courier.shared.clientKey!!,
-                    userId = Courier.shared.userId!!,
-                    onMessageReceived = { message ->
-
-                        // Add new message and notify
-                        this@CoreInbox.inbox?.addNewMessage(message)
-                        notifyMessagesChanged()
-
-                    },
-                    onMessageReceivedError = { e ->
-                        notifyError(e)
-                    }
-                )
+                connectWebsocket()
             }
         )
 
@@ -92,6 +85,39 @@ internal class CoreInbox {
             unreadCount = unreadCount,
             hasNextPage = inboxData.messages?.pageInfo?.hasNextPage,
             startCursor = inboxData.messages?.pageInfo?.startCursor
+        )
+
+    }
+
+    private suspend fun connectWebsocket() {
+
+        // Skip if the socket is already connected
+        if (inboxRepo.isSocketConnected) {
+            return
+        }
+
+        // Disconnect existing socket
+        inboxRepo.disconnectWebsocket()
+
+        // Check if user is signed in
+        if (!Courier.shared.isUserSignedIn || Courier.shared.clientKey == null) {
+            return
+        }
+
+        // Reconnect new socket
+        inboxRepo.connectWebsocket(
+            clientKey = Courier.shared.clientKey!!,
+            userId = Courier.shared.userId!!,
+            onMessageReceived = { message ->
+
+                // Add new message and notify
+                this@CoreInbox.inbox?.addNewMessage(message)
+                notifyMessagesChanged()
+
+            },
+            onMessageReceivedError = { e ->
+                notifyError(e)
+            }
         )
 
     }
@@ -144,6 +170,13 @@ internal class CoreInbox {
 
                 }
 
+            }
+
+        } else {
+
+            // Reconnect the socket if needed
+            coroutineScope.launch(Dispatchers.IO) {
+                connectWebsocket()
             }
 
         }
@@ -392,6 +425,12 @@ internal class CoreInbox {
             inbox?.hasNextPage ?: false
         )
     }
+
+    /**
+     * Lifecycle
+     */
+
+
 
 }
 

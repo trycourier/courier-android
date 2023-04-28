@@ -90,7 +90,6 @@ class MainActivity : CourierActivity() {
         inboxListener.remove()
     }
 
-
     override fun onPushNotificationClicked(message: RemoteMessage) {
         Log.d("Courier", message.toJsonString())
         Toast.makeText(this, "Message clicked:\n${message.data}", Toast.LENGTH_LONG).show()
