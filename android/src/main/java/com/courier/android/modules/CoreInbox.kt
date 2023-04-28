@@ -8,28 +8,6 @@ import kotlinx.coroutines.*
 
 internal class CoreInbox {
 
-    private data class Inbox(
-        var messages: MutableList<InboxMessage>?,
-        var totalCount: Int,
-        var unreadCount: Int,
-        var hasNextPage: Boolean?,
-        var startCursor: String?
-    ) {
-
-        fun addNewMessage(message: InboxMessage) {
-            this.messages?.add(0, message)
-            this.totalCount += 1
-            this.unreadCount += 1
-        }
-
-        fun addPage(messages: List<InboxMessage>, startCursor: String?, hasNextPage: Boolean?) {
-            this.messages?.addAll(messages)
-            this.startCursor = startCursor
-            this.hasNextPage = hasNextPage
-        }
-
-    }
-
     private var setupPipe: Job? = null
     private var isPaging = false
 
@@ -38,6 +16,14 @@ internal class CoreInbox {
     private var inbox: Inbox? = null
 
     internal val inboxMessages get() = inbox?.messages
+
+    companion object {
+        const val DEFAULT_PAGINATION_LIMIT = 32
+        const val DEFAULT_MAX_PAGINATION_LIMIT = 200
+        const val DEFAULT_MIN_PAGINATION_LIMIT = 1
+    }
+
+    internal var paginationLimit = DEFAULT_PAGINATION_LIMIT
 
     fun restart() {
 
@@ -49,7 +35,7 @@ internal class CoreInbox {
 
     }
 
-    private suspend fun load(): Inbox = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
+    private suspend fun load(refresh: Boolean = false): Inbox = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
 
         // Disconnect existing socket
         inboxRepo.disconnectWebsocket()
@@ -57,11 +43,19 @@ internal class CoreInbox {
         // Get all inbox data and start the websocket
         val result = awaitAll(
             async {
-                inboxRepo.getMessages(
+
+                // Determine a safe pagination limit
+                val messageCount = this@CoreInbox.inbox?.messages?.size ?: paginationLimit
+                val maxRefreshLimit = messageCount.coerceAtMost(DEFAULT_MAX_PAGINATION_LIMIT)
+                val limit = if (refresh) maxRefreshLimit else paginationLimit
+
+                // Grab the messages
+                return@async inboxRepo.getMessages(
                     clientKey = Courier.shared.clientKey!!,
                     userId = Courier.shared.userId!!,
-                    paginationLimit = 24 // TODO
+                    paginationLimit = limit
                 )
+
             },
             async {
                 inboxRepo.getUnreadMessageCount(
@@ -102,6 +96,15 @@ internal class CoreInbox {
 
     }
 
+    suspend fun refresh() {
+        try {
+            this@CoreInbox.inbox = load(refresh = true)
+            notifyMessagesChanged()
+        } catch (error: Exception) {
+            notifyError(error)
+        }
+    }
+
     suspend fun close() {
 
         // Close the socket
@@ -132,7 +135,7 @@ internal class CoreInbox {
                         notifyMessagesChanged()
                     }
 
-                } catch (error: CourierException) {
+                } catch (error: Exception) {
 
                     // Notify Error
                     setupPipe?.invokeOnCompletion {
@@ -186,7 +189,7 @@ internal class CoreInbox {
         val inboxData = inboxRepo.getMessages(
             clientKey = Courier.shared.clientKey!!,
             userId = Courier.shared.userId!!,
-            paginationLimit = 24, // TODO,
+            paginationLimit = paginationLimit,
             startCursor = this@CoreInbox.inbox!!.startCursor
         )
 
@@ -259,6 +262,110 @@ internal class CoreInbox {
         close()
     }
 
+    internal suspend fun readAllMessages() {
+
+        if (!Courier.shared.isUserSignedIn || Courier.shared.clientKey == null) {
+            throw CourierException.inboxUserNotFound
+        }
+
+        if (this@CoreInbox.inbox == null) {
+            return
+        }
+
+        // Read the messages
+        val original = this@CoreInbox.inbox!!.readAllMessages()
+
+        // Notify
+        notifyMessagesChanged()
+
+        // Perform datasource change in background
+        coroutineScope.launch(Dispatchers.IO) {
+
+            try {
+                inboxRepo.readAllMessages(
+                    clientKey = Courier.shared.clientKey!!,
+                    userId = Courier.shared.userId!!
+                )
+            } catch (e: Exception) {
+                this@CoreInbox.inbox?.resetReadAll(original)
+                notifyMessagesChanged()
+                notifyError(e)
+            }
+
+        }
+
+    }
+
+    internal fun readMessage(messageId: String) {
+
+        if (!Courier.shared.isUserSignedIn || Courier.shared.clientKey == null) {
+            throw CourierException.inboxUserNotFound
+        }
+
+        if (this@CoreInbox.inbox == null) {
+            throw CourierException.inboxNotInitialized
+        }
+
+        // Mark the message as read instantly
+        val original = this@CoreInbox.inbox!!.readMessage(messageId)
+
+        // Notify
+        notifyMessagesChanged()
+
+        // Perform datasource change in background
+        coroutineScope.launch(Dispatchers.IO) {
+
+            try {
+                inboxRepo.readMessage(
+                    clientKey = Courier.shared.clientKey!!,
+                    userId = Courier.shared.userId!!,
+                    messageId = messageId,
+                )
+            } catch (e: Exception) {
+                this@CoreInbox.inbox?.resetUpdate(original)
+                notifyMessagesChanged()
+                notifyError(e)
+            }
+
+        }
+
+    }
+
+    internal fun unreadMessage(messageId: String) {
+
+        if (!Courier.shared.isUserSignedIn || Courier.shared.clientKey == null) {
+            throw CourierException.inboxUserNotFound
+        }
+
+        if (this@CoreInbox.inbox == null) {
+            throw CourierException.inboxNotInitialized
+        }
+
+        // Mark the message as read instantly
+        val original = this@CoreInbox.inbox!!.unreadMessage(messageId)
+
+        // Notify
+        notifyMessagesChanged()
+
+        // Perform datasource change in background
+        coroutineScope.launch(Dispatchers.IO) {
+
+            try {
+                inboxRepo.unreadMessage(
+                    clientKey = Courier.shared.clientKey!!,
+                    userId = Courier.shared.userId!!,
+                    messageId = messageId,
+                )
+            } catch (e: Exception) {
+                this@CoreInbox.inbox?.resetUpdate(original)
+                notifyMessagesChanged()
+                notifyError(e)
+            }
+
+        }
+
+    }
+
     private fun notifyLoading() {
         listeners.forEach {
             it.onInitialLoad?.invoke()
@@ -294,19 +401,26 @@ internal class CoreInbox {
 
 val Courier.inboxMessages get() = inbox.inboxMessages
 
+var Courier.inboxPaginationLimit
+    get() = inbox.paginationLimit
+    set(value) {
+        val min = value.coerceAtMost(CoreInbox.DEFAULT_MAX_PAGINATION_LIMIT)
+        inbox.paginationLimit = min.coerceAtLeast(CoreInbox.DEFAULT_MIN_PAGINATION_LIMIT)
+    }
+
 suspend fun Courier.fetchNextPageOfMessages(): List<InboxMessage> {
     return inbox.fetchNextPage()
 }
 
-fun Courier.fetchNextPageOfMessages(onSuccess: ((List<InboxMessage>) -> Unit)? = null, onFailure: ((Exception) -> Void)? = null) = coroutineScope.launch(Dispatchers.IO) {
+fun Courier.fetchNextPageOfMessages(onSuccess: (List<InboxMessage>) -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
     try {
         val messages = fetchNextPageOfMessages()
         coroutineScope.launch(Dispatchers.Main) {
-            onSuccess?.invoke(messages)
+            onSuccess.invoke(messages)
         }
     } catch (e: Exception) {
         coroutineScope.launch(Dispatchers.Main) {
-            onFailure?.invoke(e)
+            onFailure.invoke(e)
         }
     }
 }
@@ -323,8 +437,152 @@ fun Courier.addInboxListener(onInitialLoad: (() -> Unit)? = null, onError: ((Exc
 }
 
 /**
+ * Handle refreshing the data
+ */
+suspend fun Courier.refreshInbox() {
+    inbox.refresh()
+}
+
+fun Courier.refreshInbox(onComplete: () -> Unit) = coroutineScope.launch(Dispatchers.IO) {
+    refreshInbox()
+    onComplete.invoke()
+}
+
+/**
  * Removes all the listeners from the Courier Inbox
  **/
 fun Courier.removeAllListeners() {
     inbox.removeAllListeners()
 }
+
+suspend fun Courier.readAllInboxMessages() {
+    inbox.readAllMessages()
+}
+
+fun Courier.readAllInboxMessages(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
+    try {
+        readAllInboxMessages()
+        onSuccess.invoke()
+    } catch (e: Exception) {
+        onFailure.invoke(e)
+    }
+}
+
+/**
+ * Internal Classes
+ */
+
+private data class Inbox(
+    var messages: MutableList<InboxMessage>?,
+    var totalCount: Int,
+    var unreadCount: Int,
+    var hasNextPage: Boolean?,
+    var startCursor: String?
+) {
+
+    fun addNewMessage(message: InboxMessage) {
+        this.messages?.add(0, message)
+        this.totalCount += 1
+        this.unreadCount += 1
+    }
+
+    fun addPage(messages: List<InboxMessage>, startCursor: String?, hasNextPage: Boolean?) {
+        this.messages?.addAll(messages)
+        this.startCursor = startCursor
+        this.hasNextPage = hasNextPage
+    }
+
+    fun readAllMessages(): ReadAllOperation {
+
+        // Copy previous values
+        val originalMessages = this.messages?.map { it.copy() }?.toMutableList()
+        val originalUnreadCount = this.unreadCount
+
+        // Read all messages
+        this.messages?.forEach { it.setRead() }
+        this.unreadCount = 0
+
+        return ReadAllOperation(
+            messages = originalMessages,
+            unreadCount = originalUnreadCount
+        )
+
+    }
+
+    // Return the index up the updated message
+    fun readMessage(messageId: String): UpdateOperation {
+
+        val messages = messages.orEmpty()
+        val index = messages.indexOfFirst { it.messageId == messageId }
+
+        if (index == -1) {
+            throw CourierException.inboxMessageNotFound
+        }
+
+        // Save copy
+        val message = messages[index]
+        val originalMessage = message.copy()
+        val originalUnreadCount = this.unreadCount
+
+        // Update
+        message.setRead()
+        this.unreadCount -= 1
+        this.unreadCount = this.unreadCount.coerceAtLeast(0)
+
+        return UpdateOperation(
+            index = index,
+            unreadCount = originalUnreadCount,
+            message = originalMessage
+        )
+
+    }
+
+    fun unreadMessage(messageId: String): UpdateOperation {
+
+        val messages = messages.orEmpty()
+        val index = messages.indexOfFirst { it.messageId == messageId }
+
+        if (index == -1) {
+            throw CourierException.inboxMessageNotFound
+        }
+
+        // Save copy
+        val message = messages[index]
+        val originalMessage = message.copy()
+        val originalUnreadCount = this.unreadCount
+
+        // Update
+        message.setUnread()
+        this.unreadCount += 1
+        this.unreadCount = this.unreadCount.coerceAtLeast(0)
+
+        return UpdateOperation(
+            index = index,
+            unreadCount = originalUnreadCount,
+            message = originalMessage
+        )
+
+    }
+
+    fun resetReadAll(update: ReadAllOperation) {
+        this.messages = update.messages
+        this.unreadCount = update.unreadCount
+    }
+
+    fun resetUpdate(update: UpdateOperation) {
+        this.messages?.set(update.index, update.message)
+        this.unreadCount = update.unreadCount
+    }
+
+}
+
+private data class ReadAllOperation(
+    val messages: MutableList<InboxMessage>?,
+    val unreadCount: Int,
+)
+
+private data class UpdateOperation(
+    val index: Int,
+    val unreadCount: Int,
+    val message: InboxMessage,
+)

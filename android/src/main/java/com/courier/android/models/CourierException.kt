@@ -12,6 +12,7 @@ class CourierException(message: String): Exception(message) {
         val inboxWebSocketFail = CourierException("An error occurred. Please try again.")
         val inboxNotInitialized = CourierException("The Courier Inbox is not setup. Please add a CourierInbox view or call Courier.shared.addInboxListener")
         val inboxWebSocketDisconnect = CourierException("An error occurred. Please try again.")
+        val inboxMessageNotFound = CourierException("Courier Inbox message not found")
     }
 
 }

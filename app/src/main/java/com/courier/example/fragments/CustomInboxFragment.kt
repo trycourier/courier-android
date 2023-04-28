@@ -1,26 +1,32 @@
 package com.courier.example.fragments
 
+import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
 import com.courier.android.models.CourierInboxListener
+import com.courier.android.models.markAsRead
+import com.courier.android.models.markAsUnread
 import com.courier.android.models.remove
-import com.courier.android.modules.addInboxListener
-import com.courier.android.modules.fetchNextPageOfMessages
-import com.courier.android.modules.inboxMessages
+import com.courier.android.modules.*
 import com.courier.example.R
 import com.courier.example.toJson
 
 
 class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
 
+    private lateinit var stateTextView: TextView
     private lateinit var inboxListener: CourierInboxListener
     private lateinit var recyclerView: RecyclerView
 
@@ -28,31 +34,86 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
     private val loadingAdapter = LoadingAdapter()
     private val adapter = ConcatAdapter(messagesAdapter)
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        stateTextView = view.findViewById(R.id.stateTextView)
+
+        // Get the menu
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
+        toolbar.setOnMenuItemClickListener { item ->
+            return@setOnMenuItemClickListener if (item.itemId == R.id.readAll) {
+
+                Courier.shared.readAllInboxMessages(
+                    onSuccess = {
+                        print("Messages are read")
+                    },
+                    onFailure = { error ->
+                        print(error)
+                    }
+                )
+
+                true
+            } else {
+                false
+            }
+        }
 
         // Create the list
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.adapter = adapter
         recyclerView.addItemDecoration(DividerItemDecoration(activity, DividerItemDecoration.VERTICAL))
 
+        // Handle pull to refresh
+        val refreshLayout = view.findViewById<SwipeRefreshLayout>(R.id.refreshLayout)
+        refreshLayout.setOnRefreshListener {
+
+            Courier.shared.refreshInbox {
+                refreshLayout.isRefreshing = false
+            }
+
+        }
+
         // Setup the listener
         inboxListener = Courier.shared.addInboxListener(
             onInitialLoad = {
-                adapter.addAdapter(loadingAdapter)
+
+                stateTextView.isVisible = false
+
+                refreshAdapters(
+                    showLoading = true
+                )
+
             },
             onError = { e ->
+
+                stateTextView.text = e.message
+                stateTextView.isVisible = true
+
                 print(e)
-                adapter.removeAdapter(loadingAdapter)
-                messagesAdapter.notifyDataSetChanged()
+                refreshAdapters()
+
             },
             onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
-                if (canPaginate) adapter.addAdapter(loadingAdapter) else adapter.removeAdapter(loadingAdapter)
-                messagesAdapter.notifyDataSetChanged()
+
+                stateTextView.isVisible = messages.isEmpty()
+                stateTextView.text = "No messages found"
+
+                refreshAdapters(
+                    showMessages = messages.isNotEmpty(),
+                    showLoading = canPaginate
+                )
+
             }
         )
 
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun refreshAdapters(showMessages: Boolean = false, showLoading: Boolean = false) {
+        if (showMessages) adapter.addAdapter(0, messagesAdapter) else adapter.removeAdapter(messagesAdapter)
+        if (showLoading) adapter.addAdapter(loadingAdapter) else adapter.removeAdapter(loadingAdapter)
+        messagesAdapter.notifyDataSetChanged()
     }
 
     override fun onDestroyView() {
@@ -86,11 +147,12 @@ class MessagesAdapter : RecyclerView.Adapter<MessageItemViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: MessageItemViewHolder, position: Int) {
-        val item = messages[position]
-        holder.textView.text = item.toJson()
+        val inboxMessage = messages[position]
+        val isRead = inboxMessage.isRead
+        holder.textView.text = inboxMessage.toJson()
+        holder.textView.setBackgroundColor(if (isRead) Color.TRANSPARENT else Color.GREEN)
         holder.textView.setOnClickListener {
-            Courier.log("Item Clicked")
-            Courier.log(item.toJson() ?: "Empty")
+            if (isRead) inboxMessage.markAsUnread() else inboxMessage.markAsRead()
         }
     }
 
@@ -113,9 +175,14 @@ class LoadingAdapter : RecyclerView.Adapter<LoadingItemViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: LoadingItemViewHolder, position: Int) {
-        Courier.shared.fetchNextPageOfMessages(onSuccess = { messages ->
-            print(messages)
-        })
+        Courier.shared.fetchNextPageOfMessages(
+            onSuccess = { newMessages ->
+                print(newMessages)
+            },
+            onFailure = { error ->
+                print(error)
+            }
+        )
     }
 
     override fun getItemCount(): Int {

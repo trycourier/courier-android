@@ -98,7 +98,7 @@ internal class InboxRepository : Repository() {
 
     internal suspend fun getUnreadMessageCount(clientKey: String, userId: String): Int {
 
-        val query = """
+        val mutation = """
             query GetMessages(
                 ${'$'}params: FilterParamsInput = { status: \"unread\" }
                 ${'$'}limit: Int = ${1}
@@ -117,11 +117,72 @@ internal class InboxRepository : Repository() {
             .url(inboxGraphQL)
             .addHeader("x-courier-client-key", clientKey)
             .addHeader("x-courier-user-id", userId)
-            .post(query.toRequestBody())
+            .post(mutation.toRequestBody())
             .build()
 
         val res = http.newCall(request).dispatch<CourierInboxResponse>()
         return res.data?.count ?: 0
+
+    }
+
+    internal suspend fun readMessage(clientKey: String, userId: String, messageId: String) {
+
+        val mutation = """
+            mutation TrackEvent(
+                ${'$'}messageId: String = \"${messageId}\"
+            ) {
+                read(messageId: ${'$'}messageId)
+            }
+        """.toGraphQuery()
+
+        val request = Request.Builder()
+            .url(inboxGraphQL)
+            .addHeader("x-courier-client-key", clientKey)
+            .addHeader("x-courier-user-id", userId)
+            .post(mutation.toRequestBody())
+            .build()
+
+        http.newCall(request).dispatch<Any>()
+
+    }
+
+    internal suspend fun unreadMessage(clientKey: String, userId: String, messageId: String) {
+
+        val query = """
+            mutation TrackEvent(
+                ${'$'}messageId: String = \"${messageId}\"
+            ) {
+                unread(messageId: ${'$'}messageId)
+            }
+        """.toGraphQuery()
+
+        val request = Request.Builder()
+            .url(inboxGraphQL)
+            .addHeader("x-courier-client-key", clientKey)
+            .addHeader("x-courier-user-id", userId)
+            .post(query.toRequestBody())
+            .build()
+
+        http.newCall(request).dispatch<Any>()
+
+    }
+
+    internal suspend fun readAllMessages(clientKey: String, userId: String) {
+
+        val query = """
+            mutation TrackEvent {
+                markAllRead
+            }
+        """.toGraphQuery()
+
+        val request = Request.Builder()
+            .url(inboxGraphQL)
+            .addHeader("x-courier-client-key", clientKey)
+            .addHeader("x-courier-user-id", userId)
+            .post(query.toRequestBody())
+            .build()
+
+        http.newCall(request).dispatch<Any>()
 
     }
 

@@ -15,8 +15,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.Request
-import okio.Buffer
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -169,4 +169,16 @@ fun Courier.getLastDeliveredMessage(onMessageFound: (message: RemoteMessage) -> 
     eventBus.events.collectLatest { message ->
         onMessageFound(message)
     }
+}
+
+internal fun String.isoToDate(): Date? {
+    val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+    isoFormat.timeZone = TimeZone.getTimeZone("UTC")
+    return isoFormat.parse(this)
+}
+
+internal fun Date.toIsoTimestamp(): String {
+    val isoFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+    isoFormat.timeZone = TimeZone.getTimeZone("UTC")
+    return isoFormat.format(this)
 }
