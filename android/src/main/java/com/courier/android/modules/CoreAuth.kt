@@ -53,10 +53,10 @@ internal class CoreAuth {
         Courier.log("Signing user out")
 
         awaitAll(
-            async {
+            async(Dispatchers.IO) {
                 push.deletePushTokens()
             },
-            async {
+            async(Dispatchers.IO) {
                 inbox.close()
             }
         )

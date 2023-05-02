@@ -18,6 +18,16 @@ internal class CoreInbox : DefaultLifecycleObserver {
         const val DEFAULT_MIN_PAGINATION_LIMIT = 1
     }
 
+    private var isPaging = false
+    internal var paginationLimit = DEFAULT_PAGINATION_LIMIT
+
+    private val inboxRepo by lazy { InboxRepository() }
+    private var listeners: MutableList<CourierInboxListener> = mutableListOf()
+    private var inbox: Inbox? = null
+
+    private val hasInboxUser get() = Courier.shared.userId != null || Courier.shared.clientKey != null
+    internal val inboxMessages get() = inbox?.messages
+
     private var dataPipe: Job? = null
     private val dataPipeJob get() = coroutineScope.launch(start = CoroutineStart.LAZY, context = Dispatchers.IO) {
 
@@ -41,35 +51,6 @@ internal class CoreInbox : DefaultLifecycleObserver {
                 notifyError(error)
             }
 
-        }
-
-    }
-
-    private var isPaging = false
-    internal var paginationLimit = DEFAULT_PAGINATION_LIMIT
-
-    private val inboxRepo by lazy { InboxRepository() }
-    private var listeners: MutableList<CourierInboxListener> = mutableListOf()
-    private var inbox: Inbox? = null
-
-    private val hasInboxUser get() = Courier.shared.userId != null || Courier.shared.clientKey != null
-    internal val inboxMessages get() = inbox?.messages
-
-    internal var lifecycle: Lifecycle? = null
-        set(value) {
-            field?.removeObserver(this)
-            value?.addObserver(this)
-            field = value
-        }
-
-    override fun onResume(owner: LifecycleOwner) {
-        super.onResume(owner)
-
-        // Needed to handle reconnection when app comes back into foreground
-        if (listeners.isNotEmpty() && inboxRepo.webSocket?.isSocketConnected == false) {
-            coroutineScope.launch(Dispatchers.IO) {
-                refresh()
-            }
         }
 
     }
@@ -98,11 +79,12 @@ internal class CoreInbox : DefaultLifecycleObserver {
 
         // Get all inbox data and start the websocket
         val result = awaitAll(
-            async {
+            async(Dispatchers.IO) {
 
                 // Determine a safe pagination limit
-                val messageCount = this@CoreInbox.inbox?.messages?.size ?: paginationLimit
-                val maxRefreshLimit = messageCount.coerceAtMost(DEFAULT_MAX_PAGINATION_LIMIT)
+                val currentMessageCount = this@CoreInbox.inbox?.messages?.size ?: paginationLimit
+                val minPaginationLimit = currentMessageCount.coerceAtLeast(paginationLimit)
+                val maxRefreshLimit = minPaginationLimit.coerceAtMost(DEFAULT_MAX_PAGINATION_LIMIT)
                 val limit = if (refresh) maxRefreshLimit else paginationLimit
 
                 // Grab the messages
@@ -113,13 +95,13 @@ internal class CoreInbox : DefaultLifecycleObserver {
                 )
 
             },
-            async {
+            async(Dispatchers.IO) {
                 inboxRepo.getUnreadMessageCount(
                     clientKey = Courier.shared.clientKey!!,
                     userId = Courier.shared.userId!!
                 )
             },
-            async {
+            async(Dispatchers.IO) {
                 inboxRepo.connectWebsocket(
                     clientKey = Courier.shared.clientKey!!,
                     userId = Courier.shared.userId!!,
@@ -266,7 +248,7 @@ internal class CoreInbox : DefaultLifecycleObserver {
 
         // Start the data pipes
         if (dataPipe?.isCompleted == true) {
-            listener.notifyMessageChanged()
+            listener.notifyMessagesChanged()
             return listener
         }
 
@@ -405,7 +387,7 @@ internal class CoreInbox : DefaultLifecycleObserver {
 
     }
 
-    private fun notifyLoading() {
+    private fun notifyLoading() = coroutineScope.launch(Dispatchers.Main) {
         listeners.forEach {
             it.onInitialLoad?.invoke()
         }
@@ -413,7 +395,7 @@ internal class CoreInbox : DefaultLifecycleObserver {
 
     private fun notifyMessagesChanged() = coroutineScope.launch(Dispatchers.Main) {
         listeners.forEach {
-            it.notifyMessageChanged()
+            it.notifyMessagesChanged()
         }
     }
 
@@ -423,7 +405,7 @@ internal class CoreInbox : DefaultLifecycleObserver {
         }
     }
 
-    private fun CourierInboxListener.notifyMessageChanged() = coroutineScope.launch(Dispatchers.Main) {
+    private fun CourierInboxListener.notifyMessagesChanged() = coroutineScope.launch(Dispatchers.Main) {
         onMessagesChanged?.invoke(
             inbox?.messages ?: emptyList(),
             inbox?.unreadCount ?: 0,
@@ -436,6 +418,43 @@ internal class CoreInbox : DefaultLifecycleObserver {
      * Lifecycle
      */
 
+    internal var lifecycle: Lifecycle? = null
+        set(value) {
+            field?.removeObserver(this)
+            value?.addObserver(this)
+            field = value
+        }
+
+    override fun onStart(owner: LifecycleOwner) {
+        super.onStart(owner)
+        link()
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
+        unlink()
+    }
+
+    // Reconnects and refreshes the data
+    // Called because the websocket may have disconnected or
+    // new data may have been sent when the user closed their app
+    private fun link() {
+        if (listeners.isNotEmpty() && inboxRepo.webSocket?.isSocketConnected == false) {
+            coroutineScope.launch(Dispatchers.IO) {
+                refresh()
+            }
+        }
+    }
+
+    // Disconnects the websocket
+    // Helps keep battery usage lower
+    private fun unlink() {
+        if (listeners.isNotEmpty() && inboxRepo.webSocket?.isSocketConnected == true) {
+            coroutineScope.launch(Dispatchers.IO) {
+                inboxRepo.disconnectWebsocket()
+            }
+        }
+    }
 
 }
 

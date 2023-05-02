@@ -3,19 +3,17 @@ package com.courier.example
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.annotation.IdRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.courier.android.Courier
 import com.courier.android.activity.CourierActivity
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.remove
-import com.courier.android.modules.*
+import com.courier.android.modules.addInboxListener
 import com.courier.example.databinding.ActivityMainBinding
 import com.courier.example.fragments.AuthFragment
 import com.courier.example.fragments.CustomInboxFragment
 import com.courier.example.fragments.SendFragment
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.messaging.RemoteMessage
 
 
@@ -23,14 +21,16 @@ class MainActivity : CourierActivity() {
 
     private lateinit var inboxListener: CourierInboxListener
 
-    private val authFragment = AuthFragment()
-    private val customInboxFragment = CustomInboxFragment()
-    private val sendFragment = SendFragment()
+    private val authFragment by lazy { AuthFragment() }
+    private val customInboxFragment by lazy { CustomInboxFragment() }
+    private val sendFragment by lazy { SendFragment() }
 
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Courier.initialize(this)
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             setContentView(root)

@@ -1,5 +1,7 @@
 package com.courier.android.repositories
 
+import android.os.Looper
+import com.courier.android.Courier
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxResponse
 import com.courier.android.models.InboxData
