@@ -13,11 +13,11 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 internal class InboxRepository : Repository() {
 
-    private var webSocket: CourierWebsocket? = null
-
-    val isSocketConnected get() = webSocket?.state == CourierWebsocket.ConnectionState.OPENED
+    internal var webSocket: CourierWebsocket? = null
 
     suspend fun connectWebsocket(clientKey: String, userId: String, onMessageReceived: (InboxMessage) -> Unit, onMessageReceivedError: (Exception) -> Unit) {
+
+        webSocket?.disconnect()
 
         webSocket = CourierWebsocket(
             url = "$inboxWebSocket/?clientKey=$clientKey",

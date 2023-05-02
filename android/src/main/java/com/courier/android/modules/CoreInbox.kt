@@ -1,27 +1,16 @@
 package com.courier.android.modules
 
-import android.content.Context
-import android.content.ContextWrapper
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.models.*
 import com.courier.android.repositories.InboxRepository
-import com.courier.android.socket.CourierWebsocket
 import kotlinx.coroutines.*
 
-internal class CoreInbox {
 
-    private var setupPipe: Job? = null
-    private var isPaging = false
-
-    private val inboxRepo by lazy { InboxRepository() }
-    private var listeners: MutableList<CourierInboxListener> = mutableListOf()
-    private var inbox: Inbox? = null
-
-    internal val inboxMessages get() = inbox?.messages
+internal class CoreInbox : DefaultLifecycleObserver {
 
     companion object {
         const val DEFAULT_PAGINATION_LIMIT = 32
@@ -29,22 +18,83 @@ internal class CoreInbox {
         const val DEFAULT_MIN_PAGINATION_LIMIT = 1
     }
 
+    private var dataPipe: Job? = null
+    private val dataPipeJob get() = coroutineScope.launch(start = CoroutineStart.LAZY, context = Dispatchers.IO) {
+
+        try {
+
+            // Get the initial data
+            this@CoreInbox.inbox = load()
+
+            // Notify Success
+            dataPipe?.invokeOnCompletion {
+                notifyMessagesChanged()
+            }
+
+        } catch (error: Exception) {
+
+            // Disconnect existing socket
+            inboxRepo.disconnectWebsocket()
+
+            // Notify Error
+            dataPipe?.invokeOnCompletion {
+                notifyError(error)
+            }
+
+        }
+
+    }
+
+    private var isPaging = false
     internal var paginationLimit = DEFAULT_PAGINATION_LIMIT
+
+    private val inboxRepo by lazy { InboxRepository() }
+    private var listeners: MutableList<CourierInboxListener> = mutableListOf()
+    private var inbox: Inbox? = null
+
+    private val hasInboxUser get() = Courier.shared.userId != null || Courier.shared.clientKey != null
+    internal val inboxMessages get() = inbox?.messages
+
+    internal var lifecycle: Lifecycle? = null
+        set(value) {
+            field?.removeObserver(this)
+            value?.addObserver(this)
+            field = value
+        }
+
+    override fun onResume(owner: LifecycleOwner) {
+        super.onResume(owner)
+
+        // Needed to handle reconnection when app comes back into foreground
+        if (listeners.isNotEmpty() && inboxRepo.webSocket?.isSocketConnected == false) {
+            coroutineScope.launch(Dispatchers.IO) {
+                refresh()
+            }
+        }
+
+    }
+
+    private fun startDataPipe() {
+        dataPipe?.cancel()
+        dataPipe = dataPipeJob
+        dataPipe?.start()
+    }
 
     fun restart() {
 
         if (listeners.isNotEmpty()) {
             notifyLoading()
-            setupPipe = null
-            startPipe()
+            startDataPipe()
         }
 
     }
 
     private suspend fun load(refresh: Boolean = false): Inbox = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
 
-        // Disconnect existing socket
-        inboxRepo.disconnectWebsocket()
+        // Check if user is signed in
+        if (!hasInboxUser) {
+            throw CourierException.inboxUserNotFound
+        }
 
         // Get all inbox data and start the websocket
         val result = awaitAll(
@@ -70,7 +120,20 @@ internal class CoreInbox {
                 )
             },
             async {
-                connectWebsocket()
+                inboxRepo.connectWebsocket(
+                    clientKey = Courier.shared.clientKey!!,
+                    userId = Courier.shared.userId!!,
+                    onMessageReceived = { message ->
+
+                        // Add new message and notify
+                        this@CoreInbox.inbox?.addNewMessage(message)
+                        notifyMessagesChanged()
+
+                    },
+                    onMessageReceivedError = { e ->
+                        notifyError(e)
+                    }
+                )
             }
         )
 
@@ -89,39 +152,6 @@ internal class CoreInbox {
 
     }
 
-    private suspend fun connectWebsocket() {
-
-        // Skip if the socket is already connected
-        if (inboxRepo.isSocketConnected) {
-            return
-        }
-
-        // Disconnect existing socket
-        inboxRepo.disconnectWebsocket()
-
-        // Check if user is signed in
-        if (!Courier.shared.isUserSignedIn || Courier.shared.clientKey == null) {
-            return
-        }
-
-        // Reconnect new socket
-        inboxRepo.connectWebsocket(
-            clientKey = Courier.shared.clientKey!!,
-            userId = Courier.shared.userId!!,
-            onMessageReceived = { message ->
-
-                // Add new message and notify
-                this@CoreInbox.inbox?.addNewMessage(message)
-                notifyMessagesChanged()
-
-            },
-            onMessageReceivedError = { e ->
-                notifyError(e)
-            }
-        )
-
-    }
-
     suspend fun refresh() {
         try {
             this@CoreInbox.inbox = load(refresh = true)
@@ -133,6 +163,10 @@ internal class CoreInbox {
 
     suspend fun close() {
 
+        // Stops all the jobs
+        dataPipe?.cancel()
+        dataPipe = null
+
         // Close the socket
         inboxRepo.disconnectWebsocket()
 
@@ -141,45 +175,6 @@ internal class CoreInbox {
 
         // Update the listeners
         notifyError(CourierException.inboxUserNotFound)
-
-    }
-
-    private fun startPipe() {
-
-        if (setupPipe == null) {
-
-            // Opens the connections and grabs the inbox data
-            setupPipe = coroutineScope.launch(Dispatchers.IO) {
-
-                try {
-
-                    // Get the initial data
-                    this@CoreInbox.inbox = load()
-
-                    // Notify Success
-                    setupPipe?.invokeOnCompletion {
-                        notifyMessagesChanged()
-                    }
-
-                } catch (error: Exception) {
-
-                    // Notify Error
-                    setupPipe?.invokeOnCompletion {
-                        notifyError(error)
-                    }
-
-                }
-
-            }
-
-        } else {
-
-            // Reconnect the socket if needed
-            coroutineScope.launch(Dispatchers.IO) {
-                connectWebsocket()
-            }
-
-        }
 
     }
 
@@ -214,7 +209,7 @@ internal class CoreInbox {
     private suspend fun fetchNextPageOfMessages(): List<InboxMessage> {
 
         // Check for auth
-        if (!Courier.shared.isUserSignedIn || Courier.shared.clientKey == null || this@CoreInbox.inbox == null) {
+        if (!hasInboxUser || this@CoreInbox.inbox == null) {
             throw CourierException.inboxUserNotFound
         }
 
@@ -255,7 +250,7 @@ internal class CoreInbox {
         listeners.add(listener)
 
         // Check for auth
-        if (!Courier.shared.isUserSignedIn || Courier.shared.clientKey == null) {
+        if (!hasInboxUser) {
             Courier.log("User is not signed in. Please call Courier.shared.signIn(...) to setup the inbox listener.")
             listener.onError?.invoke(CourierException.inboxUserNotFound)
             return listener
@@ -265,12 +260,18 @@ internal class CoreInbox {
         listener.initialize()
 
         // Start the data pipes
-        startPipe()
-
-        // Get the current data if available
-        if (setupPipe?.isCompleted == true) {
+        if (dataPipe?.isCompleted == true) {
             listener.notifyMessageChanged()
+            return listener
         }
+
+        // Return if the pipe is starting
+        if (dataPipe?.isActive == true) {
+            return listener
+        }
+
+        // Start the data pipes
+        startDataPipe()
 
         return listener
 
@@ -297,7 +298,7 @@ internal class CoreInbox {
 
     internal suspend fun readAllMessages() {
 
-        if (!Courier.shared.isUserSignedIn || Courier.shared.clientKey == null) {
+        if (!hasInboxUser) {
             throw CourierException.inboxUserNotFound
         }
 
@@ -331,7 +332,7 @@ internal class CoreInbox {
 
     internal fun readMessage(messageId: String) {
 
-        if (!Courier.shared.isUserSignedIn || Courier.shared.clientKey == null) {
+        if (!hasInboxUser) {
             throw CourierException.inboxUserNotFound
         }
 
@@ -366,7 +367,7 @@ internal class CoreInbox {
 
     internal fun unreadMessage(messageId: String) {
 
-        if (!Courier.shared.isUserSignedIn || Courier.shared.clientKey == null) {
+        if (!hasInboxUser) {
             throw CourierException.inboxUserNotFound
         }
 
@@ -429,7 +430,6 @@ internal class CoreInbox {
     /**
      * Lifecycle
      */
-
 
 
 }

@@ -1,7 +1,10 @@
 package com.courier.android
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
 import com.courier.android.modules.*
@@ -78,6 +81,12 @@ class Courier private constructor(internal val context: Context) {
             // Create the new instance if needed
             if (mInstance == null) {
                 mInstance = Courier(context)
+            }
+
+            // Stash the lifecycle if possible
+            if (mInstance?.inbox?.lifecycle == null) {
+                val activity = context as? AppCompatActivity
+                mInstance?.inbox?.lifecycle = activity?.lifecycle
             }
 
         }

@@ -10,6 +10,10 @@ import kotlin.coroutines.suspendCoroutine
 
 internal class CourierWebsocket(url: String, private val onMessageReceived: (text: String) -> Unit): WebSocketListener() {
 
+    private companion object {
+        const val SOCKET_CLOSE_CODE = 1001
+    }
+
     internal enum class ConnectionState {
         OPENED,
         CLOSED,
@@ -18,7 +22,9 @@ internal class CourierWebsocket(url: String, private val onMessageReceived: (tex
 
     private val webSocket: WebSocket
 
-    internal var state = ConnectionState.CLOSED
+    val isSocketConnected get() = state == ConnectionState.OPENED
+
+    private var state = ConnectionState.CLOSED
         private set(value) {
             field = value
             connectionListener?.invoke(value)
@@ -69,7 +75,7 @@ internal class CourierWebsocket(url: String, private val onMessageReceived: (tex
 
     }
 
-    suspend fun disconnect(code: Int = 1001) = suspendCoroutine { continuation ->
+    suspend fun disconnect(code: Int = SOCKET_CLOSE_CODE) = suspendCoroutine { continuation ->
 
         // Listener to the connection state
         connectionListener = { state ->
