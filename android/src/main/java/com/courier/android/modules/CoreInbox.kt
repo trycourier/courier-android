@@ -239,6 +239,11 @@ internal class CoreInbox : DefaultLifecycleObserver {
 
     internal fun addInboxListener(onInitialLoad: (() -> Unit)? = null, onError: ((Exception) -> Unit)? = null, onMessagesChanged: ((messages: List<InboxMessage>, unreadMessageCount: Int, totalMessageCount: Int, canPaginate: Boolean) -> Unit)? = null): CourierInboxListener {
 
+        // Tell developer about the lifecycle concerns
+        if (lifecycle == null) {
+            Courier.warn("The Courier Inbox has no \"lifecycle\". This will result in websocket reconnection issues for your users. Please call Courier.shared.initialize(context) with \"context\" being an AppCompatActivity to fix this.")
+        }
+
         // Create a new inbox listener
         val listener = CourierInboxListener(
             onInitialLoad = onInitialLoad,
@@ -251,7 +256,7 @@ internal class CoreInbox : DefaultLifecycleObserver {
 
         // Check for auth
         if (!hasInboxUser) {
-            Courier.log("User is not signed in. Please call Courier.shared.signIn(...) to setup the inbox listener.")
+            Courier.warn("User is not signed in. Please call Courier.shared.signIn(...) to setup the inbox listener.")
             listener.onError?.invoke(CourierException.inboxUserNotFound)
             return listener
         }

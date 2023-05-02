@@ -98,6 +98,10 @@ class Courier private constructor(internal val context: Context) {
             shared.logging.log(data)
         }
 
+        fun warn(data: String) {
+            shared.logging.warn(data)
+        }
+
     }
 
 }

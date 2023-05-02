@@ -30,6 +30,13 @@ internal class CoreLogging {
         }
     }
 
+    internal fun warn(data: String) {
+        if (isDebugging) {
+            Log.w(Courier.TAG, data)
+            logListener?.invoke(data)
+        }
+    }
+
 }
 
 /**
