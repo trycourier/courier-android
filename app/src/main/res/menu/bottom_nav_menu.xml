@@ -9,6 +9,10 @@
         android:icon="@android:drawable/sym_action_chat"
         android:title="Default Inbox" />
     <item
+        android:id="@+id/styledInbox"
+        android:icon="@android:drawable/sym_action_chat"
+        android:title="Styled Inbox" />
+    <item
         android:id="@+id/customInbox"
         android:icon="@android:drawable/sym_action_chat"
         android:title="Custom Inbox" />

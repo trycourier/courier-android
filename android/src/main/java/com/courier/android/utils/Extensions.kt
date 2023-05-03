@@ -1,12 +1,20 @@
 package com.courier.android
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
+import android.content.res.Configuration.UI_MODE_NIGHT_MASK
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Resources
 import android.os.Build
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.courier.android.Courier.Companion.COURIER_COROUTINE_CONTEXT
 import com.courier.android.Courier.Companion.eventBus
 import com.courier.android.models.CourierPushEvent
@@ -227,3 +235,8 @@ internal val Int.pxToDp: Int get() = (this / Resources.getSystem().displayMetric
  * Converts DP to Pixel.
  */
 internal val Int.dpToPx: Int get() = (this * Resources.getSystem().displayMetrics.density).toInt()
+
+internal val Context.isDarkMode: Boolean get() {
+    val darkModeFlag = resources.configuration.uiMode and UI_MODE_NIGHT_MASK
+    return darkModeFlag == UI_MODE_NIGHT_YES
+}
