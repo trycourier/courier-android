@@ -2,6 +2,7 @@ package com.courier.android
 
 import android.Manifest
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Build
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -182,3 +183,47 @@ internal fun Date.toIsoTimestamp(): String {
     isoFormat.timeZone = TimeZone.getTimeZone("UTC")
     return isoFormat.format(this)
 }
+
+internal fun Date.timeSince(): String {
+
+    val secondsAgo = (Date().time - time) / 1000
+
+    val minute = 60
+    val hour = 60 * minute
+    val day = 24 * hour
+    val week = 7 * day
+    val month = 4 * week
+    val year = 12 * month
+
+    val secondString = "s"
+    val minuteString = "m"
+    val hourString = "h"
+    val dayString = "d"
+    val weekString = "w"
+    val yearString = "y"
+
+    return if (secondsAgo < minute) {
+        "${secondsAgo}${secondString}"
+    } else if (secondsAgo < hour) {
+        "${secondsAgo / minute}${minuteString}"
+    } else if (secondsAgo < day) {
+        "${secondsAgo / hour}${hourString}"
+    } else if (secondsAgo < week) {
+        "${secondsAgo / day}${dayString}"
+    } else if (secondsAgo < year) {
+        "${secondsAgo / week}${weekString}"
+    } else {
+        "${secondsAgo / year}${yearString}"
+    }
+
+}
+
+/**
+ * Converts Pixel to DP.
+ */
+internal val Int.pxToDp: Int get() = (this / Resources.getSystem().displayMetrics.density).toInt()
+
+/**
+ * Converts DP to Pixel.
+ */
+internal val Int.dpToPx: Int get() = (this * Resources.getSystem().displayMetrics.density).toInt()

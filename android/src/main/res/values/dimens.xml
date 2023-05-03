@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="courier_inbox_button_text_size">16sp</dimen>
+    <dimen name="courier_inbox_horizontal_margin">16dp</dimen>
+    <dimen name="courier_inbox_vertical_margin">12dp</dimen>
+    <dimen name="courier_inbox_indicator_width">3dp</dimen>
+    <dimen name="courier_inbox_item_gap">4dp</dimen>
+    <dimen name="courier_inbox_button_gap">12dp</dimen>
+    <dimen name="courier_inbox_button_horizontal">16dp</dimen>
+    <dimen name="courier_inbox_button_vertical">8dp</dimen>
+</resources>

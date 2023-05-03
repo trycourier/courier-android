@@ -13,6 +13,7 @@ import com.courier.android.modules.addInboxListener
 import com.courier.example.databinding.ActivityMainBinding
 import com.courier.example.fragments.AuthFragment
 import com.courier.example.fragments.CustomInboxFragment
+import com.courier.example.fragments.PrebuiltInboxFragment
 import com.courier.example.fragments.SendFragment
 import com.google.firebase.messaging.RemoteMessage
 
@@ -22,6 +23,7 @@ class MainActivity : CourierActivity() {
     private lateinit var inboxListener: CourierInboxListener
 
     private val authFragment by lazy { AuthFragment() }
+    private val prebuiltInboxFragment by lazy { PrebuiltInboxFragment() }
     private val customInboxFragment by lazy { CustomInboxFragment() }
     private val sendFragment by lazy { SendFragment() }
 
@@ -41,6 +43,7 @@ class MainActivity : CourierActivity() {
         binding.bottomNavigationView.setOnItemSelectedListener {
             return@setOnItemSelectedListener when (it.itemId) {
                 R.id.auth -> setCurrentFragment(authFragment)
+                R.id.prebuiltInbox -> setCurrentFragment(prebuiltInboxFragment)
                 R.id.customInbox -> setCurrentFragment(customInboxFragment)
                 R.id.send -> setCurrentFragment(sendFragment)
                 else -> false
@@ -73,7 +76,7 @@ class MainActivity : CourierActivity() {
 
         val bottomNav = binding.bottomNavigationView
 
-        listOf(R.id.customInbox).forEach { itemId ->
+        listOf(R.id.prebuiltInbox, R.id.customInbox).forEach { itemId ->
             val badge = bottomNav.getOrCreateBadge(itemId)
             badge.backgroundColor = ContextCompat.getColor(this, R.color.purple_700)
             badge.badgeTextColor = ContextCompat.getColor(this, R.color.white)
