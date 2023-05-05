@@ -13,7 +13,7 @@
         android:minHeight="0dp"
         android:paddingHorizontal="@dimen/courier_inbox_button_horizontal"
         android:paddingVertical="@dimen/courier_inbox_button_vertical"
-        android:textSize="@dimen/courier_inbox_button_text_size"
+        android:textSize="@dimen/courier_inbox_default_text_size"
         tools:text="Example Button" />
 
 </merge>

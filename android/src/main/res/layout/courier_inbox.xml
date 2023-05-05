@@ -4,19 +4,51 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.FrameLayout">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/refreshLayout"
+    <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/courier_inbox_list_item" />
+            android:layout_height="0dp"
+            android:layout_weight="1">
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+            <!-- Inbox -->
+            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+                android:id="@+id/refreshLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scrollbars="vertical"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/courier_inbox_list_item" />
+
+            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+            <!-- Detail Text -->
+            <TextView
+                android:id="@+id/detailTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_margin="@dimen/courier_inbox_horizontal_margin"
+                android:gravity="center"
+                android:textSize="@dimen/courier_inbox_default_text_size"
+                tools:text="No User Found" />
+
+        </RelativeLayout>
+
+        <View
+            android:id="@+id/courierBar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@android:color/holo_green_dark" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
 </merge>

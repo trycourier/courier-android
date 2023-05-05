@@ -1,7 +1,6 @@
 package com.courier.android.modules
 
 import com.courier.android.Courier
-import com.courier.android.friendlyMessage
 import com.courier.android.models.CourierProvider
 import com.courier.android.repositories.TokenRepository
 import com.google.firebase.FirebaseApp
@@ -26,7 +25,7 @@ internal class CorePush {
     internal suspend fun getFcmToken(): String? {
 
         if (!isFirebaseInitialized) {
-            Courier.log("Firebase is not initialized. Courier will not be able to get the FCM token until Firebase is initialized.")
+            Courier.error("Firebase is not initialized. Courier will not be able to get the FCM token until Firebase is initialized.")
             return null
         }
 
@@ -42,7 +41,7 @@ internal class CorePush {
             FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
 
                 if (!task.isSuccessful) {
-                    Courier.log(task.exception.toString())
+                    Courier.error(task.exception.toString())
                 }
 
                 // Save and return the token
@@ -115,7 +114,7 @@ internal class CorePush {
                 provider = provider
             )
         } catch (e: Exception) {
-            Courier.log(e.friendlyMessage)
+            Courier.error(e.message)
         }
 
     }
@@ -137,7 +136,7 @@ internal class CorePush {
                 token = token
             )
         } catch (e: Exception) {
-            Courier.log(e.friendlyMessage)
+            Courier.error(e.message)
         }
 
     }

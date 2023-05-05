@@ -94,13 +94,9 @@ class Courier private constructor(internal val context: Context) {
         /**
          * Logs to the console
          */
-        fun log(data: String) {
-            shared.logging.log(data)
-        }
-
-        fun warn(data: String) {
-            shared.logging.warn(data)
-        }
+        fun log(data: String) = shared.logging.log(data)
+        fun warn(data: String) = shared.logging.warn(data)
+        fun error(data: String?) = shared.logging.error(data)
 
     }
 

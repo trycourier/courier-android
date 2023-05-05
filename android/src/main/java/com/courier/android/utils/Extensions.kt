@@ -3,11 +3,14 @@ package com.courier.android
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Resources
 import android.os.Build
+import android.util.TypedValue
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
@@ -15,8 +18,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import com.courier.android.Courier.Companion.COURIER_COROUTINE_CONTEXT
 import com.courier.android.Courier.Companion.eventBus
+import com.courier.android.inbox.CourierInboxFont
+import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPushEvent
 import com.courier.android.repositories.MessagingRepository
 import com.google.firebase.messaging.RemoteMessage
@@ -45,7 +51,7 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
                 message = message,
                 event = CourierPushEvent.CLICKED,
                 onSuccess = { Courier.log("Event tracked") },
-                onFailure = { Courier.log(it.toString()) }
+                onFailure = { Courier.error(it.toString()) }
             )
 
             onClick(message)
@@ -54,7 +60,7 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
 
     } catch (e: Exception) {
 
-        Courier.log(e.toString())
+        Courier.error(e.toString())
 
     }
 
@@ -103,7 +109,7 @@ internal fun Courier.broadcastMessage(message: RemoteMessage) = Courier.coroutin
     try {
         eventBus.emitEvent(message)
     } catch (e: Exception) {
-        Courier.log(e.toString())
+        Courier.error(e.toString())
     }
 }
 
@@ -171,8 +177,6 @@ val RemoteMessage.pushNotification: Map<String, Any?>
 
     }
 
-internal val Exception.friendlyMessage get() = "UPDATE ME" // TODO
-
 // Returns the last message that was delivered via the event bus
 fun Courier.getLastDeliveredMessage(onMessageFound: (message: RemoteMessage) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
     eventBus.events.collectLatest { message ->
@@ -239,4 +243,28 @@ internal val Int.dpToPx: Int get() = (this * Resources.getSystem().displayMetric
 internal val Context.isDarkMode: Boolean get() {
     val darkModeFlag = resources.configuration.uiMode and UI_MODE_NIGHT_MASK
     return darkModeFlag == UI_MODE_NIGHT_YES
+}
+
+internal fun Int.resIdToColorList(context: Context): ColorStateList {
+    val color = ContextCompat.getColor(context, this)
+    return ColorStateList.valueOf(color)
+}
+
+internal fun TextView.setCourierFont(font: CourierInboxFont) {
+
+    // Typeface
+    font.typeface?.let {
+        typeface = ResourcesCompat.getFont(context, it)
+    }
+
+    // Color
+    font.color?.let {
+        setTextColor(ContextCompat.getColor(context, it))
+    }
+
+    // Text Size
+    font.sizeInSp?.let {
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, it.toFloat())
+    }
+
 }

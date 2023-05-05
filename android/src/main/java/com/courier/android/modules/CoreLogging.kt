@@ -37,6 +37,14 @@ internal class CoreLogging {
         }
     }
 
+    internal fun error(data: String?) {
+        if (isDebugging) {
+            val message = data ?: "Oops, an error occured"
+            Log.e(Courier.TAG, message)
+            logListener?.invoke(message)
+        }
+    }
+
 }
 
 /**

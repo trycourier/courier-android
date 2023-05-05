@@ -2,10 +2,8 @@ package com.courier.android.modules
 
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
-import com.courier.android.friendlyMessage
 import com.courier.android.managers.UserManager
 import com.courier.android.models.CourierAuthenticationListener
-import com.courier.android.models.CourierException
 import kotlinx.coroutines.*
 
 internal class CoreAuth {
@@ -36,7 +34,7 @@ internal class CoreAuth {
             inbox.restart()
             notifyListeners()
         } catch (e: Exception) {
-            Courier.log(e.friendlyMessage)
+            Courier.error(e.message)
             signOut(push, inbox)
             throw e
         }

@@ -13,7 +13,7 @@
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:menu="@menu/inbox_actions_menu"
-        app:title="Default Inbox" />
+        app:title="Styled Inbox" />
 
     <com.courier.android.inbox.CourierInbox
         android:id="@+id/courierInbox"
