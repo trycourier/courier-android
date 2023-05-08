@@ -44,8 +44,8 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
         inbox = view.findViewById(R.id.courierInbox)
 
         inbox.lightTheme = CourierInboxTheme(
-            unreadIndicatorBarColor = R.color.courier_red_10,
-            loadingIndicatorColor = R.color.courier_green_10,
+            unreadIndicatorBarColor = R.color.courier_red,
+            loadingIndicatorColor = R.color.courier_purple,
             titleFont = CourierInboxFont(
                 typeface = R.font.poppins,
                 color = android.R.color.black,
@@ -72,15 +72,15 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
                     color = android.R.color.white,
                     sizeInSp = 16
                 ),
-                backgroundColor = R.color.courier_blue_10,
+                backgroundColor = R.color.courier_purple,
                 cornerRadiusInDp = 100
             ),
             dividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
         )
 
         inbox.darkTheme = CourierInboxTheme(
-            unreadIndicatorBarColor = R.color.courier_red_10,
-            loadingIndicatorColor = R.color.courier_blue_10,
+            unreadIndicatorBarColor = R.color.courier_red,
+            loadingIndicatorColor = R.color.courier_purple,
             titleFont = CourierInboxFont(
                 typeface = R.font.poppins,
                 color = android.R.color.white,
@@ -107,7 +107,7 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
                     color = android.R.color.white,
                     sizeInSp = 16
                 ),
-                backgroundColor = R.color.courier_green_10,
+                backgroundColor = R.color.courier_red,
                 cornerRadiusInDp = 0
             )
         )

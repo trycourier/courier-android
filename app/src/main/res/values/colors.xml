@@ -9,8 +9,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="courier_green_10">#6CBC6E</color>
-    <color name="courier_red_10">#FF003D</color>
-    <color name="courier_blue_10">#0085FF</color>
+    <color name="courier_red">#E76A68</color>
+    <color name="courier_purple">#882DB8</color>
 
 </resources>

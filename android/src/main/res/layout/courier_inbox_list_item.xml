@@ -71,7 +71,7 @@
         android:id="@+id/indicator"
         android:layout_width="@dimen/courier_inbox_indicator_width"
         android:layout_height="0dp"
-        android:layout_margin="1dp"
+        android:layout_margin="2dp"
         android:background="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
