@@ -11,6 +11,8 @@ import com.courier.android.inbox.CourierInbox
 import com.courier.android.inbox.CourierInboxButtonStyles
 import com.courier.android.inbox.CourierInboxFont
 import com.courier.android.inbox.CourierInboxTheme
+import com.courier.android.models.markAsRead
+import com.courier.android.models.markAsUnread
 import com.courier.android.modules.readAllInboxMessages
 import com.courier.example.R
 
@@ -114,8 +116,8 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
 
         inbox.setOnClickMessageListener { message, index ->
             Courier.log(message.toString())
-            Toast.makeText(context, "Message Click: ${message}", Toast.LENGTH_SHORT).show()
-//            if (message.isRead) message.markAsUnread() else message.markAsRead()
+            Toast.makeText(context, "Message Click: $message", Toast.LENGTH_SHORT).show()
+            if (message.isRead) message.markAsUnread() else message.markAsRead()
         }
 
         inbox.setOnClickActionListener { action, message, index ->

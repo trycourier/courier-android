@@ -575,20 +575,26 @@ private data class Inbox(
     // Return the index up the updated message
     fun readMessage(messageId: String): UpdateOperation {
 
-        val messages = messages.orEmpty()
-        val index = messages.indexOfFirst { it.messageId == messageId }
+        if (messages == null) {
+            throw CourierException.inboxNotInitialized
+        }
+
+        val index = messages!!.indexOfFirst { it.messageId == messageId }
 
         if (index == -1) {
             throw CourierException.inboxMessageNotFound
         }
 
         // Save copy
-        val message = messages[index]
+        val message = messages!![index]
         val originalMessage = message.copy()
         val originalUnreadCount = this.unreadCount
 
         // Update
         message.setRead()
+
+        // Change data
+        this.messages?.set(index, message)
         this.unreadCount -= 1
         this.unreadCount = this.unreadCount.coerceAtLeast(0)
 
@@ -602,20 +608,26 @@ private data class Inbox(
 
     fun unreadMessage(messageId: String): UpdateOperation {
 
-        val messages = messages.orEmpty()
-        val index = messages.indexOfFirst { it.messageId == messageId }
+        if (messages == null) {
+            throw CourierException.inboxNotInitialized
+        }
+
+        val index = messages!!.indexOfFirst { it.messageId == messageId }
 
         if (index == -1) {
             throw CourierException.inboxMessageNotFound
         }
 
         // Save copy
-        val message = messages[index]
+        val message = messages!![index]
         val originalMessage = message.copy()
         val originalUnreadCount = this.unreadCount
 
         // Update
         message.setUnread()
+
+        // Change data
+        this.messages?.set(index, message)
         this.unreadCount += 1
         this.unreadCount = this.unreadCount.coerceAtLeast(0)
 

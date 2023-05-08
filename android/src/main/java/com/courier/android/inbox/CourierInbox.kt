@@ -1,21 +1,22 @@
 package com.courier.android.inbox
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.AttributeSet
 import android.view.View
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.courier.android.Courier
-import com.courier.android.R
+import com.courier.android.*
 import com.courier.android.isDarkMode
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.InboxAction
@@ -24,7 +25,6 @@ import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.refreshInbox
 import com.courier.android.setCourierFont
-import kotlin.coroutines.resume
 
 class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
@@ -38,23 +38,26 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
             when (field) {
                 State.LOADING -> {
                     refreshLayout.isVisible = false
-                    detailTextView.isVisible = true
-                    detailTextView.text = field.title
+                    detailTextView.isVisible = false
+                    loadingIndicator.isVisible = true
                 }
                 State.ERROR -> {
                     refreshLayout.isVisible = false
                     detailTextView.isVisible = true
                     detailTextView.text = field.title
+                    loadingIndicator.isVisible = false
                 }
                 State.CONTENT -> {
                     refreshLayout.isVisible = true
                     detailTextView.isVisible = false
                     detailTextView.text = null
+                    loadingIndicator.isVisible = false
                 }
                 State.EMPTY -> {
                     refreshLayout.isVisible = false
                     detailTextView.isVisible = true
                     detailTextView.text = field.title
+                    loadingIndicator.isVisible = false
                 }
             }
         }
@@ -100,6 +103,11 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
             // Empty / Error view
             detailTextView.setCourierFont(theme.detailTitleFont)
 
+            // Loading
+            theme.getLoadingColor()?.let {
+                loadingIndicator.indeterminateTintList = it.resIdToColorList(context)
+            }
+
         }
 
     lateinit var recyclerView: RecyclerView
@@ -107,8 +115,9 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     private lateinit var refreshLayout: SwipeRefreshLayout
     private lateinit var detailTextView: TextView
-    private lateinit var courierBar: View
+    private lateinit var courierBar: View // TODO: Need brand
     private lateinit var courierBarButton: ImageView
+    private lateinit var loadingIndicator: ProgressBar
 
     private lateinit var inboxListener: CourierInboxListener
     private var onClickInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
@@ -116,6 +125,7 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     private val messagesAdapter = MessagesAdapter(
         theme = theme,
+        messages = emptyList(),
         onMessageClick = { message, index ->
             onClickInboxMessageAtIndex?.invoke(message, index)
         },
@@ -167,6 +177,9 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     private fun setup() {
 
+        // Loading
+        loadingIndicator = findViewById(R.id.loadingIndicator)
+
         // Courier Bar Button
         courierBarButton = findViewById(R.id.courierBarButton)
         courierBarButton.setOnClickListener { openDialog() }
@@ -191,31 +204,93 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         // Setup the listener
         inboxListener = Courier.shared.addInboxListener(
             onInitialLoad = {
-                state = State.LOADING.apply { title = "Loading" }
-                refreshAdapters(
-                    showLoading = true
-                )
+
+                state = State.LOADING
+
+                refreshAdapters()
+
             },
             onError = { e ->
-                Courier.error(e.message)
+
                 state = State.ERROR.apply { title = e.message }
+
+                Courier.error(e.message)
+
                 refreshAdapters()
+
             },
             onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
+
                 state = if (messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
+
                 refreshAdapters(
                     showMessages = messages.isNotEmpty(),
                     showLoading = canPaginate
                 )
+
+                refreshMessages(
+                    newMessages = messages.toList()
+                )
+
             }
         )
+
+    }
+
+    private fun RecyclerView.restoreScrollPosition() {
+        layoutManager?.apply {
+            onRestoreInstanceState(onSaveInstanceState())
+        }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun refreshMessages(newMessages: List<InboxMessage>) {
+
+        val existingMessages = messagesAdapter.messages
+
+        // Set the new messages
+        messagesAdapter.messages = newMessages
+
+        // Check if we need to insert
+        val didInsert = newMessages.size - existingMessages.size == 1
+
+        // Handle insert
+        if (newMessages.firstOrNull()?.messageId != existingMessages.firstOrNull()?.messageId && didInsert) {
+            messagesAdapter.notifyItemInserted(0)
+            recyclerView.restoreScrollPosition()
+            return
+        }
+
+        // Handle pagination
+        if (newMessages.size > existingMessages.size) {
+            val firstIndex = existingMessages.size
+            val itemCount = newMessages.size - existingMessages.size
+            messagesAdapter.notifyItemRangeInserted(firstIndex, itemCount)
+            return
+        }
+
+        // Manually sync all view holders
+        // This ensure the click animation is nice and clean
+        if (newMessages.size == existingMessages.size) {
+            newMessages.forEachIndexed { index, message ->
+                val viewHolder = recyclerView.findViewHolderForLayoutPosition(index) as? MessageItemViewHolder
+                viewHolder?.setMessage(
+                    theme = theme,
+                    message = message
+                )
+            }
+            return
+        }
+
+        // Reload all other data
+        // Forces a hard reload
+        messagesAdapter.notifyDataSetChanged()
 
     }
 
     private fun refreshAdapters(showMessages: Boolean = false, showLoading: Boolean = false) {
         if (showMessages) adapter.addAdapter(0, messagesAdapter) else adapter.removeAdapter(messagesAdapter)
         if (showLoading) adapter.addAdapter(loadingAdapter) else adapter.removeAdapter(loadingAdapter)
-        messagesAdapter.notifyDataSetChanged()
     }
 
     override fun onDetachedFromWindow() {
