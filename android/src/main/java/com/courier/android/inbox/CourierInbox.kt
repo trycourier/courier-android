@@ -1,11 +1,14 @@
 package com.courier.android.inbox
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.AttributeSet
 import android.view.View
-import android.widget.FrameLayout
-import android.widget.TextView
+import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -21,6 +24,7 @@ import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.refreshInbox
 import com.courier.android.setCourierFont
+import kotlin.coroutines.resume
 
 class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
@@ -104,6 +108,7 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
     private lateinit var refreshLayout: SwipeRefreshLayout
     private lateinit var detailTextView: TextView
     private lateinit var courierBar: View
+    private lateinit var courierBarButton: ImageView
 
     private lateinit var inboxListener: CourierInboxListener
     private var onClickInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
@@ -135,7 +140,36 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         theme = if (context.isDarkMode) darkTheme else lightTheme
     }
 
+    private fun openDialog() {
+
+        AlertDialog.Builder(context).apply {
+
+            setTitle("Learn more about Courier?")
+
+            setNegativeButton("Cancel") { _, _ ->
+                // Empty
+            }
+
+            setPositiveButton("Learn More") { _, _ ->
+                openCourier()
+            }
+
+            show()
+
+        }
+
+    }
+
+    private fun openCourier() {
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.courier.com/"))
+        context.startActivity(browserIntent)
+    }
+
     private fun setup() {
+
+        // Courier Bar Button
+        courierBarButton = findViewById(R.id.courierBarButton)
+        courierBarButton.setOnClickListener { openDialog() }
 
         // Detail TextView
         detailTextView = findViewById(R.id.detailTextView)

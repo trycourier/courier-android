@@ -7,6 +7,7 @@
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipChildren="true"
         android:orientation="vertical">
 
         <RelativeLayout
@@ -43,11 +44,25 @@
 
         </RelativeLayout>
 
-        <View
+        <RelativeLayout
             android:id="@+id/courierBar"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@android:color/holo_green_dark" />
+            android:layout_height="@dimen/courier_inbox_footer_height"
+            android:background="?android:colorBackground"
+            android:elevation="4dp">
+
+            <ImageView
+                android:id="@+id/courierBarButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:contentDescription="Powered by Courier"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:padding="12dp"
+                android:src="@drawable/footer"
+                app:tint="@color/footer_image_tint" />
+
+        </RelativeLayout>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 

@@ -8,4 +8,5 @@
     <dimen name="courier_inbox_button_gap">12dp</dimen>
     <dimen name="courier_inbox_button_horizontal">16dp</dimen>
     <dimen name="courier_inbox_button_vertical">8dp</dimen>
+    <dimen name="courier_inbox_footer_height">56dp</dimen>
 </resources>
