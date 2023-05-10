@@ -190,4 +190,25 @@ internal class InboxRepository : Repository() {
 
     }
 
+    internal suspend fun openMessage(clientKey: String, userId: String, messageId: String) {
+
+        val query = """
+            mutation TrackEvent(
+                ${'$'}messageId: String = \"${messageId}\"
+            ) {
+                opened(messageId: ${'$'}messageId)
+            }
+        """.toGraphQuery()
+
+        val request = Request.Builder()
+            .url(inboxGraphQL)
+            .addHeader("x-courier-client-key", clientKey)
+            .addHeader("x-courier-user-id", userId)
+            .post(query.toRequestBody())
+            .build()
+
+        http.newCall(request).dispatch<Any>()
+
+    }
+
 }

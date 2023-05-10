@@ -14,17 +14,23 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.*
+import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.isDarkMode
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
 import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
+import com.courier.android.modules.clientKey
 import com.courier.android.modules.refreshInbox
+import com.courier.android.modules.userId
+import com.courier.android.repositories.InboxRepository
 import com.courier.android.setCourierFont
+import kotlinx.coroutines.*
 
 class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
@@ -113,6 +119,8 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
     lateinit var recyclerView: RecyclerView
         private set
 
+    private val layoutManager get() = recyclerView.layoutManager as? LinearLayoutManager
+
     private lateinit var refreshLayout: SwipeRefreshLayout
     private lateinit var detailTextView: TextView
     private lateinit var courierBar: View // TODO: Need brand
@@ -122,6 +130,8 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
     private lateinit var inboxListener: CourierInboxListener
     private var onClickInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
     private var onClickInboxActionForMessageAtIndex: ((InboxAction, InboxMessage, Int) -> Unit)? = null
+
+    private val inboxRepo by lazy { InboxRepository() }
 
     private val messagesAdapter = MessagesAdapter(
         theme = theme,
@@ -161,7 +171,7 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
             }
 
             setPositiveButton("Learn More") { _, _ ->
-                openCourier()
+                launchCourierWebsite()
             }
 
             show()
@@ -170,7 +180,7 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     }
 
-    private fun openCourier() {
+    private fun launchCourierWebsite() {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.courier.com/"))
         context.startActivity(browserIntent)
     }
@@ -190,6 +200,9 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         // Create the list
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.adapter = adapter
+        recyclerView.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            openVisibleMessages()
+        }
 
         // Handle pull to refresh
         refreshLayout = findViewById(R.id.refreshLayout)
@@ -243,6 +256,54 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
     }
 
+    // Opens all the current messages
+    // Performs this on an async thread
+    private fun openVisibleMessages() = coroutineScope.launch(context = Dispatchers.IO) {
+
+        // Ensure we have a user
+        if (Courier.shared.clientKey == null || Courier.shared.userId == null) {
+            return@launch
+        }
+
+        // Get all the visible items
+        layoutManager?.let { manager ->
+
+            // Get the indexes
+            val firstIndex = manager.findFirstCompletelyVisibleItemPosition()
+            val lastIndex = manager.findLastCompletelyVisibleItemPosition()
+
+            // Avoid index out of bounds
+            if (firstIndex == -1 && lastIndex == -1) {
+                return@let
+            }
+
+            // Find the messages
+            val messagesToOpen = messagesAdapter.messages.subList(firstIndex, lastIndex).filter { !it.isOpened }.map { message ->
+
+                // Mark the message as open locally
+                message.setOpened()
+
+                // Bundle the request into an async function
+                return@map async {
+
+                    // Open the message in Courier
+                    inboxRepo.openMessage(
+                        clientKey = Courier.shared.clientKey!!,
+                        userId = Courier.shared.userId!!,
+                        messageId = message.messageId,
+                    )
+
+                }
+
+            }
+
+            // Perform all the changes together
+            messagesToOpen.awaitAll()
+
+        }
+
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     private fun refreshMessages(newMessages: List<InboxMessage>) {
 
@@ -285,6 +346,9 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         // Reload all other data
         // Forces a hard reload
         messagesAdapter.notifyDataSetChanged()
+
+        // Read new messages if possible
+        openVisibleMessages()
 
     }
 

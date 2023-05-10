@@ -214,7 +214,9 @@ internal fun Date.timeSince(): String {
     val weekString = "w"
     val yearString = "y"
 
-    return if (secondsAgo < minute) {
+    return if (secondsAgo <= 0) {
+        "now"
+    } else if (secondsAgo < minute) {
         "${secondsAgo}${secondString}"
     } else if (secondsAgo < hour) {
         "${secondsAgo / minute}${minuteString}"
