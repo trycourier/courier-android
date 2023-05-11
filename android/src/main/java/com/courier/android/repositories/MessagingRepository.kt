@@ -55,7 +55,7 @@ internal class MessagingRepository : Repository() {
 
     }
 
-    internal suspend fun postTrackingUrl(url: String, event: CourierPushEvent): String {
+    internal suspend fun postTrackingUrl(url: String, event: CourierPushEvent) {
 
         val json = JSONObject(
             mapOf("event" to event.value)
@@ -66,9 +66,7 @@ internal class MessagingRepository : Repository() {
             .post(json.toRequestBody())
             .build()
 
-        val res = http.newCall(request).dispatch<CourierMessageResponse>()
-
-        return res.requestId
+        http.newCall(request).dispatch<CourierMessageResponse>()
 
     }
 
