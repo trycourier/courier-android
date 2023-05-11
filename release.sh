@@ -65,12 +65,12 @@ cat android/src/main/java/com/courier/android/Courier.kt | while read LINE; do
     git push --tags
     echo "✅ $VERSION tag pushed\n"
 
-#    # gh release create
-#    gh release create $VERSION --generate-notes
-#    echo "✅ $VERSION github release created\n"
-#
-#    # Jitpack will automatically create a new build for use
-#    echo "You can see the Jitpack distribution here: https://jitpack.io/#trycourier/courier-android"
+    # gh release create
+    gh release create $VERSION --generate-notes
+    echo "✅ $VERSION github release created\n"
+
+    # Jitpack will automatically create a new build for use
+    echo "You can see the Jitpack distribution here: https://jitpack.io/#trycourier/courier-android"
 
   fi
 done
