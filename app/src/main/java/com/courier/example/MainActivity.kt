@@ -1,220 +1,109 @@
 package com.courier.example
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.courier.android.Courier
-import com.courier.android.models.CourierProvider
 import com.courier.android.activity.CourierActivity
-import com.courier.android.requestNotificationPermission
-import com.courier.android.sendPush
+import com.courier.android.models.CourierInboxListener
+import com.courier.android.models.remove
+import com.courier.android.modules.addInboxListener
+import com.courier.android.modules.inboxBrandId
 import com.courier.example.databinding.ActivityMainBinding
-import com.google.firebase.FirebaseApp
-import com.google.firebase.FirebaseOptions
+import com.courier.example.fragments.*
 import com.google.firebase.messaging.RemoteMessage
-import kotlinx.coroutines.launch
 
 
 class MainActivity : CourierActivity() {
+
+    private lateinit var inboxListener: CourierInboxListener
+
+    private val authFragment by lazy { AuthFragment() }
+    private val prebuiltInboxFragment by lazy { PrebuiltInboxFragment() }
+    private val styledInboxFragment by lazy { StyledInboxFragment() }
+    private val customInboxFragment by lazy { CustomInboxFragment() }
+    private val sendFragment by lazy { SendFragment() }
 
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Courier.initialize(context = this)
-
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             setContentView(root)
         }
 
-        binding.authButton.isEnabled = false
-        binding.sendPushButton.isEnabled = false
+        setCurrentFragment(authFragment)
 
-        lifecycleScope.launch {
-            setup()
-            refresh()
+        binding.bottomNavigationView.setOnItemSelectedListener {
+            return@setOnItemSelectedListener when (it.itemId) {
+                R.id.auth -> setCurrentFragment(authFragment)
+                R.id.prebuiltInbox -> setCurrentFragment(prebuiltInboxFragment)
+                R.id.styledInbox -> setCurrentFragment(styledInboxFragment)
+                R.id.customInbox -> setCurrentFragment(customInboxFragment)
+                R.id.send -> setCurrentFragment(sendFragment)
+                else -> false
+            }
         }
 
-        binding.sendPushButton.setOnClickListener {
-            sendPush()
+        Courier.initialize(this)
+
+        // Sets the brand at a global level
+        Courier.shared.inboxBrandId = "EK44JHXWFX4A9AGC8QWVNTBDTKC2"
+
+        inboxListener = Courier.shared.addInboxListener(
+            onInitialLoad = {
+                setBadge(0)
+            },
+            onError = {
+                setBadge(0)
+            },
+            onMessagesChanged = { _, unreadMessageCount, _, _ ->
+                setBadge(unreadMessageCount)
+            }
+        )
+
+    }
+
+    private fun setCurrentFragment(fragment: Fragment): Boolean {
+        supportFragmentManager.beginTransaction().let {
+            it.replace(R.id.fragmentContainer, fragment)
+            return@let it.commit()
+        }
+        return true
+    }
+
+    private fun setBadge(value: Int) {
+
+        val bottomNav = binding.bottomNavigationView
+
+        listOf(R.id.prebuiltInbox, R.id.styledInbox, R.id.customInbox).forEach { itemId ->
+            val badge = bottomNav.getOrCreateBadge(itemId)
+            badge.backgroundColor = ContextCompat.getColor(this, R.color.purple_700)
+            badge.badgeTextColor = ContextCompat.getColor(this, R.color.white)
+            badge.maxCharacterCount = 3
+            badge.verticalOffset = 2
+            badge.isVisible = value > 0
+            badge.number = value
         }
 
     }
 
-    private suspend fun setup() {
-
-        try {
-
-            val hasNotificationPermissions = requestNotificationPermission()
-            Toast.makeText(
-                this@MainActivity,
-                "Notification permissions are granted: $hasNotificationPermissions",
-                Toast.LENGTH_LONG
-            ).show()
-
-            // Start firebase
-            // This must be set before you can sync FCM tokens in Courier
-            val options = FirebaseOptions.Builder().apply {
-                setApiKey(Env.FIREBASE_API_KEY)
-                setApplicationId(Env.FIREBASE_APP_ID)
-                setProjectId(Env.FIREBASE_PROJECT_ID)
-                setGcmSenderId(Env.FIREBASE_GCM_SENDER_ID)
-            }.build()
-
-            FirebaseApp.initializeApp(this@MainActivity, options)
-
-            Toast.makeText(this, "SDK Initialized", Toast.LENGTH_LONG).show()
-
-        } catch (e: Exception) {
-
-            Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
-            setup()
-
-        }
-
-    }
-
-    private fun sendPush() {
-
-        lifecycleScope.launch {
-
-            val checkboxes = listOf(
-                binding.checkFcm, binding.checkApns
-            )
-
-            val providers = checkboxes.filter { it.isChecked }.map { checkbox ->
-                return@map when (checkbox.id) {
-                    binding.checkFcm.id -> CourierProvider.FCM
-                    binding.checkApns.id -> CourierProvider.APNS
-                    else -> CourierProvider.FCM
-                }
-            }
-
-            binding.sendPushButton.isEnabled = false
-
-            try {
-
-                val courierUserId = Courier.shared.userId
-
-                if (!courierUserId.isNullOrBlank() && courierUserId.isNotEmpty()) {
-                    Courier.shared.sendPush(
-                        authKey = Env.COURIER_AUTH_KEY,
-                        userId = courierUserId,
-                        title = "Hey ${Courier.shared.userId}!",
-                        body = "This is a test push sent through ${providers.joinToString(" and ") { it.value }}",
-                        providers = providers,
-                    )
-                } else {
-                    Toast.makeText(this@MainActivity, "No Courier UserId Found", Toast.LENGTH_LONG).show()
-                }
-
-            } catch (e: Exception) {
-
-                Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
-
-            }
-
-            binding.sendPushButton.isEnabled = true
-
-        }
-
+    override fun onDestroy() {
+        super.onDestroy()
+        inboxListener.remove()
     }
 
     override fun onPushNotificationClicked(message: RemoteMessage) {
-        print(message)
+        Log.d("Courier", message.toJsonString())
         Toast.makeText(this, "Message clicked:\n${message.data}", Toast.LENGTH_LONG).show()
     }
 
     override fun onPushNotificationDelivered(message: RemoteMessage) {
-        print(message)
+        Log.d("Courier", message.toJsonString())
         Toast.makeText(this, "Message delivered:\n${message.data}", Toast.LENGTH_LONG).show()
-    }
-
-    private fun refresh() {
-
-        binding.sendPushButton.isEnabled = true
-        binding.authButton.isEnabled = true
-
-        if (Courier.shared.userId == null) {
-            binding.authTextView.text = "Courier user not signed in"
-            binding.authButton.text = "Sign In"
-            binding.authButton.setOnClickListener {
-                signIn()
-            }
-        } else {
-            binding.authTextView.text = "Courier user signed in: ${Courier.shared.userId}"
-            binding.authButton.text = "Sign Out"
-            binding.authButton.setOnClickListener {
-                signOut()
-            }
-        }
-
-    }
-
-    private fun signIn() {
-        lifecycleScope.launch {
-
-            binding.authButton.isEnabled = false
-
-            try {
-
-                var courierUserId = showDialog(
-                    activity = this@MainActivity, title = "Configure SDK", items = listOf(
-                        DialogItem("COURIER_USER_ID", "Courier UserId"),
-                    )
-                ).getString("COURIER_USER_ID", "")
-
-                if (!courierUserId.isNullOrBlank() && courierUserId.isNotEmpty()) {
-                    Courier.shared.signIn(
-                        accessToken = Env.COURIER_AUTH_KEY, userId = courierUserId
-                    )
-
-                    refresh()
-
-                    Toast.makeText(this@MainActivity, "Courier user signed in", Toast.LENGTH_LONG)
-                        .show()
-                } else {
-                    Toast.makeText(
-                        this@MainActivity, "Please Enter a valid UserId", Toast.LENGTH_LONG
-                    )
-                }
-
-
-            } catch (e: Exception) {
-
-                Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
-
-            }
-
-            binding.authButton.isEnabled = true
-
-        }
-    }
-
-    private fun signOut() {
-        lifecycleScope.launch {
-
-            binding.authButton.isEnabled = false
-
-            try {
-
-                Courier.shared.signOut()
-
-                refresh()
-
-                Toast.makeText(this@MainActivity, "Courier user signed out", Toast.LENGTH_LONG)
-                    .show()
-
-            } catch (e: Exception) {
-
-                Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
-
-            }
-
-            binding.authButton.isEnabled = true
-
-        }
     }
 
 }

@@ -1,6 +1,6 @@
 package com.courier.android.models
 
-data class CourierServerError(
+internal data class CourierServerError(
     val type: String,
     val message: String
 ) {

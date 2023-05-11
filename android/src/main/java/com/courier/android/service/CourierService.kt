@@ -1,10 +1,10 @@
 package com.courier.android.service
 
 import com.courier.android.Courier
-import com.courier.android.broadcastMessage
-import com.courier.android.log
+import com.courier.android.utils.broadcastMessage
 import com.courier.android.models.CourierPushEvent
-import com.courier.android.trackNotification
+import com.courier.android.modules.setFCMToken
+import com.courier.android.utils.trackNotification
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -32,7 +32,7 @@ open class CourierService: FirebaseMessagingService() {
                 message = message,
                 event = CourierPushEvent.DELIVERED,
                 onSuccess = { Courier.log("Event tracked") },
-                onFailure = { Courier.log(it.toString()) }
+                onFailure = { Courier.error(it.toString()) }
             )
 
             // Broadcast the message to the app
@@ -41,7 +41,7 @@ open class CourierService: FirebaseMessagingService() {
 
         } catch (e: Exception) {
 
-            Courier.log(e.toString())
+            Courier.error(e.toString())
 
         }
 
@@ -57,13 +57,13 @@ open class CourierService: FirebaseMessagingService() {
 
             Courier.shared.setFCMToken(
                 token = token,
-                onSuccess = { Courier.log("Courier FCM token refreshed") },
-                onFailure = { Courier.log(it.toString()) }
+                onSuccess = { Courier.log("Courier FCM token updated") },
+                onFailure = { Courier.error(it.toString()) }
             )
 
         } catch (e: Exception) {
 
-            Courier.log(e.toString())
+            Courier.error(e.toString())
 
         }
 

@@ -2,9 +2,10 @@ package com.courier.android
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.courier.android.models.CourierException
 import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierPushEvent
+import com.courier.android.modules.*
+import com.courier.android.utils.trackNotification
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.RemoteMessage
@@ -37,17 +38,11 @@ class CourierTests {
 
         print("🔬 Setting FCM Token before User")
 
-        var exception: Exception? = null
+        Courier.shared.setFCMToken(token = "something_that_will_fail")
 
-        try {
-            Courier.shared.setFCMToken(
-                token = "something_that_will_fail"
-            )
-        } catch (e: Exception) {
-            exception = e
-        }
+        val fcmToken = Courier.shared.getFCMToken()
 
-        assertEquals(exception?.message, CourierException.missingAccessToken.message)
+        assertEquals(fcmToken, null)
         assertEquals(Courier.shared.userId, null)
         assertEquals(Courier.shared.accessToken, null)
 
@@ -78,7 +73,9 @@ class CourierTests {
 
         assertEquals(Courier.shared.userId, Env.COURIER_USER_ID)
         assertEquals(Courier.shared.accessToken, Env.COURIER_AUTH_KEY)
-        assertNotNull(Courier.shared.fcmToken)
+
+        val fcmToken = Courier.shared.getFCMToken()
+        assertNotNull(fcmToken)
 
     }
 
@@ -91,7 +88,8 @@ class CourierTests {
             token = "something_that_will_succeed"
         )
 
-        assertNotNull(Courier.shared.fcmToken)
+        val fcmToken = Courier.shared.getFCMToken()
+        assertNotNull(fcmToken)
 
     }
 
@@ -100,12 +98,12 @@ class CourierTests {
 
         print("🔬 Sending Push")
 
-        val requestId = Courier.shared.sendPush(
+        val requestId = Courier.shared.sendMessage(
             authKey = Env.COURIER_AUTH_KEY,
-            userId = Env.COURIER_USER_ID,
+            userIds = listOf(Env.COURIER_USER_ID),
             title = "🐤 Chirp Chirp!",
             body = "Message sent from Android Studio tests",
-            providers = listOf(CourierProvider.FCM),
+            channels = listOf(CourierProvider.FCM),
         )
 
         print("Request ID: $requestId")
@@ -143,7 +141,9 @@ class CourierTests {
 
         Courier.shared.signOut()
 
-        assertNotNull(Courier.shared.fcmToken)
+        val fcmToken = Courier.shared.getFCMToken()
+        assertNotNull(fcmToken)
+
         assertEquals(Courier.shared.userId, null)
         assertEquals(Courier.shared.accessToken, null)
 
