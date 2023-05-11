@@ -3,15 +3,16 @@ package com.courier.android.inbox
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.net.Uri
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.ProgressBar
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,17 +20,12 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.*
 import com.courier.android.Courier.Companion.coroutineScope
-import com.courier.android.isDarkMode
-import com.courier.android.models.CourierInboxListener
-import com.courier.android.models.InboxAction
-import com.courier.android.models.InboxMessage
-import com.courier.android.models.remove
-import com.courier.android.modules.addInboxListener
-import com.courier.android.modules.clientKey
-import com.courier.android.modules.refreshInbox
-import com.courier.android.modules.userId
+import com.courier.android.models.*
+import com.courier.android.modules.*
 import com.courier.android.repositories.InboxRepository
-import com.courier.android.setCourierFont
+import com.courier.android.utils.isDarkMode
+import com.courier.android.utils.pxToDp
+import com.courier.android.utils.setCourierFont
 import kotlinx.coroutines.*
 
 class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
@@ -70,51 +66,63 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     var lightTheme: CourierInboxTheme = CourierInboxTheme.DEFAULT_LIGHT
         set(value) {
-            field = value
-            refreshTheme()
+            if (field != value) {
+                field = value
+                refreshTheme()
+            }
         }
 
     var darkTheme: CourierInboxTheme = CourierInboxTheme.DEFAULT_DARK
         set(value) {
-            field = value
-            refreshTheme()
+            if (field != value) {
+                field = value
+                refreshTheme()
+            }
         }
 
     private var theme: CourierInboxTheme = CourierInboxTheme.DEFAULT_LIGHT
+        @SuppressLint("NotifyDataSetChanged")
         set(value) {
+
+            // Update the theme
             field = value
 
-            // TODO: Cleanup
+            reloadViews()
+
+            // Reload the list
             messagesAdapter.theme = theme
             messagesAdapter.notifyDataSetChanged()
 
             loadingAdapter.theme = theme
             loadingAdapter.notifyDataSetChanged()
 
-            // Loading indicator
-            theme.getLoadingColor()?.let {
-                val color = ContextCompat.getColor(context, it)
-                refreshLayout.setColorSchemeColors(color)
-            }
-
-            // Divider line
-            if (recyclerView.itemDecorationCount > 0) {
-                recyclerView.removeItemDecorationAt(0)
-            }
-
-            theme.dividerItemDecoration?.let {
-                recyclerView.addItemDecoration(it)
-            }
-
-            // Empty / Error view
-            detailTextView.setCourierFont(theme.detailTitleFont)
-
-            // Loading
-            theme.getLoadingColor()?.let {
-                loadingIndicator.indeterminateTintList = it.resIdToColorList(context)
-            }
-
         }
+
+    private fun reloadViews() {
+
+        // Loading indicator
+        theme.getLoadingColor()?.let {
+            refreshLayout.setColorSchemeColors(it)
+        }
+
+        // Divider line
+        if (recyclerView.itemDecorationCount > 0) {
+            recyclerView.removeItemDecorationAt(0)
+        }
+
+        theme.dividerItemDecoration?.let {
+            recyclerView.addItemDecoration(it)
+        }
+
+        // Empty / Error view
+        detailTextView.setCourierFont(theme.detailTitleFont)
+
+        // Loading
+        theme.getLoadingColor()?.let {
+            loadingIndicator.indeterminateTintList = ColorStateList.valueOf(it)
+        }
+
+    }
 
     lateinit var recyclerView: RecyclerView
         private set
@@ -123,13 +131,15 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     private lateinit var refreshLayout: SwipeRefreshLayout
     private lateinit var detailTextView: TextView
-    private lateinit var courierBar: View // TODO: Need brand
+    private lateinit var courierBar: RelativeLayout
     private lateinit var courierBarButton: ImageView
     private lateinit var loadingIndicator: ProgressBar
 
     private lateinit var inboxListener: CourierInboxListener
+
     private var onClickInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
     private var onClickInboxActionForMessageAtIndex: ((InboxAction, InboxMessage, Int) -> Unit)? = null
+    private var onScrollInbox: ((Int) -> Unit)? = null
 
     private val inboxRepo by lazy { InboxRepository() }
 
@@ -197,11 +207,23 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         // Detail TextView
         detailTextView = findViewById(R.id.detailTextView)
 
+        // Courier Bar
+        courierBar = findViewById(R.id.courierBar)
+
         // Create the list
         recyclerView = findViewById(R.id.recyclerView)
         recyclerView.adapter = adapter
-        recyclerView.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+        recyclerView.setOnScrollChangeListener { _, _, _, _, _ ->
+
+            // Get the current offset if needed
+            onScrollInbox?.let {
+                val offsetDp = recyclerView.computeVerticalScrollOffset().pxToDp
+                it.invoke(offsetDp)
+            }
+
+            // Open the messages
             openVisibleMessages()
+
         }
 
         // Handle pull to refresh
@@ -218,12 +240,16 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         inboxListener = Courier.shared.addInboxListener(
             onInitialLoad = {
 
+                refreshBrand()
+
                 state = State.LOADING
 
                 refreshAdapters()
 
             },
             onError = { e ->
+
+                refreshBrand()
 
                 state = State.ERROR.apply { title = e.message }
 
@@ -233,6 +259,8 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
 
             },
             onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
+
+                refreshBrand()
 
                 state = if (messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
 
@@ -357,6 +385,22 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         if (showLoading) adapter.addAdapter(loadingAdapter) else adapter.removeAdapter(loadingAdapter)
     }
 
+    private fun refreshBrand() {
+        Courier.shared.inboxBrand?.let { brand ->
+
+            // Set the theme
+            theme.attachBrand(brand)
+
+            // Handle bar visibility
+            val hideBar = brand.settings?.inapp?.disableCourierFooter ?: false
+            courierBar.isVisible = !hideBar
+
+            // Refresh brand
+            reloadViews()
+
+        }
+    }
+
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         inboxListener.remove()
@@ -368,6 +412,10 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     fun setOnClickActionListener(listener: ((action: InboxAction, message: InboxMessage, index: Int) -> Unit)?) {
         onClickInboxActionForMessageAtIndex = listener
+    }
+
+    fun setOnScrollInboxListener(listener: ((offsetInDp: Int) -> Unit)?) {
+        onScrollInbox = listener
     }
 
 }

@@ -5,25 +5,27 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.R
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
-import com.courier.android.setCourierFont
+import com.courier.android.utils.setCourierFont
 import com.google.android.flexbox.FlexboxLayout
 
 internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    val container: ConstraintLayout
-    val titleTextView: TextView
-    val timeTextView: TextView
-    val subtitleTextView: TextView
-    val indicator: View
-    val buttonContainer: FlexboxLayout
+    private val container: ConstraintLayout
+    private val titleTextView: TextView
+    private val timeTextView: TextView
+    private val subtitleTextView: TextView
+    private val indicator: View
+    private val buttonContainer: FlexboxLayout
 
     private var message: InboxMessage? = null
+
+    private var onActionClick: ((InboxAction, InboxMessage) -> Unit)? = null
+    private var onMessageClick: ((InboxMessage) -> Unit)? = null
 
     init {
         container = itemView.findViewById(R.id.container)
@@ -48,13 +50,21 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
         buttonContainer.isVisible = !message.actions.isNullOrEmpty()
         buttonContainer.removeAllViews()
 
+        // Container
+        container.setOnClickListener {
+            onMessageClick?.invoke(message)
+        }
+
         // Add the button actions
         message.actions?.forEach { action ->
 
             // Create the button for the action
             CourierInboxButton(itemView.context).apply {
-                setTheme(theme)
-                text = action.content
+                this.setTheme(theme)
+                this.text = action.content
+                this.onClick = {
+                    onActionClick?.invoke(action, message)
+                }
                 buttonContainer.addView(this)
             }
 
@@ -62,7 +72,7 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
 
         // Theming
         theme.getUnreadColor()?.let {
-            indicator.setBackgroundResource(it)
+            indicator.setBackgroundColor(it)
         }
 
         titleTextView.setCourierFont(theme.titleFont)
@@ -71,20 +81,9 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
 
     }
 
-    fun setInteraction(onActionClick: (InboxAction) -> Unit, onMessageClick: () -> Unit) {
-
-        buttonContainer.children.forEachIndexed { index, view ->
-            view.setOnClickListener {
-                message?.actions?.get(index)?.let { action ->
-                    onActionClick(action)
-                }
-            }
-        }
-
-        container.setOnClickListener {
-            onMessageClick()
-        }
-
+    fun setInteraction(onActionClick: (InboxAction, InboxMessage) -> Unit, onMessageClick: (InboxMessage) -> Unit) {
+        this.onActionClick = onActionClick
+        this.onMessageClick = onMessageClick
     }
 
 }
@@ -103,19 +102,17 @@ internal class MessagesAdapter(
 
     override fun onBindViewHolder(holder: MessageItemViewHolder, position: Int) {
 
-        val message = messages[position]
-
         holder.setMessage(
             theme = theme,
-            message = message
+            message = messages[position]
         )
 
         holder.setInteraction(
-            onActionClick = { action ->
-                onActionClick(action, message, position)
+            onActionClick = { action, msg ->
+                onActionClick(action, msg, position)
             },
-            onMessageClick = {
-                onMessageClick(message, position)
+            onMessageClick = { msg ->
+                onMessageClick(msg, position)
             }
         )
 

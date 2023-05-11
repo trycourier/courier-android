@@ -1,10 +1,10 @@
 package com.courier.android.service
 
 import com.courier.android.Courier
-import com.courier.android.broadcastMessage
+import com.courier.android.utils.broadcastMessage
 import com.courier.android.models.CourierPushEvent
 import com.courier.android.modules.setFCMToken
-import com.courier.android.trackNotification
+import com.courier.android.utils.trackNotification
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 

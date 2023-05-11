@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.courier.android.Courier
@@ -45,73 +47,73 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
 
         inbox = view.findViewById(R.id.courierInbox)
 
+        val font = ResourcesCompat.getFont(requireContext(), R.font.poppins)
+
         inbox.lightTheme = CourierInboxTheme(
-            unreadIndicatorBarColor = R.color.courier_red,
-            loadingIndicatorColor = R.color.courier_purple,
+            unreadIndicatorBarColor = ContextCompat.getColor(requireContext(), R.color.courier_red),
+            loadingIndicatorColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
             titleFont = CourierInboxFont(
-                typeface = R.font.poppins,
-                color = android.R.color.black,
+                typeface = font,
+                color = ContextCompat.getColor(requireContext(), android.R.color.black),
                 sizeInSp = 18
             ),
             bodyFont = CourierInboxFont(
-                typeface = R.font.poppins,
-                color = android.R.color.darker_gray,
+                typeface = font,
+                color = ContextCompat.getColor(requireContext(), android.R.color.darker_gray),
                 sizeInSp = 16
             ),
             timeFont = CourierInboxFont(
-                typeface = R.font.poppins,
-                color = android.R.color.darker_gray,
+                typeface = font,
+                color = ContextCompat.getColor(requireContext(), android.R.color.darker_gray),
                 sizeInSp = 14
             ),
             detailTitleFont = CourierInboxFont(
-                typeface = R.font.poppins,
-                color = android.R.color.black,
+                typeface = font,
+                color = ContextCompat.getColor(requireContext(), android.R.color.black),
                 sizeInSp = 18
             ),
             buttonStyles = CourierInboxButtonStyles(
                 font = CourierInboxFont(
-                    typeface = R.font.poppins,
-                    color = android.R.color.white,
+                    typeface = font,
+                    color = ContextCompat.getColor(requireContext(), android.R.color.white),
                     sizeInSp = 16
                 ),
-                backgroundColor = R.color.courier_purple,
+                backgroundColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
                 cornerRadiusInDp = 100
             ),
             dividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
         )
 
         inbox.darkTheme = CourierInboxTheme(
-            unreadIndicatorBarColor = R.color.courier_red,
-            loadingIndicatorColor = R.color.courier_purple,
             titleFont = CourierInboxFont(
-                typeface = R.font.poppins,
-                color = android.R.color.white,
+                typeface = font,
+                color = ContextCompat.getColor(requireContext(), android.R.color.white),
                 sizeInSp = 18
             ),
             bodyFont = CourierInboxFont(
-                typeface = R.font.poppins,
-                color = android.R.color.white,
+                typeface = font,
+                color = ContextCompat.getColor(requireContext(), android.R.color.white),
                 sizeInSp = 16
             ),
             timeFont = CourierInboxFont(
-                typeface = R.font.poppins,
-                color = android.R.color.white,
+                typeface = font,
+                color = ContextCompat.getColor(requireContext(), android.R.color.white),
                 sizeInSp = 14
             ),
             detailTitleFont = CourierInboxFont(
-                typeface = R.font.poppins,
-                color = android.R.color.white,
+                typeface = font,
+                color = ContextCompat.getColor(requireContext(), android.R.color.white),
                 sizeInSp = 18
             ),
             buttonStyles = CourierInboxButtonStyles(
                 font = CourierInboxFont(
-                    typeface = R.font.poppins,
-                    color = android.R.color.white,
+                    typeface = font,
+                    color = ContextCompat.getColor(requireContext(), android.R.color.white),
                     sizeInSp = 16
                 ),
-                backgroundColor = R.color.courier_red,
-                cornerRadiusInDp = 0
-            )
+                cornerRadiusInDp = 100
+            ),
+            dividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
         )
 
         inbox.setOnClickMessageListener { message, index ->
@@ -123,6 +125,10 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
         inbox.setOnClickActionListener { action, message, index ->
             Courier.log(action.toString())
             Toast.makeText(context, "Action Click: ${action.content}", Toast.LENGTH_SHORT).show()
+        }
+
+        inbox.setOnScrollInboxListener { offsetInDp ->
+            Courier.log(offsetInDp.toString())
         }
 
     }

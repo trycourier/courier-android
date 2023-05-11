@@ -1,21 +1,14 @@
 package com.courier.android.inbox
 
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
-import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.Courier
 import com.courier.android.R
 import com.courier.android.modules.fetchNextPageOfMessages
-import com.courier.android.resIdToColorList
-import com.google.android.flexbox.FlexboxLayout
 
 internal class LoadingItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -38,7 +31,7 @@ internal class LoadingAdapter(internal var theme: CourierInboxTheme) : RecyclerV
         holder.apply {
 
             theme.getLoadingColor()?.let {
-                progressBar.indeterminateTintList = it.resIdToColorList(itemView.context)
+                progressBar.indeterminateTintList = ColorStateList.valueOf(it)
             }
 
         }

@@ -1,9 +1,9 @@
 package com.courier.android.models
 
 import com.courier.android.Courier
-import com.courier.android.isoToDate
-import com.courier.android.timeSince
-import com.courier.android.toIsoTimestamp
+import com.courier.android.utils.isoToDate
+import com.courier.android.utils.timeSince
+import com.courier.android.utils.toIsoTimestamp
 import java.util.*
 
 data class InboxMessage(

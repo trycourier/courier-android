@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.courier.android.Courier
-import com.courier.android.getLastDeliveredMessage
-import com.courier.android.trackPushNotificationClick
+import com.courier.android.utils.getLastDeliveredMessage
+import com.courier.android.utils.trackPushNotificationClick
 import com.google.firebase.messaging.RemoteMessage
 
 open class CourierActivity : AppCompatActivity() {

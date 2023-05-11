@@ -1,7 +1,5 @@
 package com.courier.android.repositories
 
-import android.os.Looper
-import com.courier.android.Courier
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxResponse
 import com.courier.android.models.InboxData
@@ -17,7 +15,7 @@ internal class InboxRepository : Repository() {
 
     internal var webSocket: CourierWebsocket? = null
 
-    suspend fun connectWebsocket(clientKey: String, userId: String, onMessageReceived: (InboxMessage) -> Unit, onMessageReceivedError: (Exception) -> Unit) {
+    internal suspend fun connectWebsocket(clientKey: String, userId: String, onMessageReceived: (InboxMessage) -> Unit, onMessageReceivedError: (Exception) -> Unit) {
 
         webSocket?.disconnect()
 
@@ -53,7 +51,7 @@ internal class InboxRepository : Repository() {
         webSocket?.disconnect()
     }
 
-    suspend fun getMessages(clientKey: String, userId: String, paginationLimit: Int = 24, startCursor: String? = null): InboxData {
+    internal suspend fun getMessages(clientKey: String, userId: String, paginationLimit: Int = 24, startCursor: String? = null): InboxData {
 
         val query = """
             query GetMessages(

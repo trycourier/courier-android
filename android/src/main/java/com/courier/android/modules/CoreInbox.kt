@@ -6,6 +6,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.models.*
+import com.courier.android.repositories.BrandsRepository
 import com.courier.android.repositories.InboxRepository
 import kotlinx.coroutines.*
 
@@ -22,38 +23,44 @@ internal class CoreInbox : DefaultLifecycleObserver {
     internal var paginationLimit = DEFAULT_PAGINATION_LIMIT
 
     private val inboxRepo by lazy { InboxRepository() }
+    private val brandsRepo by lazy { BrandsRepository() }
+
     private var listeners: MutableList<CourierInboxListener> = mutableListOf()
     private var inbox: Inbox? = null
+
+    internal var brandId: String? = null
+    internal val brand: CourierBrand? get() = inbox?.brand
 
     private val hasInboxUser get() = Courier.shared.userId != null || Courier.shared.clientKey != null
     internal val inboxMessages get() = inbox?.messages
 
     private var dataPipe: Job? = null
-    private val dataPipeJob get() = coroutineScope.launch(start = CoroutineStart.LAZY, context = Dispatchers.IO) {
+    private val dataPipeJob
+        get() = coroutineScope.launch(start = CoroutineStart.LAZY, context = Dispatchers.IO) {
 
-        try {
+            try {
 
-            // Get the initial data
-            this@CoreInbox.inbox = load()
+                // Get the initial data
+                this@CoreInbox.inbox = load()
 
-            // Notify Success
-            dataPipe?.invokeOnCompletion {
-                notifyMessagesChanged()
-            }
+                // Notify Success
+                dataPipe?.invokeOnCompletion {
+                    notifyMessagesChanged()
+                }
 
-        } catch (error: Exception) {
+            } catch (error: Exception) {
 
-            // Disconnect existing socket
-            inboxRepo.disconnectWebsocket()
+                // Disconnect existing socket
+                inboxRepo.disconnectWebsocket()
 
-            // Notify Error
-            dataPipe?.invokeOnCompletion {
-                notifyError(error)
+                // Notify Error
+                dataPipe?.invokeOnCompletion {
+                    notifyError(error)
+                }
+
             }
 
         }
-
-    }
 
     private fun startDataPipe() {
         dataPipe?.cancel()
@@ -116,12 +123,29 @@ internal class CoreInbox : DefaultLifecycleObserver {
                         notifyError(e)
                     }
                 )
+            },
+            async(Dispatchers.IO) {
+
+                // Skip if there is no brand
+                if (this@CoreInbox.brandId == null) {
+                    return@async null
+                }
+
+                // Fetch the brand
+                // May error
+                return@async brandsRepo.getBrand(
+                    clientKey = Courier.shared.clientKey!!,
+                    userId = Courier.shared.userId!!,
+                    brandId = this@CoreInbox.brandId!!
+                )
+
             }
         )
 
         // Get the values
         val inboxData = result[0] as InboxData
         val unreadCount = result[1] as Int
+        val brand = result[3] as CourierBrand?
 
         // Return the values
         return@withContext Inbox(
@@ -129,7 +153,8 @@ internal class CoreInbox : DefaultLifecycleObserver {
             totalCount = inboxData.count ?: 0,
             unreadCount = unreadCount,
             hasNextPage = inboxData.messages?.pageInfo?.hasNextPage,
-            startCursor = inboxData.messages?.pageInfo?.startCursor
+            startCursor = inboxData.messages?.pageInfo?.startCursor,
+            brand = brand,
         )
 
     }
@@ -471,6 +496,14 @@ var Courier.inboxPaginationLimit
         inbox.paginationLimit = min.coerceAtLeast(CoreInbox.DEFAULT_MIN_PAGINATION_LIMIT)
     }
 
+var Courier.inboxBrandId
+    get() = inbox.brandId
+    set(value) {
+        inbox.brandId = value
+    }
+
+val Courier.inboxBrand get() = inbox.brand
+
 suspend fun Courier.fetchNextPageOfMessages(): List<InboxMessage> {
     return inbox.fetchNextPage()
 }
@@ -540,7 +573,8 @@ private data class Inbox(
     var totalCount: Int,
     var unreadCount: Int,
     var hasNextPage: Boolean?,
-    var startCursor: String?
+    var startCursor: String?,
+    val brand: CourierBrand?
 ) {
 
     fun addNewMessage(message: InboxMessage) {

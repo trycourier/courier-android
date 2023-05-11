@@ -1,15 +1,13 @@
 package com.courier.android.inbox
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import android.widget.FrameLayout
-import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import com.courier.android.R
-import com.courier.android.dpToPx
-import com.courier.android.resIdToColorList
+import com.courier.android.utils.dpToPx
 import com.google.android.material.button.MaterialButton
 
 internal class CourierInboxButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
@@ -46,8 +44,8 @@ internal class CourierInboxButton @JvmOverloads constructor(context: Context, at
         val buttonStyles = theme.buttonStyles
 
         // Background Color
-        buttonStyles.backgroundColor?.let {
-            button.backgroundTintList = it.resIdToColorList(context)
+        theme.getButtonColor()?.let {
+            button.backgroundTintList = ColorStateList.valueOf(it)
         }
 
         // Corner Radius
@@ -57,12 +55,12 @@ internal class CourierInboxButton @JvmOverloads constructor(context: Context, at
 
         // Typeface
         buttonStyles.font?.typeface?.let {
-            button.typeface = ResourcesCompat.getFont(context, it)
+            button.typeface = it
         }
 
         // Color
         buttonStyles.font?.color?.let {
-            button.setTextColor(ContextCompat.getColor(context, it))
+            button.setTextColor(it)
         }
 
         // Text Size

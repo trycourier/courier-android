@@ -13,7 +13,7 @@ import com.courier.android.modules.isUserSignedIn
 import com.courier.android.modules.signIn
 import com.courier.android.modules.signOut
 import com.courier.android.modules.userId
-import com.courier.android.requestNotificationPermission
+import com.courier.android.utils.requestNotificationPermission
 import com.courier.example.Env
 import com.courier.example.R
 import kotlinx.coroutines.launch

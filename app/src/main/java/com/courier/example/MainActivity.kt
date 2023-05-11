@@ -10,6 +10,7 @@ import com.courier.android.activity.CourierActivity
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
+import com.courier.android.modules.inboxBrandId
 import com.courier.example.databinding.ActivityMainBinding
 import com.courier.example.fragments.*
 import com.google.firebase.messaging.RemoteMessage
@@ -30,8 +31,6 @@ class MainActivity : CourierActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Courier.initialize(this)
-
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             setContentView(root)
         }
@@ -48,6 +47,11 @@ class MainActivity : CourierActivity() {
                 else -> false
             }
         }
+
+        Courier.initialize(this)
+
+        // Sets the brand at a global level
+        Courier.shared.inboxBrandId = "EK44JHXWFX4A9AGC8QWVNTBDTKC2"
 
         inboxListener = Courier.shared.addInboxListener(
             onInitialLoad = {
