@@ -33,27 +33,6 @@
 
 &emsp;
 
-<table>
-    <thead>
-        <tr>
-            <th width="880px" align="left">Languages</th>
-            <th width="120px" align="center"></th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr width="600px">
-            <td align="left">Kotlin</td>
-            <td align="center">✅</td>
-        </tr>
-        <tr width="600px">
-            <td align="left">Java</td>
-            <td align="center">✅</td>
-        </tr>
-    </tbody>
-</table>
-
-&emsp;
-
 # Installation
 
 1. Add Jitpack repository support in your `settings.gradle` file
@@ -61,13 +40,14 @@
 ```gradle
 pluginManagement {
     repositories {
-        ...
+        ..
         maven { url 'https://jitpack.io' }
     }
 }
+
 dependencyResolutionManagement {
     repositories {
-        ...
+        ..
         maven { url 'https://jitpack.io' }
     }
 }
