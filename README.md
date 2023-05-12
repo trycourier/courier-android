@@ -42,40 +42,11 @@
     </thead>
     <tbody>
         <tr width="600px">
-            <td align="left">Swift</td>
+            <td align="left">Kotlin</td>
             <td align="center">✅</td>
         </tr>
         <tr width="600px">
-            <td align="left">Objective-C</td>
-            <td align="center">✅</td>
-        </tr>
-    </tbody>
-</table>
-
-&emsp;
-
-<table>
-    <thead>
-        <tr>
-            <th width="880px" align="left">Package Manager</th>
-            <th width="120px" align="center"></th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr width="600px">
-            <td align="left">
-                <a href="https://github.com/trycourier/courier-ios#using-swift-package-manager">
-                    <code>Swift Package Manager</code>
-                </a>
-            </td>
-            <td align="center">✅</td>
-        </tr>
-        <tr width="600px">
-            <td align="left">
-                <a href="https://github.com/trycourier/courier-ios#using-cocoapods">
-                    <code>Cocoapods</code>
-                </a>
-            </td>
+            <td align="left">Java</td>
             <td align="center">✅</td>
         </tr>
     </tbody>
@@ -85,9 +56,32 @@
 
 # Installation
 
-## Using Swift Package Manager
+[//]: # (https://user-images.githubusercontent.com/29832989/202578202-32c0ebf7-c11f-46c0-905a-daa8fc3ba8bd.mov)
 
-https://user-images.githubusercontent.com/29832989/202578202-32c0ebf7-c11f-46c0-905a-daa8fc3ba8bd.mov
+#### 1. Add Jitpack repository support in your settings.gradle file
+Courier Android is currently distributed via Jitpack. Maven Central support will be coming in a future update.
+```gradle
+pluginManagement {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+dependencyResolutionManagement {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+#### 2. Add the implementation to your app build.gradle file
+``` gradle
+dependencies {
+    implementation 'com.github.trycourier:courier-android:2.0.01'
+}
+```
+&emsp;
 
 1. Open your iOS project and increase the min SDK target to iOS 13.0+
 2. In your Xcode project, go to File > Add Packages
