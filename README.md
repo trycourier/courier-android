@@ -165,7 +165,6 @@ We want to make this the best SDK for managing notifications! Have an idea or fe
 - [Courier Feedback](https://feedback.courier.com/)
 - [Courier Android Issues](https://github.com/trycourier/courier-android/issues)
 
-
 # **🐤 Courier — Android**
 
 Courier helps you spend less time building notification infrastructure, and more time building great experiences for your users!
