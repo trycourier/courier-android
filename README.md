@@ -56,10 +56,8 @@
 
 # Installation
 
-[//]: # (https://user-images.githubusercontent.com/29832989/202578202-32c0ebf7-c11f-46c0-905a-daa8fc3ba8bd.mov)
+1. Add Jitpack repository support in your `settings.gradle` file
 
-#### 1. Add Jitpack repository support in your settings.gradle file
-Courier Android is currently distributed via Jitpack. Maven Central support will be coming in a future update.
 ```gradle
 pluginManagement {
     repositories {
@@ -75,7 +73,8 @@ dependencyResolutionManagement {
 }
 ```
 
-#### 2. Add the implementation to your app build.gradle file
+2. Add the implementation to your app `build.gradle` file
+
 ``` gradle
 dependencies {
     implementation 'com.github.trycourier:courier-android:2.0.01'
