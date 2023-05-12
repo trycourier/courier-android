@@ -14,7 +14,6 @@ import kotlinx.coroutines.*
 internal class CorePush {
 
     private val tokenRepo by lazy { TokenRepository() }
-//    private lateinit var trackingRepo = TrackingRepository()
 
     // Stores a local copy of the fcmToken
     private var fcmToken: String? = null

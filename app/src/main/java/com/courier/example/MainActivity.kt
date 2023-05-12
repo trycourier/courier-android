@@ -51,7 +51,7 @@ class MainActivity : CourierActivity() {
         Courier.initialize(this)
 
         // Sets the brand at a global level
-        Courier.shared.inboxBrandId = "EK44JHXWFX4A9AGC8QWVNTBDTKC2"
+        Courier.shared.inboxBrandId = Env.COURIER_BRAND_ID
 
         inboxListener = Courier.shared.addInboxListener(
             onInitialLoad = {
