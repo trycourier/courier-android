@@ -60,36 +60,6 @@ dependencies {
     implementation 'com.github.trycourier:courier-android:2.0.01'
 }
 ```
-&emsp;
-
-1. Open your iOS project and increase the min SDK target to iOS 13.0+
-2. In your Xcode project, go to File > Add Packages
-3. Paste the following url in "Search or Enter Package URL"
-
-```
-https://github.com/trycourier/courier-ios
-```
-
-## Using Cocoapods
-
-1. Open your iOS project and increase the min SDK target to iOS 13.0+
-2. Update Podfile
-
-```ruby
-platform :ios, '13.0'
-..
-target 'YOUR_TARGET_NAME' do
-    ..
-    pod 'Courier_iOS'
-    ..
-end
-```
-
-3. Open terminal in root directory and run
-
-```sh
-pod install
-```
 
 &emsp;
 
@@ -111,7 +81,7 @@ These are all the available features of the SDK.
                 1
             </td>
             <td align="left">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/Authentication.md">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md">
                     <code>Authentication</code>
                 </a>
             </td>
@@ -124,7 +94,7 @@ These are all the available features of the SDK.
                 2
             </td>
             <td align="left">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/Inbox.md">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md">
                     <code>Courier Inbox</code>
                 </a>
             </td>
@@ -137,7 +107,7 @@ These are all the available features of the SDK.
                 3
             </td>
             <td align="left">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md">
                     <code>Push Notifications</code>
                 </a>
             </td>
@@ -150,7 +120,7 @@ These are all the available features of the SDK.
                 4
             </td>
             <td align="left">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/Testing.md">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Testing.md">
                     <code>Testing</code>
                 </a>
             </td>
@@ -165,59 +135,35 @@ These are all the available features of the SDK.
 
 # Example Projects
 
-Several common starter projects using the SDK.
+Starter projects using this SDK.
 
 <table>
     <thead>
         <tr>
-            <th width="400px" align="left">Project Link</th>
-            <th width="200px" align="center">UI Framework</th>
-            <th width="200px" align="center">Package Manager</th>
+            <th width="800px" align="left">Project Link</th>
             <th width="200px" align="center">Language</th>
         </tr>
     </thead>
     <tbody>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-ios/tree/master/Example">
+                <a href="https://github.com/trycourier/courier-android/tree/feature/inbox-docs/app">
                     <code>Example</code>
                 </a>
             </td>
-            <td align="center"><code>UIKit</code></td>
-            <td align="center"><code>Swift</code></td>
-            <td align="center"><code>Swift</code></td>
-        </tr>
-        <tr width="600px">
-            <td align="left">
-                <a href="https://github.com/trycourier/courier-ios/tree/master/Pod-Example">
-                    <code>Example</code>
-                </a>
-            </td>
-            <td align="center"><code>UIKit</code></td>
-            <td align="center"><code>Cocoapods</code></td>
-            <td align="center"><code>Swift</code></td>
-        </tr>
-        <tr width="600px">
-            <td align="left">
-                <a href="https://github.com/trycourier/courier-ios/tree/master/SwiftUI-Example">
-                    <code>Example</code>
-                </a>
-            </td>
-            <td align="center"><code>SwiftUI</code></td>
-            <td align="center"><code>Swift</code></td>
-            <td align="center"><code>Swift</code></td>
+            <td align="center"><code>Kotlin</code></td>
         </tr>
     </tbody>
 </table>
 
 &emsp;
 
-# **Share feedback with Courier**
+## **Share feedback with Courier**
 
-We are building the best SDKs for handling notifications! Have an idea or feedback about our SDKs? Here are some links to contact us:
+We want to make this the best SDK for managing notifications! Have an idea or feedback about our SDKs? Here are some links to contact us:
 
 - [Courier Feedback](https://feedback.courier.com/)
-- [Courier iOS Issues](https://github.com/trycourier/courier-ios/issues)
+- [Courier Android Issues](https://github.com/trycourier/courier-android/issues)
 
 
 # **🐤 Courier — Android**
