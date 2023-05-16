@@ -45,7 +45,7 @@ An in-app notification center list you can use to notify your users. Allows you 
 
 The default `CourierInbox` styles.
 
-<img width="810" alt="default-inbox-styles" src="https://user-images.githubusercontent.com/6370613/228881237-97534448-e8af-46e4-91de-d3423e95dc14.png">
+<img width="810" alt="android-default-inbox-styles" src="https://github.com/trycourier/courier-android/assets/6370613/fc521446-1c89-4ff8-8e8c-4f8567bb2b91">
 
 ```swift
 import Courier_iOS
