@@ -119,6 +119,10 @@ inbox.setOnClickMessageListener { message, index ->
 inbox.setOnClickActionListener { action, message, index ->
     Courier.log(action.toString())
 }
+
+inbox.setOnScrollInboxListener { offsetInDp ->
+    Courier.log(offsetInDp.toString())
+}
 ```
 
 &emsp;
@@ -129,17 +133,19 @@ inbox.setOnClickActionListener { action, message, index ->
 
 You can control your branding from the [`Courier Studio`](https://app.courier.com/designer/brands).
 
-```swift 
-let brandedThemeWithLoadingColorOverride = CourierInboxTheme(
-    brandId: "YOUR_BRAND_ID",
-    loadingIndicatorColor: .red, // ⚠️ Will override the brand primary color
-    ...
+```kotlin
+// Sets the brand for the inbox
+Courier.shared.inboxBrandId = "YOUR_BRAND_ID"
+
+val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
+
+// ⚠️ Any colors you apply to the theme will override the brand you applied
+val theme = CourierInboxTheme(
+    loadingIndicatorColor = ContextCompat.getColor(requireContext(), R.color.courier_purple)
 )
 
-let courierInbox = CourierInbox(
-    lightTheme: brandedThemeWithLoadingColorOverride,
-    ...
-)
+inbox.lightTheme = theme
+inbox.darkTheme = theme
 ```
 
 &emsp;
