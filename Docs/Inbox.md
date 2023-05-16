@@ -173,103 +173,40 @@ inbox.darkTheme = theme
 
 ## Custom Inbox Example
 
-The raw data you can use to build whatever UI you'd like.
+The raw data you can use to build any UI you'd like.
 
 <img width="415" alt="android-custom-inbox" src="https://github.com/trycourier/courier-android/assets/6370613/e89a3b52-08ba-426c-94ac-ee26bcf7cfee">
 
 ```kotlin
 class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
 
-    private lateinit var stateTextView: TextView
     private lateinit var inboxListener: CourierInboxListener
     private lateinit var recyclerView: RecyclerView
-
     private val messagesAdapter = MessagesAdapter()
-    private val loadingAdapter = LoadingAdapter()
-    private val adapter = ConcatAdapter(messagesAdapter)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        stateTextView = view.findViewById(R.id.stateTextView)
-
-        // Get the menu
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
-        toolbar.setOnMenuItemClickListener { item ->
-            return@setOnMenuItemClickListener if (item.itemId == R.id.readAll) {
-
-                Courier.shared.readAllInboxMessages(
-                    onSuccess = {
-                        print("Messages are read")
-                    },
-                    onFailure = { error ->
-                        print(error)
-                    }
-                )
-
-                true
-            } else {
-                false
-            }
-        }
-
         // Create the list
         recyclerView = view.findViewById(R.id.recyclerView)
-        recyclerView.adapter = adapter
-        recyclerView.addItemDecoration(DividerItemDecoration(activity, DividerItemDecoration.VERTICAL))
-
-        // Handle pull to refresh
-        val refreshLayout = view.findViewById<SwipeRefreshLayout>(R.id.refreshLayout)
-        refreshLayout.setOnRefreshListener {
-
-            Courier.shared.refreshInbox {
-                refreshLayout.isRefreshing = false
-            }
-
-        }
+        recyclerView.adapter = messagesAdapter
 
         // Setup the listener
         inboxListener = Courier.shared.addInboxListener(
             onInitialLoad = {
-
-                stateTextView.isVisible = false
-
-                refreshAdapters(
-                    showLoading = true
-                )
-
+                ...
             },
-            onError = { e ->
-
-                stateTextView.text = e.message
-                stateTextView.isVisible = true
-
-                print(e)
-                refreshAdapters()
-
+            onError = { error ->
+                ...
             },
             onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
-
-                stateTextView.isVisible = messages.isEmpty()
-                stateTextView.text = "No messages found"
-
-                refreshAdapters(
-                    showMessages = messages.isNotEmpty(),
-                    showLoading = canPaginate
-                )
-
+                messagesAdapter.messages = messages
+                messagesAdapter.notifyDataSetChanged()
             }
         )
 
     }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun refreshAdapters(showMessages: Boolean = false, showLoading: Boolean = false) {
-        if (showMessages) adapter.addAdapter(0, messagesAdapter) else adapter.removeAdapter(messagesAdapter)
-        if (showLoading) adapter.addAdapter(loadingAdapter) else adapter.removeAdapter(loadingAdapter)
-        messagesAdapter.notifyDataSetChanged()
-    }
-
+    
     override fun onDestroyView() {
         super.onDestroyView()
         inboxListener.remove()
@@ -292,49 +229,37 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
     <tbody>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Example/Example/PrebuiltInboxViewController.swift">
+                <a href="https://github.com/trycourier/courier-android/blob/master/app/src/main/java/com/courier/example/fragments/PrebuiltInboxFragment.kt">
                     <code>Default Example</code>
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/Inbox.md#default-inbox-example">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md#default-inbox-example">
                     <code>Default</code>
                 </a>
             </td>
         </tr>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Example/Example/StyledInboxViewController.swift">
+                <a href="https://github.com/trycourier/courier-android/blob/master/app/src/main/java/com/courier/example/fragments/StyledInboxFragment.kt">
                     <code>Styled Example</code>
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/Inbox.md#styled-inbox-example">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md#styled-inbox-example">
                     <code>Styled</code>
                 </a>
             </td>
         </tr>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Example/Example/CustomInboxViewController.swift">
+                <a href="https://github.com/trycourier/courier-android/blob/master/app/src/main/java/com/courier/example/fragments/CustomInboxFragment.kt">
                     <code>Custom Example</code>
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/Inbox.md#custom-inbox-example">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md#custom-inbox-example">
                     <code>Custom</code>
-                </a>
-            </td>
-        </tr>
-        <tr width="600px">
-            <td align="left">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/SwiftUI-Example/SwiftUI-Example/ContentView.swift">
-                    <code>SwiftUI Example</code>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/Inbox.md#styled-inbox-example">
-                    <code>Styled</code>
                 </a>
             </td>
         </tr>
@@ -345,19 +270,18 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
 
 ## Available Properties and Functions
 
-```swift
-import Courier_iOS
+```kotlin
 
 // Listen to all inbox events
 // Only one "pipe" of data is created behind the scenes for network / performance reasons
-let inboxListener = Courier.shared.addInboxListener(
-    onInitialLoad: {
+val inboxListener = Courier.shared.addInboxListener(
+    onInitialLoad = {
         // Called when the inbox starts up
     },
-    onError: { error in
+    onError = { error ->
         // Called if an error occurs
     },
-    onMessagesChanged: { messages, unreadMessageCount, totalMessageCount, canPaginate in
+    onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
         // Called when messages update
     }
 )
@@ -374,21 +298,16 @@ Courier.shared.removeAllInboxListeners()
 Courier.shared.inboxPaginationLimit = 123
 
 // The available messages the inbox has
-let inboxMessages = Courier.shared.inboxMessages
+val inboxMessages = Courier.shared.inboxMessages
 
-Task {
+lifecycle.coroutineScope.launch {
 
     // Fetches the next page of messages
-    try await Courier.shared.fetchNextPageOfMessages()
+    Courier.shared.fetchNextPageOfMessages()
 
     // Reloads the inbox
     // Commonly used with pull to refresh
-    try await Courier.shared.refreshInbox()
-
-    // Reads / Unreads a message
-    // Writes the update instantly and performs request in background
-    try await Courier.shared.readMessage(messageId: "1-321...")
-    try await Courier.shared.unreadMessage(messageId: "1-321...")
+    Courier.shared.refreshInbox()
 
     // Reads all the messages
     // Writes the update instantly and performs request in background
