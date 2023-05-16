@@ -71,64 +71,54 @@ The styles you can use to quickly customize the `CourierInbox`.
 <img width="415" alt="android-styled-inbox-styles" src="https://github.com/trycourier/courier-android/assets/6370613/cfea668d-2a8d-4da6-a128-bf5d747a8e11">
 
 ```kotlin
-let textColor = UIColor(red: 42 / 255, green: 21 / 255, blue: 55 / 255, alpha: 100)
-let primaryColor = UIColor(red: 136 / 255, green: 45 / 255, blue: 185 / 255, alpha: 100)
-let secondaryColor = UIColor(red: 234 / 255, green: 104 / 255, blue: 102 / 255, alpha: 100)
+val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
 
-// Theme object containing all the styles you want to apply 
-let inboxTheme = CourierInboxTheme(
-    messageAnimationStyle: .fade,
-    unreadIndicatorBarColor: secondaryColor,
-    loadingIndicatorColor: primaryColor,
-    titleFont: CourierInboxFont(
-        font: UIFont(name: "Avenir Black", size: 20)!,
-        color: textColor
+val theme = CourierInboxTheme(
+    unreadIndicatorBarColor = ContextCompat.getColor(requireContext(), R.color.courier_red),
+    loadingIndicatorColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
+    titleFont = CourierInboxFont(
+        typeface = ResourcesCompat.getFont(requireContext(), R.font.poppins),
+        color = ContextCompat.getColor(requireContext(), android.R.color.black),
+        sizeInSp = 18
     ),
-    timeFont: CourierInboxFont(
-        font: UIFont(name: "Avenir Medium", size: 16)!,
-        color: textColor
+    bodyFont = CourierInboxFont(
+        typeface = ResourcesCompat.getFont(requireContext(), R.font.poppins),
+        color = ContextCompat.getColor(requireContext(), android.R.color.darker_gray),
+        sizeInSp = 16
     ),
-    bodyFont: CourierInboxFont(
-        font: UIFont(name: "Avenir Medium", size: 18)!,
-        color: textColor
+    timeFont = CourierInboxFont(
+        typeface = ResourcesCompat.getFont(requireContext(), R.font.poppins),
+        color = ContextCompat.getColor(requireContext(), android.R.color.darker_gray),
+        sizeInSp = 14
     ),
-    detailTitleFont: CourierInboxFont(
-        font: UIFont(name: "Avenir Medium", size: 20)!,
-        color: textColor
+    detailTitleFont = CourierInboxFont(
+        typeface = ResourcesCompat.getFont(requireContext(), R.font.poppins),
+        color = ContextCompat.getColor(requireContext(), android.R.color.black),
+        sizeInSp = 18
     ),
-    buttonStyles: CourierInboxButtonStyles(
-        font: CourierInboxFont(
-            font: UIFont(name: "Avenir Black", size: 16)!,
-            color: .white
+    buttonStyles = CourierInboxButtonStyles(
+        font = CourierInboxFont(
+            typeface = ResourcesCompat.getFont(requireContext(), R.font.poppins),
+            color = ContextCompat.getColor(requireContext(), android.R.color.white),
+            sizeInSp = 16
         ),
-        backgroundColor: primaryColor,
-        cornerRadius: 100
+        backgroundColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
+        cornerRadiusInDp = 100
     ),
-    cellStyles: CourierInboxCellStyles(
-        separatorStyle: .singleLine,
-        separatorInsets: .zero
-    )
+    dividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
 )
 
-// Pass the theme to the inbox
-// This example will use the same theme for light and dark mode
-let courierInbox = CourierInbox(
-    lightTheme: inboxTheme,
-    darkTheme: inboxTheme,
-    didClickInboxMessageAtIndex: { message, index in
-        message.isRead ? message.markAsUnread() : message.markAsRead()
-        print(index, message)
-    },
-    didClickInboxActionForMessageAtIndex: { action, message, index in
-        print(action, message, index)
-    },
-    didScrollInbox: { scrollView in
-        print(scrollView.contentOffset.y)
-    }
-)
+inbox.lightTheme = theme
+inbox.darkTheme = theme
 
-view.addSubview(courierInbox)
-...
+inbox.setOnClickMessageListener { message, index ->
+    Courier.log(message.toString())
+    if (message.isRead) message.markAsUnread() else message.markAsRead()
+}
+
+inbox.setOnClickActionListener { action, message, index ->
+    Courier.log(action.toString())
+}
 ```
 
 &emsp;
