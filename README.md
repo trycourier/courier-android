@@ -86,7 +86,7 @@ These are all the available features of the SDK.
                 </a>
             </td>
             <td align="left">
-                Manages user credentials between app sessions. Required if you would like to use <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/Inbox.md"><code>Courier Inbox</code></a> and <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md"><code>Push Notifications</code></a>.
+                Manages user credentials between app sessions. Required if you would like to use <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md"><code>Courier Inbox</code></a> and <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md"><code>Push Notifications</code></a>.
             </td>
         </tr>
         <tr width="600px">

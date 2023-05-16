@@ -95,7 +95,7 @@ listener.remove()
             </td>
             <td align="left">
                 For development only: <a href="https://app.courier.com/settings/api-keys"><code>authKey</code></a><br>
-                For development or production: <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/Authentication.md#going-to-production"><code>accessToken</code></a>
+                For development or production: <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md#going-to-production"><code>accessToken</code></a>
             </td>
         </tr>
         <tr width="600px">
@@ -103,7 +103,7 @@ listener.remove()
                 <code>clientKey</code>
             </td>
             <td align="left">
-                The key required to get <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/Inbox.md"><code>Courier Inbox</code></a> messages for the current user. Can be <code>nil</code> if you do not need Courier Inbox.
+                The key required to get <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md"><code>Courier Inbox</code></a> messages for the current user. Can be <code>nil</code> if you do not need Courier Inbox.
             </td>
             <td align="left">
                 <a href="https://app.courier.com/channels/courier"><code>Courier Inbox clientKey</code></a>
