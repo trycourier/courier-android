@@ -68,7 +68,7 @@ inbox.setOnClickActionListener { action, message, index ->
 
 The styles you can use to quickly customize the `CourierInbox`.
 
-<img width="415" alt="styled-inbox" src="https://user-images.githubusercontent.com/6370613/228883605-c8f5a63b-8be8-491d-9d19-ac2d2a666076.png">
+<img width="415" alt="android-styled-inbox-styles" src="https://github.com/trycourier/courier-android/assets/6370613/cfea668d-2a8d-4da6-a128-bf5d747a8e11">
 
 ```kotlin
 let textColor = UIColor(red: 42 / 255, green: 21 / 255, blue: 55 / 255, alpha: 100)
