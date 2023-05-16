@@ -194,10 +194,10 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
         // Setup the listener
         inboxListener = Courier.shared.addInboxListener(
             onInitialLoad = {
-                ...
+                ..
             },
             onError = { error ->
-                ...
+                ..
             },
             onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
                 messagesAdapter.messages = messages
@@ -316,10 +316,7 @@ lifecycle.coroutineScope.launch {
 }
 
 // Mark message as read/unread
-let message = InboxMessage(...)
-
-// Calls Courier.shared.un/readMessage(messageId...) under the hood
-// Has optional callbacks
+let message = InboxMessage(..)
 message.markAsRead()
 message.markAsUnread()
 
