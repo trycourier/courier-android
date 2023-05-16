@@ -47,34 +47,17 @@ The default `CourierInbox` styles.
 
 <img width="810" alt="android-default-inbox-styles" src="https://github.com/trycourier/courier-android/assets/6370613/1aca0cd0-a0bb-4e22-9ac6-65a97a06f914">
 
-```swift
-import Courier_iOS
+```kotlin
+val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
 
-// Create the view
-let courierInbox = CourierInbox(
-    didClickInboxMessageAtIndex: { message, index in
-        message.isRead ? message.markAsUnread() : message.markAsRead()
-        print(index, message)
-    },
-    didClickInboxActionForMessageAtIndex: { action, message, index in
-        print(action, message, index)
-    },
-    didScrollInbox: { scrollView in
-        print(scrollView.contentOffset.y)
-    }
-)
+inbox.setOnClickMessageListener { message, index ->
+    Courier.log(message.toString())
+    if (message.isRead) message.markAsUnread() else message.markAsRead()
+}
 
-// Add the view to your UI
-courierInbox.translatesAutoresizingMaskIntoConstraints = false
-view.addSubview(courierInbox)
-
-// Constrain the view how you'd like
-NSLayoutConstraint.activate([
-    courierInbox.topAnchor.constraint(equalTo: view.topAnchor),
-    courierInbox.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-    courierInbox.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-    courierInbox.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-])
+inbox.setOnClickActionListener { action, message, index ->
+    Courier.log(action.toString())
+}
 ```
 
 &emsp;
@@ -85,9 +68,7 @@ The styles you can use to quickly customize the `CourierInbox`.
 
 <img width="415" alt="styled-inbox" src="https://user-images.githubusercontent.com/6370613/228883605-c8f5a63b-8be8-491d-9d19-ac2d2a666076.png">
 
-```swift
-import Courier_iOS
-
+```kotlin
 let textColor = UIColor(red: 42 / 255, green: 21 / 255, blue: 55 / 255, alpha: 100)
 let primaryColor = UIColor(red: 136 / 255, green: 45 / 255, blue: 185 / 255, alpha: 100)
 let secondaryColor = UIColor(red: 234 / 255, green: 104 / 255, blue: 102 / 255, alpha: 100)
