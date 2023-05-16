@@ -2,6 +2,8 @@
 
 &emsp;
 
+&emsp;
+
 # Courier Inbox
 
 An in-app notification center list you can use to notify your users. Allows you to build high quality, flexible notification feeds very quickly.
@@ -28,7 +30,7 @@ An in-app notification center list you can use to notify your users. Allows you 
                 </td>
             </tr>
             <td align="left">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/Authentication.md">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md">
                     <code>Authentication</code>
                 </a>
             </td>
@@ -41,69 +43,23 @@ An in-app notification center list you can use to notify your users. Allows you 
 
 &emsp;
 
-# Usage
-
-`CourierInbox` works with all native iOS UI frameworks.
-
-<table>
-    <thead>
-        <tr>
-            <th width="800px" align="left">UI Framework</th>
-            <th width="200px" align="center">Support</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr width="600px">
-            <td align="left"><code>UIKit</code></td>
-            <td align="center">✅</td>
-        </tr>
-        <tr width="600px">
-            <td align="left"><code>XIB</code></td>
-            <td align="center">⚠️ Not optimised</td>
-        </tr>
-        <tr width="600px">
-            <td align="left"><code>SwiftUI</code></td>
-            <td align="center">✅</td>
-        </tr>
-    </tbody>
-</table>
-
-&emsp;
-
 ## Default Inbox Example
 
 The default `CourierInbox` styles.
 
-<img width="810" alt="default-inbox-styles" src="https://user-images.githubusercontent.com/6370613/228881237-97534448-e8af-46e4-91de-d3423e95dc14.png">
+<img width="810" alt="android-default-inbox-styles" src="https://github.com/trycourier/courier-android/assets/6370613/1aca0cd0-a0bb-4e22-9ac6-65a97a06f914">
 
-```swift
-import Courier_iOS
+```kotlin
+val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
 
-// Create the view
-let courierInbox = CourierInbox(
-    didClickInboxMessageAtIndex: { message, index in
-        message.isRead ? message.markAsUnread() : message.markAsRead()
-        print(index, message)
-    },
-    didClickInboxActionForMessageAtIndex: { action, message, index in
-        print(action, message, index)
-    },
-    didScrollInbox: { scrollView in
-        print(scrollView.contentOffset.y)
-    }
-)
+inbox.setOnClickMessageListener { message, index ->
+    Courier.log(message.toString())
+    if (message.isRead) message.markAsUnread() else message.markAsRead()
+}
 
-// Add the view to your UI
-courierInbox.translatesAutoresizingMaskIntoConstraints = false
-view.addSubview(courierInbox)
-
-// Constrain the view how you'd like
-NSLayoutConstraint.activate([
-    courierInbox.topAnchor.constraint(equalTo: view.topAnchor),
-    courierInbox.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-    courierInbox.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-    courierInbox.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-])
+inbox.setOnClickActionListener { action, message, index ->
+    Courier.log(action.toString())
+}
 ```
 
 &emsp;
@@ -114,9 +70,7 @@ The styles you can use to quickly customize the `CourierInbox`.
 
 <img width="415" alt="styled-inbox" src="https://user-images.githubusercontent.com/6370613/228883605-c8f5a63b-8be8-491d-9d19-ac2d2a666076.png">
 
-```swift
-import Courier_iOS
-
+```kotlin
 let textColor = UIColor(red: 42 / 255, green: 21 / 255, blue: 55 / 255, alpha: 100)
 let primaryColor = UIColor(red: 136 / 255, green: 45 / 255, blue: 185 / 255, alpha: 100)
 let secondaryColor = UIColor(red: 234 / 255, green: 104 / 255, blue: 102 / 255, alpha: 100)
