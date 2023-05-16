@@ -175,63 +175,107 @@ inbox.darkTheme = theme
 
 The raw data you can use to build whatever UI you'd like.
 
-<img width="415" alt="custom-inbox" src="https://user-images.githubusercontent.com/6370613/228886933-d6f1ef6a-c582-4269-af68-da988aa25063.png">
+<img width="415" alt="android-custom-inbox" src="https://github.com/trycourier/courier-android/assets/6370613/e89a3b52-08ba-426c-94ac-ee26bcf7cfee">
 
-```swift
-import UIKit
-import Courier_iOS
+```kotlin
+class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
 
-class CustomInboxViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
+    private lateinit var stateTextView: TextView
+    private lateinit var inboxListener: CourierInboxListener
+    private lateinit var recyclerView: RecyclerView
 
-    private var inboxListener: CourierInboxListener? = nil
-    
-    ...
+    private val messagesAdapter = MessagesAdapter()
+    private val loadingAdapter = LoadingAdapter()
+    private val adapter = ConcatAdapter(messagesAdapter)
 
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        ...
-        
-        // Allows you to listen to all inbox changes and build whatever you'd like
-        self.inboxListener = Courier.shared.addInboxListener(
-            onInitialLoad: {
-                ...
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        stateTextView = view.findViewById(R.id.stateTextView)
+
+        // Get the menu
+        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
+        toolbar.setOnMenuItemClickListener { item ->
+            return@setOnMenuItemClickListener if (item.itemId == R.id.readAll) {
+
+                Courier.shared.readAllInboxMessages(
+                    onSuccess = {
+                        print("Messages are read")
+                    },
+                    onFailure = { error ->
+                        print(error)
+                    }
+                )
+
+                true
+            } else {
+                false
+            }
+        }
+
+        // Create the list
+        recyclerView = view.findViewById(R.id.recyclerView)
+        recyclerView.adapter = adapter
+        recyclerView.addItemDecoration(DividerItemDecoration(activity, DividerItemDecoration.VERTICAL))
+
+        // Handle pull to refresh
+        val refreshLayout = view.findViewById<SwipeRefreshLayout>(R.id.refreshLayout)
+        refreshLayout.setOnRefreshListener {
+
+            Courier.shared.refreshInbox {
+                refreshLayout.isRefreshing = false
+            }
+
+        }
+
+        // Setup the listener
+        inboxListener = Courier.shared.addInboxListener(
+            onInitialLoad = {
+
+                stateTextView.isVisible = false
+
+                refreshAdapters(
+                    showLoading = true
+                )
+
             },
-            onError: { error in
-                ...
+            onError = { e ->
+
+                stateTextView.text = e.message
+                stateTextView.isVisible = true
+
+                print(e)
+                refreshAdapters()
+
             },
-            onMessagesChanged: { messages, unreadMessageCount, totalMessageCount, canPaginate in
-                ...
-                self.collectionView.reloadData()
+            onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
+
+                stateTextView.isVisible = messages.isEmpty()
+                stateTextView.text = "No messages found"
+
+                refreshAdapters(
+                    showMessages = messages.isNotEmpty(),
+                    showLoading = canPaginate
+                )
+
             }
         )
-        
+
     }
-    
-    ...
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CustomInboxCollectionViewCell.id, for: indexPath as IndexPath) as! CustomInboxCollectionViewCell
-        
-        let message = inboxMessages[indexPath.row]
-        cell.setMessage(message)
-        
-        return cell
-        
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun refreshAdapters(showMessages: Boolean = false, showLoading: Boolean = false) {
+        if (showMessages) adapter.addAdapter(0, messagesAdapter) else adapter.removeAdapter(messagesAdapter)
+        if (showLoading) adapter.addAdapter(loadingAdapter) else adapter.removeAdapter(loadingAdapter)
+        messagesAdapter.notifyDataSetChanged()
     }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let message = inboxMessages[indexPath.row].toJson()
-        message.isRead ? message.markAsUnread() : message.markAsRead()
-    }
-    
-    deinit {
-        self.inboxListener?.remove()
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        inboxListener.remove()
     }
 
 }
-...
 ```
 
 &emsp;
