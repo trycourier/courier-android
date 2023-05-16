@@ -41,35 +41,6 @@ An in-app notification center list you can use to notify your users. Allows you 
 
 &emsp;
 
-# Usage
-
-`CourierInbox` works with all native iOS UI frameworks.
-
-<table>
-    <thead>
-        <tr>
-            <th width="800px" align="left">UI Framework</th>
-            <th width="200px" align="center">Support</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr width="600px">
-            <td align="left"><code>UIKit</code></td>
-            <td align="center">✅</td>
-        </tr>
-        <tr width="600px">
-            <td align="left"><code>XIB</code></td>
-            <td align="center">⚠️ Not optimised</td>
-        </tr>
-        <tr width="600px">
-            <td align="left"><code>SwiftUI</code></td>
-            <td align="center">✅</td>
-        </tr>
-    </tbody>
-</table>
-
-&emsp;
-
 ## Default Inbox Example
 
 The default `CourierInbox` styles.
