@@ -286,6 +286,7 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     // Opens all the current messages
     // Performs this on an async thread
+    // Fails silently
     private fun openVisibleMessages() = coroutineScope.launch(context = Dispatchers.IO) {
 
         // Ensure we have a user
@@ -301,32 +302,40 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
             val lastIndex = manager.findLastCompletelyVisibleItemPosition()
 
             // Avoid index out of bounds
-            if (firstIndex == -1 && lastIndex == -1) {
+            if (firstIndex == -1 || lastIndex == -1) {
                 return@let
             }
 
-            // Find the messages
-            val messagesToOpen = messagesAdapter.messages.subList(firstIndex, lastIndex).filter { !it.isOpened }.map { message ->
+            try {
 
-                // Mark the message as open locally
-                message.setOpened()
+                // Find the messages
+                val messagesToOpen = messagesAdapter.messages.subList(firstIndex, lastIndex).filter { !it.isOpened }.map { message ->
 
-                // Bundle the request into an async function
-                return@map async {
+                    // Mark the message as open locally
+                    message.setOpened()
 
-                    // Open the message in Courier
-                    inboxRepo.openMessage(
-                        clientKey = Courier.shared.clientKey!!,
-                        userId = Courier.shared.userId!!,
-                        messageId = message.messageId,
-                    )
+                    // Bundle the request into an async function
+                    return@map async {
+
+                        // Open the message in Courier
+                        inboxRepo.openMessage(
+                            clientKey = Courier.shared.clientKey!!,
+                            userId = Courier.shared.userId!!,
+                            messageId = message.messageId,
+                        )
+
+                    }
 
                 }
 
-            }
+                // Perform all the changes together
+                messagesToOpen.awaitAll()
 
-            // Perform all the changes together
-            messagesToOpen.awaitAll()
+            } catch (e: CourierException) {
+
+                Courier.error(e.message)
+
+            }
 
         }
 
