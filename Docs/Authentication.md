@@ -55,8 +55,8 @@ Courier.initialize(context = context)
 // Uploads push notification devices tokens to Courier if needed
 Courier.shared.signIn(
     accessToken = "pk_prod_H12...",
-    userId = "example_user_id",
-    clientKey = "YWQxN..."
+    clientKey = "YWQxN...",
+    userId = "example_user_id"
 )
 
 // Removes the locally saved credentials
@@ -69,7 +69,7 @@ val userId = Courier.shared.userId
 val isUserSignedIn = Courier.shared.isUserSignedIn
 
 val listener = Courier.shared.addAuthenticationListener { userId ->
-        print(userId ?: "No userId found")
+    print(userId ?: "No userId found")
 }
 
 listener.remove()
