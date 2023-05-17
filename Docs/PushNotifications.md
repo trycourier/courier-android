@@ -255,23 +255,8 @@ lifecycleScope.launch {
 1. Register for push notifications
 
 
-```swift
-import Courier_iOS
-
-Task {
-        
-    // Sends a test message
-    // "YOUR_AUTH_KEY" is found here: https://app.courier.com/settings/api-keys
-    // DO NOT LEAVE "YOUR_AUTH_KEY" in your production app. This is only for testing.
-    try await Courier.shared.sendMessage(
-        authKey: "YOUR_AUTH_KEY",
-        userId: "example_user_id",
-        title: "Hello!",
-        message: "I hope you are having a great day",
-        providers: [.apns, .fcm]
-    )
-
-}
+```kotlin
+TODO
 ```
 
 2. Send a test message
