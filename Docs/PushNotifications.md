@@ -241,9 +241,9 @@ class MainActivity : CourierActivity() {
 lifecycleScope.launch {
 
     Courier.shared.signIn(
-        accessToken = "YOUR_ACCESS_TOKEN",
-        userId = "EXAMPLE_USER_ID",
-        clientKey = "YOUR_CLIENT_KEY"
+        accessToken = "pk_prod_H12...",
+        clientKey = "YWQxN...",
+        userId = "example_user_id"
     )
     
     val hasNotificationPermissions = (activity as AppCompatActivity).requestNotificationPermission()
