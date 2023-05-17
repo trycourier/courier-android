@@ -148,7 +148,7 @@ Select which push notification provider you would like Courier to route push not
 
 ## 2. Add the `CourierService`
 
-### 1. Create the `CourierService` file
+1. Create the `CourierService` file
 
 This file is used to track new push notifications when they arrive and to automatically sync push notification tokens. Create a new file, name it what you'd like and paste the follow code in it. (Kotlin example shown below)
 
@@ -185,7 +185,7 @@ class YourNotificationService: CourierService() {
 
 &emsp;
 
-### 2. Add the `CourierService` entry in your `AndroidManifest.xml` file
+2. Add the `CourierService` entry in your `AndroidManifest.xml` file
 
 ```xml
 <manifest>
@@ -220,7 +220,7 @@ This will allow you to handle when users get push notifications delivered and wh
 ```kotlin
 class MainActivity : CourierActivity() {
 
-    ...
+    ..
 
     override fun onPushNotificationClicked(message: RemoteMessage) {
         Toast.makeText(this, "Message clicked:\n${message.data}", Toast.LENGTH_LONG).show()
@@ -235,61 +235,19 @@ class MainActivity : CourierActivity() {
 
 &emsp;
 
-## 4. Add the Notification Service Extension (Optional, but recommended)
+## 4. Send a Test Push Notification
 
-To make sure Courier can track when a notification is delivered to the device, you need to add a Notification Service Extension. Here is how to add one.
+```kotlin
+lifecycleScope.launch {
 
-https://user-images.githubusercontent.com/29832989/202580269-863a9293-4c0b-48c9-8485-c0c43f077e12.mov
-
-1. Download and Unzip the Courier Notification Service Extension: [`CourierNotificationServiceTemplate.zip`](https://github.com/trycourier/courier-notification-service-extension-template/archive/refs/heads/main.zip)
-2. Open the folder in terminal and run `sh make_template.sh`
-    - This will create the Notification Service Extension on your mac to save you time
-3. Open your iOS app in Xcode and go to File > New > Target
-4. Select "Courier Service" and click "Next"
-5. Give the Notification Service Extension a name (i.e. "CourierService").
-6. Click Finish
-
-### Link the Courier SDK to your extension:
-
-#### Swift Package Manager Setup
-1. Click on your project file
-2. Under Targets, click on your new Target
-3. Under the General tab > Frameworks and Libraries, click the "+" icon
-4. Select the Courier package from the list under Courier Package > Courier
-
-#### Cocoapods Setup
-1. Add the following snippet to the bottom of your Podfile
-
-```ruby 
-target 'CourierService' do
-    pod 'Courier_iOS'
-end
-```
-
-2. Run `pod install`
-
-&emsp;
-
-## 5. Send a Test Push Notification
-
-```swift
-import Courier_iOS
-
-Task {
-                    
-    // Make sure your user is signed into Courier
-    // This allows Courier to sync push notification tokens automatically
-    try await Courier.shared.signIn(
-        accessToken: Env.COURIER_ACCESS_TOKEN,
-        clientKey: Env.COURIER_CLIENT_KEY,
-        userId: "example_user_id"
+    Courier.shared.signIn(
+        accessToken = "YOUR_ACCESS_TOKEN",
+        userId = "EXAMPLE_USER_ID",
+        clientKey = "YOUR_CLIENT_KEY"
     )
-
-    // Shows a popup where your user can allow or deny push notifications
-    // You should put this in a place that makes sense for your app
-    // You cannot ask the user for push notification permissions again
-    // if they deny, you will have to get them to open their device settings to change this
-    let status = try await Courier.requestNotificationPermission()
+    
+    val hasNotificationPermissions = (activity as AppCompatActivity).requestNotificationPermission()
+    print(hasNotificationPermissions)
 
 }
 ```
