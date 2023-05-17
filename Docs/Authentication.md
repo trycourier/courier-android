@@ -43,32 +43,33 @@ Manages user credentials between app sessions.
 
 Put this code where you normally manage your user's state. The user's access to [`Courier Inbox`](https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md) and [`Push Notifications`](https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md) will automatically be managed by the SDK and stored in persistent storage. This means that if your user fully closes your app and starts it back up, they will still be "signed in".
 
-```swift
-import Courier_iOS
+```kotlin
+// ⚠️ Important
+// Courier must be initialized before authentication will work
+// Initialize allows the Courier SDK to access SharedPreferences to preserve user state accross app sessions (important for creating a great push notification experience)
+// If you are extending a `CourierActivity` or a `CourierService` you may be able to skip this step
+// You can call this multiple times without issues. So it's not a problem if you have duplicate calls of this.
+Courier.initialize(context = context)
 
-Task {
+// Saves credentials locally and accesses the Courier API with them
+// Uploads push notification devices tokens to Courier if needed
+Courier.shared.signIn(
+    accessToken = "pk_prod_H12...",
+    userId = "example_user_id",
+    clientKey = "YWQxN..."
+)
 
-    // Saves credentials locally and accesses the Courier API with them
-    // Uploads push notification devices tokens to Courier if needed
-    try await Courier.shared.signIn(
-        accessToken: "pk_prod_H12...",
-        clientKey: "YWQxN...",
-        userId: "example_user_id"
-    )
-
-    // Removes the locally saved credentials
-    // Deletes the user's push notification device tokens in Courier if needed
-    try await Courier.shared.signOut()
-
-}
+// Removes the locally saved credentials
+// Deletes the user's push notification device tokens in Courier if needed
+Courier.shared.signOut()
 
 // Other available properties and functions
 
-let userId = Courier.shared.userId
-let isUserSignedIn = Courier.shared.isUserSignedIn
+val userId = Courier.shared.userId
+val isUserSignedIn = Courier.shared.isUserSignedIn
 
-let listener = Courier.shared.addAuthenticationListener { userId in
-    print(userId ?? "No userId found")
+val listener = Courier.shared.addAuthenticationListener { userId ->
+        print(userId ?: "No userId found")
 }
 
 listener.remove()
