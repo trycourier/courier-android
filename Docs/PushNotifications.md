@@ -108,7 +108,7 @@ The easiest way to support push notifications in your app.
 
 ## 1. Setup a Push Notification Provider
 
-Select which push notification provider you would like Courier to route push notifications to. Choose APNS - Apple Push Notification Service if you are not sure which provider to use.
+Select which push notification provider you would like Courier to route push notifications to. Choose (FCM) - Firebase Cloud Messaging if you are not sure which provider to use.
 
 <table>
     <thead>
