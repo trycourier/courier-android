@@ -51,17 +51,22 @@ Put this code where you normally manage your user's state. The user's access to 
 // You can call this multiple times without issues. So it's not a problem if you have duplicate calls of this.
 Courier.initialize(context = context)
 
-// Saves credentials locally and accesses the Courier API with them
-// Uploads push notification devices tokens to Courier if needed
-Courier.shared.signIn(
-    accessToken = "pk_prod_H12...",
-    clientKey = "YWQxN...",
-    userId = "example_user_id"
-)
+// Example below supports coroutines, but traditional callbacks are also available
+lifecycleScope.launch {
 
-// Removes the locally saved credentials
-// Deletes the user's push notification device tokens in Courier if needed
-Courier.shared.signOut()
+    // Saves credentials locally and accesses the Courier API with them
+    // Uploads push notification devices tokens to Courier if needed
+    Courier.shared.signIn(
+        accessToken = "pk_prod_H12...",
+        clientKey = "YWQxN...",
+        userId = "example_user_id"
+    )
+
+    // Removes the locally saved credentials
+    // Deletes the user's push notification device tokens in Courier if needed
+    Courier.shared.signOut()
+
+}
 
 // Other available properties and functions
 
@@ -73,7 +78,6 @@ val listener = Courier.shared.addAuthenticationListener { userId ->
 }
 
 listener.remove()
-
 ```
 
 &emsp;
