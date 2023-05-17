@@ -144,6 +144,8 @@ Select which push notification provider you would like Courier to route push not
     </tbody>
 </table>
 
+&emsp;
+
 ## 2. Add the `CourierService`
 
 ### 1. Create the `CourierService` file
@@ -180,6 +182,8 @@ class YourNotificationService: CourierService() {
 
 }
 ```
+
+&emsp;
 
 ### 2. Add the `CourierService` entry in your `AndroidManifest.xml` file
 
