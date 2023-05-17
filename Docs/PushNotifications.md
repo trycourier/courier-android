@@ -213,85 +213,21 @@ class YourNotificationService: CourierService() {
 
 &emsp;
 
-## 3. Implement the `CourierDelegate`
-    
-```swift
-import Courier_iOS
+## 3. Extend `CourierActivity`
 
-@main
-class AppDelegate: CourierDelegate {
+This will allow you to handle when users get push notifications delivered and when they click on the push notifications. You will likely want to extend your `MainActivity` but your use case may be slightly different.
     
+```kotlin
+class MainActivity : CourierActivity() {
+
     ...
 
-    override func pushNotificationDeliveredInForeground(message: [AnyHashable : Any]) -> UNNotificationPresentationOptions {
-        
-        print("\n=== 💌 Push Notification Delivered In Foreground ===\n")
-        print(message)
-        print("\n=================================================\n")
-        
-        // This is how you want to show your notification in the foreground
-        // You can pass "[]" to not show the notification to the user or
-        // handle this with your own custom styles
-        return [.sound, .list, .banner, .badge]
-        
-    }
-    
-    override func pushNotificationClicked(message: [AnyHashable : Any]) {
-        
-        print("\n=== 👉 Push Notification Clicked ===\n")
-        print(message)
-        print("\n=================================\n")
-        
-        showMessageAlert(title: "Message Clicked", message: "\(message)")
-        
+    override fun onPushNotificationClicked(message: RemoteMessage) {
+        Toast.makeText(this, "Message clicked:\n${message.data}", Toast.LENGTH_LONG).show()
     }
 
-}
-```
-
-1. In your `AppDelegate`, add `import Courier_iOS`
-2. Change your `AppDelegate` to extend the `CourierDelegate`
-    * This adds simple functions to handle push notification delivery and clicks
-    * This automatically syncs APNS tokens to Courier
-    
-### FCM - Firebase Cloud Messaging Support
-
-⚠️ The [`Firebase iOS package`](https://firebase.google.com/docs/ios/setup) is required
-
-Here is how you can configure your project to support FCM tokens.
-
-```swift
-import Courier_iOS
-import FirebaseCore
-import FirebaseMessaging
-
-@main
-class AppDelegate: CourierDelegate, MessagingDelegate {
-    
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
-        // Initialize Firebase and FCM
-        FirebaseApp.configure()
-        Messaging.messaging().delegate = self
-        
-        return true
-        
-    }
-
-    ...
-    
-    public func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-
-        guard let token = fcmToken else { return }
-
-        Task {
-            do {
-                try await Courier.shared.setFCMToken(token)
-            } catch {
-                print(String(describing: error))
-            }
-        }
-
+    override fun onPushNotificationDelivered(message: RemoteMessage) {
+        Toast.makeText(this, "Message delivered:\n${message.data}", Toast.LENGTH_LONG).show()
     }
 
 }
