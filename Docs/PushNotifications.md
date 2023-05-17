@@ -63,12 +63,22 @@ The easiest way to support push notifications in your app.
     <tbody>
         <tr width="600px">
             <td align="left">
-                <a href="https://developer.apple.com/account/">
+                <a href="https://firebase.google.com/">
                     <code>Firebase Account</code>
                 </a>
             </td>
             <td align="left">
-                Apple requires all iOS developers to have a membership so you can manage your push notification certificates.
+                Needed to send push notifications out to your Android devices. Courier recommends you do this for the most ideal developer experience.
+            </td>
+        </tr>
+        <tr width="600px">
+            <td align="left">
+                <a href="https://app.courier.com/channels">
+                    <code>A Configured Provider</code>
+                </a>
+            </td>
+            <td align="left">
+                Courier needs to know who to route the push notifications to so your users can receive them.
             </td>
         </tr>
         <tr width="600px">
@@ -81,17 +91,7 @@ The easiest way to support push notifications in your app.
         </tr>
         <tr width="600px">
             <td align="left">
-                <a href="TODO">
-                    <code>A Configured Provider</code>
-                </a>
-            </td>
-            <td align="left">
-                Courier needs to know who to route the push notifications to so your users can receive them.
-            </td>
-        </tr>
-        <tr width="600px">
-            <td align="left">
-                <a href="TODO">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md">
                     <code>Authentication</code>
                 </a>
             </td>
