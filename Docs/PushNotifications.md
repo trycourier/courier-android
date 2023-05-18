@@ -38,7 +38,7 @@ The easiest way to support push notifications in your app.
         </tr>
         <tr width="600px">
             <td align="left">
-                <a href="TODO">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#2-register-for-push-notifications">
                     <code>Permission Requests & Checking</code>
                 </a>
             </td>
@@ -252,7 +252,7 @@ lifecycleScope.launch {
 }
 ```
 
-### 2. Register for push notifications
+### 2. Register for Notifications
 
 This is only needed for Android `33` and above. You are safe to call it in older versions of Android.
 
@@ -260,6 +260,6 @@ This is only needed for Android `33` and above. You are safe to call it in older
 context?.requestNotificationPermission()
 ```
 
-3. Send a test message
+3. Send a Test Message
 
 [`See Testing Examples`](https://github.com/trycourier/courier-android/blob/master/Docs/Testing.md)
