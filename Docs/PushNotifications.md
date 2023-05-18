@@ -146,6 +146,10 @@ Select which push notification provider you would like Courier to route push not
 
 &emsp;
 
+⚠️ If you are using Firebase Cloud Messaging, please make sure you initialize the Firebase SDK. Follow this [`Setup Guide`](https://firebase.google.com/docs/android/setup) for Firebase on Android.
+
+&emsp;
+
 ## 2. Add the `CourierService`
 
 ### 1. Create the `CourierService` file
