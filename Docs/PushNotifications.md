@@ -148,7 +148,7 @@ Select which push notification provider you would like Courier to route push not
 
 ## 2. Add the `CourierService`
 
-1. Create the `CourierService` file
+### 1. Create the `CourierService` file
 
 This file is used to track new push notifications when they arrive and to automatically sync push notification tokens. Create a new file, name it what you'd like and paste the follow code in it. (Kotlin example shown below)
 
@@ -184,7 +184,7 @@ class YourNotificationService: CourierService() {
 
 &emsp;
 
-2. Add the `CourierService` entry in your `AndroidManifest.xml` file
+### 2. Add the `CourierService` entry in your `AndroidManifest.xml` file
 
 ```xml
 <manifest>
@@ -236,7 +236,7 @@ class MainActivity : CourierActivity() {
 
 ## 4. Send a Test Push Notification
 
-1. Sign your user in
+### 1. Sign your user in
 
 See [`Authentication`](https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md) for more details.
 
@@ -252,7 +252,7 @@ lifecycleScope.launch {
 }
 ```
 
-2. Register for push notifications
+### 2. Register for push notifications
 
 This is only needed for Android `33` and above. You are safe to call it in older versions of Android.
 
