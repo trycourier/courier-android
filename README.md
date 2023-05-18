@@ -23,9 +23,9 @@
             </td>
         </tr>
         <tr width="600px">
-            <td align="left">Minimum iOS SDK Version</td>
+            <td align="left">Minimum Android SDK Version</td>
             <td align="center">
-                <code>13.0</code>
+                <code>23</code>
             </td>
         </tr>
     </tbody>
