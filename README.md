@@ -370,7 +370,6 @@ class YourNotificationService: CourierService() {
 }
 ```
 
-
 4. Add the Notification Service entry in your `AndroidManifest.xml` file
 
 ```xml

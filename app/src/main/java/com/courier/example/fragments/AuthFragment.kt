@@ -1,18 +1,15 @@
 package com.courier.example.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
-import com.courier.android.modules.isUserSignedIn
-import com.courier.android.modules.signIn
-import com.courier.android.modules.signOut
-import com.courier.android.modules.userId
+import com.courier.android.modules.*
 import com.courier.android.utils.requestNotificationPermission
 import com.courier.example.Env
 import com.courier.example.R
@@ -61,23 +58,21 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
 
             Courier.shared.signIn(
                 accessToken = Env.COURIER_ACCESS_TOKEN,
+                clientKey = Env.COURIER_CLIENT_KEY,
                 userId = Env.COURIER_USER_ID,
-                clientKey = Env.COURIER_CLIENT_KEY
             )
 
-            val hasNotificationPermissions = (activity as AppCompatActivity).requestNotificationPermission()
-            Toast.makeText(context, "Notification permissions are granted: $hasNotificationPermissions", Toast.LENGTH_LONG).show()
-
-            refresh()
-
-            Toast.makeText(context, "Courier user signed in", Toast.LENGTH_LONG).show()
-
+            // TODO: Put this where it makes sense for your user experience
+            // If needed, handle this result inside `onActivityResult`
+            context?.requestNotificationPermission()
 
         } catch (e: Exception) {
 
             Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show()
 
         }
+
+        refresh()
 
         authButton.isEnabled = true
 
@@ -91,8 +86,6 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
 
             Courier.shared.signOut()
 
-            refresh()
-
             Toast.makeText(context, "Courier user signed out", Toast.LENGTH_LONG).show()
 
         } catch (e: Exception) {
@@ -100,6 +93,8 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
             Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show()
 
         }
+
+        refresh()
 
         authButton.isEnabled = true
 
