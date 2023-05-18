@@ -35,7 +35,7 @@
 
 # Installation
 
-1. Add Jitpack repository support in your `settings.gradle` file
+### 1. Add Jitpack repository support in your `settings.gradle` file
 
 ```gradle
 pluginManagement {
@@ -53,11 +53,34 @@ dependencyResolutionManagement {
 }
 ```
 
-2. Add the implementation to your app `build.gradle` file
+### 2. Add the implementation to your app `build.gradle` file
 
-``` gradle
+```gradle
 dependencies {
     implementation 'com.github.trycourier:courier-android:2.0.01'
+}
+```
+
+### 3. Initialize the SDK
+
+```kotlin
+// This example is on an Application class
+// You can also do this with Activities or Fragments, but
+// it is very important to call this before using other 
+// parts of the Courier SDK
+class YourApplication: Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+
+        // Initialize the SDK
+        // This is used to give Courier access to SharedPreferences
+        // Courier uses SharedPreferences to save some state between app sessions
+        // This is important to create a great user experience around push notifications
+        Courier.initialize(this)
+
+    }
+
 }
 ```
 
