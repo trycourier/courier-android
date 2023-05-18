@@ -38,7 +38,7 @@ The easiest way to support push notifications in your app.
         </tr>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#2-register-for-push-notifications">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#4-send-a-test-push-notification">
                     <code>Permission Requests & Checking</code>
                 </a>
             </td>
@@ -257,7 +257,11 @@ lifecycleScope.launch {
 This is only needed for Android `33` and above. You are safe to call it in older versions of Android.
 
 ```kotlin
+// Shows the request notification popup
 context?.requestNotificationPermission()
+
+// Gets the value of the permission
+val isGranted = context?.isPushPermissionGranted
 ```
 
 3. Send a Test Message
