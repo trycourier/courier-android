@@ -236,6 +236,10 @@ class MainActivity : CourierActivity() {
 
 ## 4. Send a Test Push Notification
 
+1. Sign your user in
+
+See [`Authentication`](https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md) for more details.
+
 ```kotlin
 lifecycleScope.launch {
 
@@ -244,20 +248,18 @@ lifecycleScope.launch {
         clientKey = "YWQxN...",
         userId = "example_user_id"
     )
-    
-    val hasNotificationPermissions = (activity as AppCompatActivity).requestNotificationPermission()
-    print(hasNotificationPermissions)
 
 }
 ```
 
-1. Register for push notifications
+2. Register for push notifications
 
+This is only needed for Android `33` and above. You are safe to call it in older versions of Android.
 
 ```kotlin
-TODO
+context?.requestNotificationPermission()
 ```
 
-2. Send a test message
+3. Send a test message
 
-[`More Testing Examples Here`](https://github.com/trycourier/courier-android/blob/master/Docs/Testing.md)
+[`See Testing Examples`](https://github.com/trycourier/courier-android/blob/master/Docs/Testing.md)
