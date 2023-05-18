@@ -10,18 +10,17 @@ import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.coroutineScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
-import com.courier.android.models.CourierInboxListener
-import com.courier.android.models.markAsRead
-import com.courier.android.models.markAsUnread
-import com.courier.android.models.remove
+import com.courier.android.models.*
 import com.courier.android.modules.*
 import com.courier.example.R
 import com.courier.example.toJson
+import kotlinx.coroutines.launch
 
 
 class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {

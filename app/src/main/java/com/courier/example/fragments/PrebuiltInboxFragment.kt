@@ -6,7 +6,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.courier.android.Courier
 import com.courier.android.inbox.CourierInbox
-import com.courier.android.inbox.scrollToTop
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
 import com.courier.android.modules.readAllInboxMessages

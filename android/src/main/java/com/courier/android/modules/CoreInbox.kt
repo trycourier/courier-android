@@ -248,7 +248,7 @@ internal class CoreInbox : DefaultLifecycleObserver {
 
         // Tell developer about the lifecycle concerns
         if (lifecycle == null) {
-            Courier.warn("The Courier Inbox has no \"lifecycle\". This will result in websocket reconnection issues for your users. Please call Courier.shared.initialize(context) with \"context\" being an AppCompatActivity to fix this.")
+            Courier.warn("The Courier Inbox has no \"lifecycle\". This will result in websocket reconnection issues for your users. Please call Courier.initialize(context) with \"context\" being an AppCompatActivity to fix this.")
         }
 
         // Create a new inbox listener
@@ -547,7 +547,7 @@ fun Courier.refreshInbox(onComplete: () -> Unit) = coroutineScope.launch(Dispatc
 /**
  * Removes all the listeners from the Courier Inbox
  **/
-fun Courier.removeAllListeners() {
+fun Courier.removeAllInboxListeners() {
     inbox.removeAllListeners()
 }
 

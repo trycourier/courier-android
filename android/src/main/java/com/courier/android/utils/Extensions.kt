@@ -1,8 +1,10 @@
 package com.courier.android.utils
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Resources
@@ -11,6 +13,8 @@ import android.util.TypedValue
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.app.NotificationManagerCompat
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.COURIER_COROUTINE_CONTEXT
@@ -106,42 +110,33 @@ internal fun Courier.broadcastMessage(message: RemoteMessage) = Courier.coroutin
     }
 }
 
-fun AppCompatActivity.requestNotificationPermission(onStatusChange: (granted: Boolean) -> Unit) {
+// Using this function, you will need to manually handle the result
+// Inside `Activity.onActivityResult`
+fun Context.requestNotificationPermission(requestCode: Int = 1) {
 
-    // Check if the notification manager can show push notifications
-    val notificationManagerCompat = NotificationManagerCompat.from(this)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 
-    // Handle granting notification permission if possible
-    if (Build.VERSION.SDK_INT >= 33) {
-        val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            val areNotificationsEnabled = notificationManagerCompat.areNotificationsEnabled()
-            val canReceivePushes = granted && areNotificationsEnabled
-            onStatusChange(canReceivePushes)
+        if (!isPushPermissionGranted) {
+
+            if (this is Activity) {
+                val permissions = arrayOf(Manifest.permission.POST_NOTIFICATIONS)
+                requestPermissions(permissions, requestCode)
+            }
+
         }
-        permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+
+    }
+
+}
+
+val Context.isPushPermissionGranted: Boolean get() {
+
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
     } else {
-        val areNotificationsEnabled = notificationManagerCompat.areNotificationsEnabled()
-        onStatusChange(areNotificationsEnabled)
+        true
     }
 
-}
-
-suspend fun AppCompatActivity.requestNotificationPermission() = suspendCoroutine { continuation ->
-    requestNotificationPermission { granted ->
-        continuation.resume(granted)
-    }
-}
-
-fun AppCompatActivity.getNotificationPermissionStatus(onStatusChange: (granted: Boolean) -> Unit) {
-    val notificationManagerCompat = NotificationManagerCompat.from(this)
-    val areNotificationsEnabled = notificationManagerCompat.areNotificationsEnabled()
-    onStatusChange(areNotificationsEnabled)
-}
-
-suspend fun AppCompatActivity.getNotificationPermissionStatus() = suspendCoroutine { continuation ->
-    getNotificationPermissionStatus { granted ->
-        continuation.resume(granted)
-    }
 }
 
 val RemoteMessage.pushNotification: Map<String, Any?>
@@ -235,10 +230,11 @@ internal val Int.pxToDp: Int get() = (this / Resources.getSystem().displayMetric
  */
 internal val Int.dpToPx: Int get() = (this * Resources.getSystem().displayMetrics.density).toInt()
 
-internal val Context.isDarkMode: Boolean get() {
-    val darkModeFlag = resources.configuration.uiMode and UI_MODE_NIGHT_MASK
-    return darkModeFlag == UI_MODE_NIGHT_YES
-}
+internal val Context.isDarkMode: Boolean
+    get() {
+        val darkModeFlag = resources.configuration.uiMode and UI_MODE_NIGHT_MASK
+        return darkModeFlag == UI_MODE_NIGHT_YES
+    }
 
 internal fun TextView.setCourierFont(font: CourierInboxFont) {
 
