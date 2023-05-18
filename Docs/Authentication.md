@@ -43,7 +43,7 @@ Manages user credentials between app sessions.
 
 Put this code where you normally manage your user's state. The user's access to [`Courier Inbox`](https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md) and [`Push Notifications`](https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md) will automatically be managed by the SDK and stored in persistent storage. This means that if your user fully closes your app and starts it back up, they will still be "signed in".
 
-⚠️ Important: Be sure to call `Courier.initialize(context)` before `Courier.shared.signIn(...)`. [`Click here`](https://github.com/trycourier/courier-android#3-initialize-the-sdk) for more details.
+⚠️ Be sure to call `Courier.initialize(context)` before `Courier.shared.signIn(...)`. [`Click here`](https://github.com/trycourier/courier-android#3-initialize-the-sdk) for more details.
 
 ```kotlin
 // Example below supports coroutines, but traditional callbacks are also available
