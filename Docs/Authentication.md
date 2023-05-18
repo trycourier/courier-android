@@ -46,8 +46,8 @@ Put this code where you normally manage your user's state. The user's access to 
 ```kotlin
 // ⚠️ Important
 // Courier must be initialized before authentication will work
-// Initialize allows the Courier SDK to access SharedPreferences to preserve user state accross app sessions (important for creating a great push notification experience)
-// If you are extending a `CourierActivity` or a `CourierService` you may be able to skip this step
+// Initialize allows the Courier SDK to access SharedPreferences to preserve user state across app sessions (important for creating a great push notification experience)
+// If you are extending a `CourierActivity` or a `CourierService` you may be able to skip this step as those classes call this function automatically
 // You can call this multiple times without issues. So it's not a problem if you have duplicate calls of this.
 Courier.initialize(context = context)
 
