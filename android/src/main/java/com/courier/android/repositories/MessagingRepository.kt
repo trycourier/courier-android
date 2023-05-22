@@ -1,8 +1,8 @@
 package com.courier.android.repositories
 
 import com.courier.android.Courier
+import com.courier.android.models.CourierChannel
 import com.courier.android.models.CourierMessageResponse
-import com.courier.android.models.CourierProvider
 import com.courier.android.models.CourierPushEvent
 import com.courier.android.utils.dispatch
 import okhttp3.Request
@@ -12,9 +12,7 @@ import org.json.JSONObject
 
 internal class MessagingRepository : Repository() {
 
-    internal suspend fun send(authKey: String, userIds: List<String>, title: String, body: String, providers: List<CourierProvider>): String {
-
-        // TODO: Update channels
+    internal suspend fun send(authKey: String, userIds: List<String>, title: String, body: String, channels: List<CourierChannel>): String {
 
         val url = "$baseRest/send"
 
@@ -26,12 +24,24 @@ internal class MessagingRepository : Repository() {
                     },
                     "content" to mapOf(
                         "title" to title,
-                        "body" to body
+                        "body" to body,
+                        "version" to "2020-01-01",
+                        "elements" to channels.flatMap { it.elements }.map { it.map }
                     ),
+                    "data" to channels.map { it.data ?: emptyMap() }.fold(mutableMapOf<String, Any>()) { result, data ->
+                        result.apply {
+                            for ((key, value) in data) {
+                                this[key] = value
+                            }
+                        }
+                    },
                     "routing" to mapOf(
                         "method" to "all",
-                        "channels" to providers.map { it.value }
+                        "channels" to channels.map { it.key }
                     ),
+                    "providers" to channels.filter { it.providerOverride != null }.associate { channel ->
+                        channel.key to channel.providerOverride
+                    }
                 )
             )
         ).toString()

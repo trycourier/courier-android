@@ -1,6 +1,5 @@
 package com.courier.example.fragments
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -9,7 +8,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
-import com.courier.android.modules.*
+import com.courier.android.modules.isUserSignedIn
+import com.courier.android.modules.signIn
+import com.courier.android.modules.signOut
+import com.courier.android.modules.userId
 import com.courier.android.utils.requestNotificationPermission
 import com.courier.example.Env
 import com.courier.example.R
@@ -65,6 +67,9 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
             // TODO: Put this where it makes sense for your user experience
             // If needed, handle this result inside `onActivityResult`
             context?.requestNotificationPermission()
+
+            // To check for permissions, you can use
+//            val isGranted = context?.isPushPermissionGranted
 
         } catch (e: Exception) {
 
