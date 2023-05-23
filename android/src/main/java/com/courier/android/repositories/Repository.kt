@@ -4,7 +4,7 @@ import com.courier.android.Courier
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 
-sealed class Repository {
+internal open class Repository {
 
     val gson = Gson()
     val baseRest = "https://api.courier.com"
