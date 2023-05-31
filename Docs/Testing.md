@@ -27,9 +27,9 @@ Common examples for testing [`Courier Inbox`](https://github.com/trycourier/cour
     </tbody>
 </table>
 
-&emsp;
-
 ⚠️ Only use your `authKey` while testing. For security reasons, Courier does not recommend you leave this key in your production app. More info can be found [`here`](https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md#usage).
+
+&emsp;
 
 ## Courier Inbox Message
 
