@@ -77,37 +77,37 @@ curl --request POST \
   --header 'Authorization: Bearer pk_prod_1X3F...' \
   --header 'Content-Type: application/json' \
   --data '{
-	"message": {
-		"to": [
-			{
-				"user_id": "example_user_id"
-			}
-		],
-		"content": {
-			"title": "Hey there 👋",
-			"body": "Have a great day 😁",
-			"version": "2020-01-01",
-			"elements": [
-				{
-					"type": "action",
-					"content": "Action Button",
-					"data": {
-						"CUSTOM_ACTION_KEY": "YOUR_CUSTOM_VALUE"
-					}
-				}
-			]
-		},
-		"data": {
-			"CUSTOM_MESSAGE_KEY": "YOUR_CUSTOM_VALUE"
-		},
-		"routing": {
-			"method": "all",
-			"channels": [
-				"inbox"
-			]
-		}
-	}
-}'
+    "message": {
+      "to": [
+        {
+          "user_id": "example_user_id"
+        }
+      ],
+      "content": {
+        "title": "Hey there 👋",
+        "body": "Have a great day 😁",
+        "version": "2020-01-01",
+        "elements": [
+          {
+            "type": "action",
+            "content": "Action Button",
+            "data": {
+              "CUSTOM_ACTION_KEY": "YOUR_CUSTOM_VALUE"
+            }
+          }
+        ]
+      },
+      "data": {
+        "CUSTOM_MESSAGE_KEY": "YOUR_CUSTOM_VALUE"
+      },
+      "routing": {
+        "method": "all",
+        "channels": [
+          "inbox"
+        ]
+      }
+    }
+  }'
 ```
 
 </td>
