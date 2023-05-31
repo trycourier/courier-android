@@ -29,7 +29,7 @@ Common examples for testing [`Courier Inbox`](https://github.com/trycourier/cour
 
 &emsp;
 
-⚠️ Only use your `Authentication Key` while testing. For security reasons, Courier does not recommend you leave this key in your production app. More info can be found [`here`](https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md#usage).
+⚠️ Only use your `authKey` while testing. For security reasons, Courier does not recommend you leave this key in your production app. More info can be found [`here`](https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md#usage).
 
 ## Courier Inbox Message
 
@@ -43,13 +43,28 @@ Common examples for testing [`Courier Inbox`](https://github.com/trycourier/cour
 <tr width="600px">
 <td> 
 
-```swift
-try await Courier.shared.sendMessage(
-    authKey: "YOUR_AUTH_KEY",
-    userId: "example_user_id",
-    title: "Hey there 👋",
-    message: "Have a great day 😁",
-    providers: [.inbox]
+```kotlin
+Courier.shared.sendMessage(
+    authKey = "pk_prod_1X3F...",
+    userIds = listOf("example_user_id"),
+    title = "Hey there 👋",
+    body = "Have a great day 😁",
+    channels = listOf(
+        CourierInboxChannel(
+            elements = listOf(
+                CourierElement(
+                    type = "action",
+                    content = "Action Button",
+                    data = mapOf(
+                        "CUSTOM_ACTION_KEY" to "YOUR_CUSTOM_VALUE"
+                    )
+                )
+            ),
+            data = mapOf(
+                "CUSTOM_MESSAGE_KEY" to "YOUR_CUSTOM_VALUE"
+            )
+        )
+    ),
 )
 ```
 
@@ -59,7 +74,7 @@ try await Courier.shared.sendMessage(
 ```bash
 curl --request POST \
   --url https://api.courier.com/send \
-  --header 'Authorization: Bearer YOUR_AUTH_KEY' \
+  --header 'Authorization: Bearer pk_prod_1X3F...' \
   --header 'Content-Type: application/json' \
   --data '{
     "message": {
