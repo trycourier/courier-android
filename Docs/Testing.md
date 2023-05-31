@@ -37,7 +37,7 @@ Common examples for testing [`Courier Inbox`](https://github.com/trycourier/cour
 
 <table>
 <tr>
-<td width="500px" align="left">Swift</td>
+<td width="500px" align="left">Kotlin</td>
 <td width="500px" align="left">HTTP</td>
 </tr>
 <tr width="600px">
