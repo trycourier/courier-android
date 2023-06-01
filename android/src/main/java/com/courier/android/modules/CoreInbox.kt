@@ -31,7 +31,7 @@ internal class CoreInbox : DefaultLifecycleObserver {
     internal var brandId: String? = null
     internal val brand: CourierBrand? get() = inbox?.brand
 
-    private val hasInboxUser get() = Courier.shared.userId != null || Courier.shared.clientKey != null
+    private val hasInboxUser get() = Courier.shared.userId != null && Courier.shared.clientKey != null
     internal val inboxMessages get() = inbox?.messages
 
     private var dataPipe: Job? = null
@@ -70,6 +70,13 @@ internal class CoreInbox : DefaultLifecycleObserver {
 
     fun restart() {
 
+        // Do not launch if we do not have a user
+        if (!hasInboxUser) {
+            notifyError(CourierException.inboxUserNotFound)
+            return
+        }
+
+        // Call listeners
         if (listeners.isNotEmpty()) {
             notifyLoading()
             startDataPipe()
@@ -77,7 +84,7 @@ internal class CoreInbox : DefaultLifecycleObserver {
 
     }
 
-    private suspend fun load(refresh: Boolean = false): Inbox = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
+    private suspend fun load(refresh: Boolean = false): Inbox = withContext(Dispatchers.IO) {
 
         // Check if user is signed in
         if (!hasInboxUser) {
@@ -86,7 +93,7 @@ internal class CoreInbox : DefaultLifecycleObserver {
 
         // Get all inbox data and start the websocket
         val result = awaitAll(
-            async(Dispatchers.IO) {
+            async {
 
                 // Determine a safe pagination limit
                 val currentMessageCount = this@CoreInbox.inbox?.messages?.size ?: paginationLimit
@@ -102,13 +109,13 @@ internal class CoreInbox : DefaultLifecycleObserver {
                 )
 
             },
-            async(Dispatchers.IO) {
+            async {
                 inboxRepo.getUnreadMessageCount(
                     clientKey = Courier.shared.clientKey!!,
                     userId = Courier.shared.userId!!
                 )
             },
-            async(Dispatchers.IO) {
+            async {
                 inboxRepo.connectWebsocket(
                     clientKey = Courier.shared.clientKey!!,
                     userId = Courier.shared.userId!!,
@@ -124,7 +131,7 @@ internal class CoreInbox : DefaultLifecycleObserver {
                     }
                 )
             },
-            async(Dispatchers.IO) {
+            async {
 
                 // Skip if there is no brand
                 if (this@CoreInbox.brandId == null) {

@@ -73,7 +73,7 @@ internal class CorePush {
 
     }
 
-    internal suspend fun putPushTokens() = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
+    internal suspend fun putPushTokens() = withContext(Dispatchers.IO) {
 
         // Refresh the tokens
         fcmToken = getFcmToken()
@@ -85,7 +85,7 @@ internal class CorePush {
 
     // Delete all the current tokens for the user
     // Done like this in case we have other tokens for the user at some point
-    internal suspend fun deletePushTokens() = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
+    internal suspend fun deletePushTokens() = withContext(Dispatchers.IO) {
 
         // Refresh the tokens
         fcmToken = getFcmToken()

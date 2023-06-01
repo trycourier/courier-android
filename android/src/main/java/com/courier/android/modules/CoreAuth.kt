@@ -4,6 +4,7 @@ import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.managers.UserManager
 import com.courier.android.models.CourierAuthenticationListener
+import com.courier.android.models.CourierException
 import kotlinx.coroutines.*
 
 internal class CoreAuth {
@@ -14,7 +15,14 @@ internal class CoreAuth {
      * Function to set the current credentials for the user and their access token
      * You should consider using this in areas where you update your local user's state
      */
-    suspend fun signIn(accessToken: String, clientKey: String?, userId: String, push: CorePush, inbox: CoreInbox) = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
+    suspend fun signIn(accessToken: String, clientKey: String?, userId: String, push: CorePush, inbox: CoreInbox) = withContext(Dispatchers.IO) {
+
+        // Sign the user out if needed
+        // This will clear all tokens from the user
+        // and ensure the state is proper for the session
+        if (Courier.shared.isUserSignedIn) {
+            signOut(push, inbox)
+        }
 
         Courier.log("Signing user in")
         Courier.log("Access Token: $accessToken")
@@ -46,15 +54,15 @@ internal class CoreAuth {
      * You should call this when your user signs out
      * It will remove the current tokens used for this user in Courier so they do not receive pushes they should not get
      */
-    suspend fun signOut(push: CorePush, inbox: CoreInbox) = withContext(Courier.COURIER_COROUTINE_CONTEXT) {
+    suspend fun signOut(push: CorePush, inbox: CoreInbox) = withContext(Dispatchers.IO) {
 
         Courier.log("Signing user out")
 
         awaitAll(
-            async(Dispatchers.IO) {
+            async {
                 push.deletePushTokens()
             },
-            async(Dispatchers.IO) {
+            async {
                 inbox.close()
             }
         )
