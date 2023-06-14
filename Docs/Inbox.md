@@ -45,7 +45,7 @@ An in-app notification center list you can use to notify your users. Allows you 
 
 ## Default Inbox Example
 
-The default `CourierInbox` styles. The colors will be pulled for your `styles.xml` file.
+The default `CourierInbox` styles. Colors are using `colorPrimary` located in your `res/values/themes.xml` file.
 
 <img width="810" alt="android-default-inbox-styles" src="https://github.com/trycourier/courier-android/assets/6370613/1aca0cd0-a0bb-4e22-9ac6-65a97a06f914">
 
