@@ -572,11 +572,11 @@ fun Courier.readAllInboxMessages(onSuccess: () -> Unit, onFailure: (Exception) -
 }
 
 fun Courier.readMessage(messageId: String) {
-    inbox.inbox?.readMessage(messageId)
+    inbox.readMessage(messageId)
 }
 
 fun Courier.unreadMessage(messageId: String) {
-    inbox.inbox?.unreadMessage(messageId)
+    inbox.unreadMessage(messageId)
 }
 
 /**
