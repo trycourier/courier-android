@@ -1,22 +1,13 @@
 package com.courier.android
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Lifecycle
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
 import com.courier.android.modules.*
-import com.courier.android.modules.CoreAuth
-import com.courier.android.modules.CoreInbox
-import com.courier.android.modules.CoreLogging
-import com.courier.android.modules.CorePush
 import com.courier.android.utils.NotificationEventBus
-import com.google.firebase.FirebaseApp
-import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collectLatest
 
 /**
 
@@ -54,7 +45,7 @@ class Courier private constructor(internal val context: Context) {
     companion object {
 
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "2.0.2"
+        internal const val VERSION = "2.0.3"
         internal const val TAG = "Courier SDK"
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
         internal val eventBus by lazy { NotificationEventBus() }

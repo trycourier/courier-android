@@ -26,7 +26,7 @@ internal class CoreInbox : DefaultLifecycleObserver {
     private val brandsRepo by lazy { BrandsRepository() }
 
     private var listeners: MutableList<CourierInboxListener> = mutableListOf()
-    private var inbox: Inbox? = null
+    internal var inbox: Inbox? = null
 
     internal var brandId: String? = null
     internal val brand: CourierBrand? get() = inbox?.brand
@@ -571,11 +571,19 @@ fun Courier.readAllInboxMessages(onSuccess: () -> Unit, onFailure: (Exception) -
     }
 }
 
+fun Courier.readMessage(messageId: String) {
+    inbox.inbox?.readMessage(messageId)
+}
+
+fun Courier.unreadMessage(messageId: String) {
+    inbox.inbox?.unreadMessage(messageId)
+}
+
 /**
  * Internal Classes
  */
 
-private data class Inbox(
+internal data class Inbox(
     var messages: MutableList<InboxMessage>?,
     var totalCount: Int,
     var unreadCount: Int,
@@ -692,12 +700,12 @@ private data class Inbox(
 
 }
 
-private data class ReadAllOperation(
+internal data class ReadAllOperation(
     val messages: MutableList<InboxMessage>?,
     val unreadCount: Int,
 )
 
-private data class UpdateOperation(
+internal data class UpdateOperation(
     val index: Int,
     val unreadCount: Int,
     val message: InboxMessage,
