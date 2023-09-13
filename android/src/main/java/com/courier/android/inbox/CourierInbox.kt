@@ -7,11 +7,7 @@ import android.content.res.ColorStateList
 import android.net.Uri
 import android.util.AttributeSet
 import android.view.View
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
@@ -260,6 +256,8 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
             },
             onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
 
+                mRequestedLayout = false
+
                 refreshBrand()
 
                 state = if (messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
@@ -426,6 +424,29 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
     fun setOnScrollInboxListener(listener: ((offsetInDp: Int) -> Unit)?) {
         onScrollInbox = listener
     }
+
+    // Fixes for React Native UI bugs
+
+    private var mRequestedLayout = false
+
+    @SuppressLint("WrongCall")
+    override fun requestLayout() {
+        super.requestLayout()
+
+        // We need to intercept this method because if we don't our children will never update
+        // Check https://stackoverflow.com/questions/49371866/recyclerview-wont-update-child-until-i-scroll
+
+        if (!mRequestedLayout) {
+            mRequestedLayout = true
+            post {
+                mRequestedLayout = false
+                layout(left, top, right, bottom)
+                onLayout(false, left, top, right, bottom)
+            }
+        }
+
+    }
+
 
 }
 
