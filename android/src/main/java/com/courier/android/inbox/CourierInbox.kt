@@ -60,8 +60,6 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
             }
         }
 
-    var isReactNative = false
-
     var lightTheme: CourierInboxTheme = CourierInboxTheme.DEFAULT_LIGHT
         set(value) {
             if (field != value) {
@@ -290,7 +288,7 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     private fun RecyclerView.forceReactNativeLayoutFix() {
 
-        if (!isReactNative) {
+        if (Courier.USER_AGENT != CourierAgent.REACT_NATIVE_ANDROID) {
             return
         }
 
