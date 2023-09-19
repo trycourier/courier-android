@@ -60,6 +60,8 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
             }
         }
 
+    var isReactNative = false
+
     var lightTheme: CourierInboxTheme = CourierInboxTheme.DEFAULT_LIGHT
         set(value) {
             if (field != value) {
@@ -242,6 +244,8 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
 
                 refreshAdapters()
 
+                recyclerView.forceReactNativeLayoutFix()
+
             },
             onError = { e ->
 
@@ -252,6 +256,8 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
                 Courier.error(e.message)
 
                 refreshAdapters()
+
+                recyclerView.forceReactNativeLayoutFix()
 
             },
             onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
@@ -269,6 +275,8 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
                     newMessages = messages.toList()
                 )
 
+                recyclerView.forceReactNativeLayoutFix()
+
             }
         )
 
@@ -278,6 +286,27 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         layoutManager?.apply {
             onRestoreInstanceState(onSaveInstanceState())
         }
+    }
+
+    private fun RecyclerView.forceReactNativeLayoutFix() {
+
+        if (!isReactNative) {
+            return
+        }
+
+        try {
+
+            // Forces the layout to refresh
+            // This is a react native bug
+            adapter?.notifyDataSetChanged()
+            scrollBy(0, 0)
+
+        } catch (e: Exception) {
+
+            print(e)
+
+        }
+
     }
 
     // Opens all the current messages
