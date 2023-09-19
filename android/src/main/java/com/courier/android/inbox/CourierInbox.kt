@@ -301,7 +301,7 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         } catch (e: Exception) {
 
-            print(e)
+            Courier.error(e.toString())
 
         }
 
@@ -431,6 +431,14 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
             reloadViews()
 
         }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        // Reloads the inbox
+        recyclerView.forceReactNativeLayoutFix()
+
     }
 
     override fun onDetachedFromWindow() {
