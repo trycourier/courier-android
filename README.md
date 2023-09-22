@@ -170,7 +170,7 @@ Starter projects using this SDK.
     <tbody>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/tree/feature/inbox-docs/app">
+                <a href="https://github.com/trycourier/courier-android/tree/master/app">
                     <code>Example</code>
                 </a>
             </td>
