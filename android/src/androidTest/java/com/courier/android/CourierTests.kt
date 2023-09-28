@@ -5,13 +5,14 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.courier.android.models.*
 import com.courier.android.modules.*
 import com.courier.android.repositories.InboxRepository
+import com.courier.android.repositories.UsersRepository
 import com.courier.android.utils.trackNotification
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.RemoteMessage
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,12 +29,15 @@ class CourierTests {
 
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
 
-    @Test
-    fun test_A() = runBlocking {
-
-        print("🔬 Start Courier SDK")
+    @Before
+    fun setup() {
 
         Courier.initialize(context)
+
+    }
+
+    @Test
+    fun test_A() = runBlocking {
 
         Courier.shared.signOut()
 
@@ -339,12 +343,57 @@ class CourierTests {
         assertEquals(Courier.shared.inboxPaginationLimit, 1)
 
         Courier.shared.inboxPaginationLimit = 1000
-        assertEquals(Courier.shared.inboxPaginationLimit, 200)
+        assertEquals(Courier.shared.inboxPaginationLimit, 100)
 
     }
 
     @Test
     fun test_N() = runBlocking {
+
+        print("🔬 Get All User Preferences")
+
+        val preferences = UsersRepository().getUserPreferences(
+            accessToken = Env.COURIER_ACCESS_TOKEN,
+            userId = Env.COURIER_USER_ID,
+        )
+
+        print(preferences)
+
+    }
+
+    @Test
+    fun test_O() = runBlocking {
+
+        print("🔬 Get Topic")
+
+        UsersRepository().putUserPreferenceTopic(
+            accessToken = Env.COURIER_ACCESS_TOKEN,
+            userId = Env.COURIER_USER_ID,
+            topicId = "6QHD7Z1D4Q436SMECGXENTQYWVQQ",
+            status = CourierPreferenceStatus.OPTED_IN,
+            hasCustomRouting = true,
+            customRouting = listOf(CourierPreferenceChannel.SMS, CourierPreferenceChannel.PUSH)
+        )
+
+    }
+
+    @Test
+    fun test_P() = runBlocking {
+
+        print("🔬 Update Topic")
+
+        val topic = UsersRepository().getUserPreferenceTopic(
+            accessToken = Env.COURIER_ACCESS_TOKEN,
+            userId = Env.COURIER_USER_ID,
+            topicId = "6QHD7Z1D4Q436SMECGXENTQYWVQQ",
+        )
+
+        print(topic)
+
+    }
+
+    @Test
+    fun test_Z() = runBlocking {
 
         print("🔬 Signing Out")
 

@@ -15,7 +15,7 @@ internal class CoreInbox : DefaultLifecycleObserver {
 
     companion object {
         const val DEFAULT_PAGINATION_LIMIT = 32
-        const val DEFAULT_MAX_PAGINATION_LIMIT = 200
+        const val DEFAULT_MAX_PAGINATION_LIMIT = 100
         const val DEFAULT_MIN_PAGINATION_LIMIT = 1
     }
 

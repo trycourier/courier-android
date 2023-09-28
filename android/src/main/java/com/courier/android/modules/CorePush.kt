@@ -2,7 +2,7 @@ package com.courier.android.modules
 
 import com.courier.android.Courier
 import com.courier.android.models.CourierProvider
-import com.courier.android.repositories.TokenRepository
+import com.courier.android.repositories.UsersRepository
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +13,7 @@ import kotlinx.coroutines.*
 
 internal class CorePush {
 
-    private val tokenRepo by lazy { TokenRepository() }
+    private val usersRepo by lazy { UsersRepository() }
 
     // Stores a local copy of the fcmToken
     private var fcmToken: String? = null
@@ -106,7 +106,7 @@ internal class CorePush {
         Courier.log("Putting ${provider.value} Messaging Token: $token")
 
         try {
-            tokenRepo.putUserToken(
+            usersRepo.putUserToken(
                 accessToken = Courier.shared.accessToken!!,
                 userId = Courier.shared.userId!!,
                 token = token,
@@ -129,7 +129,7 @@ internal class CorePush {
         Courier.log("Deleting Messaging Token: $token")
 
         try {
-            tokenRepo.deleteUserToken(
+            usersRepo.deleteUserToken(
                 accessToken = Courier.shared.accessToken!!,
                 userId = Courier.shared.userId!!,
                 token = token
