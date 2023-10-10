@@ -21,7 +21,7 @@ class Courier private constructor() {
     companion object {
 
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "1.2.0"
+        internal const val VERSION = "1.2.1"
         internal const val TAG = "Courier SDK"
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
         internal val eventBus by lazy { NotificationEventBus() }
@@ -129,19 +129,9 @@ class Courier private constructor() {
         // If this fails, rethrow the exception
         return@withContext try {
 
-            // Bundle all deferred requests
-            val updates = listOf(
-                async(Dispatchers.IO) {
-
-                    // Refresh & update the current fcm token
-                    val fcmToken = updateCurrentFcmToken()
-                    return@async fcmToken?.let { setFCMToken(it) }
-
-                }
-            )
-
-            // Await all results
-            updates.awaitAll()
+            // Refresh & update the current fcm token
+            val fcmToken = updateCurrentFcmToken()
+            fcmToken?.let { setFCMToken(it) }
 
         } catch (e: Exception) {
 
