@@ -40,6 +40,7 @@ class Courier private constructor(internal val context: Context) {
     internal val auth by lazy { CoreAuth() }
     internal val push by lazy { CorePush() }
     internal val inbox by lazy { CoreInbox() }
+    internal val preferences by lazy { CorePreferences() }
     internal val messaging by lazy { CoreMessaging() }
 
     companion object {

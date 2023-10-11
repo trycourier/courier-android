@@ -14,7 +14,7 @@ internal class ExampleServer : Repository() {
 
         val json = JSONObject(
             mapOf(
-                "scope" to "user_id:$userId write:user-tokens",
+                "scope" to "user_id:$userId write:user-tokens write:preferences read:preferences",
                 "expires_in" to "2 days"
             )
         ).toString()

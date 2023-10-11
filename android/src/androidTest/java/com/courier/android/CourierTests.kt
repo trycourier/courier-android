@@ -6,6 +6,7 @@ import com.courier.android.models.*
 import com.courier.android.modules.*
 import com.courier.android.repositories.InboxRepository
 import com.courier.android.repositories.UsersRepository
+import com.courier.android.utils.getLastDeliveredMessage
 import com.courier.android.utils.trackNotification
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
@@ -352,10 +353,7 @@ class CourierTests {
 
         print("🔬 Get All User Preferences")
 
-        val preferences = UsersRepository().getUserPreferences(
-            accessToken = Env.COURIER_ACCESS_TOKEN,
-            userId = Env.COURIER_USER_ID,
-        )
+        val preferences = Courier.shared.getUserPreferences()
 
         print(preferences)
 
@@ -366,9 +364,7 @@ class CourierTests {
 
         print("🔬 Get Topic")
 
-        UsersRepository().putUserPreferenceTopic(
-            accessToken = Env.COURIER_ACCESS_TOKEN,
-            userId = Env.COURIER_USER_ID,
+        Courier.shared.putUserPreferenceTopic(
             topicId = "6QHD7Z1D4Q436SMECGXENTQYWVQQ",
             status = CourierPreferenceStatus.OPTED_IN,
             hasCustomRouting = true,
@@ -382,9 +378,7 @@ class CourierTests {
 
         print("🔬 Update Topic")
 
-        val topic = UsersRepository().getUserPreferenceTopic(
-            accessToken = Env.COURIER_ACCESS_TOKEN,
-            userId = Env.COURIER_USER_ID,
+        val topic = Courier.shared.getUserPreferenceTopic(
             topicId = "6QHD7Z1D4Q436SMECGXENTQYWVQQ",
         )
 
