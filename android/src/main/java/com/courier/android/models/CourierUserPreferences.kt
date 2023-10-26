@@ -3,10 +3,18 @@ package com.courier.android.models
 import com.google.gson.annotations.SerializedName
 
 enum class CourierPreferenceStatus(val value: String) {
+
     OPTED_IN("OPTED_IN"),
     OPTED_OUT("OPTED_OUT"),
     REQUIRED("REQUIRED"),
-    UNKNOWN("UNKNOWN")
+    UNKNOWN("UNKNOWN");
+
+    companion object {
+        fun fromString(value: String): CourierPreferenceStatus {
+            return CourierPreferenceStatus.values().firstOrNull { it.value == value } ?: UNKNOWN
+        }
+    }
+
 }
 
 enum class CourierPreferenceChannel(val value: String) {
@@ -19,7 +27,7 @@ enum class CourierPreferenceChannel(val value: String) {
     UNKNOWN("unknown");
 
     companion object {
-        internal fun fromString(value: String): CourierPreferenceChannel {
+        fun fromString(value: String): CourierPreferenceChannel {
             return values().firstOrNull { it.value == value } ?: UNKNOWN
         }
     }
