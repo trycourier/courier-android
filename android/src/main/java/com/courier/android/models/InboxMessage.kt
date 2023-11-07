@@ -14,9 +14,9 @@ data class InboxMessage(
     val created: String?,
     val actions: List<InboxAction>?,
     val data: Map<String, Any>?,
-    internal val archived: Boolean?,
-    internal var read: String?,
-    internal var opened: String?,
+    val archived: Boolean?,
+    var read: String?,
+    var opened: String?,
 ) {
 
     val subtitle get() = body ?: preview
