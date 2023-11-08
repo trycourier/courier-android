@@ -9,12 +9,12 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 internal class UsersRepository : Repository() {
 
-    suspend fun putUserToken(accessToken: String, userId: String, token: String, provider: CourierProvider) {
+    suspend fun putUserToken(accessToken: String, userId: String, token: String, provider: String) {
 
         val url = "$baseRest/users/$userId/tokens/$token"
 
         val json = gson.toJson(CourierToken(
-            provider_key = provider.value,
+            provider_key = provider,
             device = CourierDevice.current
         ))
 

@@ -81,6 +81,11 @@ class Courier private constructor(internal val context: Context) {
                 mInstance?.inbox?.lifecycle = activity?.lifecycle
             }
 
+            // Get the current fcmToken if possible
+            coroutineScope.launch(Dispatchers.IO) {
+                mInstance?.push?.refreshFcmToken()
+            }
+
         }
 
         /**

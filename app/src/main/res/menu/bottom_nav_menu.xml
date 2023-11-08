@@ -19,5 +19,5 @@
     <item
         android:id="@+id/send"
         android:icon="@android:drawable/sym_action_email"
-        android:title="Send" />
+        android:title="Push" />
 </menu>

@@ -49,11 +49,18 @@ class CourierTests {
 
         print("🔬 Setting FCM Token before User")
 
-        Courier.shared.setFCMToken(token = "something_that_will_fail")
+        val token = "8af92b6e587cbadf3c2e3d1a"
 
-        val fcmToken = Courier.shared.getFCMToken()
+        Courier.shared.setFCMToken(token = token)
 
-        assertEquals(fcmToken, null)
+        val fcmToken0 = Courier.shared.fcmToken
+        val fcmToken1 = Courier.shared.getToken(provider = "firebase-fcm")
+        val fcmToken2 = Courier.shared.getToken(provider = CourierPushProvider.FIREBASE_FCM)
+
+        assertEquals(fcmToken0, token)
+        assertEquals(fcmToken1, token)
+        assertEquals(fcmToken2, token)
+
         assertEquals(Courier.shared.userId, null)
         assertEquals(Courier.shared.accessToken, null)
 
@@ -87,8 +94,13 @@ class CourierTests {
         assertEquals(Courier.shared.clientKey, Env.COURIER_CLIENT_KEY)
         assertEquals(Courier.shared.accessToken, Env.COURIER_AUTH_KEY)
 
-        val fcmToken = Courier.shared.getFCMToken()
-        assertNotNull(fcmToken)
+        val fcmToken0 = Courier.shared.fcmToken
+        val fcmToken1 = Courier.shared.getToken(provider = "firebase-fcm")
+        val fcmToken2 = Courier.shared.getToken(provider = CourierPushProvider.FIREBASE_FCM)
+
+        assertNotNull(fcmToken0)
+        assertNotNull(fcmToken1)
+        assertNotNull(fcmToken2)
 
     }
 
@@ -117,14 +129,16 @@ class CourierTests {
     @Test
     fun test_E() = runBlocking {
 
-        print("🔬 Setting FCM Token")
+        print("🔬 Setting Messaging Tokens")
 
-        Courier.shared.setFCMToken(
-            token = "something_that_will_succeed"
-        )
+        val fcm = "6b7a8c9d1e2f3a4g5h6i7j8k"
+        val expo = "a1b2c3d4e5f6g7h8i9j0k1l"
 
-        val fcmToken = Courier.shared.getFCMToken()
-        assertNotNull(fcmToken)
+        Courier.shared.setFCMToken(token = fcm)
+        Courier.shared.setToken(provider = CourierPushProvider.EXPO, token = expo)
+
+        assertEquals(Courier.shared.fcmToken, fcm)
+        assertEquals(Courier.shared.getToken(provider = CourierPushProvider.EXPO), expo)
 
     }
 
@@ -393,8 +407,7 @@ class CourierTests {
 
         Courier.shared.signOut()
 
-        val fcmToken = Courier.shared.getFCMToken()
-        assertNotNull(fcmToken)
+        assertNotNull(Courier.shared.fcmToken)
 
         assertEquals(Courier.shared.userId, null)
         assertEquals(Courier.shared.accessToken, null)

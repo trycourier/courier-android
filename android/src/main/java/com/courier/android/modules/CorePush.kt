@@ -1,7 +1,8 @@
 package com.courier.android.modules
 
 import com.courier.android.Courier
-import com.courier.android.models.CourierProvider
+import com.courier.android.models.CourierException
+import com.courier.android.models.CourierPushProvider
 import com.courier.android.repositories.UsersRepository
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
@@ -15,26 +16,39 @@ internal class CorePush {
 
     private val usersRepo by lazy { UsersRepository() }
 
-    // Stores a local copy of the fcmToken
-    private var fcmToken: String? = null
-
     // Ensures we can use firebase functions
     private val isFirebaseInitialized get() = FirebaseApp.getApps(Courier.shared.context).isNotEmpty()
 
-    internal suspend fun getFcmToken(): String? {
+    // Keep a reference to all tokens
+    internal var tokens: MutableMap<String, String> = mutableMapOf()
+
+    // Stores a local copy of the fcmToken
+    internal var fcmToken: String? = null
+        set(value) {
+
+            // Set the value
+            field = value
+
+            val key = CourierPushProvider.FIREBASE_FCM.value
+
+            // Update the local cache
+            if (value != null) {
+                tokens[key] = value
+            } else {
+                tokens.remove(key)
+            }
+
+        }
+
+    private suspend fun getFcmToken(): String? {
 
         if (!isFirebaseInitialized) {
             Courier.error("Firebase is not initialized. Courier will not be able to get the FCM token until Firebase is initialized.")
             return null
         }
 
-        // Get the existing fcm token
-        fcmToken?.let { existingToken ->
-            return existingToken
-        }
-
         // Get the latest token
-        val latestFcmToken = suspendCoroutine { continuation ->
+        val token = suspendCoroutine { continuation ->
 
             // Get the current FCM token
             FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
@@ -50,36 +64,77 @@ internal class CorePush {
 
         }
 
-        // Update the fcm token
-        fcmToken = latestFcmToken
-
-        return latestFcmToken
+        return token
 
     }
 
-    suspend fun setFCMToken(newToken: String?) {
+    internal suspend fun setFCMToken(newToken: String) {
 
-        Courier.log("Firebase Cloud Messaging Token: $newToken")
+        if (Courier.shared.accessToken == null || Courier.shared.userId == null) {
+            fcmToken = newToken
+            return
+        }
 
-        // Delete the old token if possible
-        val oldToken = getFcmToken()
-        deleteToken(oldToken)
+        // FCM key
+        val key = CourierPushProvider.FIREBASE_FCM.value
 
-        // Set the new token
+        // Remove the old token
+        deleteTokenIfNeeded(
+            token = tokens[key]
+        )
+
+        // Save the local token
         fcmToken = newToken
 
         // Put the new token
-        putToken(CourierProvider.FCM, newToken)
+        putToken(
+            provider = key,
+            token = newToken
+        )
 
+    }
+
+    internal suspend fun setToken(provider: String, token: String) {
+
+        if (Courier.shared.accessToken == null || Courier.shared.userId == null) {
+            tokens[provider] = token
+            return
+        }
+
+        // Remove the old token
+        deleteTokenIfNeeded(
+            token = tokens[provider]
+        )
+
+        // Save the local token
+        tokens[provider] = token
+
+        // Put the new token
+        putToken(
+            provider = provider,
+            token = token
+        )
+
+    }
+
+    internal suspend fun refreshFcmToken() = withContext(Dispatchers.IO) {
+        if (fcmToken == null) {
+            fcmToken = getFcmToken()
+        }
     }
 
     internal suspend fun putPushTokens() = withContext(Dispatchers.IO) {
 
-        // Refresh the tokens
-        fcmToken = getFcmToken()
+        // Check if we do not have an fcm token
+        refreshFcmToken()
 
-        // Put the new tokens in Courier
-        putToken(CourierProvider.FCM, fcmToken)
+        // Save all the tokens
+        tokens.forEach { token ->
+            putTokenIfNeeded(
+                provider = token.key,
+                token = token.value
+            )
+        }
 
     }
 
@@ -87,55 +142,80 @@ internal class CorePush {
     // Done like this in case we have other tokens for the user at some point
     internal suspend fun deletePushTokens() = withContext(Dispatchers.IO) {
 
-        // Refresh the tokens
-        fcmToken = getFcmToken()
+        // Check if we do not have an fcm token
+        refreshFcmToken()
 
         // Remove the old tokens
-        deleteToken(fcmToken)
-
-    }
-
-    // Tries add the token from Courier
-    // Will silently fail if error occurs
-    private suspend fun putToken(provider: CourierProvider, token: String?) {
-
-        if (Courier.shared.accessToken == null || Courier.shared.userId == null || token == null) {
-            return
-        }
-
-        Courier.log("Putting ${provider.value} Messaging Token: $token")
-
-        try {
-            usersRepo.putUserToken(
-                accessToken = Courier.shared.accessToken!!,
-                userId = Courier.shared.userId!!,
-                token = token,
-                provider = provider
+        tokens.forEach { token ->
+            deleteTokenIfNeeded(
+                token = token.value
             )
-        } catch (e: Exception) {
-            Courier.error(e.message)
         }
 
     }
 
-    // Tries to the remove the token from Courier
-    // Will silently fail if error occurs
-    private suspend fun deleteToken(token: String?) {
+    private suspend fun putToken(provider: String, token: String) {
+
+        if (Courier.shared.accessToken == null || Courier.shared.userId == null) {
+            throw CourierException.missingAccessToken
+        }
+
+        Courier.log("Putting $provider Token: $token")
+
+        usersRepo.putUserToken(
+            accessToken = Courier.shared.accessToken!!,
+            userId = Courier.shared.userId!!,
+            token = token,
+            provider = provider
+        )
+
+    }
+
+    private suspend fun putTokenIfNeeded(provider: String, token: String?) {
 
         if (Courier.shared.accessToken == null || Courier.shared.userId == null || token == null) {
             return
         }
 
-        Courier.log("Deleting Messaging Token: $token")
-
         try {
-            usersRepo.deleteUserToken(
-                accessToken = Courier.shared.accessToken!!,
-                userId = Courier.shared.userId!!,
+            putToken(
+                provider = provider,
                 token = token
             )
         } catch (e: Exception) {
-            Courier.error(e.message)
+            Courier.log(e.toString())
+        }
+
+    }
+
+    private suspend fun deleteToken(token: String) {
+
+        if (Courier.shared.accessToken == null || Courier.shared.userId == null) {
+            throw CourierException.missingAccessToken
+        }
+
+        Courier.log("Deleting Token: $token")
+
+        usersRepo.deleteUserToken(
+            accessToken = Courier.shared.accessToken!!,
+            userId = Courier.shared.userId!!,
+            token = token
+        )
+
+    }
+
+    private suspend fun deleteTokenIfNeeded(token: String?) {
+
+        if (Courier.shared.accessToken == null || Courier.shared.userId == null || token == null) {
+            return
+        }
+
+        try {
+            deleteToken(
+                token = token
+            )
+        } catch (e: Exception) {
+            Courier.log(e.toString())
         }
 
     }
@@ -147,30 +227,60 @@ internal class CorePush {
  */
 
 /**
- * The current firebase cloud messaging token for the device
+ * Get the FCM Token
  */
-suspend fun Courier.getFCMToken() = push.getFcmToken()
 
-fun Courier.getFCMToken(onSuccess: (String?) -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
+val Courier.fcmToken get() = push.fcmToken
+
+/**
+ * Upserts the FCM token in Courier for the current user
+ * To get started with FCM, checkout the firebase docs [Here](https://firebase.google.com/docs/cloud-messaging/android/client)
+ */
+suspend fun Courier.setFCMToken(token: String) {
+    push.setFCMToken(token)
+}
+
+fun Courier.setFCMToken(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
     try {
-        val token = getFCMToken()
-        onSuccess(token)
+        setFCMToken(token)
+        onSuccess()
     } catch (e: Exception) {
         onFailure(e)
     }
 }
 
 /**
- * Upserts the FCM token in Courier for the current user
- * To get started with FCM, checkout the firebase docs [Here](https://firebase.google.com/docs/cloud-messaging/android/client)
+ * Gets the current token for the user
+ * This value is stored locally
  */
-suspend fun Courier.setFCMToken(token: String?) {
-    push.setFCMToken(token)
+fun Courier.getToken(provider: String) = push.tokens[provider]
+
+fun Courier.getToken(provider: CourierPushProvider) = push.tokens[provider.value]
+
+/**
+ * Sets the current token for the provider
+ */
+
+suspend fun Courier.setToken(provider: String, token: String) {
+    push.setToken(provider = provider, token = token)
 }
 
-fun Courier.setFCMToken(token: String?, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
+fun Courier.setToken(provider: String, token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
     try {
-        setFCMToken(token)
+        setToken(provider, token)
+        onSuccess()
+    } catch (e: Exception) {
+        onFailure(e)
+    }
+}
+
+suspend fun Courier.setToken(provider: CourierPushProvider, token: String) {
+    push.setToken(provider = provider.value, token = token)
+}
+
+fun Courier.setToken(provider: CourierPushProvider, token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
+    try {
+        setToken(provider, token)
         onSuccess()
     } catch (e: Exception) {
         onFailure(e)

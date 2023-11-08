@@ -10,7 +10,6 @@ import com.courier.android.activity.CourierActivity
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
-import com.courier.android.modules.inboxBrandId
 import com.courier.example.databinding.ActivityMainBinding
 import com.courier.example.fragments.*
 import com.google.firebase.messaging.RemoteMessage
@@ -24,7 +23,7 @@ class MainActivity : CourierActivity() {
     private val prebuiltInboxFragment by lazy { PrebuiltInboxFragment() }
     private val styledInboxFragment by lazy { StyledInboxFragment() }
     private val customInboxFragment by lazy { CustomInboxFragment() }
-    private val sendFragment by lazy { SendFragment() }
+    private val sendFragment by lazy { PushFragment() }
 
     private lateinit var binding: ActivityMainBinding
 

@@ -2,7 +2,6 @@ package com.courier.android.modules
 
 import com.courier.android.Courier
 import com.courier.android.models.CourierChannel
-import com.courier.android.models.CourierProvider
 import com.courier.android.repositories.MessagingRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
