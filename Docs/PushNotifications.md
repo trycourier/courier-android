@@ -104,21 +104,32 @@ The easiest way to support push notifications in your app.
 
 &emsp;
 
-# Setup
+# Setup 
 
 ## 1. Setup a Push Notification Provider
 
-Select which push notification provider you would like Courier to route push notifications to. Choose (FCM) - Firebase Cloud Messaging if you are not sure which provider to use.
+Select which push notification provider you would like Courier to route push notifications to. Choose APNS - Apple Push Notification Service if you are not sure which provider to use.
 
 <table>
     <thead>
         <tr>
-            <th width="600px" align="left">Provider</th>
+            <th width="850px" align="left">Provider</th>
             <th width="200px" align="center">Token Syncing</th>
-            <th width="200px" align="center">Supported</th>
         </tr>
     </thead>
     <tbody>
+        <tr width="600px">
+            <td align="left">
+                <a href="https://app.courier.com/channels/apn">
+                    <code>(APNS) - Apple Push Notification Service</code>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#automatic-token-syncing-apns-only">
+                    <code>Automatic</code>
+                </a>
+            </td>
+        </tr>
         <tr width="600px">
             <td align="left">
                 <a href="https://app.courier.com/channels/firebase-fcm">
@@ -126,9 +137,22 @@ Select which push notification provider you would like Courier to route push not
                 </a>
             </td>
             <td align="center">
-                <code>Automatic</code>
+                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#manual-token-syncing">
+                    <code>Manual</code>
+                </a>
             </td>
-            <td align="center">✅</td>
+        </tr>
+        <tr width="600px">
+            <td align="left">
+                <a href="https://app.courier.com/channels/expo">
+                    <code>Expo</code>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#manual-token-syncing">
+                    <code>Manual</code>
+                </a>
+            </td>
         </tr>
         <tr width="600px">
             <td align="left">
@@ -137,9 +161,22 @@ Select which push notification provider you would like Courier to route push not
                 </a>
             </td>
             <td align="center">
-                —
+                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#manual-token-syncing">
+                    <code>Manual</code>
+                </a>
             </td>
-            <td align="center">❌</td>
+        </tr>
+        <tr width="600px">
+            <td align="left">
+                <a href="https://app.courier.com/channels/pusher-beams">
+                    <code>Pusher Beams</code>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#manual-token-syncing">
+                    <code>Manual</code>
+                </a>
+            </td>
         </tr>
     </tbody>
 </table>
