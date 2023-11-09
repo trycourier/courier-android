@@ -18,7 +18,7 @@ The easiest way to support push notifications in your app.
     <tbody>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#automatic-token-syncing-fcm-only">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#automatic-token-syncing-fcm-only">
                     <code>Automatic Token Management</code>
                 </a>
             </td>
