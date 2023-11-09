@@ -308,7 +308,7 @@ lifecycleScope.launch {
 
 &emsp;
 
-## 4. Sign your user in
+## 4. Authenticate User
 
 This will take the tokens you are syncing above and upload them to the `userId` you provide here.
 
@@ -326,7 +326,7 @@ lifecycleScope.launch {
 }
 ```
 
-### 5. Register for Notifications
+## 5. Register for Notifications
 
 This is only needed for Android `33` and above. You are safe to call it in older versions of Android.
 
@@ -338,7 +338,7 @@ context?.requestNotificationPermission()
 val isGranted = context?.isPushPermissionGranted
 ```
 
-### 6. Sending a message
+## 6. Sending a message
 
 <table>
     <thead>
