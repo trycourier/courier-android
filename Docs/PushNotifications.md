@@ -48,7 +48,7 @@ The easiest way to support push notifications in your app.
         </tr>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#4-send-a-test-push-notification">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#5-register-for-notifications">
                     <code>Permission Requests & Checking</code>
                 </a>
             </td>
