@@ -293,7 +293,7 @@ lifecycleScope.launch {
 
 ### Manual Notification Tracking
 
-This is how you can tell Courier when notification have been delivered on your device. If you are using `CourierService` and `CourierActivity`, this is done automatically.
+This is how you can tell Courier when a notification has been delivered or clicked in your app. If you are using `CourierService` and `CourierActivity`, this is done automatically.
 
 ```kotlin
 lifecycleScope.launch {
