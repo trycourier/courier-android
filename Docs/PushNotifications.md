@@ -125,7 +125,7 @@ Select which push notification provider you would like Courier to route push not
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#automatic-token-syncing-apns-only">
+                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#automatic-token-syncing-fcm-only">
                      <code>Automatic</code>
                 </a>
             </td>
@@ -169,17 +169,15 @@ Select which push notification provider you would like Courier to route push not
     </tbody>
 </table>
 
-&emsp;
-
 ⚠️ If you are using Firebase Cloud Messaging, please make sure you initialize the Firebase SDK before continuing. Follow this [`Setup Guide`](https://firebase.google.com/docs/android/setup) for Firebase on Android.
 
 &emsp;
 
-## 2. Add the `CourierService`
+## 2. Sync Push Notification Tokens
 
-### 1. Create the `CourierService` file
+### Automatic Token Syncing (FCM Only)
 
-This file is used to track new push notifications when they arrive and to automatically sync push notification tokens. Create a new file, name it what you'd like and paste the follow code in it. (Kotlin example shown below)
+To track new push notifications when they arrive and to automatically sync push notification tokens, create a new file, name it what you'd like and paste the following code in it. (Kotlin example shown below)
 
 ```kotlin
 import android.annotation.SuppressLint
@@ -213,7 +211,7 @@ class YourNotificationService: CourierService() {
 
 &emsp;
 
-### 2. Add the `CourierService` entry in your `AndroidManifest.xml` file
+Next, add the `CourierService` entry in your `AndroidManifest.xml` file
 
 ```xml
 <manifest>
@@ -241,9 +239,7 @@ class YourNotificationService: CourierService() {
 
 &emsp;
 
-## 3. Extend `CourierActivity`
-
-This will allow you to handle when users get push notifications delivered and when they click on the push notifications. You will likely want to extend your `MainActivity` but your use case may be slightly different.
+Then, extend your `MainActivity` with `CourierActivity`. This will allow you to handle when users get push notifications delivered and when they click on the push notifications. You will likely want to extend your `MainActivity` but your use case may be slightly different.
     
 ```kotlin
 class MainActivity : CourierActivity() {
@@ -261,11 +257,40 @@ class MainActivity : CourierActivity() {
 }
 ```
 
+### Manual Token Syncing
+
+If you do not want to use `CourierService` and `CourierActivity`, you can manually sync push notification tokens with the following code.
+
+```kotlin
+lifecycleScope.launch {
+            
+    val fcm = CourierPushProvider.FIREBASE_FCM
+
+    // Save a token into Courier
+    // If your user is signed in, this will succeed.
+    // If your user is not signed in, this will be stored locally
+    // and uploaded when you sign your user in.
+    Courier.shared.setToken(
+        provider = fcm,
+        token = "your_messaging_token",
+    )
+
+    // Get a token
+    // Looks up the locally stored token
+    val fcmToken = Courier.shared.getToken(
+        provider = fcm
+    )
+    
+    print(fcmToken)
+    
+}
+```
+
 &emsp;
 
-## 4. Send a Test Push Notification
+## 4. Sign your user in
 
-### 1. Sign your user in
+This will take the tokens you are syncing above and upload them to the `userId` you provide here.
 
 See [`Authentication`](https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md) for more details.
 
@@ -281,7 +306,7 @@ lifecycleScope.launch {
 }
 ```
 
-### 2. Register for Notifications
+### 5. Register for Notifications
 
 This is only needed for Android `33` and above. You are safe to call it in older versions of Android.
 
@@ -293,6 +318,27 @@ context?.requestNotificationPermission()
 val isGranted = context?.isPushPermissionGranted
 ```
 
-3. Send a Test Message
+### 6. Sending a message
 
-[`See Testing Examples`](https://github.com/trycourier/courier-android/blob/master/Docs/Testing.md)
+<table>
+    <thead>
+        <tr>
+            <th width="600px" align="left">Provider</th>
+            <th width="200px" align="center">Link</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr width="600px">
+            <td align="left">
+                <a href="https://app.courier.com/channels/firebase-fcm">
+                    <code>(FCM) - Firebase Cloud Messaging</code>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://www.courier.com/docs/platform/channels/push/firebase-fcm/#sending-messages">
+                    <code>Testing Docs</code>
+                </a>
+            </td>
+        </tr>
+    </tbody>
+</table>
