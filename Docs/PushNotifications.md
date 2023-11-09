@@ -18,7 +18,7 @@ The easiest way to support push notifications in your app.
     <tbody>
         <tr width="600px">
             <td align="left">
-                <a href="TODO">
+                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#automatic-token-syncing-fcm-only">
                     <code>Automatic Token Management</code>
                 </a>
             </td>
@@ -28,8 +28,8 @@ The easiest way to support push notifications in your app.
         </tr>
         <tr width="600px">
             <td align="left">
-                <a href="TODO">
-                    <code>Notification Tracking</code>
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#manual-token-syncing">
+                    <code>Manual Token Managment & Notification Tracking</code>
                 </a>
             </td>
             <td align="left">
@@ -125,7 +125,7 @@ Select which push notification provider you would like Courier to route push not
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#automatic-token-syncing-fcm-only">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#automatic-token-syncing-fcm-only">
                      <code>Automatic</code>
                 </a>
             </td>
@@ -137,7 +137,7 @@ Select which push notification provider you would like Courier to route push not
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#manual-token-syncing">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#manual-token-syncing">
                     <code>Manual</code>
                 </a>
             </td>
@@ -149,7 +149,7 @@ Select which push notification provider you would like Courier to route push not
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#manual-token-syncing">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#manual-token-syncing">
                     <code>Manual</code>
                 </a>
             </td>
@@ -161,7 +161,7 @@ Select which push notification provider you would like Courier to route push not
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#manual-token-syncing">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#manual-token-syncing">
                     <code>Manual</code>
                 </a>
             </td>
