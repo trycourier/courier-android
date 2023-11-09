@@ -193,7 +193,6 @@ class YourNotificationService: CourierService() {
         super.showNotification(message)
 
         // TODO: This is where you will customize the notification that is shown to your users
-        // The function below is used to get started quickly.
         // `message.presentNotification(...)` is used to get started quickly and not for production use.
         // More information on how to customize an Android notification here:
         // https://developer.android.com/develop/ui/views/notifications/build-notification
