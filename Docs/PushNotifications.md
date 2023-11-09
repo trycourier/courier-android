@@ -235,7 +235,7 @@ Next, add the `CourierService` entry in your `AndroidManifest.xml` file
 </manifest>
 ```
 
-Finally, extend your `MainActivity` with `CourierActivity`. This will allow you to handle when users get push notifications delivered and when they click on the push notifications. You will likely want to extend your `MainActivity` but your use case may be slightly different.
+Finally, add the `CourierActivity`. This will allow you to handle when users get push notifications delivered and when they click on the push notifications. You will likely want to extend your `MainActivity` but your use case may be slightly different.
     
 ```kotlin
 class MainActivity : CourierActivity() {
