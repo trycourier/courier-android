@@ -209,8 +209,6 @@ class YourNotificationService: CourierService() {
 }
 ```
 
-&emsp;
-
 Next, add the `CourierService` entry in your `AndroidManifest.xml` file
 
 ```xml
@@ -237,9 +235,7 @@ Next, add the `CourierService` entry in your `AndroidManifest.xml` file
 </manifest>
 ```
 
-&emsp;
-
-Then, extend your `MainActivity` with `CourierActivity`. This will allow you to handle when users get push notifications delivered and when they click on the push notifications. You will likely want to extend your `MainActivity` but your use case may be slightly different.
+Finally, extend your `MainActivity` with `CourierActivity`. This will allow you to handle when users get push notifications delivered and when they click on the push notifications. You will likely want to extend your `MainActivity` but your use case may be slightly different.
     
 ```kotlin
 class MainActivity : CourierActivity() {
