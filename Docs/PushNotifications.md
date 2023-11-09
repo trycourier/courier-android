@@ -29,7 +29,17 @@ The easiest way to support push notifications in your app.
         <tr width="600px">
             <td align="left">
                 <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#manual-token-syncing">
-                    <code>Manual Token Managment & Notification Tracking</code>
+                    <code>Manual Token Managment</code>
+                </a>
+            </td>
+            <td align="left">
+                Sync push notification tokens into Courier
+            </td>
+        </tr>
+        <tr width="600px">
+            <td align="left">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#manual-notification-tracking">
+                    <code>Manual Notification Tracking</code>
                 </a>
             </td>
             <td align="left">
@@ -278,6 +288,21 @@ lifecycleScope.launch {
     
     print(fcmToken)
     
+}
+```
+
+### Manual Notification Tracking
+
+This is how you can tell Courier when notification have been delivered on your device. If you are using `CourierService` and `CourierActivity`, this is done automatically.
+
+```kotlin
+lifecycleScope.launch {
+
+    Courier.shared.trackNotification(
+        trackingUrl = "https://courier.com/your_tracking_url", 
+        event = CourierPushEvent.CLICKED
+    )
+
 }
 ```
 
