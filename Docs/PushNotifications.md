@@ -120,25 +120,13 @@ Select which push notification provider you would like Courier to route push not
     <tbody>
         <tr width="600px">
             <td align="left">
-                <a href="https://app.courier.com/channels/apn">
-                    <code>(APNS) - Apple Push Notification Service</code>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#automatic-token-syncing-apns-only">
-                    <code>Automatic</code>
-                </a>
-            </td>
-        </tr>
-        <tr width="600px">
-            <td align="left">
                 <a href="https://app.courier.com/channels/firebase-fcm">
                     <code>(FCM) - Firebase Cloud Messaging</code>
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#manual-token-syncing">
-                    <code>Manual</code>
+                <a href="https://github.com/trycourier/courier-ios/blob/master/Docs/PushNotifications.md#automatic-token-syncing-apns-only">
+                     <code>Automatic</code>
                 </a>
             </td>
         </tr>
