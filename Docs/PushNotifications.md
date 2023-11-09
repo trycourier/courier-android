@@ -181,6 +181,8 @@ Select which push notification provider you would like Courier to route push not
     </tbody>
 </table>
 
+&emsp;
+
 ⚠️ If you are using Firebase Cloud Messaging, please make sure you initialize the Firebase SDK before continuing. Follow this [`Setup Guide`](https://firebase.google.com/docs/android/setup) for Firebase on Android.
 
 &emsp;
