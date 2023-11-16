@@ -55,6 +55,8 @@ internal class CorePush {
 
                 if (!task.isSuccessful) {
                     Courier.error(task.exception.toString())
+                    continuation.resume(null)
+                    return@addOnCompleteListener
                 }
 
                 // Save and return the token
