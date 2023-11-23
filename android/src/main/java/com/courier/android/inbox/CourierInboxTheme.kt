@@ -7,8 +7,8 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import com.courier.android.models.CourierBrand
 
 data class CourierInboxTheme(
-    @ColorInt private val unreadIndicatorBarColor: Int? = null,
     @ColorInt private val loadingIndicatorColor: Int? = null,
+    internal val unreadIndicatorStyle: CourierInboxUnreadIndicatorStyle = CourierInboxUnreadIndicatorStyle(),
     internal val titleFont: CourierInboxFont = CourierInboxFont(),
     internal val timeFont: CourierInboxFont = CourierInboxFont(),
     internal val bodyFont: CourierInboxFont = CourierInboxFont(),
@@ -27,12 +27,12 @@ data class CourierInboxTheme(
     @ColorInt
     internal fun getUnreadColor(): Int? {
 
-        if (unreadIndicatorBarColor == null) {
+        if (unreadIndicatorStyle.color == null) {
             val value = brand?.settings?.colors?.primary
             return try { Color.parseColor(value) } catch (e: Exception) { null }
         }
 
-        return unreadIndicatorBarColor
+        return unreadIndicatorStyle.color
 
     }
 
@@ -76,4 +76,14 @@ data class CourierInboxFont(
     val typeface: Typeface? = null,
     @ColorInt val color: Int? = null,
     val sizeInSp: Int? = null,
+)
+
+enum class CourierInboxUnreadIndicator {
+    DOT,
+    LINE
+}
+
+data class CourierInboxUnreadIndicatorStyle(
+    val indicator: CourierInboxUnreadIndicator = CourierInboxUnreadIndicator.LINE,
+    @ColorInt val color: Int? = null
 )

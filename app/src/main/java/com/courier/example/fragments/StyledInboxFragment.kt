@@ -9,10 +9,7 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.courier.android.Courier
-import com.courier.android.inbox.CourierInbox
-import com.courier.android.inbox.CourierInboxButtonStyles
-import com.courier.android.inbox.CourierInboxFont
-import com.courier.android.inbox.CourierInboxTheme
+import com.courier.android.inbox.*
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
 import com.courier.android.modules.readAllInboxMessages
@@ -50,8 +47,11 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
         val font = ResourcesCompat.getFont(requireContext(), R.font.poppins)
 
         inbox.lightTheme = CourierInboxTheme(
-            unreadIndicatorBarColor = ContextCompat.getColor(requireContext(), R.color.courier_red),
             loadingIndicatorColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
+            unreadIndicatorStyle = CourierInboxUnreadIndicatorStyle(
+                indicator = CourierInboxUnreadIndicator.DOT,
+                color = ContextCompat.getColor(requireContext(), R.color.courier_red)
+            ),
             titleFont = CourierInboxFont(
                 typeface = font,
                 color = ContextCompat.getColor(requireContext(), android.R.color.black),
