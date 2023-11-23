@@ -7,45 +7,88 @@
     android:layout_height="wrap_content"
     android:foreground="?attr/selectableItemBackground">
 
-    <com.google.android.flexbox.FlexboxLayout
-        android:layout_width="match_parent"
+    <FrameLayout
+        android:id="@+id/indicatorContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <View
+            android:id="@+id/indicator"
+            android:layout_width="@dimen/courier_inbox_indicator_width"
+            android:layout_height="match_parent"
+            android:layout_margin="2dp"
+            android:background="?attr/colorPrimary"
+            tools:background="@android:color/holo_green_light" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/dotContainer"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/courier_inbox_horizontal_margin"
+        android:minWidth="@dimen/courier_inbox_horizontal_margin"
+        app:layout_constraintBottom_toBottomOf="@id/titleContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/titleContainer">
+
+        <com.courier.android.inbox.CourierCircleView
+            android:id="@+id/dot"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:layout_margin="8dp"
+            android:visibility="invisible"
+            tools:visibility="visible" />
+
+    </FrameLayout>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/titleContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/courier_inbox_horizontal_margin"
+        android:layout_marginEnd="@dimen/courier_inbox_horizontal_margin"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/dotContainer"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/titleTextView"
+            style="@style/TextAppearance.MaterialComponents.Body1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            tools:text="Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem" />
+
+        <TextView
+            android:id="@+id/timeTextView"
+            style="@style/TextAppearance.MaterialComponents.Body1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/courier_inbox_horizontal_margin"
+            android:maxLines="1"
+            android:textAlignment="textEnd"
+            tools:text="5m" />
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <com.google.android.flexbox.FlexboxLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/courier_inbox_item_gap"
+        android:paddingBottom="@dimen/courier_inbox_horizontal_margin"
         android:orientation="vertical"
         app:dividerDrawable="@drawable/courier_inbox_item_gap"
         app:flexDirection="column"
         app:flexWrap="nowrap"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/titleContainer"
+        app:layout_constraintStart_toStartOf="@id/titleContainer"
+        app:layout_constraintTop_toBottomOf="@id/titleContainer"
         app:showDivider="middle">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/titleTextView"
-                style="@style/TextAppearance.MaterialComponents.Body1"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textStyle="bold"
-                tools:text="Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem" />
-
-            <TextView
-                android:id="@+id/timeTextView"
-                style="@style/TextAppearance.MaterialComponents.Body1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/courier_inbox_horizontal_margin"
-                android:maxLines="1"
-                android:textAlignment="textEnd"
-                tools:text="5m" />
-
-        </LinearLayout>
 
         <TextView
             android:id="@+id/subtitleTextView"
@@ -62,19 +105,10 @@
             app:dividerDrawable="@drawable/courier_inbox_button_gap"
             app:flexDirection="row"
             app:flexWrap="wrap"
+            android:visibility="gone"
             app:justifyContent="flex_start"
             app:showDivider="middle" />
 
     </com.google.android.flexbox.FlexboxLayout>
-
-    <View
-        android:id="@+id/indicator"
-        android:layout_width="@dimen/courier_inbox_indicator_width"
-        android:layout_height="0dp"
-        android:layout_margin="2dp"
-        android:background="?attr/colorPrimary"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

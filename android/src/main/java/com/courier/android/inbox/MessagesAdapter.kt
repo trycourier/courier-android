@@ -3,8 +3,10 @@ package com.courier.android.inbox
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.R
@@ -20,6 +22,8 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
     private val timeTextView: TextView
     private val subtitleTextView: TextView
     private val indicator: View
+    private val dot: CourierCircleView
+    private val dotContainer: FrameLayout
     private val buttonContainer: FlexboxLayout
 
     private var message: InboxMessage? = null
@@ -33,7 +37,24 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
         timeTextView = itemView.findViewById(R.id.timeTextView)
         subtitleTextView = itemView.findViewById(R.id.subtitleTextView)
         indicator = itemView.findViewById(R.id.indicator)
+        dot = itemView.findViewById(R.id.dot)
+        dotContainer = itemView.findViewById(R.id.dotContainer)
         buttonContainer = itemView.findViewById(R.id.buttonContainer)
+    }
+
+    private fun setIndicator(theme: CourierInboxTheme, message: InboxMessage) {
+
+        when (theme.unreadIndicatorStyle.indicator) {
+            CourierInboxUnreadIndicator.DOT -> {
+                indicator.isVisible = false
+                dot.isInvisible = message.isRead
+            }
+            CourierInboxUnreadIndicator.LINE -> {
+                indicator.isVisible = !message.isRead
+                dot.isVisible = false
+            }
+        }
+
     }
 
     fun setMessage(theme: CourierInboxTheme, message: InboxMessage) {
@@ -45,7 +66,7 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
         subtitleTextView.text = message.subtitle
 
         // Indicator
-        indicator.isVisible = !message.isRead
+        setIndicator(theme, message)
 
         buttonContainer.isVisible = !message.actions.isNullOrEmpty()
         buttonContainer.removeAllViews()
@@ -73,6 +94,7 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
         // Theming
         theme.getUnreadColor()?.let {
             indicator.setBackgroundColor(it)
+            dot.setCircleColor(it)
         }
 
         titleTextView.setCourierFont(theme.titleFont)
