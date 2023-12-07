@@ -82,9 +82,9 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
         message.actions?.forEach { action ->
 
             // Create the button for the action
-            CourierInboxButton(itemView.context).apply {
+            CourierInboxButtonView(itemView.context).apply {
                 val fallbackColor = ContextCompat.getColor(itemView.context, android.R.color.darker_gray)
-                this.setTheme(isRead = message.isRead, theme = theme, fallbackColor = if (message.isRead) fallbackColor else null)
+                this.setStyle(style = if (message.isRead) theme.buttonStyle.read else theme.buttonStyle.unread, fallbackColor = if (message.isRead) fallbackColor else null)
                 this.text = action.content
                 this.onClick = {
                     onActionClick?.invoke(action, message)

@@ -88,13 +88,24 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
                     sizeInSp = 14
                 )
             ),
-            infoViewStyle = CourierInboxFont(
-                typeface = font,
-                color = ContextCompat.getColor(requireContext(), android.R.color.black),
-                sizeInSp = 18
+            infoViewStyle = CourierInboxInfoViewStyle(
+                font = CourierInboxFont(
+                    typeface = font,
+                    color = ContextCompat.getColor(requireContext(), android.R.color.black),
+                    sizeInSp = 18
+                ),
+                button = CourierInboxButton(
+                    font = CourierInboxFont(
+                        typeface = font,
+                        color = ContextCompat.getColor(requireContext(), android.R.color.white),
+                        sizeInSp = 16
+                    ),
+                    backgroundColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
+                    cornerRadiusInDp = 100
+                )
             ),
-            buttonStyle = CourierInboxButtonStyles(
-                unread = CourierInboxButtonTheme(
+            buttonStyle = CourierInboxButtonStyle(
+                unread = CourierInboxButton(
                     font = CourierInboxFont(
                         typeface = font,
                         color = ContextCompat.getColor(requireContext(), android.R.color.white),
@@ -103,7 +114,7 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
                     backgroundColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
                     cornerRadiusInDp = 100
                 ),
-                read = CourierInboxButtonTheme(
+                read = CourierInboxButton(
                     font = CourierInboxFont(
                         typeface = font,
                         color = ContextCompat.getColor(requireContext(), android.R.color.white),
@@ -153,13 +164,23 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
                     sizeInSp = 14
                 )
             ),
-            infoViewStyle = CourierInboxFont(
-                typeface = font,
-                color = ContextCompat.getColor(requireContext(), android.R.color.white),
-                sizeInSp = 18
+            infoViewStyle = CourierInboxInfoViewStyle(
+                font = CourierInboxFont(
+                    typeface = font,
+                    color = ContextCompat.getColor(requireContext(), android.R.color.white),
+                    sizeInSp = 18
+                ),
+                button = CourierInboxButton(
+                    font = CourierInboxFont(
+                        typeface = font,
+                        color = ContextCompat.getColor(requireContext(), android.R.color.white),
+                        sizeInSp = 16
+                    ),
+                    cornerRadiusInDp = 100
+                )
             ),
-            buttonStyle = CourierInboxButtonStyles(
-                unread = CourierInboxButtonTheme(
+            buttonStyle = CourierInboxButtonStyle(
+                unread = CourierInboxButton(
                     font = CourierInboxFont(
                         typeface = font,
                         color = ContextCompat.getColor(requireContext(), android.R.color.white),
@@ -167,7 +188,7 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
                     ),
                     cornerRadiusInDp = 100
                 ),
-                read = CourierInboxButtonTheme(
+                read = CourierInboxButton(
                     font = CourierInboxFont(
                         typeface = font,
                         color = ContextCompat.getColor(requireContext(), android.R.color.white),

@@ -245,18 +245,20 @@ internal fun isDarkModeOn(context: Context): Boolean {
     return currentNightMode == UI_MODE_NIGHT_YES
 }
 
-internal fun TextView.setCourierFont(font: CourierInboxFont, @ColorInt fallbackColor: Int) {
+internal fun TextView.setCourierFont(font: CourierInboxFont?, @ColorInt fallbackColor: Int? = null) {
 
     // Typeface
-    font.typeface?.let {
+    font?.typeface?.let {
         typeface = it
     }
 
     // Color
-    setTextColor(font.color ?: fallbackColor)
+    (font?.color ?: fallbackColor)?.let {
+        setTextColor(it)
+    }
 
     // Text Size
-    font.sizeInSp?.let {
+    font?.sizeInSp?.let {
         setTextSize(TypedValue.COMPLEX_UNIT_SP, it.toFloat())
     }
 

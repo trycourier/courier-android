@@ -11,7 +11,7 @@ import com.courier.android.R
 import com.courier.android.utils.dpToPx
 import com.google.android.material.button.MaterialButton
 
-internal class CourierInboxButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
+internal class CourierInboxButtonView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
     var onClick: (() -> Unit)? = null
 
@@ -40,16 +40,12 @@ internal class CourierInboxButton @JvmOverloads constructor(context: Context, at
         cornerRadius = DEFAULT_CORNER_RADIUS
     }
 
-    fun setTheme(isRead: Boolean, theme: CourierInboxTheme, @ColorInt fallbackColor: Int? = null) {
-
-        val buttonStyles = theme.buttonStyle
+    fun setStyle(style: CourierInboxButton, @ColorInt fallbackColor: Int? = null) {
 
         // Background Color
-        (theme.getButtonColor(isRead) ?: fallbackColor)?.let {
+        (style.backgroundColor ?: fallbackColor)?.let {
             button.backgroundTintList = ColorStateList.valueOf(it)
         }
-
-        val style = if (isRead) buttonStyles.read else buttonStyles.unread
 
         // Corner Radius
         style.cornerRadiusInDp?.let {
