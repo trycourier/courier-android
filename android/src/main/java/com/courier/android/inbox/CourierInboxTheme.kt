@@ -9,12 +9,24 @@ import com.courier.android.models.CourierBrand
 data class CourierInboxTheme(
     @ColorInt private val loadingIndicatorColor: Int? = null,
     internal val unreadIndicatorStyle: CourierInboxUnreadIndicatorStyle = CourierInboxUnreadIndicatorStyle(),
-    internal val titleFont: CourierInboxFont = CourierInboxFont(),
-    internal val timeFont: CourierInboxFont = CourierInboxFont(),
-    internal val bodyFont: CourierInboxFont = CourierInboxFont(),
-    internal val detailTitleFont: CourierInboxFont = CourierInboxFont(),
-    internal val buttonStyles: CourierInboxButtonStyles = CourierInboxButtonStyles(),
+    internal val titleStyle: CourierInboxTextStyle = CourierInboxTextStyle(
+        unread = CourierInboxFont(),
+        read = CourierInboxFont(),
+    ),
+    internal val timeStyle: CourierInboxTextStyle = CourierInboxTextStyle(
+        unread = CourierInboxFont(),
+        read = CourierInboxFont(),
+    ),
+    internal val bodyStyle: CourierInboxTextStyle = CourierInboxTextStyle(
+        unread = CourierInboxFont(),
+        read = CourierInboxFont(),
+    ),
+    internal val buttonStyle: CourierInboxButtonStyles = CourierInboxButtonStyles(
+        unread = CourierInboxButtonTheme(),
+        read = CourierInboxButtonTheme(),
+    ),
     internal val dividerItemDecoration: DividerItemDecoration? = null,
+    internal val infoViewStyle: CourierInboxFont = CourierInboxFont(),
 ) {
 
     companion object {
@@ -49,14 +61,20 @@ data class CourierInboxTheme(
     }
 
     @ColorInt
-    internal fun getButtonColor(): Int? {
+    internal fun getButtonColor(isRead: Boolean): Int? {
 
-        if (buttonStyles.backgroundColor == null) {
-            val value = brand?.settings?.colors?.primary
-            return try { Color.parseColor(value) } catch (e: Exception) { null }
+        val styleColor = if (isRead) buttonStyle.read.backgroundColor else buttonStyle.unread.backgroundColor
+        val brandColor = brand?.settings?.colors?.primary
+
+        if (styleColor != null) {
+            return styleColor
         }
 
-        return buttonStyles.backgroundColor
+        if (brandColor != null) {
+            return try { Color.parseColor(brandColor) } catch (e: Exception) { null }
+        }
+
+        return if (isRead) buttonStyle.read.backgroundColor else buttonStyle.unread.backgroundColor
 
     }
 
@@ -67,6 +85,11 @@ data class CourierInboxTheme(
 }
 
 data class CourierInboxButtonStyles(
+    val unread: CourierInboxButtonTheme,
+    val read: CourierInboxButtonTheme,
+)
+
+data class CourierInboxButtonTheme(
     val font: CourierInboxFont? = null,
     @ColorInt val backgroundColor: Int? = null,
     val cornerRadiusInDp: Int? = null
@@ -76,6 +99,11 @@ data class CourierInboxFont(
     val typeface: Typeface? = null,
     @ColorInt val color: Int? = null,
     val sizeInSp: Int? = null,
+)
+
+data class CourierInboxTextStyle(
+    val unread: CourierInboxFont,
+    val read: CourierInboxFont,
 )
 
 enum class CourierInboxUnreadIndicator {

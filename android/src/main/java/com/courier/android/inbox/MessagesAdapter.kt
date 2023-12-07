@@ -6,12 +6,14 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.R
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
+import com.courier.android.utils.isDarkModeOn
 import com.courier.android.utils.setCourierFont
 import com.google.android.flexbox.FlexboxLayout
 
@@ -81,7 +83,8 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
 
             // Create the button for the action
             CourierInboxButton(itemView.context).apply {
-                this.setTheme(theme)
+                val fallbackColor = ContextCompat.getColor(itemView.context, android.R.color.darker_gray)
+                this.setTheme(isRead = message.isRead, theme = theme, fallbackColor = if (message.isRead) fallbackColor else null)
                 this.text = action.content
                 this.onClick = {
                     onActionClick?.invoke(action, message)
@@ -97,9 +100,24 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
             dot.setCircleColor(it)
         }
 
-        titleTextView.setCourierFont(theme.titleFont)
-        subtitleTextView.setCourierFont(theme.bodyFont)
-        timeTextView.setCourierFont(theme.timeFont)
+        if (message.isRead) {
+
+            val fallbackColor = ContextCompat.getColor(itemView.context, android.R.color.darker_gray)
+
+            titleTextView.setCourierFont(font = theme.titleStyle.read, fallbackColor = fallbackColor)
+            subtitleTextView.setCourierFont(font = theme.bodyStyle.read, fallbackColor = fallbackColor)
+            timeTextView.setCourierFont(font = theme.timeStyle.read, fallbackColor = fallbackColor)
+
+        } else {
+
+            val res = if (isDarkModeOn(itemView.context)) android.R.color.white else android.R.color.black
+            val fallbackColor = ContextCompat.getColor(itemView.context, res)
+
+            titleTextView.setCourierFont(font = theme.titleStyle.unread, fallbackColor = fallbackColor)
+            subtitleTextView.setCourierFont(font = theme.bodyStyle.unread, fallbackColor = fallbackColor)
+            timeTextView.setCourierFont(font = theme.timeStyle.unread, fallbackColor = fallbackColor)
+
+        }
 
     }
 

@@ -53,8 +53,20 @@ internal class CourierCircleView @JvmOverloads constructor(context: Context, att
         val height = height // Get the height of the view
         val radius = if (width < height) width / 2f else height / 2f // Calculate the radius as half of the smaller dimension
 
-        // Draw the circle in the center of the view
-        canvas.drawCircle((width / 2).toFloat(), (height / 2).toFloat(), radius, paint)
+        val centerX = width / 2f // Calculate the X coordinate of the circle's center
+        val centerY = height / 2f // Calculate the Y coordinate of the circle's center
+
+        // Adjust radius to ensure the circle fits within the view bounds
+        val adjustedRadius = if (radius > centerX || radius > centerY) {
+            // If the radius is larger than the center coordinates, adjust it to fit within the view
+            minOf(centerX, centerY)
+        } else {
+            radius
+        }
+
+        // Draw the circle in the center of the view without clipping
+        canvas.drawCircle(centerX, centerY, adjustedRadius, paint)
+
     }
 
 }
