@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
 import android.widget.FrameLayout
+import androidx.annotation.ColorInt
 import com.courier.android.R
 import com.courier.android.utils.dpToPx
 import com.google.android.material.button.MaterialButton
@@ -39,32 +40,34 @@ internal class CourierInboxButton @JvmOverloads constructor(context: Context, at
         cornerRadius = DEFAULT_CORNER_RADIUS
     }
 
-    fun setTheme(theme: CourierInboxTheme) {
+    fun setTheme(isRead: Boolean, theme: CourierInboxTheme, @ColorInt fallbackColor: Int? = null) {
 
-        val buttonStyles = theme.buttonStyles
+        val buttonStyles = theme.buttonStyle
 
         // Background Color
-        theme.getButtonColor()?.let {
+        (theme.getButtonColor(isRead) ?: fallbackColor)?.let {
             button.backgroundTintList = ColorStateList.valueOf(it)
         }
 
+        val style = if (isRead) buttonStyles.read else buttonStyles.unread
+
         // Corner Radius
-        buttonStyles.cornerRadiusInDp?.let {
+        style.cornerRadiusInDp?.let {
             cornerRadius = it
         }
 
         // Typeface
-        buttonStyles.font?.typeface?.let {
+        style.font?.typeface?.let {
             button.typeface = it
         }
 
         // Color
-        buttonStyles.font?.color?.let {
+        style.font?.color?.let {
             button.setTextColor(it)
         }
 
         // Text Size
-        buttonStyles.font?.sizeInSp?.let {
+        style.font?.sizeInSp?.let {
             button.setTextSize(TypedValue.COMPLEX_UNIT_SP, it.toFloat())
         }
 

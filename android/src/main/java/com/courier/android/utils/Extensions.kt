@@ -1,21 +1,21 @@
 package com.courier.android.utils
 
 import android.Manifest
+import android.R
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Resources
 import android.os.Build
 import android.util.TypedValue
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
 import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityCompat.requestPermissions
-import androidx.core.app.NotificationManagerCompat
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.COURIER_COROUTINE_CONTEXT
 import com.courier.android.Courier.Companion.eventBus
@@ -29,8 +29,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit) {
 
@@ -236,7 +234,18 @@ internal val Context.isDarkMode: Boolean
         return darkModeFlag == UI_MODE_NIGHT_YES
     }
 
-internal fun TextView.setCourierFont(font: CourierInboxFont) {
+internal fun Context.getColorFromAttribute(resId: Int): Int {
+    val typedValue = TypedValue()
+    theme.resolveAttribute(resId, typedValue, true)
+    return typedValue.data
+}
+
+internal fun isDarkModeOn(context: Context): Boolean {
+    val currentNightMode = context.resources.configuration.uiMode and UI_MODE_NIGHT_MASK
+    return currentNightMode == UI_MODE_NIGHT_YES
+}
+
+internal fun TextView.setCourierFont(font: CourierInboxFont, @ColorInt fallbackColor: Int) {
 
     // Typeface
     font.typeface?.let {
@@ -244,9 +253,7 @@ internal fun TextView.setCourierFont(font: CourierInboxFont) {
     }
 
     // Color
-    font.color?.let {
-        setTextColor(it)
-    }
+    setTextColor(font.color ?: fallbackColor)
 
     // Text Size
     font.sizeInSp?.let {

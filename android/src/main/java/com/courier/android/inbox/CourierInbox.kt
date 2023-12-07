@@ -19,6 +19,7 @@ import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.models.*
 import com.courier.android.modules.*
 import com.courier.android.repositories.InboxRepository
+import com.courier.android.utils.getColorFromAttribute
 import com.courier.android.utils.isDarkMode
 import com.courier.android.utils.pxToDp
 import com.courier.android.utils.setCourierFont
@@ -111,7 +112,10 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
 
         // Empty / Error view
-        detailTextView.setCourierFont(theme.detailTitleFont)
+        detailTextView.setCourierFont(
+            font = theme.infoViewStyle,
+            fallbackColor = context.getColorFromAttribute(android.R.attr.textColorPrimary),
+        )
 
         // Loading
         theme.getLoadingColor()?.let {
