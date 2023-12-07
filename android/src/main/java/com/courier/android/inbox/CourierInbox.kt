@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,8 +20,10 @@ import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.models.*
 import com.courier.android.modules.*
 import com.courier.android.repositories.InboxRepository
+import com.courier.android.utils.*
 import com.courier.android.utils.getColorFromAttribute
 import com.courier.android.utils.isDarkMode
+import com.courier.android.utils.isDarkModeOn
 import com.courier.android.utils.pxToDp
 import com.courier.android.utils.setCourierFont
 import kotlinx.coroutines.*
@@ -37,24 +40,24 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
             when (field) {
                 State.LOADING -> {
                     refreshLayout.isVisible = false
-                    detailTextView.isVisible = false
+                    infoView.isVisible = false
                     loadingIndicator.isVisible = true
                 }
                 State.ERROR -> {
                     refreshLayout.isVisible = false
-                    detailTextView.isVisible = true
+                    infoView.isVisible = true
                     detailTextView.text = field.title
                     loadingIndicator.isVisible = false
                 }
                 State.CONTENT -> {
                     refreshLayout.isVisible = true
-                    detailTextView.isVisible = false
+                    infoView.isVisible = false
                     detailTextView.text = null
                     loadingIndicator.isVisible = false
                 }
                 State.EMPTY -> {
                     refreshLayout.isVisible = false
-                    detailTextView.isVisible = true
+                    infoView.isVisible = true
                     detailTextView.text = field.title
                     loadingIndicator.isVisible = false
                 }
@@ -113,9 +116,23 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         // Empty / Error view
         detailTextView.setCourierFont(
-            font = theme.infoViewStyle,
-            fallbackColor = context.getColorFromAttribute(android.R.attr.textColorPrimary),
+            font = theme.infoViewStyle.font
         )
+
+        // Button
+        retryButton.apply {
+
+            setStyle(
+                style = theme.infoViewStyle.button
+            )
+
+            text = "Retry"
+            onClick = {
+                state = State.LOADING
+                refresh()
+            }
+
+        }
 
         // Loading
         theme.getLoadingColor()?.let {
@@ -130,7 +147,9 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
     private val layoutManager get() = recyclerView.layoutManager as? LinearLayoutManager
 
     private lateinit var refreshLayout: SwipeRefreshLayout
+    private lateinit var infoView: LinearLayoutCompat
     private lateinit var detailTextView: TextView
+    private lateinit var retryButton: CourierInboxButtonView
     private lateinit var courierBar: RelativeLayout
     private lateinit var courierBarButton: ImageView
     private lateinit var loadingIndicator: ProgressBar
@@ -204,8 +223,10 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         courierBarButton = findViewById(R.id.courierBarButton)
         courierBarButton.setOnClickListener { openDialog() }
 
-        // Detail TextView
+        // Info View
+        infoView = findViewById(R.id.infoView)
         detailTextView = findViewById(R.id.detailTextView)
+        retryButton = findViewById(R.id.retryButton)
 
         // Courier Bar
         courierBar = findViewById(R.id.courierBar)
@@ -229,11 +250,7 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         // Handle pull to refresh
         refreshLayout = findViewById(R.id.refreshLayout)
         refreshLayout.setOnRefreshListener {
-
-            Courier.shared.refreshInbox {
-                refreshLayout.isRefreshing = false
-            }
-
+            refresh()
         }
 
         // Setup the listener
@@ -282,6 +299,12 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
             }
         )
 
+    }
+
+    private fun refresh() {
+        Courier.shared.refreshInbox {
+            refreshLayout.isRefreshing = false
+        }
     }
 
     private fun RecyclerView.restoreScrollPosition() {

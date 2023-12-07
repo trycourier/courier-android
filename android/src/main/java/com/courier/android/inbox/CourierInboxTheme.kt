@@ -21,12 +21,15 @@ data class CourierInboxTheme(
         unread = CourierInboxFont(),
         read = CourierInboxFont(),
     ),
-    internal val buttonStyle: CourierInboxButtonStyles = CourierInboxButtonStyles(
-        unread = CourierInboxButtonTheme(),
-        read = CourierInboxButtonTheme(),
+    internal val buttonStyle: CourierInboxButtonStyle = CourierInboxButtonStyle(
+        unread = CourierInboxButton(),
+        read = CourierInboxButton(),
     ),
     internal val dividerItemDecoration: DividerItemDecoration? = null,
-    internal val infoViewStyle: CourierInboxFont = CourierInboxFont(),
+    internal val infoViewStyle: CourierInboxInfoViewStyle = CourierInboxInfoViewStyle(
+        font = CourierInboxFont(),
+        button = CourierInboxButton(),
+    ),
 ) {
 
     companion object {
@@ -84,12 +87,12 @@ data class CourierInboxTheme(
 
 }
 
-data class CourierInboxButtonStyles(
-    val unread: CourierInboxButtonTheme,
-    val read: CourierInboxButtonTheme,
+data class CourierInboxButtonStyle(
+    val unread: CourierInboxButton,
+    val read: CourierInboxButton,
 )
 
-data class CourierInboxButtonTheme(
+data class CourierInboxButton(
     val font: CourierInboxFont? = null,
     @ColorInt val backgroundColor: Int? = null,
     val cornerRadiusInDp: Int? = null
@@ -104,6 +107,11 @@ data class CourierInboxFont(
 data class CourierInboxTextStyle(
     val unread: CourierInboxFont,
     val read: CourierInboxFont,
+)
+
+data class CourierInboxInfoViewStyle(
+    val font: CourierInboxFont,
+    val button: CourierInboxButton,
 )
 
 enum class CourierInboxUnreadIndicator {
