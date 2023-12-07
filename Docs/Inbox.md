@@ -74,36 +74,82 @@ The styles you can use to quickly customize the `CourierInbox`.
 val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
 
 val theme = CourierInboxTheme(
-    unreadIndicatorBarColor = ContextCompat.getColor(requireContext(), R.color.courier_red),
     loadingIndicatorColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
-    titleFont = CourierInboxFont(
-        typeface = ResourcesCompat.getFont(requireContext(), R.font.poppins),
-        color = ContextCompat.getColor(requireContext(), android.R.color.black),
-        sizeInSp = 18
+    unreadIndicatorStyle = CourierInboxUnreadIndicatorStyle(
+        indicator = CourierInboxUnreadIndicator.LINE,
+        color = ContextCompat.getColor(requireContext(), R.color.courier_red)
     ),
-    bodyFont = CourierInboxFont(
-        typeface = ResourcesCompat.getFont(requireContext(), R.font.poppins),
-        color = ContextCompat.getColor(requireContext(), android.R.color.darker_gray),
-        sizeInSp = 16
+    titleStyle = CourierInboxTextStyle(
+        unread = CourierInboxFont(
+            typeface = font,
+            color = ContextCompat.getColor(requireContext(), android.R.color.black),
+            sizeInSp = 18
+        ),
+        read = CourierInboxFont(
+            typeface = font,
+            color = ContextCompat.getColor(requireContext(), android.R.color.black),
+            sizeInSp = 18
+        ),
     ),
-    timeFont = CourierInboxFont(
-        typeface = ResourcesCompat.getFont(requireContext(), R.font.poppins),
-        color = ContextCompat.getColor(requireContext(), android.R.color.darker_gray),
-        sizeInSp = 14
-    ),
-    detailTitleFont = CourierInboxFont(
-        typeface = ResourcesCompat.getFont(requireContext(), R.font.poppins),
-        color = ContextCompat.getColor(requireContext(), android.R.color.black),
-        sizeInSp = 18
-    ),
-    buttonStyles = CourierInboxButtonStyles(
-        font = CourierInboxFont(
-            typeface = ResourcesCompat.getFont(requireContext(), R.font.poppins),
-            color = ContextCompat.getColor(requireContext(), android.R.color.white),
+    bodyStyle = CourierInboxTextStyle(
+        unread = CourierInboxFont(
+            typeface = font,
+            color = ContextCompat.getColor(requireContext(), android.R.color.black),
             sizeInSp = 16
         ),
-        backgroundColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
-        cornerRadiusInDp = 100
+        read = CourierInboxFont(
+            typeface = font,
+            color = ContextCompat.getColor(requireContext(), android.R.color.black),
+            sizeInSp = 16
+        )
+    ),
+    timeStyle = CourierInboxTextStyle(
+        unread = CourierInboxFont(
+            typeface = font,
+            color = ContextCompat.getColor(requireContext(), android.R.color.black),
+            sizeInSp = 14
+        ),
+        read = CourierInboxFont(
+            typeface = font,
+            color = ContextCompat.getColor(requireContext(), android.R.color.black),
+            sizeInSp = 14
+        )
+    ),
+    infoViewStyle = CourierInboxInfoViewStyle(
+        font = CourierInboxFont(
+            typeface = font,
+            color = ContextCompat.getColor(requireContext(), android.R.color.black),
+            sizeInSp = 18
+        ),
+        button = CourierInboxButton(
+            font = CourierInboxFont(
+                typeface = font,
+                color = ContextCompat.getColor(requireContext(), android.R.color.white),
+                sizeInSp = 16
+            ),
+            backgroundColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
+            cornerRadiusInDp = 100
+        )
+    ),
+    buttonStyle = CourierInboxButtonStyle(
+        unread = CourierInboxButton(
+            font = CourierInboxFont(
+                typeface = font,
+                color = ContextCompat.getColor(requireContext(), android.R.color.white),
+                sizeInSp = 16
+            ),
+            backgroundColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
+            cornerRadiusInDp = 100
+        ),
+        read = CourierInboxButton(
+            font = CourierInboxFont(
+                typeface = font,
+                color = ContextCompat.getColor(requireContext(), android.R.color.white),
+                sizeInSp = 16
+            ),
+            backgroundColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
+            cornerRadiusInDp = 100
+        )
     ),
     dividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
 )
