@@ -38,26 +38,6 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
 
         stateTextView = view.findViewById(R.id.stateTextView)
 
-        // Get the menu
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
-        toolbar.setOnMenuItemClickListener { item ->
-            return@setOnMenuItemClickListener if (item.itemId == R.id.readAll) {
-
-                Courier.shared.readAllInboxMessages(
-                    onSuccess = {
-                        print("Messages are read")
-                    },
-                    onFailure = { error ->
-                        print(error)
-                    }
-                )
-
-                true
-            } else {
-                false
-            }
-        }
-
         // Create the list
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView.adapter = adapter

@@ -1,4 +1,4 @@
-package com.courier.example.fragments
+package com.courier.example.fragments.tabs
 
 import android.os.Bundle
 import android.view.View
@@ -21,26 +21,6 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Get the menu
-        val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
-        toolbar.setOnMenuItemClickListener { item ->
-            return@setOnMenuItemClickListener if (item.itemId == R.id.readAll) {
-
-                Courier.shared.readAllInboxMessages(
-                    onSuccess = {
-                        print("Messages are read")
-                    },
-                    onFailure = { error ->
-                        print(error)
-                    }
-                )
-
-                true
-            } else {
-                false
-            }
-        }
 
         inbox = view.findViewById(R.id.courierInbox)
 

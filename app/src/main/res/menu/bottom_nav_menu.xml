@@ -5,17 +5,9 @@
         android:icon="@android:drawable/sym_contact_card"
         android:title="Auth" />
     <item
-        android:id="@+id/prebuiltInbox"
+        android:id="@+id/inbox"
         android:icon="@android:drawable/sym_action_chat"
-        android:title="Default Inbox" />
-    <item
-        android:id="@+id/styledInbox"
-        android:icon="@android:drawable/sym_action_chat"
-        android:title="Styled Inbox" />
-    <item
-        android:id="@+id/customInbox"
-        android:icon="@android:drawable/sym_action_chat"
-        android:title="Custom Inbox" />
+        android:title="Inbox" />
     <item
         android:id="@+id/send"
         android:icon="@android:drawable/sym_action_email"

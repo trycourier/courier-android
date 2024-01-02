@@ -20,9 +20,7 @@ class MainActivity : CourierActivity() {
     private lateinit var inboxListener: CourierInboxListener
 
     private val authFragment by lazy { AuthFragment() }
-    private val prebuiltInboxFragment by lazy { PrebuiltInboxFragment() }
-    private val styledInboxFragment by lazy { StyledInboxFragment() }
-    private val customInboxFragment by lazy { CustomInboxFragment() }
+    private val inboxFragment by lazy { InboxFragment() }
     private val sendFragment by lazy { PushFragment() }
 
     private lateinit var binding: ActivityMainBinding
@@ -39,9 +37,7 @@ class MainActivity : CourierActivity() {
         binding.bottomNavigationView.setOnItemSelectedListener {
             return@setOnItemSelectedListener when (it.itemId) {
                 R.id.auth -> setCurrentFragment(authFragment)
-                R.id.prebuiltInbox -> setCurrentFragment(prebuiltInboxFragment)
-                R.id.styledInbox -> setCurrentFragment(styledInboxFragment)
-                R.id.customInbox -> setCurrentFragment(customInboxFragment)
+                R.id.inbox -> setCurrentFragment(inboxFragment)
                 R.id.send -> setCurrentFragment(sendFragment)
                 else -> false
             }
@@ -51,15 +47,9 @@ class MainActivity : CourierActivity() {
 //        Courier.shared.inboxBrandId = Env.COURIER_BRAND_ID
 
         inboxListener = Courier.shared.addInboxListener(
-            onInitialLoad = {
-                setBadge(0)
-            },
-            onError = {
-                setBadge(0)
-            },
-            onMessagesChanged = { _, unreadMessageCount, _, _ ->
-                setBadge(unreadMessageCount)
-            }
+            onInitialLoad = { setBadge(0) },
+            onError = { setBadge(0) },
+            onMessagesChanged = { _, unreadMessageCount, _, _ -> setBadge(unreadMessageCount) }
         )
 
     }
@@ -73,19 +63,13 @@ class MainActivity : CourierActivity() {
     }
 
     private fun setBadge(value: Int) {
-
-        val bottomNav = binding.bottomNavigationView
-
-        listOf(R.id.prebuiltInbox, R.id.styledInbox, R.id.customInbox).forEach { itemId ->
-            val badge = bottomNav.getOrCreateBadge(itemId)
-            badge.backgroundColor = ContextCompat.getColor(this, R.color.purple_700)
-            badge.badgeTextColor = ContextCompat.getColor(this, R.color.white)
-            badge.maxCharacterCount = 3
-            badge.verticalOffset = 2
-            badge.isVisible = value > 0
-            badge.number = value
-        }
-
+        val badge = binding.bottomNavigationView.getOrCreateBadge(R.id.inbox)
+        badge.backgroundColor = ContextCompat.getColor(this, R.color.purple_700)
+        badge.badgeTextColor = ContextCompat.getColor(this, R.color.white)
+        badge.maxCharacterCount = 3
+        badge.verticalOffset = 2
+        badge.isVisible = value > 0
+        badge.number = value
     }
 
     override fun onDestroy() {
