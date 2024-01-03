@@ -1,8 +1,5 @@
 package com.courier.android.modules
 
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.models.*
@@ -11,7 +8,7 @@ import com.courier.android.repositories.InboxRepository
 import kotlinx.coroutines.*
 
 
-internal class CoreInbox : DefaultLifecycleObserver {
+internal class CoreInbox {
 
     companion object {
         const val DEFAULT_PAGINATION_LIMIT = 32
@@ -253,11 +250,6 @@ internal class CoreInbox : DefaultLifecycleObserver {
 
     internal fun addInboxListener(onInitialLoad: (() -> Unit)? = null, onError: ((Exception) -> Unit)? = null, onMessagesChanged: ((messages: List<InboxMessage>, unreadMessageCount: Int, totalMessageCount: Int, canPaginate: Boolean) -> Unit)? = null): CourierInboxListener {
 
-        // Tell developer about the lifecycle concerns
-        if (lifecycle == null) {
-            Courier.warn("The Courier Inbox has no \"lifecycle\". This will result in websocket reconnection issues for your users. Please call Courier.initialize(context) with \"context\" being an AppCompatActivity to fix this.")
-        }
-
         // Create a new inbox listener
         val listener = CourierInboxListener(
             onInitialLoad = onInitialLoad,
@@ -446,31 +438,10 @@ internal class CoreInbox : DefaultLifecycleObserver {
         )
     }
 
-    /**
-     * Lifecycle
-     */
-
-    internal var lifecycle: Lifecycle? = null
-        set(value) {
-            field?.removeObserver(this)
-            value?.addObserver(this)
-            field = value
-        }
-
-    override fun onStart(owner: LifecycleOwner) {
-        super.onStart(owner)
-        link()
-    }
-
-    override fun onStop(owner: LifecycleOwner) {
-        super.onStop(owner)
-        unlink()
-    }
-
     // Reconnects and refreshes the data
     // Called because the websocket may have disconnected or
     // new data may have been sent when the user closed their app
-    private fun link() {
+    internal fun link() {
         if (listeners.isNotEmpty() && inboxRepo.webSocket?.isSocketConnected == false) {
             coroutineScope.launch(Dispatchers.IO) {
                 refresh()
@@ -480,7 +451,7 @@ internal class CoreInbox : DefaultLifecycleObserver {
 
     // Disconnects the websocket
     // Helps keep battery usage lower
-    private fun unlink() {
+    internal fun unlink() {
         if (listeners.isNotEmpty() && inboxRepo.webSocket?.isSocketConnected == true) {
             coroutineScope.launch(Dispatchers.IO) {
                 inboxRepo.disconnectWebsocket()

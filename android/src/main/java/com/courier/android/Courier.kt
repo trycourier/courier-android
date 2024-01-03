@@ -1,8 +1,10 @@
 package com.courier.android
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.Application
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
 import com.courier.android.modules.*
@@ -31,7 +33,7 @@ Y8,           i8'    ,8I   I8,    ,8I  ,8'    8I   88   I8, ,8I  ,8'    8I
 
 */
 
-class Courier private constructor(internal val context: Context) {
+class Courier private constructor(internal val context: Context) : Application.ActivityLifecycleCallbacks {
 
     /**
      * Modules
@@ -75,10 +77,10 @@ class Courier private constructor(internal val context: Context) {
                 mInstance = Courier(context)
             }
 
-            // Stash the lifecycle if possible
-            if (mInstance?.inbox?.lifecycle == null) {
-                val activity = context as? AppCompatActivity
-                mInstance?.inbox?.lifecycle = activity?.lifecycle
+            // Register lifecycle callbacks
+            if (context is Activity) {
+                context.unregisterActivityLifecycleCallbacks(this@Companion.mInstance!!)
+                context.registerActivityLifecycleCallbacks(this@Companion.mInstance!!)
             }
 
             // Get the current fcmToken if possible
@@ -96,5 +98,23 @@ class Courier private constructor(internal val context: Context) {
         fun error(data: String?) = shared.logging.error(data)
 
     }
+
+    override fun onActivityStarted(activity: Activity) {
+        inbox.link()
+    }
+
+    override fun onActivityStopped(activity: Activity) {
+        inbox.unlink()
+    }
+
+    override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
+
+    override fun onActivityResumed(activity: Activity) {}
+
+    override fun onActivityPaused(activity: Activity) {}
+
+    override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
+
+    override fun onActivityDestroyed(activity: Activity) {}
 
 }
