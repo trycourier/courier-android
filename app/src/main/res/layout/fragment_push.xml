@@ -44,6 +44,18 @@
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 
+        <Button
+            android:id="@+id/refreshTokens"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Refresh Tokens" />
+
+        <Button
+            android:id="@+id/requestPermissions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Request Permissions" />
+
     </androidx.appcompat.widget.LinearLayoutCompat>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -12,7 +12,6 @@ import com.courier.android.modules.isUserSignedIn
 import com.courier.android.modules.signIn
 import com.courier.android.modules.signOut
 import com.courier.android.modules.userId
-import com.courier.android.utils.requestNotificationPermission
 import com.courier.example.Env
 import com.courier.example.R
 import kotlinx.coroutines.launch
@@ -63,13 +62,6 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
                 clientKey = Env.COURIER_CLIENT_KEY,
                 userId = Env.COURIER_USER_ID,
             )
-
-            // TODO: Put this where it makes sense for your user experience
-            // If needed, handle this result inside `onActivityResult`
-            context?.requestNotificationPermission()
-
-            // To check for permissions, you can use
-//            val isGranted = context?.isPushPermissionGranted
 
         } catch (e: Exception) {
 

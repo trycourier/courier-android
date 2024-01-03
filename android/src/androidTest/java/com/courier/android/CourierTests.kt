@@ -378,12 +378,11 @@ class CourierTests {
 
         print("🔬 Get Topic")
 
-        Courier.shared.putUserPreferenceTopic(
+        val topic = Courier.shared.getUserPreferenceTopic(
             topicId = "6QHD7Z1D4Q436SMECGXENTQYWVQQ",
-            status = CourierPreferenceStatus.OPTED_IN,
-            hasCustomRouting = true,
-            customRouting = listOf(CourierPreferenceChannel.SMS, CourierPreferenceChannel.PUSH)
         )
+
+        print(topic)
 
     }
 
@@ -392,11 +391,12 @@ class CourierTests {
 
         print("🔬 Update Topic")
 
-        val topic = Courier.shared.getUserPreferenceTopic(
+        Courier.shared.putUserPreferenceTopic(
             topicId = "6QHD7Z1D4Q436SMECGXENTQYWVQQ",
+            status = CourierPreferenceStatus.OPTED_IN,
+            hasCustomRouting = true,
+            customRouting = listOf(CourierPreferenceChannel.SMS, CourierPreferenceChannel.PUSH)
         )
-
-        print(topic)
 
     }
 

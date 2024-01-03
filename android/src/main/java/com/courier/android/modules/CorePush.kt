@@ -1,5 +1,12 @@
 package com.courier.android.modules
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.core.app.ActivityCompat
 import com.courier.android.Courier
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPushProvider
@@ -286,5 +293,19 @@ fun Courier.setToken(provider: CourierPushProvider, token: String, onSuccess: ()
         onSuccess()
     } catch (e: Exception) {
         onFailure(e)
+    }
+}
+
+fun Courier.requestNotificationPermission(activity: Activity, requestCode: Int = 1) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), requestCode)
+    }
+}
+
+fun Courier.isPushPermissionGranted(context: Context): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+    } else {
+        true
     }
 }

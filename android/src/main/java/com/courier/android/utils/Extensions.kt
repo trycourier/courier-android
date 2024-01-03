@@ -108,35 +108,6 @@ internal fun Courier.broadcastMessage(message: RemoteMessage) = Courier.coroutin
     }
 }
 
-// Using this function, you will need to manually handle the result
-// Inside `Activity.onActivityResult`
-fun Context.requestNotificationPermission(requestCode: Int = 1) {
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-
-        if (!isPushPermissionGranted) {
-
-            if (this is Activity) {
-                val permissions = arrayOf(Manifest.permission.POST_NOTIFICATIONS)
-                requestPermissions(permissions, requestCode)
-            }
-
-        }
-
-    }
-
-}
-
-val Context.isPushPermissionGranted: Boolean get() {
-
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
-    } else {
-        true
-    }
-
-}
-
 val RemoteMessage.pushNotification: Map<String, Any?>
     get() {
 

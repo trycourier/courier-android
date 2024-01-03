@@ -4,16 +4,27 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.coroutineScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
+import com.courier.android.models.CourierPreferenceChannel
+import com.courier.android.models.CourierPreferenceStatus
 import com.courier.android.models.CourierPreferenceTopic
+import com.courier.android.modules.getUserPreferenceTopic
 import com.courier.android.modules.getUserPreferences
+import com.courier.android.modules.putUserPreferenceTopic
 import com.courier.android.modules.refreshInbox
 import com.courier.example.R
 import com.google.gson.Gson
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 class PreferencesFragment : Fragment(R.layout.fragment_preferences) {
 
@@ -40,7 +51,56 @@ class PreferencesFragment : Fragment(R.layout.fragment_preferences) {
 
         }
 
+        preferencesAdapter.onItemClick = { topic ->
+
+            lifecycle.coroutineScope.launch(Dispatchers.Main) {
+
+                refreshLayout.isRefreshing = true
+
+                val preferenceTopic = Courier.shared.getUserPreferenceTopic(
+                    topicId = topic.topicId,
+                )
+
+                print(preferenceTopic)
+
+                Courier.shared.putUserPreferenceTopic(
+                    topicId = preferenceTopic.topicId,
+                    status = CourierPreferenceStatus.OPTED_IN,
+                    hasCustomRouting = true,
+                    customRouting = generateRandomChannels(range = Random.nextInt(6))
+                )
+
+                Toast.makeText(context, "Preference Updated", Toast.LENGTH_SHORT).show()
+
+                load()
+
+            }
+
+        }
+
         load()
+
+    }
+
+    private fun generateRandomChannels(range: Int): List<CourierPreferenceChannel> {
+
+        val allChannels = CourierPreferenceChannel.values().toList()
+        val random = Random(System.currentTimeMillis())
+
+        val randomItems = mutableSetOf<CourierPreferenceChannel>()
+
+        // Cap the range to the enum size
+        val cappedRange = range.coerceAtMost(allChannels.size)
+
+        while (randomItems.size < cappedRange) {
+            val randomIndex = random.nextInt(allChannels.size)
+            val channel = allChannels[randomIndex]
+            if (channel != CourierPreferenceChannel.UNKNOWN) {
+                randomItems.add(allChannels[randomIndex])
+            }
+        }
+
+        return randomItems.toList()
 
     }
 
@@ -72,6 +132,8 @@ class PreferencesAdapter : RecyclerView.Adapter<MessageItemViewHolder>() {
             notifyDataSetChanged()
         }
 
+    var onItemClick: ((CourierPreferenceTopic) -> Unit)? = null
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageItemViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.message_item, parent, false)
         return MessageItemViewHolder(view)
@@ -81,7 +143,7 @@ class PreferencesAdapter : RecyclerView.Adapter<MessageItemViewHolder>() {
         val topic = topics[position]
         holder.textView.text = Gson().toJson(topic).toString()
         holder.textView.setOnClickListener {
-//            if (isRead) inboxMessage.markAsUnread() else inboxMessage.markAsRead()
+            onItemClick?.invoke(topic)
         }
     }
 
