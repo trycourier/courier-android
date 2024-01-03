@@ -332,10 +332,10 @@ This is only needed for Android `33` and above. You are safe to call it in older
 
 ```kotlin
 // Shows the request notification popup
-context?.requestNotificationPermission()
+Courier.shared.requestNotificationPermission(activity)
 
 // Gets the value of the permission
-val isGranted = context?.isPushPermissionGranted
+val isGranted = Courier.shared.isPushPermissionGranted(context)
 ```
 
 ## 6. Sending a message
