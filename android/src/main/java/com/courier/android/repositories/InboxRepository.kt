@@ -17,7 +17,9 @@ internal class InboxRepository : Repository() {
 
     internal suspend fun connectWebsocket(clientKey: String, userId: String, onMessageReceived: (InboxMessage) -> Unit, onMessageReceivedError: (Exception) -> Unit) {
 
-        webSocket?.disconnect()
+        if (webSocket?.isSocketConnected == true) {
+            return
+        }
 
         webSocket = CourierWebsocket(
             url = "$inboxWebSocket/?clientKey=$clientKey",

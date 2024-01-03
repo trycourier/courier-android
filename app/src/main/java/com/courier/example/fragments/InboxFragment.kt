@@ -2,6 +2,7 @@ package com.courier.example.fragments
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -21,10 +22,10 @@ class InboxFragment: Fragment(R.layout.fragment_inbox) {
 
         // Get the menu
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
-        toolbar.setOnMenuItemClickListener { item ->
+        toolbar.setOnMenuItemClickListener { _ ->
             Courier.shared.readAllInboxMessages(
                 onSuccess = {
-                    print("All Messages Read")
+                    Toast.makeText(context, "All Messages Read", Toast.LENGTH_SHORT).show()
                 },
                 onFailure = { error ->
                     print(error)

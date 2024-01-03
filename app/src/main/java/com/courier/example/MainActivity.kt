@@ -22,6 +22,7 @@ class MainActivity : CourierActivity() {
     private val authFragment by lazy { AuthFragment() }
     private val inboxFragment by lazy { InboxFragment() }
     private val sendFragment by lazy { PushFragment() }
+    private val preferenceFragment by lazy { PreferencesFragment() }
 
     private lateinit var binding: ActivityMainBinding
 
@@ -39,6 +40,7 @@ class MainActivity : CourierActivity() {
                 R.id.auth -> setCurrentFragment(authFragment)
                 R.id.inbox -> setCurrentFragment(inboxFragment)
                 R.id.send -> setCurrentFragment(sendFragment)
+                R.id.preferences -> setCurrentFragment(preferenceFragment)
                 else -> false
             }
         }

@@ -108,14 +108,15 @@ internal class CourierWebsocket(url: String, private val onMessageReceived: (tex
 
     }
 
-    override fun onOpen(webSocket: WebSocket, response: Response) {
-        super.onOpen(webSocket, response)
-        state = ConnectionState.OPENED
-    }
-
     override fun onMessage(webSocket: WebSocket, text: String) {
         super.onMessage(webSocket, text)
         onMessageReceived(text)
+    }
+
+    override fun onOpen(webSocket: WebSocket, response: Response) {
+        super.onOpen(webSocket, response)
+        state = ConnectionState.OPENED
+        Courier.log("Connecting Inbox Websocket")
     }
 
     override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {

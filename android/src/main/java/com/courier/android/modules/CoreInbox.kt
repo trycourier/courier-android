@@ -515,7 +515,7 @@ suspend fun Courier.fetchNextPageOfMessages(): List<InboxMessage> {
     return inbox.fetchNextPage()
 }
 
-fun Courier.fetchNextPageOfMessages(onSuccess: (List<InboxMessage>) -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
+fun Courier.fetchNextPageOfMessages(onSuccess: (List<InboxMessage>) -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val messages = fetchNextPageOfMessages()
         coroutineScope.launch(Dispatchers.Main) {
@@ -546,7 +546,7 @@ suspend fun Courier.refreshInbox() {
     inbox.refresh()
 }
 
-fun Courier.refreshInbox(onComplete: () -> Unit) = coroutineScope.launch(Dispatchers.IO) {
+fun Courier.refreshInbox(onComplete: () -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     refreshInbox()
     onComplete.invoke()
 }
@@ -562,7 +562,7 @@ suspend fun Courier.readAllInboxMessages() {
     inbox.readAllMessages()
 }
 
-fun Courier.readAllInboxMessages(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
+fun Courier.readAllInboxMessages(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         readAllInboxMessages()
         onSuccess.invoke()

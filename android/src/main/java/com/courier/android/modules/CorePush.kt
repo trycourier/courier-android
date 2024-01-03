@@ -242,7 +242,7 @@ suspend fun Courier.setFCMToken(token: String) {
     push.setFCMToken(token)
 }
 
-fun Courier.setFCMToken(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
+fun Courier.setFCMToken(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
     try {
         setFCMToken(token)
         onSuccess()
@@ -267,7 +267,7 @@ suspend fun Courier.setToken(provider: String, token: String) {
     push.setToken(provider = provider, token = token)
 }
 
-fun Courier.setToken(provider: String, token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
+fun Courier.setToken(provider: String, token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
     try {
         setToken(provider, token)
         onSuccess()
@@ -280,7 +280,7 @@ suspend fun Courier.setToken(provider: CourierPushProvider, token: String) {
     push.setToken(provider = provider.value, token = token)
 }
 
-fun Courier.setToken(provider: CourierPushProvider, token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
+fun Courier.setToken(provider: CourierPushProvider, token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
     try {
         setToken(provider, token)
         onSuccess()

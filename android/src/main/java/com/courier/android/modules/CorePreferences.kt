@@ -79,7 +79,7 @@ suspend fun Courier.getUserPreferences(paginationCursor: String? = null): Courie
     return preferences.getUserPreferences(paginationCursor)
 }
 
-fun Courier.getUserPreferences(paginationCursor: String? = null, onSuccess: (CourierUserPreferences) -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
+fun Courier.getUserPreferences(paginationCursor: String? = null, onSuccess: (CourierUserPreferences) -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val preferences = getUserPreferences(paginationCursor)
         onSuccess(preferences)
@@ -92,7 +92,7 @@ suspend fun Courier.putUserPreferenceTopic(topicId: String, status: CourierPrefe
     return preferences.putUserPreferenceTopic(topicId, status, hasCustomRouting, customRouting)
 }
 
-fun Courier.putUserPreferenceTopic(topicId: String, status: CourierPreferenceStatus, hasCustomRouting: Boolean, customRouting: List<CourierPreferenceChannel>, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
+fun Courier.putUserPreferenceTopic(topicId: String, status: CourierPreferenceStatus, hasCustomRouting: Boolean, customRouting: List<CourierPreferenceChannel>, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         putUserPreferenceTopic(topicId, status, hasCustomRouting, customRouting)
         onSuccess()
@@ -105,7 +105,7 @@ suspend fun Courier.getUserPreferenceTopic(topicId: String): CourierPreferenceTo
     return preferences.getUserPreferenceTopic(topicId)
 }
 
-fun Courier.getUserPreferenceTopic(topicId: String, onSuccess: (CourierPreferenceTopic) -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
+fun Courier.getUserPreferenceTopic(topicId: String, onSuccess: (CourierPreferenceTopic) -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val topic = getUserPreferenceTopic(topicId)
         onSuccess(topic)

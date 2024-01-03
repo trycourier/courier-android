@@ -154,7 +154,7 @@ suspend fun Courier.signOut() {
     )
 }
 
-fun Courier.signOut(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
+fun Courier.signOut(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
     try {
         signOut()
         onSuccess()
