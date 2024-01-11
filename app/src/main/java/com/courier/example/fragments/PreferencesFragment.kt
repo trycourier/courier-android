@@ -90,7 +90,7 @@ class PreferencesFragment : Fragment(R.layout.fragment_preferences) {
 
     }
 
-    fun getRandomChannels(): List<CourierPreferenceChannel> {
+    private fun getRandomChannels(): List<CourierPreferenceChannel> {
         val channelValues = listOf(
             CourierPreferenceChannel.DIRECT_MESSAGE,
             CourierPreferenceChannel.EMAIL,
