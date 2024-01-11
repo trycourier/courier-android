@@ -14,6 +14,7 @@ import com.courier.android.modules.signOut
 import com.courier.android.modules.userId
 import com.courier.example.Env
 import com.courier.example.R
+import com.courier.example.showAlert
 import kotlinx.coroutines.launch
 
 class AuthFragment : Fragment(R.layout.fragment_auth) {
@@ -57,10 +58,18 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
 
         try {
 
+            val values = showAlert(
+                context = requireContext(),
+                title = "Enter a user id",
+                items = mapOf(
+                    "userId" to ""
+                )
+            )
+
             Courier.shared.signIn(
                 accessToken = Env.COURIER_ACCESS_TOKEN,
                 clientKey = Env.COURIER_CLIENT_KEY,
-                userId = Env.COURIER_USER_ID,
+                userId = values["userId"]!!,
             )
 
         } catch (e: Exception) {

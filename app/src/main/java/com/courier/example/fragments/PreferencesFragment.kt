@@ -19,12 +19,10 @@ import com.courier.android.modules.getUserPreferences
 import com.courier.android.modules.putUserPreferenceTopic
 import com.courier.android.modules.refreshInbox
 import com.courier.example.R
+import com.courier.example.showAlert
 import com.google.gson.Gson
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlin.random.Random
 
 class PreferencesFragment : Fragment(R.layout.fragment_preferences) {
 
@@ -55,24 +53,34 @@ class PreferencesFragment : Fragment(R.layout.fragment_preferences) {
 
             lifecycle.coroutineScope.launch(Dispatchers.Main) {
 
-                refreshLayout.isRefreshing = true
+                try {
 
-                val preferenceTopic = Courier.shared.getUserPreferenceTopic(
-                    topicId = topic.topicId,
-                )
+                    refreshLayout.isRefreshing = true
 
-                print(preferenceTopic)
+                    val preferenceTopic = Courier.shared.getUserPreferenceTopic(
+                        topicId = topic.topicId,
+                    )
 
-                Courier.shared.putUserPreferenceTopic(
-                    topicId = preferenceTopic.topicId,
-                    status = CourierPreferenceStatus.OPTED_IN,
-                    hasCustomRouting = true,
-                    customRouting = generateRandomChannels(range = Random.nextInt(6))
-                )
+                    print(preferenceTopic)
 
-                Toast.makeText(context, "Preference Updated", Toast.LENGTH_SHORT).show()
+                    Courier.shared.putUserPreferenceTopic(
+                        topicId = preferenceTopic.topicId,
+                        status = CourierPreferenceStatus.OPTED_IN,
+                        hasCustomRouting = true,
+                        customRouting = getRandomChannels()
+                    )
 
-                load()
+                    Toast.makeText(context, "Preference Updated", Toast.LENGTH_SHORT).show()
+
+                    load()
+
+                } catch (e: Exception) {
+
+                    refreshLayout.isRefreshing = false
+
+                    showAlert(requireContext(), "Error Updating Preferences", e.toString())
+
+                }
 
             }
 
@@ -82,26 +90,26 @@ class PreferencesFragment : Fragment(R.layout.fragment_preferences) {
 
     }
 
-    private fun generateRandomChannels(range: Int): List<CourierPreferenceChannel> {
+    fun getRandomChannels(): List<CourierPreferenceChannel> {
+        val channelValues = listOf(
+            CourierPreferenceChannel.DIRECT_MESSAGE,
+            CourierPreferenceChannel.EMAIL,
+            CourierPreferenceChannel.PUSH,
+            CourierPreferenceChannel.SMS,
+            CourierPreferenceChannel.WEBHOOK
+        )
 
-        val allChannels = CourierPreferenceChannel.values().toList()
-        val random = Random(System.currentTimeMillis())
+        val randomCount = (0..channelValues.size).random()
+        val randomChannels = mutableListOf<CourierPreferenceChannel>()
 
-        val randomItems = mutableSetOf<CourierPreferenceChannel>()
-
-        // Cap the range to the enum size
-        val cappedRange = range.coerceAtMost(allChannels.size)
-
-        while (randomItems.size < cappedRange) {
-            val randomIndex = random.nextInt(allChannels.size)
-            val channel = allChannels[randomIndex]
-            if (channel != CourierPreferenceChannel.UNKNOWN) {
-                randomItems.add(allChannels[randomIndex])
+        while (randomChannels.size < randomCount) {
+            val randomChannel = channelValues.random()
+            if (randomChannel !in randomChannels) {
+                randomChannels.add(randomChannel)
             }
         }
 
-        return randomItems.toList()
-
+        return randomChannels
     }
 
     private fun load() {

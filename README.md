@@ -57,7 +57,7 @@ dependencyResolutionManagement {
 
 ```gradle
 dependencies {
-    implementation 'com.github.trycourier:courier-android:2.3.1'
+    implementation 'com.github.trycourier:courier-android:2.3.2'
 }
 ```
 

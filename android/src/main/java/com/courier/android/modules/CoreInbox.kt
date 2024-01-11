@@ -290,9 +290,17 @@ internal class CoreInbox {
 
     internal fun removeInboxListener(listener: CourierInboxListener) = coroutineScope.launch(Dispatchers.IO) {
 
-        // Look for the listener we need to remove
-        listeners.removeAll {
-            it == listener
+        try {
+
+            // Look for the listener we need to remove
+            listeners.removeAll {
+                it == listener
+            }
+
+        } catch (e: Exception) {
+
+            Courier.log(e.toString())
+
         }
 
         // Kill the pipes if nothing is listening

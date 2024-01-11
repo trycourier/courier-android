@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.os.Build
 import android.os.Bundle
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
@@ -48,7 +49,7 @@ class Courier private constructor(internal val context: Context) : Application.A
     companion object {
 
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "2.3.1"
+        internal const val VERSION = "2.3.2"
         internal const val TAG = "Courier SDK"
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
         internal val eventBus by lazy { NotificationEventBus() }
@@ -78,9 +79,10 @@ class Courier private constructor(internal val context: Context) : Application.A
             }
 
             // Register lifecycle callbacks
-            if (context is Activity) {
-                context.unregisterActivityLifecycleCallbacks(this@Companion.mInstance!!)
-                context.registerActivityLifecycleCallbacks(this@Companion.mInstance!!)
+            // This will register if the API target is 29 and higher
+            if (context is Activity && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                context.unregisterActivityLifecycleCallbacks(mInstance!!)
+                context.registerActivityLifecycleCallbacks(mInstance!!)
             }
 
             // Get the current fcmToken if possible

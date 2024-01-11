@@ -2,9 +2,7 @@ package com.courier.example
 import com.google.firebase.messaging.RemoteMessage
 import org.json.JSONObject
 
-import android.app.Activity
 import android.content.Context
-import android.content.SharedPreferences
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
@@ -14,23 +12,22 @@ import org.json.JSONArray
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-data class DialogItem(val key: String, val title: String)
+suspend fun showAlert(context: Context, title: String, subtitle: String? = null, items: Map<String, String> = emptyMap()) = suspendCoroutine { continuation ->
 
-suspend fun showDialog(activity: Activity, title: String, items: List<DialogItem>) = suspendCoroutine<SharedPreferences> { continuation ->
-
-    val sharedPrefs = activity.getPreferences(Context.MODE_PRIVATE)
-
-    val alert = AlertDialog.Builder(activity)
+    val alert = AlertDialog.Builder(context)
     alert.setTitle(title)
 
-    val layout = LinearLayout(activity)
+    subtitle?.let {
+        alert.setMessage(it)
+    }
+
+    val layout = LinearLayout(context)
     layout.orientation = LinearLayout.VERTICAL
 
     val editTexts = items.map { item ->
-        val editText = EditText(activity)
+        val editText = EditText(context)
         editText.setSingleLine()
-        editText.hint = item.title
-        editText.setText(sharedPrefs.getString(item.key, ""))
+        editText.hint = item.value
         layout.addView(editText)
         return@map editText
     }
@@ -39,15 +36,13 @@ suspend fun showDialog(activity: Activity, title: String, items: List<DialogItem
 
     alert.setView(layout)
 
-    alert.setPositiveButton("Save") { _, _ ->
+    alert.setPositiveButton("OK") { _, _ ->
 
-        with(sharedPrefs.edit()) {
-            editTexts.forEachIndexed { index, editText ->
-                putString(items[index].key, editText.text.toString())
-            }
-            apply()
-            continuation.resume(sharedPrefs)
-        }
+        val values = editTexts.mapIndexed { index, editText ->
+            items.keys.elementAt(index) to editText.text.toString()
+        }.toMap()
+
+        continuation.resume(values)
 
     }
 
