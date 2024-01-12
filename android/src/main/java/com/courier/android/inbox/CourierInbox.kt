@@ -451,8 +451,8 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
             theme.attachBrand(brand)
 
             // Handle bar visibility
-            val hideBar = brand.settings?.inapp?.disableCourierFooter ?: false
-            courierBar.isVisible = !hideBar
+            val showBar = brand.settings?.inapp?.showCourierFooter ?: false
+            courierBar.isVisible = showBar
 
             // Refresh brand
             reloadViews()

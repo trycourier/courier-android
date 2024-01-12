@@ -22,5 +22,8 @@ data class CourierBrandColors(
 )
 
 data class CourierBrandInApp(
-    val disableCourierFooter: Boolean?
-)
+    private val disableCourierFooter: Boolean?
+) {
+    val showCourierFooter: Boolean
+        get() = disableCourierFooter?.let { !it } ?: true
+}
