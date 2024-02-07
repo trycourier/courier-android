@@ -11,6 +11,7 @@ import com.courier.android.utils.trackNotification
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
@@ -18,14 +19,11 @@ import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
-/**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 @RunWith(AndroidJUnit4::class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class CourierTests {
 
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
@@ -37,19 +35,100 @@ class CourierTests {
 
     }
 
-    @Test
-    fun test_A() = runBlocking {
+    private suspend fun signUserIn(shouldUseJWT: Boolean = true) {
 
+        // Add listener. Just to make sure the listener is working
+        val listener = Courier.shared.addAuthenticationListener { userId ->
+            print(userId ?: "No userId found")
+        }
+
+        // Sign the user out, if there is one
         Courier.shared.signOut()
+
+        // Check if we need to use the access token
+        var accessToken = Env.COURIER_AUTH_KEY
+
+        if (shouldUseJWT) {
+
+            accessToken = ExampleServer().generateJWT(
+                authKey = Env.COURIER_AUTH_KEY,
+                userId = Env.COURIER_USER_ID
+            )
+
+        }
+
+        // Sign the user in
+        Courier.shared.signIn(
+            accessToken = accessToken,
+            clientKey = Env.COURIER_CLIENT_KEY,
+            userId = Env.COURIER_USER_ID
+        )
+
+        // Remove the listener
+        listener.remove()
+
+        // Check values
+        assertEquals(Courier.shared.accessToken, accessToken)
+        assertEquals(Courier.shared.userId, Env.COURIER_USER_ID)
+        assertEquals(Courier.shared.clientKey, Env.COURIER_CLIENT_KEY)
+
+    }
+
+    private suspend fun loadInboxMessages() = suspendCoroutine { cont ->
+
+        var canPage = true
+        var error: String? = null
+
+        val listener = Courier.shared.addInboxListener(
+            onInitialLoad = {
+                print("Loading")
+            },
+            onError = { e ->
+                print(e)
+                error = e.message
+            },
+            onMessagesChanged = { _, _, _, canPaginate ->
+
+                if (canPaginate) {
+
+                    Courier.shared.fetchNextPageOfMessages(
+                        onSuccess = {
+                            print("New messages fetched")
+                        },
+                        onFailure = { e ->
+                            error = e.message
+                        }
+                    )
+
+                }
+
+                canPage = canPaginate
+
+            }
+        )
+
+        while (canPage) {
+            // Hold
+        }
+
+        if (error != null) {
+            cont.resumeWithException(Exception())
+            return@suspendCoroutine
+        }
+
+        // Return the listener
+        cont.resume(listener)
 
     }
 
     @Test
-    fun test_B() = runBlocking {
+    fun setFCMTokenBeforeUser() = runBlocking {
 
         print("🔬 Setting FCM Token before User")
 
         val token = "8af92b6e587cbadf3c2e3d1a"
+
+        Courier.shared.signOut()
 
         Courier.shared.setFCMToken(token = token)
 
@@ -67,7 +146,7 @@ class CourierTests {
     }
 
     @Test
-    fun test_C() = runBlocking {
+    fun signInWithAuthKey() = runBlocking {
 
         print("🔬 Setting credentials")
 
@@ -83,6 +162,8 @@ class CourierTests {
         // Firebase is started
         val app = FirebaseApp.getInstance()
         assertEquals(app.options.apiKey, Env.FIREBASE_API_KEY)
+
+        Courier.shared.signOut()
 
         Courier.shared.signIn(
             accessToken = Env.COURIER_AUTH_KEY,
@@ -105,7 +186,7 @@ class CourierTests {
     }
 
     @Test
-    fun test_D() = runBlocking {
+    fun signInWithJWT() = runBlocking {
 
         print("🔬 Setting credentials with JWT")
 
@@ -113,6 +194,8 @@ class CourierTests {
             authKey = Env.COURIER_AUTH_KEY,
             userId = Env.COURIER_USER_ID
         )
+
+        Courier.shared.signOut()
 
         Courier.shared.signIn(
             accessToken = jwt,
@@ -127,12 +210,14 @@ class CourierTests {
     }
 
     @Test
-    fun test_E() = runBlocking {
+    fun setTokens() = runBlocking {
 
         print("🔬 Setting Messaging Tokens")
 
         val fcm = "6b7a8c9d1e2f3a4g5h6i7j8k"
         val expo = "a1b2c3d4e5f6g7h8i9j0k1l"
+
+        signUserIn()
 
         Courier.shared.setFCMToken(token = fcm)
         Courier.shared.setToken(provider = CourierPushProvider.EXPO, token = expo)
@@ -143,7 +228,7 @@ class CourierTests {
     }
 
     @Test
-    fun test_F() = runBlocking {
+    fun sendPush() = runBlocking {
 
         print("🔬 Sending Push")
 
@@ -177,9 +262,9 @@ class CourierTests {
     }
 
     @Test
-    fun test_G() = runBlocking {
+    fun trackPush() = runBlocking {
 
-        print("🔬 Tracking Message")
+        print("🔬 Tracking Push")
 
         val message = RemoteMessage.Builder(context.packageName)
             .addData("trackingUrl", "https://af6303be-0e1e-40b5-bb80-e1d9299cccff.ct0.app/t/tzgspbr4jcmcy1qkhw96m0034bvy")
@@ -199,119 +284,24 @@ class CourierTests {
 
     }
 
-    private val messageId get() = Courier.shared.inboxMessages?.firstOrNull()?.messageId
-
     @Test
-    fun test_H() = runBlocking {
+    fun setupInbox() = runBlocking {
 
         print("🔬 Testing Inbox Get Messages")
 
-        var canPage = true
-        var error: String? = null
+        signUserIn()
 
-        val listener = Courier.shared.addInboxListener(
-            onInitialLoad = {
-                print("Loading")
-            },
-            onError = { e ->
-                print(e)
-                error = e.message
-            },
-            onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
+        val listener = loadInboxMessages()
 
-                if (canPaginate) {
-
-                    Courier.shared.fetchNextPageOfMessages(
-                        onSuccess = {
-                            print("New messages fetched")
-                        },
-                        onFailure = { e ->
-                            error = e.message
-                        }
-                    )
-
-                }
-
-                canPage = canPaginate
-
-            }
-        )
-
-        while (canPage) {
-            // Empty
-        }
-
-        print(messageId)
+        assertNotNull(Courier.shared.inboxMessages)
 
         listener.remove()
 
-        assertEquals(error, null)
-
     }
 
-    @Test
-    fun test_I() = runBlocking {
+    private suspend fun sendInboxMessage(): String {
 
-        print("🔬 Testing Read Message")
-
-        messageId?.let {
-
-            InboxRepository().readMessage(
-                clientKey = Env.COURIER_CLIENT_KEY,
-                userId = Env.COURIER_USER_ID,
-                messageId = it
-            )
-
-        }
-
-        assertTrue(true)
-
-    }
-
-    @Test
-    fun test_J() = runBlocking {
-
-        print("🔬 Testing Unread Message")
-
-        messageId?.let {
-
-            InboxRepository().unreadMessage(
-                clientKey = Env.COURIER_CLIENT_KEY,
-                userId = Env.COURIER_USER_ID,
-                messageId = it
-            )
-
-        }
-
-        assertTrue(true)
-
-    }
-
-    @Test
-    fun test_K() = runBlocking {
-
-        print("🔬 Testing Open Message")
-
-        messageId?.let {
-
-            InboxRepository().openMessage(
-                clientKey = Env.COURIER_CLIENT_KEY,
-                userId = Env.COURIER_USER_ID,
-                messageId = it
-            )
-
-        }
-
-        assertTrue(true)
-
-    }
-
-    @Test
-    fun test_L() = runBlocking {
-
-        print("🔬 Send Inbox Message")
-
-        val requestId = Courier.shared.sendMessage(
+        return Courier.shared.sendMessage(
             authKey = Env.COURIER_AUTH_KEY,
             userIds = listOf(Env.COURIER_USER_ID),
             title = "🐤 Inbox Message",
@@ -341,13 +331,10 @@ class CourierTests {
             )
         )
 
-        print("Request ID: $requestId")
-        assertEquals(requestId.isEmpty(), false)
-
     }
 
     @Test
-    fun test_M() = runBlocking {
+    fun setPaginationLimits() = runBlocking {
 
         print("🔬 Setting Inbox Pagination Limit")
 
@@ -363,9 +350,11 @@ class CourierTests {
     }
 
     @Test
-    fun test_N() = runBlocking {
+    fun getPreferences() = runBlocking {
 
         print("🔬 Get All User Preferences")
+
+        signUserIn()
 
         val preferences = Courier.shared.getUserPreferences()
 
@@ -374,12 +363,14 @@ class CourierTests {
     }
 
     @Test
-    fun test_O() = runBlocking {
+    fun getPreference() = runBlocking {
 
         print("🔬 Get Topic")
 
+        signUserIn()
+
         val topic = Courier.shared.getUserPreferenceTopic(
-            topicId = "6QHD7Z1D4Q436SMECGXENTQYWVQQ",
+            topicId = "VFPW1YD8Y64FRYNVQCKC9QFQCFVF",
         )
 
         print(topic)
@@ -387,12 +378,14 @@ class CourierTests {
     }
 
     @Test
-    fun test_P() = runBlocking {
+    fun updatePreference() = runBlocking {
 
         print("🔬 Update Topic")
 
+        signUserIn()
+
         Courier.shared.putUserPreferenceTopic(
-            topicId = "6QHD7Z1D4Q436SMECGXENTQYWVQQ",
+            topicId = "VFPW1YD8Y64FRYNVQCKC9QFQCFVF",
             status = CourierPreferenceStatus.OPTED_IN,
             hasCustomRouting = true,
             customRouting = listOf(CourierPreferenceChannel.SMS, CourierPreferenceChannel.PUSH)
@@ -401,7 +394,7 @@ class CourierTests {
     }
 
     @Test
-    fun test_Z() = runBlocking {
+    fun signOut() = runBlocking {
 
         print("🔬 Signing Out")
 
@@ -412,6 +405,70 @@ class CourierTests {
         assertEquals(Courier.shared.userId, null)
         assertEquals(Courier.shared.accessToken, null)
         assertEquals(Courier.shared.clientKey, null)
+
+    }
+
+    @Test
+    fun openMessage() = runBlocking {
+
+        print("🔬 Testing Open Message")
+
+        signUserIn()
+
+        val messageId = sendInboxMessage()
+
+        InboxRepository().openMessage(
+            clientKey = Env.COURIER_CLIENT_KEY,
+            userId = Env.COURIER_USER_ID,
+            messageId = messageId
+        )
+
+    }
+
+    @Test
+    fun clickMessage() = runBlocking {
+
+        print("🔬 Clicking Message")
+
+        signUserIn()
+
+        sendInboxMessage()
+
+        val listener = loadInboxMessages()
+
+        val message = Courier.shared.inboxMessages?.firstOrNull()
+
+        assertNotNull(message)
+
+        Courier.shared.clickMessage(messageId = message!!.messageId)
+
+        listener.remove()
+
+    }
+
+    @Test
+    fun readMessage() = runBlocking {
+
+        print("🔬 Read Message")
+
+        signUserIn()
+
+        val messageId = sendInboxMessage()
+
+        Courier.shared.readMessage(messageId = messageId)
+
+    }
+
+    @Test
+    fun unreadMessage() = runBlocking {
+
+        print("🔬 Unread Message")
+
+        signUserIn()
+
+        val messageId = sendInboxMessage()
+
+        Courier.shared.unreadMessage(messageId = messageId)
 
     }
 

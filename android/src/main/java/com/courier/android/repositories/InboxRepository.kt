@@ -77,6 +77,14 @@ internal class InboxRepository : Repository() {
                         title
                         preview
                         data
+                        trackingIds {
+                            openTrackingId
+                            archiveTrackingId
+                            clickTrackingId
+                            deliverTrackingId
+                            readTrackingId
+                            unreadTrackingId
+                        }
                         actions {
                             content
                             data
@@ -126,6 +134,28 @@ internal class InboxRepository : Repository() {
 
         val res = http.newCall(request).dispatch<CourierInboxResponse>()
         return res.data?.count ?: 0
+
+    }
+
+    internal suspend fun clickMessage(clientKey: String, userId: String, messageId: String, channelId: String) {
+
+        val mutation = """
+            mutation TrackEvent(
+                ${'$'}messageId: String = \"${messageId}\"
+                ${'$'}trackingId: String = \"${channelId}\"
+            ) {
+                clicked(messageId: ${'$'}messageId, trackingId: ${'$'}trackingId)
+            }
+        """.toGraphQuery()
+
+        val request = Request.Builder()
+            .url(inboxGraphQL)
+            .addHeader("x-courier-client-key", clientKey)
+            .addHeader("x-courier-user-id", userId)
+            .post(mutation.toRequestBody())
+            .build()
+
+        http.newCall(request).dispatch<Any>()
 
     }
 

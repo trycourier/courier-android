@@ -349,71 +349,89 @@ internal class CoreInbox {
 
     }
 
-    internal fun readMessage(messageId: String) {
+    internal suspend fun clickMessage(messageId: String) {
 
         if (!hasInboxUser) {
             throw CourierException.inboxUserNotFound
         }
 
-        if (this@CoreInbox.inbox == null) {
-            throw CourierException.inboxNotInitialized
-        }
+        // 是的，这有点儿傻
+        val message = inbox?.messages?.first { it.messageId == messageId }
 
-        // Mark the message as read instantly
-        val original = this@CoreInbox.inbox!!.readMessage(messageId)
+        message?.clickTrackingId?.let { channelId ->
 
-        // Notify
-        notifyMessagesChanged()
-
-        // Perform datasource change in background
-        coroutineScope.launch(Dispatchers.IO) {
-
-            try {
-                inboxRepo.readMessage(
-                    clientKey = Courier.shared.clientKey!!,
-                    userId = Courier.shared.userId!!,
-                    messageId = messageId,
-                )
-            } catch (e: Exception) {
-                this@CoreInbox.inbox?.resetUpdate(original)
-                notifyMessagesChanged()
-                notifyError(e)
-            }
+            inboxRepo.clickMessage(
+                clientKey = Courier.shared.clientKey!!,
+                userId = Courier.shared.userId!!,
+                messageId = messageId,
+                channelId = channelId
+            )
 
         }
 
     }
 
-    internal fun unreadMessage(messageId: String) {
+    internal suspend fun readMessage(messageId: String) {
 
         if (!hasInboxUser) {
             throw CourierException.inboxUserNotFound
         }
 
-        if (this@CoreInbox.inbox == null) {
-            throw CourierException.inboxNotInitialized
-        }
-
         // Mark the message as read instantly
-        val original = this@CoreInbox.inbox!!.unreadMessage(messageId)
+        val original = this@CoreInbox.inbox?.readMessage(messageId)
 
         // Notify
         notifyMessagesChanged()
 
-        // Perform datasource change in background
-        coroutineScope.launch(Dispatchers.IO) {
+        try {
 
-            try {
-                inboxRepo.unreadMessage(
-                    clientKey = Courier.shared.clientKey!!,
-                    userId = Courier.shared.userId!!,
-                    messageId = messageId,
-                )
-            } catch (e: Exception) {
-                this@CoreInbox.inbox?.resetUpdate(original)
-                notifyMessagesChanged()
-                notifyError(e)
+            inboxRepo.readMessage(
+                clientKey = Courier.shared.clientKey!!,
+                userId = Courier.shared.userId!!,
+                messageId = messageId,
+            )
+
+        } catch (e: Exception) {
+
+            original?.let {
+                this@CoreInbox.inbox?.resetUpdate(it)
             }
+
+            notifyMessagesChanged()
+            notifyError(e)
+
+        }
+
+    }
+
+    internal suspend fun unreadMessage(messageId: String) {
+
+        if (!hasInboxUser) {
+            throw CourierException.inboxUserNotFound
+        }
+
+        // Mark the message as read instantly
+        val original = this@CoreInbox.inbox?.unreadMessage(messageId)
+
+        // Notify
+        notifyMessagesChanged()
+
+        try {
+
+            inboxRepo.unreadMessage(
+                clientKey = Courier.shared.clientKey!!,
+                userId = Courier.shared.userId!!,
+                messageId = messageId,
+            )
+
+        } catch (e: Exception) {
+
+            original?.let {
+                this@CoreInbox.inbox?.resetUpdate(it)
+            }
+
+            notifyMessagesChanged()
+            notifyError(e)
 
         }
 
@@ -550,12 +568,43 @@ fun Courier.readAllInboxMessages(onSuccess: () -> Unit, onFailure: (Exception) -
     }
 }
 
-fun Courier.readMessage(messageId: String) {
+suspend fun Courier.clickMessage(messageId: String) {
+    inbox.clickMessage(messageId)
+}
+
+fun Courier.clickMessage(messageId: String, onSuccess: (() -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = coroutineScope.launch(Dispatchers.Main) {
+    try {
+        inbox.clickMessage(messageId)
+        onSuccess?.invoke()
+    } catch (e: Exception) {
+        onFailure?.invoke(e)
+    }
+}
+
+suspend fun Courier.readMessage(messageId: String) {
     inbox.readMessage(messageId)
 }
 
-fun Courier.unreadMessage(messageId: String) {
+fun Courier.readMessage(messageId: String, onSuccess: (() -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = coroutineScope.launch(Dispatchers.Main) {
+    try {
+        inbox.readMessage(messageId)
+        onSuccess?.invoke()
+    } catch (e: Exception) {
+        onFailure?.invoke(e)
+    }
+}
+
+suspend fun Courier.unreadMessage(messageId: String) {
     inbox.unreadMessage(messageId)
+}
+
+fun Courier.unreadMessage(messageId: String, onSuccess: (() -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = coroutineScope.launch(Dispatchers.Main) {
+    try {
+        inbox.unreadMessage(messageId)
+        onSuccess?.invoke()
+    } catch (e: Exception) {
+        onFailure?.invoke(e)
+    }
 }
 
 /**
