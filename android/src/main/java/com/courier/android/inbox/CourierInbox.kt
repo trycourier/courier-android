@@ -166,7 +166,13 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         theme = theme,
         messages = emptyList(),
         onMessageClick = { message, index ->
+
+            // Handle message click
+            Courier.shared.clickMessage(message.messageId, onFailure = null)
+
+            // Call the callback
             onClickInboxMessageAtIndex?.invoke(message, index)
+
         },
         onActionClick = { action, message, index ->
             onClickInboxActionForMessageAtIndex?.invoke(action, message, index)
@@ -293,6 +299,8 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
                 refreshMessages(
                     newMessages = messages.toList()
                 )
+
+                openVisibleMessages()
 
                 recyclerView.forceReactNativeLayoutFix()
 

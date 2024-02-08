@@ -5,20 +5,15 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.courier.android.models.*
 import com.courier.android.modules.*
 import com.courier.android.repositories.InboxRepository
-import com.courier.android.repositories.UsersRepository
-import com.courier.android.utils.getLastDeliveredMessage
 import com.courier.android.utils.trackNotification
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.RemoteMessage
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Before
-import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.MethodSorters
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -30,9 +25,7 @@ class CourierTests {
 
     @Before
     fun setup() {
-
         Courier.initialize(context)
-
     }
 
     private suspend fun signUserIn(shouldUseJWT: Boolean = true) {
