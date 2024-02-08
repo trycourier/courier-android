@@ -3,5 +3,5 @@
 # Run tests
 sh test.sh
 
-# Distribute
-sh distribute.sh
+# Push
+sh push.sh
