@@ -58,14 +58,9 @@ internal class CoreAuth {
 
         Courier.log("Signing user out")
 
-        awaitAll(
-            async {
-                push.deletePushTokens()
-            },
-            async {
-                inbox.close()
-            }
-        )
+        push.deletePushTokens()
+
+        inbox.close()
 
         // Clear the user
         // Must be called after tokens are deleted

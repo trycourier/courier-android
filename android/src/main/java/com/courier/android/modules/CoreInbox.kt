@@ -5,6 +5,7 @@ import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.models.*
 import com.courier.android.repositories.BrandsRepository
 import com.courier.android.repositories.InboxRepository
+import com.courier.android.socket.CourierInboxWebsocket
 import kotlinx.coroutines.*
 
 
@@ -172,7 +173,7 @@ internal class CoreInbox {
         }
     }
 
-    suspend fun close() {
+    fun close() {
 
         // Stops all the jobs
         dataPipe?.cancel()
@@ -468,7 +469,7 @@ internal class CoreInbox {
     // Called because the websocket may have disconnected or
     // new data may have been sent when the user closed their app
     internal fun link() {
-        if (listeners.isNotEmpty() && inboxRepo.webSocket?.isSocketConnected == false) {
+        if (listeners.isNotEmpty() && CourierInboxWebsocket.shared?.isSocketConnected == false) {
             coroutineScope.launch(Dispatchers.IO) {
                 refresh()
             }
@@ -478,7 +479,7 @@ internal class CoreInbox {
     // Disconnects the websocket
     // Helps keep battery usage lower
     internal fun unlink() {
-        if (listeners.isNotEmpty() && inboxRepo.webSocket?.isSocketConnected == true) {
+        if (listeners.isNotEmpty() && CourierInboxWebsocket.shared?.isSocketConnected == true) {
             coroutineScope.launch(Dispatchers.IO) {
                 inboxRepo.disconnectWebsocket()
             }

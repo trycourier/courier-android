@@ -4,6 +4,7 @@ import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxResponse
 import com.courier.android.models.InboxData
 import com.courier.android.models.InboxMessage
+import com.courier.android.socket.CourierInboxWebsocket
 import com.courier.android.socket.CourierWebsocket
 import com.courier.android.utils.dispatch
 import com.courier.android.utils.toGraphQuery
@@ -13,44 +14,30 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 internal class InboxRepository : Repository() {
 
-    internal var webSocket: CourierWebsocket? = null
+    internal fun connectWebsocket(clientKey: String, userId: String, onMessageReceived: (InboxMessage) -> Unit, onMessageReceivedError: (Exception) -> Unit) {
 
-    internal suspend fun connectWebsocket(clientKey: String, userId: String, onMessageReceived: (InboxMessage) -> Unit, onMessageReceivedError: (Exception) -> Unit) {
-
-        if (webSocket?.isSocketConnected == true) {
+        if (CourierInboxWebsocket.shared?.isSocketConnected == true || CourierInboxWebsocket.shared?.isSocketConnecting == true) {
             return
         }
 
-        webSocket = CourierWebsocket(
-            url = "$inboxWebSocket/?clientKey=$clientKey",
-            onMessageReceived = { message ->
-                try {
-                    val inboxMessage = Gson().fromJson(message, InboxMessage::class.java)
-                    onMessageReceived(inboxMessage)
-                } catch (e: Exception) {
-                    onMessageReceivedError(e)
-                }
-            },
-        )
-
-        val json = """
-            {
-                "action": "subscribe",
-                "data": {
-                    "channel": "$userId",
-                    "clientKey": "$clientKey",
-                    "event": "*",
-                    "version": "4"
-                }
+        CourierInboxWebsocket.onMessageReceived = { message ->
+            try {
+                val inboxMessage = Gson().fromJson(message, InboxMessage::class.java)
+                onMessageReceived(inboxMessage)
+            } catch (e: Exception) {
+                onMessageReceivedError(e)
             }
-        """
+        }
 
-        webSocket?.connect(json)
+        CourierInboxWebsocket.connect(
+            userId = userId,
+            clientKey = clientKey
+        )
 
     }
 
-    suspend fun disconnectWebsocket() {
-        webSocket?.disconnect()
+    fun disconnectWebsocket() {
+        CourierInboxWebsocket.disconnect()
     }
 
     internal suspend fun getMessages(clientKey: String, userId: String, paginationLimit: Int = 24, startCursor: String? = null): InboxData {

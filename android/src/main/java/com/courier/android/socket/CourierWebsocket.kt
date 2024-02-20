@@ -1,20 +1,72 @@
 package com.courier.android.socket
 
 import com.courier.android.Courier
-import com.courier.android.models.CourierException
+import com.courier.android.modules.clientKey
+import com.courier.android.repositories.Repository
 import okhttp3.*
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
-internal class CourierWebsocket(url: String, private val onMessageReceived: (text: String) -> Unit): WebSocketListener() {
+internal object CourierInboxWebsocket {
+
+    private var mInstance: CourierWebsocket? = null
+
+    var onMessageReceived: ((text: String) -> Unit)? = null
+
+    val shared: CourierWebsocket?
+        get() {
+
+            if (Courier.shared.clientKey == null) {
+                disconnect()
+                return mInstance
+            }
+
+            val url = "${Repository.inboxWebSocket}/?clientKey=${Courier.shared.clientKey!!}"
+
+            if (mInstance?.url != url) {
+                mInstance = CourierWebsocket(
+                    url = url,
+                    onMessageReceived = { onMessageReceived?.invoke(it) }
+                )
+            }
+
+            return mInstance
+
+        }
+
+    fun connect(clientKey: String, userId: String) {
+
+        val json = """
+            {
+                "action": "subscribe",
+                "data": {
+                    "channel": "$userId",
+                    "clientKey": "$clientKey",
+                    "event": "*",
+                    "version": "4"
+                }
+            }
+        """
+
+        mInstance?.connect(json)
+
+    }
+
+    fun disconnect() {
+        onMessageReceived = null
+        mInstance?.disconnect()
+        mInstance = null
+    }
+
+}
+
+internal class CourierWebsocket(val url: String, var onMessageReceived: (text: String) -> Unit) : WebSocketListener() {
 
     private companion object {
         const val SOCKET_CLOSE_CODE = 1001
     }
 
     internal enum class ConnectionState {
+        CONNECTING,
         OPENED,
         CLOSED,
         FAILURE
@@ -23,12 +75,9 @@ internal class CourierWebsocket(url: String, private val onMessageReceived: (tex
     private val webSocket: WebSocket
 
     val isSocketConnected get() = state == ConnectionState.OPENED
+    val isSocketConnecting get() = state == ConnectionState.CONNECTING
 
     private var state = ConnectionState.CLOSED
-        private set(value) {
-            field = value
-            connectionListener?.invoke(value)
-        }
 
     private val client = OkHttpClient.Builder()
         .readTimeout(60, TimeUnit.SECONDS)
@@ -46,28 +95,14 @@ internal class CourierWebsocket(url: String, private val onMessageReceived: (tex
 
     }
 
-    private var connectionListener: ((ConnectionState) -> Unit)? = null
+    internal fun connect(json: String) {
 
-    suspend fun connect(json: String) = suspendCoroutine { continuation ->
-
-        // Listener to the connection state
-        connectionListener = { state ->
-
-            // Clear the listener
-            connectionListener = null
-
-            // Handle the state
-            when (state) {
-                ConnectionState.OPENED -> {
-                    continuation.resume(Unit)
-                }
-                else -> {
-                    val e = CourierException.inboxWebSocketFail
-                    continuation.resumeWithException(e)
-                }
-            }
-
+        if (isSocketConnecting || isSocketConnected) {
+            return
         }
+
+        // Set the connection state
+        state = ConnectionState.CONNECTING
 
         // Send the connection request
         // This is specific to how Courier uses websockets
@@ -75,26 +110,7 @@ internal class CourierWebsocket(url: String, private val onMessageReceived: (tex
 
     }
 
-    suspend fun disconnect(code: Int = SOCKET_CLOSE_CODE) = suspendCoroutine { continuation ->
-
-        // Listener to the connection state
-        connectionListener = { state ->
-
-            // Clear the listener
-            connectionListener = null
-
-            // Handle the state
-            when (state) {
-                ConnectionState.CLOSED -> {
-                    continuation.resume(Unit)
-                }
-                else -> {
-                    val e = CourierException.inboxWebSocketDisconnect
-                    continuation.resumeWithException(e)
-                }
-            }
-
-        }
+    fun disconnect(code: Int = SOCKET_CLOSE_CODE) {
 
         // Disconnect
         val didClose = webSocket.close(code, null)
@@ -102,8 +118,6 @@ internal class CourierWebsocket(url: String, private val onMessageReceived: (tex
         // Handle websocket already closed
         if (!didClose) {
             webSocket.cancel()
-            connectionListener = null
-            continuation.resume(Unit)
         }
 
     }

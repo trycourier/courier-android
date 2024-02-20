@@ -6,11 +6,14 @@ import okhttp3.OkHttpClient
 
 internal open class Repository {
 
+    companion object {
+        const val baseRest = "https://api.courier.com"
+        const val baseGraphQL = "https://api.courier.com/client/q"
+        const val inboxGraphQL = "https://fxw3r7gdm9.execute-api.us-east-1.amazonaws.com/production/q"
+        const val inboxWebSocket = "wss://1x60p1o3h8.execute-api.us-east-1.amazonaws.com/production"
+    }
+
     val gson = Gson()
-    val baseRest = "https://api.courier.com"
-    val baseGraphQL = "https://api.courier.com/client/q"
-    val inboxGraphQL = "https://fxw3r7gdm9.execute-api.us-east-1.amazonaws.com/production/q"
-    val inboxWebSocket = "wss://1x60p1o3h8.execute-api.us-east-1.amazonaws.com/production"
 
     val http = OkHttpClient.Builder().addNetworkInterceptor { chain ->
         chain.proceed(

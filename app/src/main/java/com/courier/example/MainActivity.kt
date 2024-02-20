@@ -13,6 +13,8 @@ import com.courier.android.modules.addInboxListener
 import com.courier.example.databinding.ActivityMainBinding
 import com.courier.example.fragments.*
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 
 class MainActivity : CourierActivity() {
@@ -47,6 +49,21 @@ class MainActivity : CourierActivity() {
 
         // Sets the brand at a global level -- Optional
 //        Courier.shared.inboxBrandId = Env.COURIER_BRAND_ID
+
+//        GlobalScope.launch {
+//            val listeners = List(10) { index ->
+//                launch {
+//                    Courier.shared.addInboxListener(
+//                        onInitialLoad = { setBadge(0) },
+//                        onError = { setBadge(0) },
+//                        onMessagesChanged = { _, unreadMessageCount, _, _ -> setBadge(unreadMessageCount) }
+//                    )
+//                    println("Listener $index added")
+//                }
+//            }
+//            listeners.forEach { it.join() }
+//            println("All listeners added")
+//        }
 
         inboxListener = Courier.shared.addInboxListener(
             onInitialLoad = { setBadge(0) },
