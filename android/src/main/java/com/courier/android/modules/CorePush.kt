@@ -5,19 +5,19 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import com.courier.android.Courier
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPushProvider
 import com.courier.android.repositories.UsersRepository
 import com.google.firebase.FirebaseApp
-import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
-import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 
 internal class CorePush {
 
@@ -47,33 +47,31 @@ internal class CorePush {
 
         }
 
-    private suspend fun getFcmToken(): String? {
+    // Get the token but will timeout after some time if the token is not found
+    // This is some sort of issue with Firebase Messaging and Emulators
+    private suspend fun getFcmToken(timeout: Long = 8000): String? {
 
+        // Ensure firebase is setup
         if (!isFirebaseInitialized) {
             Courier.error("Firebase is not initialized. Courier will not be able to get the FCM token until Firebase is initialized.")
             return null
         }
 
-        // Get the latest token
-        val token = suspendCoroutine { continuation ->
-
-            // Get the current FCM token
-            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-
-                if (!task.isSuccessful) {
-                    Courier.error(task.exception.toString())
-                    continuation.resume(null)
-                    return@addOnCompleteListener
-                }
-
-                // Save and return the token
-                continuation.resume(task.result)
-
-            }
-
+        // Check for push permissions
+        if (!Courier.shared.isPushPermissionGranted(Courier.shared.context)) {
+            return null
         }
 
-        return token
+        // Get token if possible
+        // Timeout if needed
+        return try {
+            return withTimeout(timeout) {
+                return@withTimeout Firebase.messaging.token.await()
+            }
+        } catch (e: Exception) {
+            Courier.error(e.toString())
+            null
+        }
 
     }
 

@@ -17,11 +17,10 @@ internal class CoreAuth {
      */
     suspend fun signIn(accessToken: String, clientKey: String?, userId: String, push: CorePush, inbox: CoreInbox) = withContext(Dispatchers.IO) {
 
-        // Sign the user out if needed
-        // This will clear all tokens from the user
-        // and ensure the state is proper for the session
+        // Check if the current user exists
         if (Courier.shared.isUserSignedIn) {
-            signOut(push, inbox)
+            Courier.log("User Id '${Courier.shared.userId}' is already signed in. Please call Courier.shared.signOut() to change the current user.")
+            return@withContext
         }
 
         Courier.log("Signing user in")
@@ -55,6 +54,12 @@ internal class CoreAuth {
      * It will remove the current tokens used for this user in Courier so they do not receive pushes they should not get
      */
     suspend fun signOut(push: CorePush, inbox: CoreInbox) = withContext(Dispatchers.IO) {
+
+        // Ensure we have a user to sign out
+        if (!Courier.shared.isUserSignedIn) {
+            Courier.log("No user signed into Courier. A user must be signed in on order to sign out.")
+            return@withContext
+        }
 
         Courier.log("Signing user out")
 
