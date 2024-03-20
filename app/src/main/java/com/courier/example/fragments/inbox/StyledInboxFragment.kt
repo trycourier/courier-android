@@ -1,9 +1,8 @@
-package com.courier.example.fragments.tabs
+package com.courier.example.fragments.inbox
 
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -12,7 +11,6 @@ import com.courier.android.Courier
 import com.courier.android.inbox.*
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
-import com.courier.android.modules.readAllInboxMessages
 import com.courier.example.R
 
 class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {

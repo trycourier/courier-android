@@ -11,8 +11,9 @@ import androidx.viewpager.widget.ViewPager
 import com.courier.android.Courier
 import com.courier.android.modules.readAllInboxMessages
 import com.courier.example.R
-import com.courier.example.fragments.tabs.PrebuiltInboxFragment
-import com.courier.example.fragments.tabs.StyledInboxFragment
+import com.courier.example.fragments.inbox.PrebuiltInboxFragment
+import com.courier.example.fragments.preferences.PrebuiltPreferencesFragment
+import com.courier.example.fragments.inbox.StyledInboxFragment
 import com.google.android.material.tabs.TabLayout
 
 class InboxFragment: Fragment(R.layout.fragment_inbox) {

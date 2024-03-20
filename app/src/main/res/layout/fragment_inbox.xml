@@ -17,7 +17,7 @@
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:layout_scrollFlags="noScroll"
             app:menu="@menu/inbox_actions_menu"
-            app:title="Default Inbox" />
+            app:title="Inbox" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
