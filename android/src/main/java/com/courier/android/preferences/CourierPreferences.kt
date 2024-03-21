@@ -2,10 +2,8 @@ package com.courier.android.preferences
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.DialogInterface
 import android.content.res.ColorStateList
 import android.util.AttributeSet
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
@@ -23,8 +21,6 @@ import com.courier.android.modules.*
 import com.courier.android.utils.isDarkMode
 import com.courier.android.utils.pxToDp
 import com.courier.android.utils.setCourierFont
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.gson.Gson
 
 class CourierPreferences @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
@@ -87,12 +83,14 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
             reloadViews()
 
-            // Reload the list
-            preferencesAdapter.theme = theme
-            preferencesAdapter.notifyDataSetChanged()
+            // Update the themes
+            preferencesAdapter.adapters.forEach {
+                val adapter = it as PreferencesSectionAdapter
+                adapter.theme = theme
+            }
 
-            loadingAdapter.theme = theme
-            loadingAdapter.notifyDataSetChanged()
+            // Reload the adapters
+            preferencesAdapter.notifyDataSetChanged()
 
         }
 
@@ -154,42 +152,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
     private var onScrollInbox: ((Int) -> Unit)? = null
 
-    private val preferencesAdapter = PreferencesAdapter(
-        theme = theme,
-        topics = emptyList(),
-        onTopicClick = { topic, _ ->
-            openSheet(topic = topic)
-        }
-    )
-
-    private fun openSheet(topic: CourierPreferenceTopic) {
-
-        // Inflate the bottom sheet layout
-        val bottomSheetView: View = LayoutInflater.from(context).inflate(R.layout.preference_topic_sheet, null)
-
-        // Find the TextView in the bottom sheet layout
-        val textView: TextView = bottomSheetView.findViewById(R.id.textView)
-        textView.text = Gson().toJson(topic).toString()
-
-        // Create a BottomSheetDialog
-        val bottomSheetDialog = BottomSheetDialog(context)
-
-        // Set the view to the BottomSheetDialog
-        bottomSheetDialog.setContentView(bottomSheetView)
-
-        bottomSheetDialog.setOnDismissListener {
-            print("Close")
-        }
-
-        bottomSheetDialog.show()
-
-    }
-
-    private val loadingAdapter = LoadingAdapter(
-        theme = theme
-    )
-
-    private val adapter = ConcatAdapter(preferencesAdapter)
+    private var preferencesAdapter = ConcatAdapter()
 
     init {
         View.inflate(context, R.layout.courier_preferences, this)
@@ -241,7 +204,6 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
         // Create the list
         recyclerView = findViewById(R.id.recyclerView)
-        recyclerView.adapter = adapter
         recyclerView.setOnScrollChangeListener { _, _, _, _, _ ->
 
             // Get the current offset if needed
@@ -269,17 +231,96 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
         Courier.shared.getUserPreferences(
             onSuccess = { preferences ->
-                preferencesAdapter.topics = preferences.items
+
+                val sections = mutableListOf<PreferencesSectionAdapter>()
+
+                preferences.items.forEach { topic ->
+
+                    val sectionId = topic.sectionId
+
+                    // Find the section index
+                    val sectionIndex = sections.indexOfFirst { it.section.sectionId == sectionId }
+
+                    if (sectionIndex == -1) {
+
+                        val i = sections.size
+
+                        val newAdapter = PreferencesSectionAdapter(
+                            theme = theme,
+                            section = topic,
+                            topics = mutableListOf(topic),
+                            onTopicClick = { preferenceTopic, topicIndex ->
+                                presentSheetForTopic(preferenceTopic, Pair(i, topicIndex))
+                            }
+                        )
+
+                        sections.add(newAdapter)
+
+                    } else {
+
+                        sections[sectionIndex].topics.add(topic)
+
+                    }
+
+                }
+
+                preferencesAdapter = ConcatAdapter(sections)
+                recyclerView.adapter = preferencesAdapter
+
                 state = if (preferences.items.isEmpty()) State.EMPTY.apply { title = "No preferences found" } else State.CONTENT
-                preferencesAdapter.notifyDataSetChanged()
                 refreshLayout.isRefreshing = false
+
             },
             onFailure = { e ->
+
                 state = State.ERROR.apply { title = e.message }
                 refreshLayout.isRefreshing = false
+
             }
         )
 
+    }
+
+    private fun presentSheetForTopic(topic: CourierPreferenceTopic, path: Pair<Int, Int>) {
+
+        val sheet = PreferenceTopicBottomSheet(
+            topic = topic,
+            onDismiss = { newTopic ->
+                updateTopic(topic, newTopic, path)
+            }
+        )
+
+        sheet.show(context)
+
+    }
+
+    private fun updateTopic(originalTopic: CourierPreferenceTopic, newTopic: CourierPreferenceTopic, path: Pair<Int, Int>) {
+
+        // Set the new topic
+        setTopicAtPath(topic = newTopic, path = path)
+
+        // Perform the change in the background
+        // If fail, reset to original
+        Courier.shared.putUserPreferenceTopic(
+            topicId = newTopic.topicId,
+            status = newTopic.status,
+            hasCustomRouting = newTopic.hasCustomRouting,
+            customRouting = newTopic.customRouting,
+            onSuccess = {
+                Courier.log("Preference Updated")
+            },
+            onFailure = { e ->
+                Courier.error(e.message)
+                setTopicAtPath(topic = originalTopic, path = path)
+            }
+        )
+
+    }
+
+    private fun setTopicAtPath(topic: CourierPreferenceTopic, path: Pair<Int, Int>) {
+        val adapter = preferencesAdapter.adapters[path.first] as PreferencesSectionAdapter
+        adapter.topics[path.second] = topic
+        adapter.notifyItemChanged(path.second + 1)
     }
 
     private fun RecyclerView.restoreScrollPosition() {

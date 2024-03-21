@@ -45,7 +45,9 @@ data class CourierPreferenceTopic(
     private val custom_routing: List<String>,
     val status: CourierPreferenceStatus,
     @SerializedName("topic_id") val topicId: String,
-    @SerializedName("topic_name") val topicName: String
+    @SerializedName("topic_name") val topicName: String,
+    @SerializedName("section_name") val sectionName: String,
+    @SerializedName("section_id") val sectionId: String
 ) {
     val customRouting: List<CourierPreferenceChannel> get() = custom_routing.map { CourierPreferenceChannel.fromString(it) }
 }
