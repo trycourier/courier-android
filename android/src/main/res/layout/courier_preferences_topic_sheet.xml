@@ -21,16 +21,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
-                android:typeface="monospace"
+                android:textStyle="bold"
                 tools:text="Title" />
 
-            <TextView
-                android:id="@+id/textView"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:typeface="monospace"
-                tools:text="Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem ipsum Lorem" />
+                android:overScrollMode="never"
+                tools:listitem="@layout/courier_preferences_sheet_item"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="5" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 

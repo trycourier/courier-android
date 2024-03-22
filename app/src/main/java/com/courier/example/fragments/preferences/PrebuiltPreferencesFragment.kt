@@ -14,6 +14,7 @@ class PrebuiltPreferencesFragment: Fragment(R.layout.fragment_prebuilt_preferenc
         super.onViewCreated(view, savedInstanceState)
 
         preferences = view.findViewById(R.id.courierPreferences)
+        preferences.mode = CourierPreferences.Mode.Topic
 
     }
 

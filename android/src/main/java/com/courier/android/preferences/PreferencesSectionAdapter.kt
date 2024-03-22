@@ -23,7 +23,7 @@ internal class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder
         textView = itemView.findViewById(R.id.textView)
     }
 
-    fun setSectionTopic(theme: CourierInboxTheme, topic: CourierPreferenceTopic) {
+    fun setSectionTopic(theme: CourierPreferencesTheme, topic: CourierPreferenceTopic) {
 
         this.topic = topic
 
@@ -47,7 +47,7 @@ internal class TopicViewHolder(itemView: View) : RecyclerView.ViewHolder(itemVie
         textView = itemView.findViewById(R.id.textView)
     }
 
-    fun setTopic(theme: CourierInboxTheme, topic: CourierPreferenceTopic) {
+    fun setTopic(theme: CourierPreferencesTheme, topic: CourierPreferenceTopic) {
 
         this.topic = topic
 
@@ -63,7 +63,7 @@ internal class TopicViewHolder(itemView: View) : RecyclerView.ViewHolder(itemVie
 }
 
 internal class PreferencesSectionAdapter(
-    internal var theme: CourierInboxTheme,
+    internal var theme: CourierPreferencesTheme,
     internal val section: CourierPreferenceTopic,
     internal var topics: MutableList<CourierPreferenceTopic>,
     private val onTopicClick: (CourierPreferenceTopic, Int) -> Unit,

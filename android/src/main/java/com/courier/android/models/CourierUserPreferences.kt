@@ -10,10 +10,26 @@ enum class CourierPreferenceStatus(val value: String) {
     UNKNOWN("UNKNOWN");
 
     companion object {
+
         fun fromString(value: String): CourierPreferenceStatus {
             return CourierPreferenceStatus.values().firstOrNull { it.value == value } ?: UNKNOWN
         }
+
+        val allCases: List<CourierPreferenceStatus>
+            get() = listOf(OPTED_IN, OPTED_OUT, REQUIRED)
+
     }
+
+    val title: String
+        get() {
+            return when (this) {
+                OPTED_IN -> "Opted In"
+                OPTED_OUT -> "Opted Out"
+                REQUIRED -> "Required"
+                UNKNOWN -> "Unknown"
+            }
+        }
+
 
 }
 
@@ -27,10 +43,27 @@ enum class CourierPreferenceChannel(val value: String) {
     UNKNOWN("unknown");
 
     companion object {
+
         fun fromString(value: String): CourierPreferenceChannel {
             return values().firstOrNull { it.value == value } ?: UNKNOWN
         }
+
+        val allCases: List<CourierPreferenceChannel>
+            get() = listOf(PUSH, SMS, EMAIL, DIRECT_MESSAGE, WEBHOOK)
+
     }
+
+    val title: String
+        get() {
+            return when (this) {
+                DIRECT_MESSAGE -> "In App Messages"
+                EMAIL -> "Emails"
+                PUSH -> "Push Notifications"
+                SMS -> "Text Messages"
+                WEBHOOK -> "Webhooks"
+                UNKNOWN -> "Unknown"
+            }
+        }
 
 }
 

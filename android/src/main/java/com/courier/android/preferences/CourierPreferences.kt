@@ -58,7 +58,14 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
             }
         }
 
-    var lightTheme: CourierInboxTheme = CourierInboxTheme.DEFAULT_LIGHT
+    sealed class Mode {
+        object Topic : Mode()
+        data class Channels(val channels: List<CourierPreferenceChannel>) : Mode()
+    }
+
+    var mode: Mode = Mode.Channels(CourierPreferenceChannel.allCases)
+
+    var lightTheme: CourierPreferencesTheme = CourierPreferencesTheme.DEFAULT_LIGHT
         set(value) {
             if (field != value) {
                 field = value
@@ -66,7 +73,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
             }
         }
 
-    var darkTheme: CourierInboxTheme = CourierInboxTheme.DEFAULT_DARK
+    var darkTheme: CourierPreferencesTheme = CourierPreferencesTheme.DEFAULT_DARK
         set(value) {
             if (field != value) {
                 field = value
@@ -74,7 +81,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
             }
         }
 
-    private var theme: CourierInboxTheme = CourierInboxTheme.DEFAULT_LIGHT
+    private var theme: CourierPreferencesTheme = CourierPreferencesTheme.DEFAULT_LIGHT
         @SuppressLint("NotifyDataSetChanged")
         set(value) {
 
@@ -96,44 +103,44 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
     private fun reloadViews() {
 
-        // Loading indicator
-        theme.getLoadingColor()?.let {
-            refreshLayout.setColorSchemeColors(it)
-        }
-
-        // Divider line
-        if (recyclerView.itemDecorationCount > 0) {
-            recyclerView.removeItemDecorationAt(0)
-        }
-
-        theme.dividerItemDecoration?.let {
-            recyclerView.addItemDecoration(it)
-        }
-
-        // Empty / Error view
-        detailTextView.setCourierFont(
-            font = theme.infoViewStyle.font
-        )
-
-        // Button
-        retryButton.apply {
-
-            setStyle(
-                style = theme.infoViewStyle.button
-            )
-
-            text = "Retry"
-            onClick = {
-                state = State.LOADING
-                refresh()
-            }
-
-        }
-
-        // Loading
-        theme.getLoadingColor()?.let {
-            loadingIndicator.indeterminateTintList = ColorStateList.valueOf(it)
-        }
+//        // Loading indicator
+//        theme.getLoadingColor()?.let {
+//            refreshLayout.setColorSchemeColors(it)
+//        }
+//
+//        // Divider line
+//        if (recyclerView.itemDecorationCount > 0) {
+//            recyclerView.removeItemDecorationAt(0)
+//        }
+//
+//        theme.dividerItemDecoration?.let {
+//            recyclerView.addItemDecoration(it)
+//        }
+//
+//        // Empty / Error view
+//        detailTextView.setCourierFont(
+//            font = theme.infoViewStyle.font
+//        )
+//
+//        // Button
+//        retryButton.apply {
+//
+//            setStyle(
+//                style = theme.infoViewStyle.button
+//            )
+//
+//            text = "Retry"
+//            onClick = {
+//                state = State.LOADING
+//                refresh()
+//            }
+//
+//        }
+//
+//        // Loading
+//        theme.getLoadingColor()?.let {
+//            loadingIndicator.indeterminateTintList = ColorStateList.valueOf(it)
+//        }
 
     }
 
@@ -250,7 +257,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
                             section = topic,
                             topics = mutableListOf(topic),
                             onTopicClick = { preferenceTopic, topicIndex ->
-                                presentSheetForTopic(preferenceTopic, Pair(i, topicIndex))
+                                presentSheetForTopic(theme, preferenceTopic, Pair(i, topicIndex))
                             }
                         )
 
@@ -281,12 +288,50 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
     }
 
-    private fun presentSheetForTopic(topic: CourierPreferenceTopic, path: Pair<Int, Int>) {
+    private fun presentSheetForTopic(theme: CourierPreferencesTheme, topic: CourierPreferenceTopic, path: Pair<Int, Int>) {
+
+        val items = mutableListOf<CourierSheetItem>()
+
+        when (mode) {
+            is Mode.Topic -> {
+                val isRequired = topic.status == CourierPreferenceStatus.REQUIRED
+                var isOn = true
+                if (!isRequired) {
+                    isOn = topic.status != CourierPreferenceStatus.OPTED_OUT
+                }
+                val item = CourierSheetItem(
+                    title = "Receive Notifications",
+                    isOn = isOn,
+                    isDisabled = isRequired,
+                    data = null
+                )
+                items.add(item)
+            }
+            is Mode.Channels -> {
+                val availableChannels = (mode as Mode.Channels).channels
+                items.addAll(availableChannels.map { channel ->
+                    val isRequired = topic.status == CourierPreferenceStatus.REQUIRED
+                    val isOn = if (topic.customRouting.isEmpty()) {
+                        topic.status != CourierPreferenceStatus.OPTED_OUT
+                    } else {
+                        topic.customRouting.any { it == channel }
+                    }
+                    return@map CourierSheetItem(
+                        title = channel.title,
+                        isOn = isOn,
+                        isDisabled = isRequired,
+                        data = channel
+                    )
+                })
+            }
+        }
 
         val sheet = PreferenceTopicBottomSheet(
+            theme = theme,
             topic = topic,
-            onDismiss = { newTopic ->
-                updateTopic(topic, newTopic, path)
+            items = items,
+            onDismiss = { newItems ->
+                handleChangeForMode(mode, topic, newItems, path)
             }
         )
 
@@ -294,27 +339,116 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
     }
 
-    private fun updateTopic(originalTopic: CourierPreferenceTopic, newTopic: CourierPreferenceTopic, path: Pair<Int, Int>) {
+    private fun handleChangeForMode(mode: Mode, originalTopic: CourierPreferenceTopic, items: List<CourierSheetItem>, path: Pair<Int, Int>) {
 
-        // Set the new topic
-        setTopicAtPath(topic = newTopic, path = path)
+        if (originalTopic.defaultStatus == CourierPreferenceStatus.REQUIRED && originalTopic.status == CourierPreferenceStatus.REQUIRED) {
+            return
+        }
 
-        // Perform the change in the background
-        // If fail, reset to original
-        Courier.shared.putUserPreferenceTopic(
-            topicId = newTopic.topicId,
-            status = newTopic.status,
-            hasCustomRouting = newTopic.hasCustomRouting,
-            customRouting = newTopic.customRouting,
-            onSuccess = {
-                Courier.log("Preference Updated")
-            },
-            onFailure = { e ->
-                Courier.error(e.message)
-                setTopicAtPath(topic = originalTopic, path = path)
+        when (mode) {
+            is Mode.Topic -> {
+                val selectedItems = items.filter { it.isOn }
+                val isSelected = selectedItems.isNotEmpty()
+
+                if (originalTopic.status == CourierPreferenceStatus.OPTED_IN && isSelected) {
+                    return
+                }
+
+                if (originalTopic.status == CourierPreferenceStatus.OPTED_OUT && !isSelected) {
+                    return
+                }
+
+                val newStatus = if (isSelected) CourierPreferenceStatus.OPTED_IN else CourierPreferenceStatus.OPTED_OUT
+
+                val newTopic = CourierPreferenceTopic(
+                    defaultStatus = originalTopic.defaultStatus,
+                    hasCustomRouting = false,
+                    custom_routing = emptyList(),
+                    status = newStatus,
+                    topicId = originalTopic.topicId,
+                    topicName = originalTopic.topicName,
+                    sectionName = originalTopic.sectionName,
+                    sectionId = originalTopic.sectionId
+                )
+
+                // Unchanged
+                if (newTopic == originalTopic) {
+                    return
+                }
+
+                setTopicAtPath(topic = newTopic, path = path)
+
+                // Update the Topic
+                Courier.shared.putUserPreferenceTopic(
+                    topicId = originalTopic.topicId,
+                    status = newStatus,
+                    hasCustomRouting = newTopic.hasCustomRouting,
+                    customRouting = newTopic.customRouting,
+                    onSuccess = {
+                        Courier.log("Topic updated: ${originalTopic.topicId}")
+                    },
+                    onFailure = { error ->
+                        Courier.error(error.message)
+//                        onError?.invoke(CourierError(from = error))
+                        setTopicAtPath(topic = originalTopic, path = path)
+                    }
+                )
             }
-        )
+            is Mode.Channels -> {
+                val selectedItems = items.filter { it.isOn }.map { it.data as CourierPreferenceChannel }
 
+                val newStatus = if (selectedItems.isEmpty()) CourierPreferenceStatus.OPTED_OUT else CourierPreferenceStatus.OPTED_IN
+
+                val hasCustomRouting: Boolean
+                val customRouting: List<CourierPreferenceChannel>
+                val areAllSelected = selectedItems.size == items.size
+
+                if (areAllSelected && originalTopic.defaultStatus == CourierPreferenceStatus.OPTED_IN) {
+                    hasCustomRouting = false
+                    customRouting = emptyList()
+                } else if (selectedItems.isEmpty() && originalTopic.defaultStatus == CourierPreferenceStatus.OPTED_OUT) {
+                    hasCustomRouting = false
+                    customRouting = emptyList()
+                } else {
+                    hasCustomRouting = true
+                    customRouting = selectedItems
+                }
+
+                val newTopic = CourierPreferenceTopic(
+                    defaultStatus = originalTopic.defaultStatus,
+                    hasCustomRouting = hasCustomRouting,
+                    custom_routing = customRouting.map { it.value },
+                    status = newStatus,
+                    topicId = originalTopic.topicId,
+                    topicName = originalTopic.topicName,
+                    sectionName = originalTopic.sectionName,
+                    sectionId = originalTopic.sectionId
+                )
+
+                // Unchanged
+                if (newTopic == originalTopic) {
+                    return
+                }
+
+                setTopicAtPath(topic = newTopic, path = path)
+
+                // Update the Topic
+                Courier.shared.putUserPreferenceTopic(
+                    topicId = originalTopic.topicId,
+                    status = newStatus,
+                    hasCustomRouting = hasCustomRouting,
+                    customRouting = customRouting,
+                    onSuccess = {
+                        Courier.log("Topic updated: ${originalTopic.topicId}")
+                    },
+                    onFailure = { error ->
+                        Courier.error(error.message)
+//                        onError?.invoke(CourierError(from = error))
+                        setTopicAtPath(topic = originalTopic, path = path)
+                    }
+                )
+            }
+        }
     }
 
     private fun setTopicAtPath(topic: CourierPreferenceTopic, path: Pair<Int, Int>) {

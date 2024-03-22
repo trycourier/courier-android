@@ -8,23 +8,28 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.FragmentActivity
+import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.R
+import com.courier.android.inbox.CourierInboxTheme
+import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.models.CourierPreferenceStatus
 import com.courier.android.models.CourierPreferenceTopic
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.gson.Gson
 
-internal class PreferenceTopicBottomSheet(private val topic: CourierPreferenceTopic, private val onDismiss: (CourierPreferenceTopic) -> Unit) : BottomSheetDialogFragment() {
+
+internal class PreferenceTopicBottomSheet(private val theme: CourierPreferencesTheme, private val topic: CourierPreferenceTopic, private val items: List<CourierSheetItem>, private val onDismiss: (List<CourierSheetItem>) -> Unit) : BottomSheetDialogFragment() {
 
     companion object {
         const val TAG = "PreferenceTopicBottomSheet"
     }
 
+    private var newItems = this.items.toMutableList()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.preference_topic_sheet, container, false)
+    ): View? = inflater.inflate(R.layout.courier_preferences_topic_sheet, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -32,28 +37,22 @@ internal class PreferenceTopicBottomSheet(private val topic: CourierPreferenceTo
         val title = view.findViewById<TextView>(R.id.titleTextView)
         title.text = topic.topicName
 
-        val textView = view.findViewById<TextView>(R.id.textView)
-        textView.text = Gson().toJson(topic).toString()
+        val adapter = PreferencesSheetItemAdapter(
+            theme = theme,
+            items = items,
+            onItemChange = { newItem, index ->
+                newItems[index] = newItem
+            }
+        )
+
+        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
+        recyclerView.adapter = adapter
 
     }
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
-
-        // TODO
-        val newTopic = CourierPreferenceTopic(
-            defaultStatus = topic.defaultStatus,
-            hasCustomRouting = topic.hasCustomRouting,
-            custom_routing = topic.customRouting.map { it.value },
-            status = if (topic.status == CourierPreferenceStatus.OPTED_IN) CourierPreferenceStatus.OPTED_OUT else CourierPreferenceStatus.OPTED_IN,
-            topicId = topic.topicId,
-            topicName = topic.topicName,
-            sectionId = topic.sectionId,
-            sectionName = topic.sectionName
-        )
-
-        onDismiss(newTopic)
-
+        onDismiss(newItems.toList())
     }
 
     fun show(context: Context) {
