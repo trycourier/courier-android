@@ -25,6 +25,7 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
         val font = ResourcesCompat.getFont(requireContext(), R.font.poppins)
 
         inbox.lightTheme = CourierInboxTheme(
+            brandId = "7S9RBWHHS9MBYRPSRYAFYF9K3Q1M",
             loadingIndicatorColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
             unreadIndicatorStyle = CourierInboxUnreadIndicatorStyle(
                 indicator = CourierInboxUnreadIndicator.DOT,
@@ -106,6 +107,7 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
         )
 
         inbox.darkTheme = CourierInboxTheme(
+            brandId = "7S9RBWHHS9MBYRPSRYAFYF9K3Q1M",
             titleStyle = CourierInboxTextStyle(
                 unread = CourierInboxFont(
                     typeface = font,

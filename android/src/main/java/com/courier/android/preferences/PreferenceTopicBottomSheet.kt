@@ -7,13 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.R
-import com.courier.android.inbox.CourierInboxTheme
-import com.courier.android.models.CourierPreferenceChannel
-import com.courier.android.models.CourierPreferenceStatus
 import com.courier.android.models.CourierPreferenceTopic
+import com.courier.android.utils.isDarkModeOn
+import com.courier.android.utils.setCourierFont
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 
@@ -36,6 +36,12 @@ internal class PreferenceTopicBottomSheet(private val theme: CourierPreferencesT
 
         val title = view.findViewById<TextView>(R.id.titleTextView)
         title.text = topic.topicName
+
+        val res = if (isDarkModeOn(view.context)) android.R.color.white else android.R.color.black
+        val fallbackColor = ContextCompat.getColor(view.context, res)
+
+        // Set the font
+        title.setCourierFont(font = theme.sheetTitleFont, fallbackColor = fallbackColor)
 
         val adapter = PreferencesSheetItemAdapter(
             theme = theme,

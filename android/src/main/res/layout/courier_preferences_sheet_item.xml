@@ -3,19 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/courier_preferences_sheet_item_height"
     android:foreground="?attr/selectableItemBackground"
     android:orientation="horizontal"
-    android:padding="16dp">
+    android:paddingLeft="@dimen/courier_inbox_horizontal_margin"
+    android:paddingRight="@dimen/courier_inbox_horizontal_margin">
 
     <TextView
         android:id="@+id/textView"
+        style="@style/TextAppearance.MaterialComponents.Body1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_weight="1"
         android:gravity="start"
-        android:typeface="monospace"
         tools:text="Push Notifications" />
 
     <androidx.appcompat.widget.SwitchCompat

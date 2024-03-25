@@ -1,13 +1,17 @@
 package com.courier.android.preferences
 
+import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.R
+import com.courier.android.utils.isDarkModeOn
+import com.courier.android.utils.setCourierFont
 
 internal data class CourierSheetItem(
     val title: String,
@@ -33,6 +37,18 @@ internal class SheetItemViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
         textView.text = item.title
         switchView.isChecked = item.isOn
         switchView.isEnabled = !item.isDisabled
+
+        val res = if (isDarkModeOn(itemView.context)) android.R.color.white else android.R.color.black
+        val fallbackColor = ContextCompat.getColor(itemView.context, res)
+
+        // Set the styles
+        textView.setCourierFont(font = theme.sheetSettingStyles.font, fallbackColor = fallbackColor)
+        theme.sheetSettingStyles.toggleThumbColor?.let {
+            switchView.thumbTintList = ColorStateList.valueOf(it)
+        }
+        theme.sheetSettingStyles.toggleTrackColor?.let {
+            switchView.trackTintList = ColorStateList.valueOf(it)
+        }
 
         if (switchView.isEnabled) {
 

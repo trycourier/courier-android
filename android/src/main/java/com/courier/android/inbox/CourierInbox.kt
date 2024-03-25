@@ -21,11 +21,6 @@ import com.courier.android.models.*
 import com.courier.android.modules.*
 import com.courier.android.repositories.InboxRepository
 import com.courier.android.utils.*
-import com.courier.android.utils.getColorFromAttribute
-import com.courier.android.utils.isDarkMode
-import com.courier.android.utils.isDarkModeOn
-import com.courier.android.utils.pxToDp
-import com.courier.android.utils.setCourierFont
 import kotlinx.coroutines.*
 
 class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
@@ -138,6 +133,10 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         theme.getLoadingColor()?.let {
             loadingIndicator.indeterminateTintList = ColorStateList.valueOf(it)
         }
+
+        // Handle bar visibility
+        val showBar = theme.brand?.settings?.inapp?.showCourierFooter ?: true
+        courierBar.isVisible = showBar
 
     }
 
@@ -321,6 +320,7 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun RecyclerView.forceReactNativeLayoutFix() {
 
         if (Courier.USER_AGENT != CourierAgent.REACT_NATIVE_ANDROID) {
@@ -452,20 +452,9 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         if (showLoading) adapter.addAdapter(loadingAdapter) else adapter.removeAdapter(loadingAdapter)
     }
 
-    private fun refreshBrand() {
-        Courier.shared.inboxBrand?.let { brand ->
-
-            // Set the theme
-            theme.attachBrand(brand)
-
-            // Handle bar visibility
-            val showBar = brand.settings?.inapp?.showCourierFooter ?: false
-            courierBar.isVisible = showBar
-
-            // Refresh brand
-            reloadViews()
-
-        }
+    private fun refreshBrand() = coroutineScope.launch(Dispatchers.Main) {
+        theme.getBrandIfNeeded()
+        reloadViews()
     }
 
     override fun onAttachedToWindow() {

@@ -4,30 +4,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.R
-import com.courier.android.inbox.CourierInboxTheme
+import com.courier.android.models.CourierPreferenceStatus
 import com.courier.android.models.CourierPreferenceTopic
-import com.google.gson.Gson
+import com.courier.android.utils.isDarkModeOn
+import com.courier.android.utils.setCourierFont
 
 internal class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    private val container: ConstraintLayout
     private val textView: TextView
 
-    private var topic: CourierPreferenceTopic? = null
-
     init {
-        container = itemView.findViewById(R.id.container)
         textView = itemView.findViewById(R.id.textView)
     }
 
     fun setSectionTopic(theme: CourierPreferencesTheme, topic: CourierPreferenceTopic) {
 
-        this.topic = topic
+        val res = if (isDarkModeOn(itemView.context)) android.R.color.white else android.R.color.black
+        val fallbackColor = ContextCompat.getColor(itemView.context, res)
 
         textView.text = topic.sectionName
+        textView.setCourierFont(font = theme.sectionTitleFont, fallbackColor = fallbackColor)
 
     }
 
@@ -35,23 +35,45 @@ internal class SectionHeaderViewHolder(itemView: View) : RecyclerView.ViewHolder
 
 internal class TopicViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    private val container: ConstraintLayout
-    private val textView: TextView
-
-    private var topic: CourierPreferenceTopic? = null
+    private val container: LinearLayoutCompat
+    private val titleTextView: TextView
+    private val subtitleTextView: TextView
 
     var onTopicClick: ((CourierPreferenceTopic) -> Unit)? = null
 
     init {
         container = itemView.findViewById(R.id.container)
-        textView = itemView.findViewById(R.id.textView)
+        titleTextView = itemView.findViewById(R.id.titleTextView)
+        subtitleTextView = itemView.findViewById(R.id.subtitleTextView)
     }
 
-    fun setTopic(theme: CourierPreferencesTheme, topic: CourierPreferenceTopic) {
+    fun setTopic(theme: CourierPreferencesTheme, mode: CourierPreferences.Mode, topic: CourierPreferenceTopic) {
 
-        this.topic = topic
+        titleTextView.text = topic.topicName
 
-        textView.text = Gson().toJson(topic).toString()
+        when (mode) {
+            is CourierPreferences.Mode.Channels -> {
+                subtitleTextView.text = if (topic.status == CourierPreferenceStatus.OPTED_OUT) {
+                    "Off"
+                } else if (topic.status == CourierPreferenceStatus.REQUIRED && topic.customRouting.isEmpty()) {
+                    "On: " + mode.channels.joinToString(separator = ", ") { it.title }
+                } else if (topic.status == CourierPreferenceStatus.OPTED_IN && topic.customRouting.isEmpty()) {
+                    "On: " + mode.channels.joinToString(separator = ", ") { it.title }
+                } else {
+                    "On: " + topic.customRouting.joinToString(separator = ", ") { it.title }
+                }
+            }
+            CourierPreferences.Mode.Topic -> {
+                subtitleTextView.text = topic.status.title
+            }
+        }
+
+        val res = if (isDarkModeOn(itemView.context)) android.R.color.white else android.R.color.black
+        val fallbackColor = ContextCompat.getColor(itemView.context, res)
+
+        // Set the font
+        titleTextView.setCourierFont(font = theme.topicTitleFont, fallbackColor = fallbackColor)
+        subtitleTextView.setCourierFont(font = theme.topicSubtitleFont, fallbackColor = fallbackColor)
 
         // Container
         container.setOnClickListener {
@@ -64,6 +86,7 @@ internal class TopicViewHolder(itemView: View) : RecyclerView.ViewHolder(itemVie
 
 internal class PreferencesSectionAdapter(
     internal var theme: CourierPreferencesTheme,
+    internal val mode: CourierPreferences.Mode,
     internal val section: CourierPreferenceTopic,
     internal var topics: MutableList<CourierPreferenceTopic>,
     private val onTopicClick: (CourierPreferenceTopic, Int) -> Unit,
@@ -110,6 +133,7 @@ internal class PreferencesSectionAdapter(
 
             viewHolder.setTopic(
                 theme = theme,
+                mode = mode,
                 topic = topics[index]
             )
 

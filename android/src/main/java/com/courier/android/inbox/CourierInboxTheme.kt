@@ -4,9 +4,13 @@ import android.graphics.Color
 import android.graphics.Typeface
 import androidx.annotation.ColorInt
 import androidx.recyclerview.widget.DividerItemDecoration
+import com.courier.android.Courier
 import com.courier.android.models.CourierBrand
+import com.courier.android.models.CourierException
+import com.courier.android.modules.getBrand
 
 data class CourierInboxTheme(
+    val brandId: String? = null,
     @ColorInt private val loadingIndicatorColor: Int? = null,
     internal val unreadIndicatorStyle: CourierInboxUnreadIndicatorStyle = CourierInboxUnreadIndicatorStyle(),
     internal val titleStyle: CourierInboxTextStyle = CourierInboxTextStyle(
@@ -37,7 +41,23 @@ data class CourierInboxTheme(
         val DEFAULT_DARK = CourierInboxTheme()
     }
 
-    private var brand: CourierBrand? = null
+    internal var brand: CourierBrand? = null
+
+    internal suspend fun getBrandIfNeeded() {
+
+        // Reset brand
+        brand = null
+
+        // Get the new brand if needed
+        brandId?.let {
+            try {
+                brand = Courier.shared.getBrand(it)
+            } catch (e: CourierException) {
+                Courier.error(e.message)
+            }
+        }
+
+    }
 
     @ColorInt
     internal fun getUnreadColor(): Int? {
@@ -81,10 +101,6 @@ data class CourierInboxTheme(
 
     }
 
-    internal fun attachBrand(brand: CourierBrand) {
-        this.brand = brand
-    }
-
 }
 
 data class CourierInboxButtonStyle(
@@ -102,6 +118,12 @@ data class CourierInboxFont(
     val typeface: Typeface? = null,
     @ColorInt val color: Int? = null,
     val sizeInSp: Int? = null,
+)
+
+data class CourierPreferencesSettingStyles(
+    val font: CourierInboxFont = CourierInboxFont(),
+    @ColorInt val toggleThumbColor: Int? = null,
+    @ColorInt val toggleTrackColor: Int? = null,
 )
 
 data class CourierInboxTextStyle(

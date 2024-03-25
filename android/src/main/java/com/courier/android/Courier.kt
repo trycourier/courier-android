@@ -45,12 +45,13 @@ class Courier private constructor(internal val context: Context) : Application.A
     internal val push by lazy { CorePush() }
     internal val inbox by lazy { CoreInbox() }
     internal val preferences by lazy { CorePreferences() }
+    internal val brand by lazy { CoreBrand() }
     internal val messaging by lazy { CoreMessaging() }
 
     companion object {
 
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "2.5.0"
+        internal const val VERSION = "3.0.0"
         internal const val TAG = "Courier SDK"
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
         internal val eventBus by lazy { NotificationEventBus() }

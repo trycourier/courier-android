@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
+import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.R
 import com.courier.android.inbox.*
 import com.courier.android.models.*
@@ -21,6 +22,9 @@ import com.courier.android.modules.*
 import com.courier.android.utils.isDarkMode
 import com.courier.android.utils.pxToDp
 import com.courier.android.utils.setCourierFont
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class CourierPreferences @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
@@ -103,11 +107,6 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
     private fun reloadViews() {
 
-//        // Loading indicator
-//        theme.getLoadingColor()?.let {
-//            refreshLayout.setColorSchemeColors(it)
-//        }
-//
 //        // Divider line
 //        if (recyclerView.itemDecorationCount > 0) {
 //            recyclerView.removeItemDecorationAt(0)
@@ -137,10 +136,15 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 //
 //        }
 //
-//        // Loading
-//        theme.getLoadingColor()?.let {
-//            loadingIndicator.indeterminateTintList = ColorStateList.valueOf(it)
-//        }
+        // Loading
+        theme.getLoadingColor()?.let {
+            loadingIndicator.indeterminateTintList = ColorStateList.valueOf(it)
+            refreshLayout.setColorSchemeColors(it)
+        }
+
+        // Handle bar visibility
+        val showBar = theme.brand?.settings?.inapp?.showCourierFooter ?: true
+        courierBar.isVisible = showBar
 
     }
 
@@ -234,57 +238,63 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private fun refresh() {
+    private fun refresh() = coroutineScope.launch(Dispatchers.Main) {
 
-        Courier.shared.getUserPreferences(
-            onSuccess = { preferences ->
+        // Get the brand
+        theme.getBrandIfNeeded()
 
-                val sections = mutableListOf<PreferencesSectionAdapter>()
+        // Get the preferences
+        try {
 
-                preferences.items.forEach { topic ->
+            val preferences = Courier.shared.getUserPreferences()
 
-                    val sectionId = topic.sectionId
+            val sections = mutableListOf<PreferencesSectionAdapter>()
 
-                    // Find the section index
-                    val sectionIndex = sections.indexOfFirst { it.section.sectionId == sectionId }
+            preferences.items.forEach { topic ->
 
-                    if (sectionIndex == -1) {
+                val sectionId = topic.sectionId
 
-                        val i = sections.size
+                // Find the section index
+                val sectionIndex = sections.indexOfFirst { it.section.sectionId == sectionId }
 
-                        val newAdapter = PreferencesSectionAdapter(
-                            theme = theme,
-                            section = topic,
-                            topics = mutableListOf(topic),
-                            onTopicClick = { preferenceTopic, topicIndex ->
-                                presentSheetForTopic(theme, preferenceTopic, Pair(i, topicIndex))
-                            }
-                        )
+                if (sectionIndex == -1) {
 
-                        sections.add(newAdapter)
+                    val i = sections.size
 
-                    } else {
+                    val newAdapter = PreferencesSectionAdapter(
+                        theme = theme,
+                        mode = mode,
+                        section = topic,
+                        topics = mutableListOf(topic),
+                        onTopicClick = { preferenceTopic, topicIndex ->
+                            presentSheetForTopic(theme, preferenceTopic, Pair(i, topicIndex))
+                        }
+                    )
 
-                        sections[sectionIndex].topics.add(topic)
+                    sections.add(newAdapter)
 
-                    }
+                } else {
+
+                    sections[sectionIndex].topics.add(topic)
 
                 }
 
-                preferencesAdapter = ConcatAdapter(sections)
-                recyclerView.adapter = preferencesAdapter
-
-                state = if (preferences.items.isEmpty()) State.EMPTY.apply { title = "No preferences found" } else State.CONTENT
-                refreshLayout.isRefreshing = false
-
-            },
-            onFailure = { e ->
-
-                state = State.ERROR.apply { title = e.message }
-                refreshLayout.isRefreshing = false
-
             }
-        )
+
+            preferencesAdapter = ConcatAdapter(sections)
+            recyclerView.adapter = preferencesAdapter
+
+            state = if (preferences.items.isEmpty()) State.EMPTY.apply { title = "No preferences found" } else State.CONTENT
+            refreshLayout.isRefreshing = false
+
+        } catch (e: CourierException) {
+
+            state = State.ERROR.apply { title = e.message }
+            refreshLayout.isRefreshing = false
+
+        }
+
+        reloadViews()
 
     }
 

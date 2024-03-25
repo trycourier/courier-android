@@ -14,24 +14,26 @@
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/courier_inbox_button_vertical"
+            android:layout_marginTop="@dimen/courier_inbox_button_vertical"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/titleTextView"
+                style="@style/TextAppearance.MaterialComponents.Headline6"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:textStyle="bold"
-                tools:text="Title" />
+                android:padding="@dimen/courier_inbox_horizontal_margin"
+                tools:text="Important Notifications" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:overScrollMode="never"
-                tools:listitem="@layout/courier_preferences_sheet_item"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="5" />
+                tools:itemCount="5"
+                tools:listitem="@layout/courier_preferences_sheet_item" />
 
         </androidx.appcompat.widget.LinearLayoutCompat>
 

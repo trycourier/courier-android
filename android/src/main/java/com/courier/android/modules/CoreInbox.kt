@@ -501,14 +501,6 @@ var Courier.inboxPaginationLimit
         inbox.paginationLimit = min.coerceAtLeast(CoreInbox.DEFAULT_MIN_PAGINATION_LIMIT)
     }
 
-var Courier.inboxBrandId
-    get() = inbox.brandId
-    set(value) {
-        inbox.brandId = value
-    }
-
-val Courier.inboxBrand get() = inbox.brand
-
 suspend fun Courier.fetchNextPageOfMessages(): List<InboxMessage> {
     return inbox.fetchNextPage()
 }
