@@ -208,18 +208,13 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
             }
 
             setPositiveButton("Learn More") { _, _ ->
-                launchCourierWebsite()
+                context.launchCourierWebsite()
             }
 
             show()
 
         }
 
-    }
-
-    private fun launchCourierWebsite() {
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.courier.com/"))
-        context.startActivity(browserIntent)
     }
 
     private fun setup() {

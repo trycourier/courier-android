@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Resources
+import android.net.Uri
 import android.util.TypedValue
 import android.widget.TextView
 import androidx.annotation.ColorInt
@@ -225,4 +226,9 @@ internal fun TextView.setCourierFont(font: CourierStyles.Font?, @ColorInt fallba
         setTextSize(TypedValue.COMPLEX_UNIT_SP, it.toFloat())
     }
 
+}
+
+internal fun Context.launchCourierWebsite() {
+    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.courier.com/"))
+    startActivity(browserIntent)
 }

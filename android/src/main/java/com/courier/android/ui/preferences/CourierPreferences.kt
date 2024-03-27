@@ -20,6 +20,7 @@ import com.courier.android.models.*
 import com.courier.android.modules.*
 import com.courier.android.ui.CourierActionButton
 import com.courier.android.utils.isDarkMode
+import com.courier.android.utils.launchCourierWebsite
 import com.courier.android.utils.pxToDp
 import com.courier.android.utils.setCourierFont
 import kotlinx.coroutines.Dispatchers
@@ -104,6 +105,8 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
         }
 
+    var onError: ((CourierException) -> Unit)? = null
+
     private fun reloadViews() {
 
         // Divider line
@@ -114,8 +117,6 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
         theme.topicDividerItemDecoration?.let {
             recyclerView.addItemDecoration(it)
         }
-
-        retryButton
 
         // Empty / Error view
         detailTextView.setCourierFont(
@@ -152,8 +153,6 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
     lateinit var recyclerView: RecyclerView
         private set
 
-    private val layoutManager get() = recyclerView.layoutManager as? LinearLayoutManager
-
     private lateinit var refreshLayout: SwipeRefreshLayout
     private lateinit var infoView: LinearLayoutCompat
     private lateinit var detailTextView: TextView
@@ -187,8 +186,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
             }
 
             setPositiveButton("Learn More") { _, _ ->
-                // TODO
-//                launchCourierWebsite()
+                context.launchCourierWebsite()
             }
 
             show()
@@ -289,6 +287,8 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
             refreshLayout.isRefreshing = false
 
         } catch (e: CourierException) {
+
+            onError?.invoke(e)
 
             state = State.ERROR.apply { title = e.message }
             refreshLayout.isRefreshing = false
