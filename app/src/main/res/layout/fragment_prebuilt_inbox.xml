@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.courier.android.inbox.CourierInbox xmlns:android="http://schemas.android.com/apk/res/android"
+<com.courier.android.ui.inbox.CourierInbox xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/courierInbox"
     android:layout_width="match_parent"
     android:layout_height="match_parent" />

@@ -1,38 +1,38 @@
-package com.courier.android.inbox
+package com.courier.android.ui.inbox
 
 import android.graphics.Color
-import android.graphics.Typeface
 import androidx.annotation.ColorInt
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.courier.android.Courier
 import com.courier.android.models.CourierBrand
 import com.courier.android.models.CourierException
 import com.courier.android.modules.getBrand
+import com.courier.android.ui.CourierStyles
 
 data class CourierInboxTheme(
     val brandId: String? = null,
     @ColorInt private val loadingIndicatorColor: Int? = null,
-    internal val unreadIndicatorStyle: CourierInboxUnreadIndicatorStyle = CourierInboxUnreadIndicatorStyle(),
-    internal val titleStyle: CourierInboxTextStyle = CourierInboxTextStyle(
-        unread = CourierInboxFont(),
-        read = CourierInboxFont(),
+    internal val unreadIndicatorStyle: CourierStyles.Inbox.UnreadIndicatorStyle = CourierStyles.Inbox.UnreadIndicatorStyle(),
+    internal val titleStyle: CourierStyles.Inbox.TextStyle = CourierStyles.Inbox.TextStyle(
+        unread = CourierStyles.Font(),
+        read = CourierStyles.Font(),
     ),
-    internal val timeStyle: CourierInboxTextStyle = CourierInboxTextStyle(
-        unread = CourierInboxFont(),
-        read = CourierInboxFont(),
+    internal val timeStyle: CourierStyles.Inbox.TextStyle = CourierStyles.Inbox.TextStyle(
+        unread = CourierStyles.Font(),
+        read = CourierStyles.Font(),
     ),
-    internal val bodyStyle: CourierInboxTextStyle = CourierInboxTextStyle(
-        unread = CourierInboxFont(),
-        read = CourierInboxFont(),
+    internal val bodyStyle: CourierStyles.Inbox.TextStyle = CourierStyles.Inbox.TextStyle(
+        unread = CourierStyles.Font(),
+        read = CourierStyles.Font(),
     ),
-    internal val buttonStyle: CourierInboxButtonStyle = CourierInboxButtonStyle(
-        unread = CourierInboxButton(),
-        read = CourierInboxButton(),
+    internal val buttonStyle: CourierStyles.Inbox.ButtonStyle = CourierStyles.Inbox.ButtonStyle(
+        unread = CourierStyles.Button(),
+        read = CourierStyles.Button(),
     ),
     internal val dividerItemDecoration: DividerItemDecoration? = null,
-    internal val infoViewStyle: CourierInboxInfoViewStyle = CourierInboxInfoViewStyle(
-        font = CourierInboxFont(),
-        button = CourierInboxButton(),
+    internal val infoViewStyle: CourierStyles.InfoViewStyle = CourierStyles.InfoViewStyle(
+        font = CourierStyles.Font(),
+        button = CourierStyles.Button(),
     ),
 ) {
 
@@ -102,46 +102,3 @@ data class CourierInboxTheme(
     }
 
 }
-
-data class CourierInboxButtonStyle(
-    val unread: CourierInboxButton,
-    val read: CourierInboxButton,
-)
-
-data class CourierInboxButton(
-    val font: CourierInboxFont? = null,
-    @ColorInt val backgroundColor: Int? = null,
-    val cornerRadiusInDp: Int? = null
-)
-
-data class CourierInboxFont(
-    val typeface: Typeface? = null,
-    @ColorInt val color: Int? = null,
-    val sizeInSp: Int? = null,
-)
-
-data class CourierPreferencesSettingStyles(
-    val font: CourierInboxFont = CourierInboxFont(),
-    @ColorInt val toggleThumbColor: Int? = null,
-    @ColorInt val toggleTrackColor: Int? = null,
-)
-
-data class CourierInboxTextStyle(
-    val unread: CourierInboxFont,
-    val read: CourierInboxFont,
-)
-
-data class CourierInboxInfoViewStyle(
-    val font: CourierInboxFont,
-    val button: CourierInboxButton,
-)
-
-enum class CourierInboxUnreadIndicator {
-    DOT,
-    LINE
-}
-
-data class CourierInboxUnreadIndicatorStyle(
-    val indicator: CourierInboxUnreadIndicator = CourierInboxUnreadIndicator.LINE,
-    @ColorInt val color: Int? = null
-)

@@ -1,4 +1,4 @@
-package com.courier.android.inbox
+package com.courier.android.ui.inbox
 
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.R
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
+import com.courier.android.ui.CourierActionButton
+import com.courier.android.ui.CourierStyles
 import com.courier.android.utils.isDarkModeOn
 import com.courier.android.utils.setCourierFont
 import com.google.android.flexbox.FlexboxLayout
@@ -47,11 +49,11 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
     private fun setIndicator(theme: CourierInboxTheme, message: InboxMessage) {
 
         when (theme.unreadIndicatorStyle.indicator) {
-            CourierInboxUnreadIndicator.DOT -> {
+            CourierStyles.Inbox.UnreadIndicator.DOT -> {
                 indicator.isVisible = false
                 dot.isInvisible = message.isRead
             }
-            CourierInboxUnreadIndicator.LINE -> {
+            CourierStyles.Inbox.UnreadIndicator.LINE -> {
                 indicator.isVisible = !message.isRead
                 dot.isVisible = false
             }
@@ -82,7 +84,7 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
         message.actions?.forEach { action ->
 
             // Create the button for the action
-            CourierInboxButtonView(itemView.context).apply {
+            CourierActionButton(itemView.context).apply {
                 val fallbackColor = ContextCompat.getColor(itemView.context, android.R.color.darker_gray)
                 this.setStyle(style = if (message.isRead) theme.buttonStyle.read else theme.buttonStyle.unread, fallbackColor = if (message.isRead) fallbackColor else null)
                 this.text = action.content

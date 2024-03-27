@@ -1,4 +1,4 @@
-package com.courier.android.preferences
+package com.courier.android.ui.preferences
 
 import android.view.LayoutInflater
 import android.view.View

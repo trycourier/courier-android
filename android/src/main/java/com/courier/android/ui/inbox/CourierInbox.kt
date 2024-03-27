@@ -1,4 +1,4 @@
-package com.courier.android.inbox
+package com.courier.android.ui.inbox
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -20,6 +20,9 @@ import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.models.*
 import com.courier.android.modules.*
 import com.courier.android.repositories.InboxRepository
+import com.courier.android.ui.CourierActionButton
+import com.courier.android.ui.preferences.inbox.*
+import com.courier.android.ui.preferences.inbox.LoadingAdapter
 import com.courier.android.utils.*
 import kotlinx.coroutines.*
 
@@ -148,7 +151,7 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
     private lateinit var refreshLayout: SwipeRefreshLayout
     private lateinit var infoView: LinearLayoutCompat
     private lateinit var detailTextView: TextView
-    private lateinit var retryButton: CourierInboxButtonView
+    private lateinit var retryButton: CourierActionButton
     private lateinit var courierBar: RelativeLayout
     private lateinit var courierBarButton: ImageView
     private lateinit var loadingIndicator: ProgressBar

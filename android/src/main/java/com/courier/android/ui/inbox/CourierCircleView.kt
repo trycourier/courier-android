@@ -1,4 +1,4 @@
-package com.courier.android.inbox
+package com.courier.android.ui.inbox
 
 import android.content.Context
 import android.content.res.TypedArray

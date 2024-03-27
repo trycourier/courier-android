@@ -34,7 +34,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@id/titleContainer">
 
-        <com.courier.android.inbox.CourierCircleView
+        <com.courier.android.ui.inbox.CourierCircleView
             android:id="@+id/dot"
             android:layout_width="12dp"
             android:layout_height="12dp"

@@ -1,22 +1,21 @@
-package com.courier.android.preferences
+package com.courier.android.ui.preferences
 
 import android.graphics.Color
 import androidx.annotation.ColorInt
 import com.courier.android.Courier
-import com.courier.android.inbox.CourierInboxFont
-import com.courier.android.inbox.CourierPreferencesSettingStyles
 import com.courier.android.models.CourierBrand
 import com.courier.android.models.CourierException
 import com.courier.android.modules.getBrand
+import com.courier.android.ui.CourierStyles
 
 data class CourierPreferencesTheme(
     val brandId: String? = null,
     @ColorInt private val loadingIndicatorColor: Int? = null,
-    val sectionTitleFont: CourierInboxFont = CourierInboxFont(),
-    val topicTitleFont: CourierInboxFont = CourierInboxFont(),
-    val topicSubtitleFont: CourierInboxFont = CourierInboxFont(),
-    val sheetTitleFont: CourierInboxFont = CourierInboxFont(),
-    val sheetSettingStyles: CourierPreferencesSettingStyles = CourierPreferencesSettingStyles(),
+    val sectionTitleFont: CourierStyles.Font = CourierStyles.Font(),
+    val topicTitleFont: CourierStyles.Font = CourierStyles.Font(),
+    val topicSubtitleFont: CourierStyles.Font = CourierStyles.Font(),
+    val sheetTitleFont: CourierStyles.Font = CourierStyles.Font(),
+    val sheetSettingStyles: CourierStyles.Preferences.SettingStyles = CourierStyles.Preferences.SettingStyles(),
 ) {
     companion object {
         val DEFAULT_LIGHT = CourierPreferencesTheme()

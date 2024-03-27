@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.courier.android.Courier
-import com.courier.android.inbox.CourierInbox
+import com.courier.android.ui.inbox.CourierInbox
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
 import com.courier.example.R

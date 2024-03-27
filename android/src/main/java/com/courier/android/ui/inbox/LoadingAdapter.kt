@@ -1,4 +1,4 @@
-package com.courier.android.inbox
+package com.courier.android.ui.preferences.inbox
 
 import android.content.res.ColorStateList
 import android.view.LayoutInflater
@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.Courier
 import com.courier.android.R
 import com.courier.android.modules.fetchNextPageOfMessages
+import com.courier.android.ui.inbox.CourierInboxTheme
 
 internal class LoadingItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 

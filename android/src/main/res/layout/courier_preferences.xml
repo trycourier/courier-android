@@ -50,7 +50,7 @@
                     android:textSize="@dimen/courier_inbox_default_text_size"
                     tools:text="No User Found" />
 
-                <com.courier.android.inbox.CourierInboxButtonView
+                <com.courier.android.ui.CourierActionButton
                     android:id="@+id/retryButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />

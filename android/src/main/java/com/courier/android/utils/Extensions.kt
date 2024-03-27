@@ -1,27 +1,19 @@
 package com.courier.android.utils
 
-import android.Manifest
-import android.R
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Resources
-import android.os.Build
 import android.util.TypedValue
 import android.widget.TextView
 import androidx.annotation.ColorInt
-import androidx.annotation.ColorRes
-import androidx.core.app.ActivityCompat
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.COURIER_COROUTINE_CONTEXT
 import com.courier.android.Courier.Companion.eventBus
-import com.courier.android.inbox.CourierInboxFont
 import com.courier.android.models.CourierPushEvent
 import com.courier.android.repositories.MessagingRepository
+import com.courier.android.ui.CourierStyles
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -216,7 +208,7 @@ internal fun isDarkModeOn(context: Context): Boolean {
     return currentNightMode == UI_MODE_NIGHT_YES
 }
 
-internal fun TextView.setCourierFont(font: CourierInboxFont?, @ColorInt fallbackColor: Int? = null) {
+internal fun TextView.setCourierFont(font: CourierStyles.Font?, @ColorInt fallbackColor: Int? = null) {
 
     // Typeface
     font?.typeface?.let {

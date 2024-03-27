@@ -5,11 +5,10 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
-import com.courier.android.inbox.CourierInboxFont
-import com.courier.android.inbox.CourierPreferencesSettingStyles
 import com.courier.android.models.CourierPreferenceChannel
-import com.courier.android.preferences.CourierPreferences
-import com.courier.android.preferences.CourierPreferencesTheme
+import com.courier.android.ui.CourierStyles
+import com.courier.android.ui.preferences.CourierPreferences
+import com.courier.android.ui.preferences.CourierPreferencesTheme
 import com.courier.example.R
 
 class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences) {
@@ -25,28 +24,29 @@ class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences)
         val font = ResourcesCompat.getFont(requireContext(), R.font.poppins)
         val purple = ContextCompat.getColor(requireContext(), R.color.courier_purple)
         val purple200 = ContextCompat.getColor(requireContext(), R.color.purple_200)
+        val lightGrey = ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
 
         val theme = CourierPreferencesTheme(
             brandId = "7S9RBWHHS9MBYRPSRYAFYF9K3Q1M",
-            sectionTitleFont = CourierInboxFont(
+            sectionTitleFont = CourierStyles.Font(
                 typeface = font,
                 color = purple,
                 sizeInSp = 22,
             ),
-            topicTitleFont = CourierInboxFont(
+            topicTitleFont = CourierStyles.Font(
                 typeface = font,
             ),
-            topicSubtitleFont = CourierInboxFont(
+            topicSubtitleFont = CourierStyles.Font(
                 typeface = font,
-                color = ContextCompat.getColor(requireContext(), android.R.color.darker_gray),
+                color = lightGrey,
             ),
-            sheetTitleFont = CourierInboxFont(
+            sheetTitleFont = CourierStyles.Font(
                 typeface = font,
                 color = purple,
                 sizeInSp = 22,
             ),
-            sheetSettingStyles = CourierPreferencesSettingStyles(
-                font = CourierInboxFont(
+            sheetSettingStyles = CourierStyles.Preferences.SettingStyles(
+                font = CourierStyles.Font(
                     typeface = font,
                 ),
                 toggleThumbColor = purple,

@@ -1,4 +1,4 @@
-package com.courier.android.preferences
+package com.courier.android.ui.preferences
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -16,15 +16,14 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.R
-import com.courier.android.inbox.*
 import com.courier.android.models.*
 import com.courier.android.modules.*
+import com.courier.android.ui.CourierActionButton
+import com.courier.android.ui.CourierStyles
 import com.courier.android.utils.isDarkMode
 import com.courier.android.utils.pxToDp
-import com.courier.android.utils.setCourierFont
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class CourierPreferences @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
@@ -156,7 +155,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
     private lateinit var refreshLayout: SwipeRefreshLayout
     private lateinit var infoView: LinearLayoutCompat
     private lateinit var detailTextView: TextView
-    private lateinit var retryButton: CourierInboxButtonView
+    private lateinit var retryButton: CourierActionButton
     private lateinit var courierBar: RelativeLayout
     private lateinit var courierBarButton: ImageView
     private lateinit var loadingIndicator: ProgressBar

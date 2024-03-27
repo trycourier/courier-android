@@ -1,4 +1,4 @@
-package com.courier.android.preferences
+package com.courier.android.ui.preferences
 
 import android.content.Context
 import android.content.DialogInterface

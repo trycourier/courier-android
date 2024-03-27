@@ -1,4 +1,4 @@
-package com.courier.android.inbox
+package com.courier.android.ui
 
 import android.content.Context
 import android.content.res.ColorStateList
@@ -11,7 +11,7 @@ import com.courier.android.R
 import com.courier.android.utils.dpToPx
 import com.google.android.material.button.MaterialButton
 
-internal class CourierInboxButtonView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
+internal class CourierActionButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
     var onClick: (() -> Unit)? = null
 
@@ -40,7 +40,7 @@ internal class CourierInboxButtonView @JvmOverloads constructor(context: Context
         cornerRadius = DEFAULT_CORNER_RADIUS
     }
 
-    fun setStyle(style: CourierInboxButton, @ColorInt fallbackColor: Int? = null) {
+    fun setStyle(style: CourierStyles.Button, @ColorInt fallbackColor: Int? = null) {
 
         // Background Color
         (style.backgroundColor ?: fallbackColor)?.let {
