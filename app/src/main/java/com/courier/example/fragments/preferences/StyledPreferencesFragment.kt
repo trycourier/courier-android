@@ -5,6 +5,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.DividerItemDecoration
 import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.ui.CourierStyles
 import com.courier.android.ui.preferences.CourierPreferences
@@ -28,11 +29,13 @@ class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences)
 
         val theme = CourierPreferencesTheme(
             brandId = "7S9RBWHHS9MBYRPSRYAFYF9K3Q1M",
+            loadingIndicatorColor = purple,
             sectionTitleFont = CourierStyles.Font(
                 typeface = font,
                 color = purple,
                 sizeInSp = 22,
             ),
+            topicDividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL),
             topicTitleFont = CourierStyles.Font(
                 typeface = font,
             ),
@@ -45,6 +48,7 @@ class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences)
                 color = purple,
                 sizeInSp = 22,
             ),
+            sheetDividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL),
             sheetSettingStyles = CourierStyles.Preferences.SettingStyles(
                 font = CourierStyles.Font(
                     typeface = font,

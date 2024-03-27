@@ -19,9 +19,9 @@ import com.courier.android.R
 import com.courier.android.models.*
 import com.courier.android.modules.*
 import com.courier.android.ui.CourierActionButton
-import com.courier.android.ui.CourierStyles
 import com.courier.android.utils.isDarkMode
 import com.courier.android.utils.pxToDp
+import com.courier.android.utils.setCourierFont
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -106,35 +106,37 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
     private fun reloadViews() {
 
-//        // Divider line
-//        if (recyclerView.itemDecorationCount > 0) {
-//            recyclerView.removeItemDecorationAt(0)
-//        }
-//
-//        theme.dividerItemDecoration?.let {
-//            recyclerView.addItemDecoration(it)
-//        }
-//
-//        // Empty / Error view
-//        detailTextView.setCourierFont(
-//            font = theme.infoViewStyle.font
-//        )
-//
-//        // Button
-//        retryButton.apply {
-//
-//            setStyle(
-//                style = theme.infoViewStyle.button
-//            )
-//
-//            text = "Retry"
-//            onClick = {
-//                state = State.LOADING
-//                refresh()
-//            }
-//
-//        }
-//
+        // Divider line
+        if (recyclerView.itemDecorationCount > 0) {
+            recyclerView.removeItemDecorationAt(0)
+        }
+
+        theme.topicDividerItemDecoration?.let {
+            recyclerView.addItemDecoration(it)
+        }
+
+        retryButton
+
+        // Empty / Error view
+        detailTextView.setCourierFont(
+            font = theme.infoViewStyle.font
+        )
+
+        // Button
+        retryButton.apply {
+
+            setStyle(
+                style = theme.infoViewStyle.button
+            )
+
+            text = "Retry"
+            onClick = {
+                state = State.LOADING
+                refresh()
+            }
+
+        }
+
         // Loading
         theme.getLoadingColor()?.let {
             loadingIndicator.indeterminateTintList = ColorStateList.valueOf(it)

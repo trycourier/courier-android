@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import com.courier.android.R
+import com.courier.android.ui.inbox.CourierInboxTheme
 import com.courier.android.utils.dpToPx
 import com.google.android.material.button.MaterialButton
 
@@ -47,24 +48,46 @@ internal class CourierActionButton @JvmOverloads constructor(context: Context, a
             button.backgroundTintList = ColorStateList.valueOf(it)
         }
 
-        // Corner Radius
+        // Set the styles
         style.cornerRadiusInDp?.let {
             cornerRadius = it
         }
 
-        // Typeface
         style.font?.typeface?.let {
             button.typeface = it
         }
 
-        // Color
         style.font?.color?.let {
             button.setTextColor(it)
         }
 
-        // Text Size
         style.font?.sizeInSp?.let {
             button.setTextSize(TypedValue.COMPLEX_UNIT_SP, it.toFloat())
+        }
+
+    }
+
+    fun setTheme(theme: CourierInboxTheme, isRead: Boolean, @ColorInt fallbackColor: Int? = null) {
+
+        // Background Color
+        (theme.getButtonColor(isRead) ?: fallbackColor)?.let {
+            button.backgroundTintList = ColorStateList.valueOf(it)
+        }
+
+        // Set the styles
+        (if (isRead) theme.buttonStyle.read else theme.buttonStyle.unread).apply {
+            this.cornerRadiusInDp?.let {
+                cornerRadius = it
+            }
+            this.font?.typeface?.let {
+                button.typeface = it
+            }
+            this.font?.color?.let {
+                button.setTextColor(it)
+            }
+            this.font?.sizeInSp?.let {
+                button.setTextSize(TypedValue.COMPLEX_UNIT_SP, it.toFloat())
+            }
         }
 
     }

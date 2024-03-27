@@ -2,6 +2,7 @@ package com.courier.android.ui.preferences
 
 import android.graphics.Color
 import androidx.annotation.ColorInt
+import androidx.recyclerview.widget.DividerItemDecoration
 import com.courier.android.Courier
 import com.courier.android.models.CourierBrand
 import com.courier.android.models.CourierException
@@ -12,10 +13,16 @@ data class CourierPreferencesTheme(
     val brandId: String? = null,
     @ColorInt private val loadingIndicatorColor: Int? = null,
     val sectionTitleFont: CourierStyles.Font = CourierStyles.Font(),
+    val topicDividerItemDecoration: DividerItemDecoration? = null,
     val topicTitleFont: CourierStyles.Font = CourierStyles.Font(),
     val topicSubtitleFont: CourierStyles.Font = CourierStyles.Font(),
     val sheetTitleFont: CourierStyles.Font = CourierStyles.Font(),
+    val sheetDividerItemDecoration: DividerItemDecoration? = null,
     val sheetSettingStyles: CourierStyles.Preferences.SettingStyles = CourierStyles.Preferences.SettingStyles(),
+    val infoViewStyle: CourierStyles.InfoViewStyle = CourierStyles.InfoViewStyle(
+        font = CourierStyles.Font(),
+        button = CourierStyles.Button(),
+    ),
 ) {
     companion object {
         val DEFAULT_LIGHT = CourierPreferencesTheme()
