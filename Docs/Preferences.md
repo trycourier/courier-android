@@ -33,7 +33,7 @@ In-app notification settings that allow your users to customize which of your no
 
 The default `CourierPreferences` styles.
 
-<img width="296" alt="default-inbox-styles" src="https://github.com/trycourier/courier-android/assets/6370613/681a8de9-536a-40cb-93bf-8e51caae7f4b">
+<img width="296" alt="default-inbox-styles" src="https://github.com/trycourier/courier-android/assets/6370613/681a8de9-536a-40cb-93bf-8e51caae7f4b.gif">
 
 ```kotlin
 // Get the view by id
@@ -54,7 +54,7 @@ preferences.apply {
 
 The styles you can use to quickly customize the `CourierPreferences`.
 
-<img width="296" alt="default-inbox-styles" src="https://github.com/trycourier/courier-ios/assets/6370613/4291c507-ffe4-41de-b551-596e5f33ff72.gif">
+<img width="296" alt="default-inbox-styles" src="https://github.com/trycourier/courier-android/assets/6370613/67c6b772-f6e3-4937-b090-b0769d64d100.gif">
 
 ```kotlin
 val preferences: CourierPreferences = view.findViewById(R.id.courierPreferences)
