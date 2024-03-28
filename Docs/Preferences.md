@@ -35,28 +35,17 @@ The default `CourierPreferences` styles.
 
 <img width="296" alt="default-inbox-styles" src="https://github.com/trycourier/courier-ios/assets/6370613/483a72be-3869-43a2-ab48-a07a8c7b4cf2.gif">
 
-```swift
-import Courier_iOS
+```kotlin
+// Get the view by id
+val preferences: CourierPreferences = view.findViewById(R.id.courierPreferences)
 
-// Create the view
-let courierPreferences = CourierPreferences(
-    mode: .topic,
-    onError: { error in
-        print(error.localizedDescription)
+// Set the mode and listen to errors
+preferences.apply {
+    mode = CourierPreferences.Mode.Topic
+    onError = { e ->
+        print(e)
     }
-)
-
-// Add the view to your UI
-courierPreferences.translatesAutoresizingMaskIntoConstraints = false
-view.addSubview(courierPreferences)
-
-// Constrain the view how you'd like
-NSLayoutConstraint.activate([
-    courierPreferences.topAnchor.constraint(equalTo: view.topAnchor),
-    courierPreferences.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-    courierPreferences.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-    courierPreferences.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-])
+}
 ```
 
 &emsp;
@@ -67,69 +56,63 @@ The styles you can use to quickly customize the `CourierPreferences`.
 
 <img width="296" alt="default-inbox-styles" src="https://github.com/trycourier/courier-ios/assets/6370613/4291c507-ffe4-41de-b551-596e5f33ff72.gif">
 
-```swift
-import Courier_iOS
+```kotlin
+val preferences: CourierPreferences = view.findViewById(R.id.courierPreferences)
 
-let textColor = UIColor(red: 42 / 255, green: 21 / 255, blue: 55 / 255, alpha: 100)
-let primaryColor = UIColor(red: 136 / 255, green: 45 / 255, blue: 185 / 255, alpha: 100)
-let secondaryColor = UIColor(red: 234 / 255, green: 104 / 255, blue: 102 / 255, alpha: 100)
+preferences.apply {
+    
+    val availableChannels = listOf(
+        CourierPreferenceChannel.PUSH,
+        CourierPreferenceChannel.SMS,
+        CourierPreferenceChannel.EMAIL
+    )
+    
+    mode = CourierPreferences.Mode.Channels(availableChannels)
+    
+    onError = { e ->
+        print(e)
+    }
+    
+}
 
-// Theme object containing all the styles you want to apply 
-let preferencesTheme = CourierPreferencesTheme(
-    brandId: "7S9R...3Q1M", // Optional. Theme colors will override this brand.
-    loadingIndicatorColor: secondaryColor,
-    sectionTitleFont: CourierStyles.Font(
-        font: UIFont(name: "Avenir Black", size: 20)!,
-        color: .white
+val font = ResourcesCompat.getFont(requireContext(), R.font.poppins)
+val purple500 = ContextCompat.getColor(requireContext(), R.color.courier_purple)
+val purple200 = ContextCompat.getColor(requireContext(), R.color.purple_200)
+val grey500 = ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
+
+val theme = CourierPreferencesTheme(
+    brandId = "7S9RBWHHS9MBYRPSRYAFYF9K3Q1M", // Optional
+    loadingIndicatorColor = purple500,
+    sectionTitleFont = CourierStyles.Font(
+        typeface = font,
+        color = purple500,
+        sizeInSp = 22,
     ),
-    topicCellStyles: CourierStyles.Cell(
-        separatorStyle: .none
+    topicDividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL),
+    topicTitleFont = CourierStyles.Font(
+        typeface = font,
     ),
-    topicTitleFont: CourierStyles.Font(
-        font: UIFont(name: "Avenir Medium", size: 18)!,
-        color: .white
+    topicSubtitleFont = CourierStyles.Font(
+        typeface = font,
+        color = grey500,
     ),
-    topicSubtitleFont: CourierStyles.Font(
-        font: UIFont(name: "Avenir Medium", size: 16)!,
-        color: .white
+    sheetTitleFont = CourierStyles.Font(
+        typeface = font,
+        color = purple500,
+        sizeInSp = 22,
     ),
-    topicButton: CourierStyles.Button(
-        font: CourierStyles.Font(
-            font: UIFont(name: "Avenir Medium", size: 16)!,
-            color: .white
+    sheetDividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL),
+    sheetSettingStyles = CourierStyles.Preferences.SettingStyles(
+        font = CourierStyles.Font(
+            typeface = font,
         ),
-        backgroundColor: secondaryColor,
-        cornerRadius: 8
-    ),
-    sheetTitleFont: CourierStyles.Font(
-        font: UIFont(name: "Avenir Medium", size: 18)!,
-        color: .white
-    ),
-    sheetSettingStyles: CourierStyles.Preferences.SettingStyles(
-        font: CourierStyles.Font(
-            font: UIFont(name: "Avenir Medium", size: 18)!,
-            color: .white
-        ),
-        toggleColor: secondaryColor
-    ),
-    sheetCornerRadius: 0,
-    sheetCellStyles: CourierStyles.Cell(
-        separatorStyle: .none
+        toggleThumbColor = purple500,
+        toggleTrackColor = purple200,
     )
 )
 
-// Pass the theme to the view
-let courierPreferences = CourierPreferences(
-    mode: .channels([.push, .sms, .email]),
-    lightTheme: preferencesTheme,
-    darkTheme: preferencesTheme,
-    onError: { error in
-        print(error.localizedDescription)
-    }
-)
-
-view.addSubview(courierPreferences)
-...
+preferences.lightTheme = theme
+preferences.darkTheme = theme
 ```
 
 If you are interested in using a Courier "Brand", here is where you can adjust that: [`Courier Studio`](https://app.courier.com/designer/brands). 
