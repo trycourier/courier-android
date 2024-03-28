@@ -1,3 +1,5 @@
+<img width="1000" alt="android-preferences-banner" src="https://github.com/trycourier/courier-android/assets/6370613/686cd3e8-d180-4cbb-9ecb-d847526626ea">
+
 # Courier Preferences
 
 Allow users to update which types of notifications they would like to receive.
