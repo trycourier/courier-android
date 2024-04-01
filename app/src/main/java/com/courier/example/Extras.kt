@@ -1,14 +1,15 @@
 package com.courier.example
-import com.google.firebase.messaging.RemoteMessage
-import org.json.JSONObject
 
 import android.content.Context
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
+import com.courier.android.models.CourierPreferenceTopic
 import com.courier.android.models.InboxMessage
+import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.GsonBuilder
 import org.json.JSONArray
+import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -111,5 +112,9 @@ fun Array<*>.toJsonArray(): JSONArray {
 }
 
 fun InboxMessage.toJson(): String? {
+    return GsonBuilder().setPrettyPrinting().create().toJson(this)
+}
+
+fun CourierPreferenceTopic.toJson(): String? {
     return GsonBuilder().setPrettyPrinting().create().toJson(this)
 }

@@ -9,14 +9,13 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
-import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.models.CourierPreferenceTopic
 import com.courier.android.modules.getUserPreferences
 import com.courier.android.modules.refreshInbox
 import com.courier.example.MainActivity
 import com.courier.example.R
 import com.courier.example.fragments.MessageItemViewHolder
-import com.google.gson.Gson
+import com.courier.example.toJson
 
 class CustomPreferencesFragment : Fragment(R.layout.fragment_custom_preferences) {
 
@@ -44,80 +43,14 @@ class CustomPreferencesFragment : Fragment(R.layout.fragment_custom_preferences)
         }
 
         preferencesAdapter.onItemClick = { topic ->
-
-            val mainActivity = activity as MainActivity
-
-            mainActivity.setCurrentFragment(
-                fragment = CustomPreferenceEditorFragment(),
+            (activity as MainActivity).setCurrentFragment(
+                fragment = PreferenceDetailFragment(topicId = topic.topicId),
                 addToBackStack = true,
             )
-
-//            val fragment = CustomPreferenceEditorFragment()
-//
-//            parentFragmentManager.beginTransaction()
-//                .replace(R.id.fragmentContainer, fragment)
-//                .addToBackStack(null)
-//                .commit()
-
-//            lifecycle.coroutineScope.launch(Dispatchers.Main) {
-//
-//                try {
-//
-//                    refreshLayout.isRefreshing = true
-//
-//                    val preferenceTopic = Courier.shared.getUserPreferenceTopic(
-//                        topicId = topic.topicId,
-//                    )
-//
-//                    print(preferenceTopic)
-//
-//                    Courier.shared.putUserPreferenceTopic(
-//                        topicId = preferenceTopic.topicId,
-//                        status = CourierPreferenceStatus.OPTED_IN,
-//                        hasCustomRouting = true,
-//                        customRouting = getRandomChannels()
-//                    )
-//
-//                    Toast.makeText(context, "Preference Updated", Toast.LENGTH_SHORT).show()
-//
-//                    load()
-//
-//                } catch (e: Exception) {
-//
-//                    refreshLayout.isRefreshing = false
-//
-//                    showAlert(requireContext(), "Error Updating Preferences", e.toString())
-//
-//                }
-//
-//            }
-
         }
 
         load()
 
-    }
-
-    private fun getRandomChannels(): List<CourierPreferenceChannel> {
-        val channelValues = listOf(
-            CourierPreferenceChannel.DIRECT_MESSAGE,
-            CourierPreferenceChannel.EMAIL,
-            CourierPreferenceChannel.PUSH,
-            CourierPreferenceChannel.SMS,
-            CourierPreferenceChannel.WEBHOOK
-        )
-
-        val randomCount = (0..channelValues.size).random()
-        val randomChannels = mutableListOf<CourierPreferenceChannel>()
-
-        while (randomChannels.size < randomCount) {
-            val randomChannel = channelValues.random()
-            if (randomChannel !in randomChannels) {
-                randomChannels.add(randomChannel)
-            }
-        }
-
-        return randomChannels
     }
 
     private fun load() {
@@ -157,7 +90,7 @@ class PreferencesAdapter : RecyclerView.Adapter<MessageItemViewHolder>() {
 
     override fun onBindViewHolder(holder: MessageItemViewHolder, position: Int) {
         val topic = topics[position]
-        holder.textView.text = Gson().toJson(topic).toString()
+        holder.textView.text = topic.toJson()
         holder.textView.setOnClickListener {
             onItemClick?.invoke(topic)
         }
