@@ -2,6 +2,7 @@ package com.courier.example.fragments.preferences
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -30,7 +31,7 @@ class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences)
             mode = CourierPreferences.Mode.Channels(availableChannels)
 
             onError = { e ->
-                print(e)
+                Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show()
             }
 
         }
