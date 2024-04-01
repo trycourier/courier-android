@@ -14,13 +14,26 @@ import com.courier.example.R
 
 class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences) {
 
-    private lateinit var preferences: CourierPreferences
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        preferences = view.findViewById(R.id.courierPreferences)
-        preferences.mode = CourierPreferences.Mode.Channels(listOf(CourierPreferenceChannel.PUSH, CourierPreferenceChannel.SMS, CourierPreferenceChannel.EMAIL))
+        val preferences: CourierPreferences = view.findViewById(R.id.courierPreferences)
+
+        preferences.apply {
+
+            val availableChannels = listOf(
+                CourierPreferenceChannel.PUSH,
+                CourierPreferenceChannel.SMS,
+                CourierPreferenceChannel.EMAIL
+            )
+
+            mode = CourierPreferences.Mode.Channels(availableChannels)
+
+            onError = { e ->
+                print(e)
+            }
+
+        }
 
         val font = ResourcesCompat.getFont(requireContext(), R.font.poppins)
         val purple = ContextCompat.getColor(requireContext(), R.color.courier_purple)

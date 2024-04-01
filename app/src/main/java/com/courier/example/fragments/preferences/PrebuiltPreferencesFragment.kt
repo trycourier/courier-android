@@ -8,13 +8,17 @@ import com.courier.example.R
 
 class PrebuiltPreferencesFragment: Fragment(R.layout.fragment_prebuilt_preferences) {
 
-    private lateinit var preferences: CourierPreferences
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        preferences = view.findViewById(R.id.courierPreferences)
-        preferences.mode = CourierPreferences.Mode.Topic
+        val preferences: CourierPreferences = view.findViewById(R.id.courierPreferences)
+
+        preferences.apply {
+            mode = CourierPreferences.Mode.Topic
+            onError = { e ->
+                print(e)
+            }
+        }
 
     }
 
