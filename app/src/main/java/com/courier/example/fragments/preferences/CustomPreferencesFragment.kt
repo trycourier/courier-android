@@ -4,26 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.coroutineScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
 import com.courier.android.models.CourierPreferenceChannel
-import com.courier.android.models.CourierPreferenceStatus
 import com.courier.android.models.CourierPreferenceTopic
-import com.courier.android.modules.getUserPreferenceTopic
 import com.courier.android.modules.getUserPreferences
-import com.courier.android.modules.putUserPreferenceTopic
 import com.courier.android.modules.refreshInbox
+import com.courier.example.MainActivity
 import com.courier.example.R
 import com.courier.example.fragments.MessageItemViewHolder
-import com.courier.example.showAlert
 import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class CustomPreferencesFragment : Fragment(R.layout.fragment_custom_preferences) {
 
@@ -52,38 +45,52 @@ class CustomPreferencesFragment : Fragment(R.layout.fragment_custom_preferences)
 
         preferencesAdapter.onItemClick = { topic ->
 
-            lifecycle.coroutineScope.launch(Dispatchers.Main) {
+            val mainActivity = activity as MainActivity
 
-                try {
+            mainActivity.setCurrentFragment(
+                fragment = CustomPreferenceEditorFragment(),
+                addToBackStack = true,
+            )
 
-                    refreshLayout.isRefreshing = true
+//            val fragment = CustomPreferenceEditorFragment()
+//
+//            parentFragmentManager.beginTransaction()
+//                .replace(R.id.fragmentContainer, fragment)
+//                .addToBackStack(null)
+//                .commit()
 
-                    val preferenceTopic = Courier.shared.getUserPreferenceTopic(
-                        topicId = topic.topicId,
-                    )
-
-                    print(preferenceTopic)
-
-                    Courier.shared.putUserPreferenceTopic(
-                        topicId = preferenceTopic.topicId,
-                        status = CourierPreferenceStatus.OPTED_IN,
-                        hasCustomRouting = true,
-                        customRouting = getRandomChannels()
-                    )
-
-                    Toast.makeText(context, "Preference Updated", Toast.LENGTH_SHORT).show()
-
-                    load()
-
-                } catch (e: Exception) {
-
-                    refreshLayout.isRefreshing = false
-
-                    showAlert(requireContext(), "Error Updating Preferences", e.toString())
-
-                }
-
-            }
+//            lifecycle.coroutineScope.launch(Dispatchers.Main) {
+//
+//                try {
+//
+//                    refreshLayout.isRefreshing = true
+//
+//                    val preferenceTopic = Courier.shared.getUserPreferenceTopic(
+//                        topicId = topic.topicId,
+//                    )
+//
+//                    print(preferenceTopic)
+//
+//                    Courier.shared.putUserPreferenceTopic(
+//                        topicId = preferenceTopic.topicId,
+//                        status = CourierPreferenceStatus.OPTED_IN,
+//                        hasCustomRouting = true,
+//                        customRouting = getRandomChannels()
+//                    )
+//
+//                    Toast.makeText(context, "Preference Updated", Toast.LENGTH_SHORT).show()
+//
+//                    load()
+//
+//                } catch (e: Exception) {
+//
+//                    refreshLayout.isRefreshing = false
+//
+//                    showAlert(requireContext(), "Error Updating Preferences", e.toString())
+//
+//                }
+//
+//            }
 
         }
 

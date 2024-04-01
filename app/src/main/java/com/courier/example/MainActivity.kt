@@ -11,10 +11,11 @@ import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
 import com.courier.example.databinding.ActivityMainBinding
-import com.courier.example.fragments.*
+import com.courier.example.fragments.AuthFragment
+import com.courier.example.fragments.InboxFragment
+import com.courier.example.fragments.PreferencesFragment
+import com.courier.example.fragments.PushFragment
 import com.google.firebase.messaging.RemoteMessage
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 
 class MainActivity : CourierActivity() {
@@ -47,24 +48,6 @@ class MainActivity : CourierActivity() {
             }
         }
 
-        // Sets the brand at a global level -- Optional
-//        Courier.shared.inboxBrandId = Env.COURIER_BRAND_ID
-
-//        GlobalScope.launch {
-//            val listeners = List(10) { index ->
-//                launch {
-//                    Courier.shared.addInboxListener(
-//                        onInitialLoad = { setBadge(0) },
-//                        onError = { setBadge(0) },
-//                        onMessagesChanged = { _, unreadMessageCount, _, _ -> setBadge(unreadMessageCount) }
-//                    )
-//                    println("Listener $index added")
-//                }
-//            }
-//            listeners.forEach { it.join() }
-//            println("All listeners added")
-//        }
-
         inboxListener = Courier.shared.addInboxListener(
             onInitialLoad = { setBadge(0) },
             onError = { setBadge(0) },
@@ -73,9 +56,12 @@ class MainActivity : CourierActivity() {
 
     }
 
-    private fun setCurrentFragment(fragment: Fragment): Boolean {
+    fun setCurrentFragment(fragment: Fragment, addToBackStack: Boolean = false): Boolean {
         supportFragmentManager.beginTransaction().let {
             it.replace(R.id.fragmentContainer, fragment)
+            if (addToBackStack) {
+                it.addToBackStack(null)
+            }
             return@let it.commit()
         }
         return true
