@@ -13,6 +13,7 @@ import com.courier.android.models.markAsUnread
 import com.courier.android.ui.CourierStyles
 import com.courier.android.ui.inbox.CourierInbox
 import com.courier.android.ui.inbox.CourierInboxTheme
+import com.courier.example.Env
 import com.courier.example.R
 
 class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
@@ -27,7 +28,7 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
         val font = ResourcesCompat.getFont(requireContext(), R.font.poppins)
 
         inbox.lightTheme = CourierInboxTheme(
-            brandId = "7S9RBWHHS9MBYRPSRYAFYF9K3Q1M",
+            brandId = Env.COURIER_BRAND_ID,
             loadingIndicatorColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
             unreadIndicatorStyle = CourierStyles.Inbox.UnreadIndicatorStyle(
                 indicator = CourierStyles.Inbox.UnreadIndicator.DOT,
@@ -109,7 +110,7 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
         )
 
         inbox.darkTheme = CourierInboxTheme(
-            brandId = "7S9RBWHHS9MBYRPSRYAFYF9K3Q1M",
+            brandId = Env.COURIER_BRAND_ID,
             titleStyle = CourierStyles.Inbox.TextStyle(
                 unread = CourierStyles.Font(
                     typeface = font,

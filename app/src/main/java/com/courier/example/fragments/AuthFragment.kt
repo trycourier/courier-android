@@ -13,6 +13,7 @@ import com.courier.android.modules.signIn
 import com.courier.android.modules.signOut
 import com.courier.android.modules.userId
 import com.courier.example.Env
+import com.courier.example.ExampleServer
 import com.courier.example.R
 import com.courier.example.showAlert
 import kotlinx.coroutines.launch
@@ -66,10 +67,16 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
                 )
             )
 
+            val userId = values["userId"]!!
+
+            val jwt = ExampleServer().generateJWT(
+                authKey = Env.COURIER_AUTH_KEY,
+                userId = userId
+            )
+
             Courier.shared.signIn(
-                accessToken = Env.COURIER_ACCESS_TOKEN,
-                clientKey = Env.COURIER_CLIENT_KEY,
-                userId = values["userId"]!!,
+                userId = userId,
+                accessToken = jwt,
             )
 
         } catch (e: Exception) {

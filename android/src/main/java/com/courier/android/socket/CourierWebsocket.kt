@@ -2,6 +2,7 @@ package com.courier.android.socket
 
 import com.courier.android.Courier
 import com.courier.android.modules.clientKey
+import com.courier.android.modules.jwt
 import com.courier.android.repositories.Repository
 import okhttp3.*
 import java.util.concurrent.TimeUnit
@@ -15,12 +16,17 @@ internal object CourierInboxWebsocket {
     val shared: CourierWebsocket?
         get() {
 
-            if (Courier.shared.clientKey == null) {
+            if (Courier.shared.clientKey == null || Courier.shared.jwt == null) {
                 disconnect()
                 return mInstance
             }
 
-            val url = "${Repository.inboxWebSocket}/?clientKey=${Courier.shared.clientKey!!}"
+            val baseUrl = Repository.inboxWebSocket
+            val url = if (Courier.shared.jwt != null) {
+                "$baseUrl?auth=${Courier.shared.jwt}"
+            } else {
+                "$baseUrl?clientKey=${Courier.shared.clientKey}"
+            }
 
             if (mInstance?.url != url) {
                 mInstance = CourierWebsocket(
@@ -33,14 +39,14 @@ internal object CourierInboxWebsocket {
 
         }
 
-    fun connect(clientKey: String, userId: String) {
+    fun connect(clientKey: String?, userId: String) {
 
         val json = """
             {
                 "action": "subscribe",
                 "data": {
                     "channel": "$userId",
-                    "clientKey": "$clientKey",
+                    "clientKey": "${clientKey ?: ""}",
                     "event": "*",
                     "version": "4"
                 }

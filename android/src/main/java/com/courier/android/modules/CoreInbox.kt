@@ -3,7 +3,6 @@ package com.courier.android.modules
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.models.*
-import com.courier.android.repositories.BrandsRepository
 import com.courier.android.repositories.InboxRepository
 import com.courier.android.socket.CourierInboxWebsocket
 import kotlinx.coroutines.*
@@ -21,15 +20,11 @@ internal class CoreInbox {
     internal var paginationLimit = DEFAULT_PAGINATION_LIMIT
 
     private val inboxRepo by lazy { InboxRepository() }
-    private val brandsRepo by lazy { BrandsRepository() }
 
     private var listeners: MutableList<CourierInboxListener> = mutableListOf()
     internal var inbox: Inbox? = null
 
-    internal var brandId: String? = null
-    internal val brand: CourierBrand? get() = inbox?.brand
-
-    private val hasInboxUser get() = Courier.shared.userId != null && Courier.shared.clientKey != null
+    private val hasInboxUser get() = Courier.shared.userId != null
     internal val inboxMessages get() = inbox?.messages
 
     private var dataPipe: Job? = null
@@ -101,7 +96,8 @@ internal class CoreInbox {
 
                 // Grab the messages
                 return@async inboxRepo.getMessages(
-                    clientKey = Courier.shared.clientKey!!,
+                    clientKey = Courier.shared.clientKey,
+                    jwt = Courier.shared.jwt,
                     userId = Courier.shared.userId!!,
                     paginationLimit = limit
                 )
@@ -109,13 +105,15 @@ internal class CoreInbox {
             },
             async {
                 inboxRepo.getUnreadMessageCount(
-                    clientKey = Courier.shared.clientKey!!,
+                    clientKey = Courier.shared.clientKey,
+                    jwt = Courier.shared.jwt,
                     userId = Courier.shared.userId!!
                 )
             },
             async {
                 inboxRepo.connectWebsocket(
-                    clientKey = Courier.shared.clientKey!!,
+                    clientKey = Courier.shared.clientKey,
+                    jwt = Courier.shared.jwt,
                     userId = Courier.shared.userId!!,
                     onMessageReceived = { message ->
 
@@ -128,29 +126,12 @@ internal class CoreInbox {
                         notifyError(e)
                     }
                 )
-            },
-            async {
-
-                // Skip if there is no brand
-                if (this@CoreInbox.brandId == null) {
-                    return@async null
-                }
-
-                // Fetch the brand
-                // May error
-                return@async brandsRepo.getBrand(
-                    clientKey = Courier.shared.clientKey!!,
-                    userId = Courier.shared.userId!!,
-                    brandId = this@CoreInbox.brandId!!
-                )
-
             }
         )
 
         // Get the values
         val inboxData = result[0] as InboxData
         val unreadCount = result[1] as Int
-        val brand = result[3] as CourierBrand?
 
         // Return the values
         return@withContext Inbox(
@@ -159,7 +140,6 @@ internal class CoreInbox {
             unreadCount = unreadCount,
             hasNextPage = inboxData.messages?.pageInfo?.hasNextPage,
             startCursor = inboxData.messages?.pageInfo?.startCursor,
-            brand = brand,
         )
 
     }
@@ -227,7 +207,8 @@ internal class CoreInbox {
 
         // Fetch the next page
         val inboxData = inboxRepo.getMessages(
-            clientKey = Courier.shared.clientKey!!,
+            clientKey = Courier.shared.clientKey,
+            jwt = Courier.shared.jwt,
             userId = Courier.shared.userId!!,
             paginationLimit = paginationLimit,
             startCursor = this@CoreInbox.inbox!!.startCursor
@@ -337,7 +318,8 @@ internal class CoreInbox {
 
             try {
                 inboxRepo.readAllMessages(
-                    clientKey = Courier.shared.clientKey!!,
+                    clientKey = Courier.shared.clientKey,
+                    jwt = Courier.shared.jwt,
                     userId = Courier.shared.userId!!
                 )
             } catch (e: Exception) {
@@ -362,7 +344,8 @@ internal class CoreInbox {
         message?.clickTrackingId?.let { channelId ->
 
             inboxRepo.clickMessage(
-                clientKey = Courier.shared.clientKey!!,
+                clientKey = Courier.shared.clientKey,
+                jwt = Courier.shared.jwt,
                 userId = Courier.shared.userId!!,
                 messageId = messageId,
                 channelId = channelId
@@ -387,7 +370,8 @@ internal class CoreInbox {
         try {
 
             inboxRepo.readMessage(
-                clientKey = Courier.shared.clientKey!!,
+                clientKey = Courier.shared.clientKey,
+                jwt = Courier.shared.jwt,
                 userId = Courier.shared.userId!!,
                 messageId = messageId,
             )
@@ -420,7 +404,8 @@ internal class CoreInbox {
         try {
 
             inboxRepo.unreadMessage(
-                clientKey = Courier.shared.clientKey!!,
+                clientKey = Courier.shared.clientKey,
+                jwt = Courier.shared.jwt,
                 userId = Courier.shared.userId!!,
                 messageId = messageId,
             )
@@ -610,7 +595,6 @@ internal data class Inbox(
     var unreadCount: Int,
     var hasNextPage: Boolean?,
     var startCursor: String?,
-    val brand: CourierBrand?
 ) {
 
     fun addNewMessage(message: InboxMessage) {

@@ -11,6 +11,7 @@ import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.ui.CourierStyles
 import com.courier.android.ui.preferences.CourierPreferences
 import com.courier.android.ui.preferences.CourierPreferencesTheme
+import com.courier.example.Env
 import com.courier.example.R
 
 class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences) {
@@ -42,7 +43,7 @@ class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences)
         val lightGrey = ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
 
         val theme = CourierPreferencesTheme(
-            brandId = "7S9RBWHHS9MBYRPSRYAFYF9K3Q1M",
+            brandId = Env.COURIER_BRAND_ID,
             loadingIndicatorColor = purple,
             sectionTitleFont = CourierStyles.Font(
                 typeface = font,

@@ -5,17 +5,23 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.activity.CourierActivity
+import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
+import com.courier.android.modules.signIn
+import com.courier.android.modules.signOut
+import com.courier.android.modules.userId
 import com.courier.example.databinding.ActivityMainBinding
 import com.courier.example.fragments.AuthFragment
 import com.courier.example.fragments.InboxFragment
 import com.courier.example.fragments.PreferencesFragment
 import com.courier.example.fragments.PushFragment
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.launch
 
 
 class MainActivity : CourierActivity() {
@@ -31,6 +37,35 @@ class MainActivity : CourierActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setup()
+    }
+
+    private fun setup() = lifecycleScope.launch {
+
+        try {
+
+            // Fetch new jwt if needed
+            Courier.shared.userId?.let { userId ->
+
+                val jwt = ExampleServer().generateJWT(
+                    authKey = Env.COURIER_AUTH_KEY,
+                    userId = userId,
+                )
+
+                Courier.shared.signOut()
+
+                Courier.shared.signIn(
+                    userId = userId,
+                    accessToken = jwt,
+                )
+
+            }
+
+        } catch (e: CourierException) {
+
+            Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
+
+        }
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             setContentView(root)

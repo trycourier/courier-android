@@ -1,6 +1,6 @@
 package com.courier.android.repositories
 
-import com.courier.android.models.*
+import com.courier.android.models.CourierBrand
 import com.courier.android.models.CourierBrandResponse
 import com.courier.android.utils.dispatch
 import com.courier.android.utils.toGraphQuery
@@ -9,7 +9,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 internal class BrandsRepository : Repository() {
 
-    internal suspend fun getBrand(clientKey: String, userId: String, brandId: String): CourierBrand {
+    internal suspend fun getBrand(clientKey: String?, jwt: String?, userId: String, brandId: String): CourierBrand {
 
         val query = """
             query GetBrand(${'$'}brandId: String = \"${brandId}\") {
@@ -31,8 +31,11 @@ internal class BrandsRepository : Repository() {
 
         val request = Request.Builder()
             .url(baseGraphQL)
-            .addHeader("x-courier-client-key", clientKey)
             .addHeader("x-courier-user-id", userId)
+            .apply {
+                jwt?.let { addHeader("Authorization", "Bearer $it") }
+                    ?: clientKey?.let { addHeader("x-courier-client-key", it) }
+            }
             .post(query.toRequestBody())
             .build()
 

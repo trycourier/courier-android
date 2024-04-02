@@ -13,7 +13,7 @@ internal class CoreBrand {
 
     internal suspend fun getBrand(brandId: String): CourierBrand {
 
-        if (Courier.shared.clientKey == null) {
+        if (Courier.shared.clientKey == null && Courier.shared.jwt == null) {
             throw CourierException.missingAccessToken
         }
 
@@ -22,7 +22,8 @@ internal class CoreBrand {
         }
 
         return brandRepo.getBrand(
-            clientKey = Courier.shared.clientKey!!,
+            clientKey = Courier.shared.clientKey,
+            jwt = Courier.shared.jwt,
             userId = Courier.shared.userId!!,
             brandId = brandId
         )

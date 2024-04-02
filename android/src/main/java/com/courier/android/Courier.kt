@@ -3,7 +3,6 @@ package com.courier.android
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
-import android.app.Service
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
@@ -51,7 +50,7 @@ class Courier private constructor(internal val context: Context) : Application.A
     companion object {
 
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "3.0.0"
+        internal const val VERSION = "3.1.0"
         internal const val TAG = "Courier SDK"
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
         internal val eventBus by lazy { NotificationEventBus() }

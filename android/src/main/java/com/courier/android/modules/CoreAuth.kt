@@ -4,8 +4,9 @@ import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.managers.UserManager
 import com.courier.android.models.CourierAuthenticationListener
-import com.courier.android.models.CourierException
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class CoreAuth {
 
@@ -15,7 +16,7 @@ internal class CoreAuth {
      * Function to set the current credentials for the user and their access token
      * You should consider using this in areas where you update your local user's state
      */
-    suspend fun signIn(accessToken: String, clientKey: String?, userId: String, push: CorePush, inbox: CoreInbox) = withContext(Dispatchers.IO) {
+    suspend fun signIn(userId: String, accessToken: String, clientKey: String?, push: CorePush, inbox: CoreInbox) = withContext(Dispatchers.IO) {
 
         // Check if the current user exists
         if (Courier.shared.isUserSignedIn) {
@@ -24,9 +25,9 @@ internal class CoreAuth {
         }
 
         Courier.log("Signing user in")
+        Courier.log("User Id: $userId")
         Courier.log("Access Token: $accessToken")
         Courier.log("Client Key: $clientKey")
-        Courier.log("User Id: $userId")
 
         // Set the current user
         UserManager.setCredentials(
@@ -115,25 +116,30 @@ val Courier.userId: String? get() = UserManager.getUserId(context)
 internal val Courier.clientKey: String? get() = UserManager.getClientKey(context)
 
 /**
+ * Token needed to authenticate with JWTs for GraphQL requests
+ */
+internal val Courier.jwt: String? get() = clientKey?.let { null } ?: accessToken
+
+/**
  * Determine user state
  */
 val Courier.isUserSignedIn get() = userId != null && accessToken != null
 
-suspend fun Courier.signIn(accessToken: String, userId: String, clientKey: String? = null) {
+suspend fun Courier.signIn(userId: String, accessToken: String, clientKey: String? = null) {
     auth.signIn(
-        accessToken = accessToken,
         userId = userId,
+        accessToken = accessToken,
         clientKey = clientKey,
         push = push,
         inbox = inbox,
     )
 }
 
-fun Courier.signIn(accessToken: String, userId: String, clientKey: String? = null, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
+fun Courier.signIn(userId: String, accessToken: String, clientKey: String? = null, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
     try {
         signIn(
-            accessToken = accessToken,
             userId = userId,
+            accessToken = accessToken,
             clientKey = clientKey
         )
         onSuccess()

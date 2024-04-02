@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.courier.android.Courier
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 sealed class UserManager {
@@ -24,15 +23,15 @@ sealed class UserManager {
             prefs.putString(ACCESS_TOKEN, accessToken)
             prefs.putString(USER_ID, userId)
             prefs.putString(CLIENT_KEY, clientKey)
-            prefs.commit()
-        }
-
-        fun getAccessToken(context: Context): String? {
-            return context.sharedPrefs.getString(ACCESS_TOKEN, null)
+            return@withContext prefs.commit()
         }
 
         fun getUserId(context: Context): String? {
             return context.sharedPrefs.getString(USER_ID, null)
+        }
+
+        fun getAccessToken(context: Context): String? {
+            return context.sharedPrefs.getString(ACCESS_TOKEN, null)
         }
 
         fun getClientKey(context: Context): String? {
@@ -44,7 +43,7 @@ sealed class UserManager {
             prefs.putString(ACCESS_TOKEN, null)
             prefs.putString(USER_ID, null)
             prefs.putString(CLIENT_KEY, null)
-            prefs.commit()
+            return@withContext prefs.commit()
         }
 
     }
