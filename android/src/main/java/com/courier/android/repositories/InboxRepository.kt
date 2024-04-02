@@ -13,7 +13,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 internal class InboxRepository : Repository() {
 
-    internal fun connectWebsocket(clientKey: String? = null, jwt: String? = null, userId: String, onMessageReceived: (InboxMessage) -> Unit, onMessageReceivedError: (Exception) -> Unit) {
+    internal fun connectWebsocket(clientKey: String? = null, userId: String, onMessageReceived: (InboxMessage) -> Unit, onMessageReceivedError: (Exception) -> Unit) {
 
         if (CourierInboxWebsocket.shared?.isSocketConnected == true || CourierInboxWebsocket.shared?.isSocketConnecting == true) {
             return
@@ -30,7 +30,7 @@ internal class InboxRepository : Repository() {
 
         CourierInboxWebsocket.connect(
             userId = userId,
-            clientKey = clientKey ?: ""
+            clientKey = clientKey
         )
 
     }

@@ -21,7 +21,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit) {
 
@@ -29,6 +31,7 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
 
         // Check to see if we have an intent to work
         val key = Courier.COURIER_PENDING_NOTIFICATION_KEY
+        @Suppress("DEPRECATION")
         (extras?.get(key) as? RemoteMessage)?.let { message ->
 
             // Clear the intent extra

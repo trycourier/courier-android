@@ -2,15 +2,43 @@ package com.courier.android
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.courier.android.models.*
-import com.courier.android.modules.*
+import com.courier.android.models.CourierElement
+import com.courier.android.models.CourierInboxChannel
+import com.courier.android.models.CourierPreferenceChannel
+import com.courier.android.models.CourierPreferenceStatus
+import com.courier.android.models.CourierPushEvent
+import com.courier.android.models.CourierPushProvider
+import com.courier.android.models.FirebaseCloudMessagingChannel
+import com.courier.android.models.remove
+import com.courier.android.modules.accessToken
+import com.courier.android.modules.addAuthenticationListener
+import com.courier.android.modules.addInboxListener
+import com.courier.android.modules.clickMessage
+import com.courier.android.modules.clientKey
+import com.courier.android.modules.fcmToken
+import com.courier.android.modules.fetchNextPageOfMessages
+import com.courier.android.modules.getToken
+import com.courier.android.modules.getUserPreferenceTopic
+import com.courier.android.modules.getUserPreferences
+import com.courier.android.modules.inboxMessages
+import com.courier.android.modules.inboxPaginationLimit
+import com.courier.android.modules.putUserPreferenceTopic
+import com.courier.android.modules.readMessage
+import com.courier.android.modules.sendMessage
+import com.courier.android.modules.setFCMToken
+import com.courier.android.modules.setToken
+import com.courier.android.modules.signIn
+import com.courier.android.modules.signOut
+import com.courier.android.modules.unreadMessage
+import com.courier.android.modules.userId
 import com.courier.android.repositories.InboxRepository
 import com.courier.android.utils.trackNotification
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,10 +78,12 @@ class CourierTests {
 
         }
 
+        val clientKey = if (shouldUseJWT) null else Env.COURIER_CLIENT_KEY
+
         // Sign the user in
         Courier.shared.signIn(
             accessToken = accessToken,
-            clientKey = Env.COURIER_CLIENT_KEY,
+            clientKey = clientKey,
             userId = Env.COURIER_USER_ID
         )
 
@@ -63,7 +93,7 @@ class CourierTests {
         // Check values
         assertEquals(Courier.shared.accessToken, accessToken)
         assertEquals(Courier.shared.userId, Env.COURIER_USER_ID)
-        assertEquals(Courier.shared.clientKey, Env.COURIER_CLIENT_KEY)
+        assertEquals(Courier.shared.clientKey, clientKey)
 
     }
 

@@ -2,10 +2,20 @@ package com.courier.android.modules
 
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
-import com.courier.android.models.*
+import com.courier.android.models.CourierException
+import com.courier.android.models.CourierInboxListener
+import com.courier.android.models.InboxData
+import com.courier.android.models.InboxMessage
+import com.courier.android.models.initialize
 import com.courier.android.repositories.InboxRepository
 import com.courier.android.socket.CourierInboxWebsocket
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 internal class CoreInbox {
@@ -113,7 +123,6 @@ internal class CoreInbox {
             async {
                 inboxRepo.connectWebsocket(
                     clientKey = Courier.shared.clientKey,
-                    jwt = Courier.shared.jwt,
                     userId = Courier.shared.userId!!,
                     onMessageReceived = { message ->
 

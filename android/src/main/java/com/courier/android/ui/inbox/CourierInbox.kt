@@ -2,12 +2,14 @@ package com.courier.android.ui.inbox
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.content.res.ColorStateList
-import android.net.Uri
 import android.util.AttributeSet
 import android.view.View
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.RelativeLayout
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
@@ -15,16 +17,31 @@ import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.courier.android.*
+import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
-import com.courier.android.models.*
-import com.courier.android.modules.*
+import com.courier.android.R
+import com.courier.android.models.CourierAgent
+import com.courier.android.models.CourierException
+import com.courier.android.models.CourierInboxListener
+import com.courier.android.models.InboxAction
+import com.courier.android.models.InboxMessage
+import com.courier.android.models.remove
+import com.courier.android.modules.addInboxListener
+import com.courier.android.modules.clickMessage
+import com.courier.android.modules.clientKey
+import com.courier.android.modules.refreshInbox
+import com.courier.android.modules.userId
 import com.courier.android.repositories.InboxRepository
 import com.courier.android.ui.CourierActionButton
-import com.courier.android.ui.preferences.inbox.*
 import com.courier.android.ui.preferences.inbox.LoadingAdapter
-import com.courier.android.utils.*
-import kotlinx.coroutines.*
+import com.courier.android.utils.isDarkMode
+import com.courier.android.utils.launchCourierWebsite
+import com.courier.android.utils.pxToDp
+import com.courier.android.utils.setCourierFont
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
 
 class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
@@ -282,7 +299,7 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
                 recyclerView.forceReactNativeLayoutFix()
 
             },
-            onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
+            onMessagesChanged = { messages, _, _, canPaginate ->
 
                 refreshBrand()
 
