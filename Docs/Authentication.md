@@ -57,6 +57,13 @@ lifecycleScope.launch {
         userId = "example_user_id"
     )
 
+    // If you are going to production
+    // You can skip using clientKey and initialize with only JWT
+    // Courier.shared.signIn(
+    //    accessToken = "YOUR_JWT",
+    //    userId = "example_user_id"
+    // )
+
     // Removes the locally saved credentials
     // Deletes the user's push notification device tokens in Courier if needed
     Courier.shared.signOut()
@@ -137,7 +144,7 @@ curl --request POST \
      --header 'Content-Type: application/json' \
      --data
  '{
-    "scope": "user_id:$YOUR_USER_ID write:user-tokens",
+    "scope": "user_id:$YOUR_USER_ID write:user-tokens inbox:read:messages inbox:write:events read:preferences write:preferences read:brands",
     "expires_in": "$YOUR_NUMBER days"
   }'
 ```
