@@ -59,6 +59,8 @@ lifecycleScope.launch {
 
     // If you are going to production
     // You can skip using clientKey and initialize with only JWT
+    // You will need to sign the user out and back in if the JWT changes
+    // Courier.shared.signOut()
     // Courier.shared.signIn(
     //    accessToken = "YOUR_JWT",
     //    userId = "example_user_id"
