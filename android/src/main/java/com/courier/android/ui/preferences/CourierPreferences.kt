@@ -121,6 +121,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
     var onError: ((CourierException) -> Unit)? = null
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun reloadViews() {
 
         // Divider line
@@ -161,6 +162,9 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
         // Handle bar visibility
         val showBar = theme.brand?.settings?.inapp?.showCourierFooter ?: true
         courierBar.isVisible = showBar
+
+        // Reload adapter views
+        recyclerView.adapter?.notifyDataSetChanged()
 
     }
 
