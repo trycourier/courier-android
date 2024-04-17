@@ -15,7 +15,7 @@
             android:layout_height="0dp"
             android:layout_weight="1">
 
-            <!-- Inbox -->
+            <!-- Preferences -->
             <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
                 android:id="@+id/refreshLayout"
                 android:layout_width="match_parent"

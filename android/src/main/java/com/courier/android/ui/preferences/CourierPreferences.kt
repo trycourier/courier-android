@@ -19,7 +19,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.R
-import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.models.CourierPreferenceStatus
@@ -42,32 +41,39 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
     private var state = State.LOADING
         set(value) {
-            field = value
-            when (field) {
-                State.LOADING -> {
-                    refreshLayout.isVisible = false
-                    infoView.isVisible = false
-                    loadingIndicator.isVisible = true
+
+            coroutineScope.launch(Dispatchers.Main) {
+
+                field = value
+
+                when (field) {
+                    State.LOADING -> {
+                        refreshLayout.isVisible = false
+                        infoView.isVisible = false
+                        loadingIndicator.isVisible = true
+                    }
+                    State.ERROR -> {
+                        refreshLayout.isVisible = false
+                        infoView.isVisible = true
+                        detailTextView.text = field.title
+                        loadingIndicator.isVisible = false
+                    }
+                    State.CONTENT -> {
+                        refreshLayout.isVisible = true
+                        infoView.isVisible = false
+                        detailTextView.text = null
+                        loadingIndicator.isVisible = false
+                    }
+                    State.EMPTY -> {
+                        refreshLayout.isVisible = false
+                        infoView.isVisible = true
+                        detailTextView.text = field.title
+                        loadingIndicator.isVisible = false
+                    }
                 }
-                State.ERROR -> {
-                    refreshLayout.isVisible = false
-                    infoView.isVisible = true
-                    detailTextView.text = field.title
-                    loadingIndicator.isVisible = false
-                }
-                State.CONTENT -> {
-                    refreshLayout.isVisible = true
-                    infoView.isVisible = false
-                    detailTextView.text = null
-                    loadingIndicator.isVisible = false
-                }
-                State.EMPTY -> {
-                    refreshLayout.isVisible = false
-                    infoView.isVisible = true
-                    detailTextView.text = field.title
-                    loadingIndicator.isVisible = false
-                }
+
             }
+
         }
 
     sealed class Mode {
@@ -290,7 +296,6 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
             preferencesAdapter = ConcatAdapter(sections)
             recyclerView.adapter = preferencesAdapter
-            preferencesAdapter.notifyDataSetChanged()
 
             state = if (preferences.items.isEmpty()) State.EMPTY.apply { title = "No preferences found" } else State.CONTENT
             refreshLayout.isRefreshing = false
@@ -483,27 +488,27 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 //        }
 //    }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun RecyclerView.forceReactNativeLayoutFix() {
-
-        if (Courier.USER_AGENT != CourierAgent.REACT_NATIVE_ANDROID) {
-            return
-        }
-
-        try {
-
-            // Forces the layout to refresh
-            // This is a react native bug
-            adapter?.notifyDataSetChanged()
-            scrollBy(0, 0)
-
-        } catch (e: Exception) {
-
-            Courier.error(e.toString())
-
-        }
-
-    }
+//    @SuppressLint("NotifyDataSetChanged")
+//    private fun RecyclerView.forceReactNativeLayoutFix() {
+//
+//        if (Courier.USER_AGENT != CourierAgent.REACT_NATIVE_ANDROID) {
+//            return
+//        }
+//
+//        try {
+//
+//            // Forces the layout to refresh
+//            // This is a react native bug
+//            adapter?.notifyDataSetChanged()
+//            scrollBy(0, 0)
+//
+//        } catch (e: Exception) {
+//
+//            Courier.error(e.toString())
+//
+//        }
+//
+//    }
 
 //    override fun onAttachedToWindow() {
 //        super.onAttachedToWindow()
