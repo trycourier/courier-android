@@ -18,6 +18,7 @@
             <!-- Preferences -->
             <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
                 android:id="@+id/refreshLayout"
+                android:background="@android:color/holo_green_light"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
@@ -26,6 +27,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scrollbars="vertical"
+                    android:background="@android:color/holo_blue_light"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:listitem="@layout/courier_inbox_list_item" />
 
