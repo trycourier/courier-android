@@ -5,19 +5,27 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.View
-import android.widget.*
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.RelativeLayout
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.R
-import com.courier.android.models.*
-import com.courier.android.modules.*
+import com.courier.android.models.CourierAgent
+import com.courier.android.models.CourierException
+import com.courier.android.models.CourierPreferenceChannel
+import com.courier.android.models.CourierPreferenceStatus
+import com.courier.android.models.CourierPreferenceTopic
+import com.courier.android.modules.getUserPreferences
+import com.courier.android.modules.putUserPreferenceTopic
 import com.courier.android.ui.CourierActionButton
 import com.courier.android.utils.isDarkMode
 import com.courier.android.utils.launchCourierWebsite
@@ -282,6 +290,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
             preferencesAdapter = ConcatAdapter(sections)
             recyclerView.adapter = preferencesAdapter
+            preferencesAdapter.notifyDataSetChanged()
 
             state = if (preferences.items.isEmpty()) State.EMPTY.apply { title = "No preferences found" } else State.CONTENT
             refreshLayout.isRefreshing = false

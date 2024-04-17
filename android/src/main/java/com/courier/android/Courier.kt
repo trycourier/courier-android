@@ -8,9 +8,18 @@ import android.os.Build
 import android.os.Bundle
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
-import com.courier.android.modules.*
+import com.courier.android.modules.CoreAuth
+import com.courier.android.modules.CoreBrand
+import com.courier.android.modules.CoreInbox
+import com.courier.android.modules.CoreLogging
+import com.courier.android.modules.CoreMessaging
+import com.courier.android.modules.CorePreferences
+import com.courier.android.modules.CorePush
 import com.courier.android.utils.NotificationEventBus
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 /**
 
@@ -50,7 +59,7 @@ class Courier private constructor(internal val context: Context) : Application.A
     companion object {
 
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "3.1.0"
+        internal const val VERSION = "3.1.1"
         internal const val TAG = "Courier SDK"
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
         internal val eventBus by lazy { NotificationEventBus() }
