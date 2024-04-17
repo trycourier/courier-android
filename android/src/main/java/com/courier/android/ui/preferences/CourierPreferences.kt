@@ -164,6 +164,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
         courierBar.isVisible = showBar
 
         // Reload adapter views
+        preferencesAdapter.notifyDataSetChanged()
         recyclerView.adapter?.notifyDataSetChanged()
 
     }
