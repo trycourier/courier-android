@@ -409,7 +409,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
                     },
                     onFailure = { error ->
                         Courier.error(error.message)
-//                        onError?.invoke(CourierError(from = error))
+                        onError?.invoke(error as CourierException)
                         setTopicAtPath(topic = originalTopic, path = path)
                     }
                 )
@@ -463,7 +463,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
                     },
                     onFailure = { error ->
                         Courier.error(error.message)
-//                        onError?.invoke(CourierError(from = error))
+                        onError?.invoke(error as CourierException)
                         setTopicAtPath(topic = originalTopic, path = path)
                     }
                 )
@@ -477,11 +477,11 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
         adapter.notifyItemChanged(path.second + 1)
     }
 
-    private fun RecyclerView.restoreScrollPosition() {
-        layoutManager?.apply {
-            onRestoreInstanceState(onSaveInstanceState())
-        }
-    }
+//    private fun RecyclerView.restoreScrollPosition() {
+//        layoutManager?.apply {
+//            onRestoreInstanceState(onSaveInstanceState())
+//        }
+//    }
 
     @SuppressLint("NotifyDataSetChanged")
     private fun RecyclerView.forceReactNativeLayoutFix() {
@@ -505,13 +505,13 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
 
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-
-        // Reloads the inbox
-        recyclerView.forceReactNativeLayoutFix()
-
-    }
+//    override fun onAttachedToWindow() {
+//        super.onAttachedToWindow()
+//
+//        // Reloads the inbox
+//        recyclerView.forceReactNativeLayoutFix()
+//
+//    }
 
 }
 
