@@ -5,6 +5,7 @@
     <dimen name="courier_inbox_vertical_margin">12dp</dimen>
     <dimen name="courier_inbox_indicator_width">3dp</dimen>
     <dimen name="courier_inbox_item_gap">4dp</dimen>
+    <dimen name="courier_bar_elevation">4dp</dimen>
     <dimen name="courier_inbox_button_gap">12dp</dimen>
     <dimen name="courier_inbox_button_horizontal">16dp</dimen>
     <dimen name="courier_inbox_button_vertical">8dp</dimen>

@@ -6,12 +6,7 @@ import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.ProgressBar
-import android.widget.RelativeLayout
-import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -25,11 +20,10 @@ import com.courier.android.models.CourierPreferenceStatus
 import com.courier.android.models.CourierPreferenceTopic
 import com.courier.android.modules.getUserPreferences
 import com.courier.android.modules.putUserPreferenceTopic
-import com.courier.android.ui.CourierActionButton
+import com.courier.android.ui.bar.CourierBar
+import com.courier.android.ui.infoview.CourierInfoView
 import com.courier.android.utils.isDarkMode
-import com.courier.android.utils.launchCourierWebsite
 import com.courier.android.utils.pxToDp
-import com.courier.android.utils.setCourierFont
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -55,19 +49,19 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
                     State.ERROR -> {
                         refreshLayout.isVisible = false
                         infoView.isVisible = true
-                        detailTextView.text = field.title
+                        infoView.setTitle(field.title)
                         loadingIndicator.isVisible = false
                     }
                     State.CONTENT -> {
                         refreshLayout.isVisible = true
                         infoView.isVisible = false
-                        detailTextView.text = null
+                        infoView.setTitle(null)
                         loadingIndicator.isVisible = false
                     }
                     State.EMPTY -> {
                         refreshLayout.isVisible = false
                         infoView.isVisible = true
-                        detailTextView.text = field.title
+                        infoView.setTitle(field.title)
                         loadingIndicator.isVisible = false
                     }
                 }
@@ -133,25 +127,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
             recyclerView.addItemDecoration(it)
         }
 
-        // Empty / Error view
-        detailTextView.setCourierFont(
-            font = theme.infoViewStyle.font
-        )
-
-        // Button
-        retryButton.apply {
-
-            setStyle(
-                style = theme.infoViewStyle.button
-            )
-
-            text = "Retry"
-            onClick = {
-                state = State.LOADING
-                refresh()
-            }
-
-        }
+        infoView.setTheme(theme)
 
         // Loading
         theme.getLoadingColor()?.let {
@@ -160,8 +136,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
         }
 
         // Handle bar visibility
-        val showBar = theme.brand?.settings?.inapp?.showCourierFooter ?: true
-        courierBar.isVisible = showBar
+        courierBar.setBrand(theme.brand)
 
         // Reload adapter views
         preferencesAdapter.notifyDataSetChanged()
@@ -173,11 +148,8 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
         private set
 
     private lateinit var refreshLayout: SwipeRefreshLayout
-    private lateinit var infoView: LinearLayoutCompat
-    private lateinit var detailTextView: TextView
-    private lateinit var retryButton: CourierActionButton
-    private lateinit var courierBar: RelativeLayout
-    private lateinit var courierBarButton: ImageView
+    private lateinit var infoView: CourierInfoView
+    private lateinit var courierBar: CourierBar
     private lateinit var loadingIndicator: ProgressBar
 
     private var onScrollInbox: ((Int) -> Unit)? = null
@@ -194,39 +166,13 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
         theme = if (context.isDarkMode) darkTheme else lightTheme
     }
 
-    private fun openDialog() {
-
-        AlertDialog.Builder(context).apply {
-
-            setTitle("Learn more about Courier?")
-
-            setNegativeButton("Cancel") { _, _ ->
-                // Empty
-            }
-
-            setPositiveButton("Learn More") { _, _ ->
-                context.launchCourierWebsite()
-            }
-
-            show()
-
-        }
-
-    }
-
     private fun setup() {
 
         // Loading
         loadingIndicator = findViewById(R.id.loadingIndicator)
 
-        // Courier Bar Button
-        courierBarButton = findViewById(R.id.courierBarButton)
-        courierBarButton.setOnClickListener { openDialog() }
-
         // Info View
         infoView = findViewById(R.id.infoView)
-        detailTextView = findViewById(R.id.detailTextView)
-        retryButton = findViewById(R.id.retryButton)
 
         // Courier Bar
         courierBar = findViewById(R.id.courierBar)

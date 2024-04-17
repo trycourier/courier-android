@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.FrameLayout">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipChildren="true"
@@ -31,31 +31,10 @@
 
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-            <!-- Info View -->
-            <androidx.appcompat.widget.LinearLayoutCompat
+            <com.courier.android.ui.infoview.CourierInfoView
                 android:id="@+id/infoView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/detailTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:layout_margin="@dimen/courier_inbox_horizontal_margin"
-                    android:layout_marginBottom="@dimen/courier_inbox_horizontal_margin"
-                    android:gravity="center"
-                    android:textSize="@dimen/courier_inbox_default_text_size"
-                    tools:text="No User Found" />
-
-                <com.courier.android.ui.CourierActionButton
-                    android:id="@+id/retryButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </androidx.appcompat.widget.LinearLayoutCompat>
+                android:layout_height="match_parent" />
 
             <ProgressBar
                 android:id="@+id/loadingIndicator"
@@ -65,26 +44,13 @@
 
         </RelativeLayout>
 
-        <RelativeLayout
+        <com.courier.android.ui.bar.CourierBar
             android:id="@+id/courierBar"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/courier_inbox_footer_height"
+            android:layout_height="wrap_content"
             android:background="?android:colorBackground"
-            android:elevation="4dp">
+            android:elevation="4dp" />
 
-            <ImageView
-                android:id="@+id/courierBarButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:contentDescription="Powered by Courier"
-                android:foreground="?attr/selectableItemBackgroundBorderless"
-                android:padding="12dp"
-                android:src="@drawable/footer"
-                app:tint="@color/footer_image_tint" />
-
-        </RelativeLayout>
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
+    </LinearLayout>
 
 </merge>

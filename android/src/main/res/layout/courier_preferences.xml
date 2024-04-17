@@ -4,13 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.FrameLayout">
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipChildren="true"
         android:orientation="vertical">
 
-        <RelativeLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
@@ -18,75 +17,46 @@
             <!-- Preferences -->
             <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
                 android:id="@+id/refreshLayout"
-                android:background="@android:color/holo_green_light"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scrollbars="vertical"
-                    android:background="@android:color/holo_blue_light"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:listitem="@layout/courier_inbox_list_item" />
 
             </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-            <!-- Info View -->
-            <androidx.appcompat.widget.LinearLayoutCompat
+            <com.courier.android.ui.infoview.CourierInfoView
                 android:id="@+id/infoView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/detailTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:layout_margin="@dimen/courier_inbox_horizontal_margin"
-                    android:layout_marginBottom="@dimen/courier_inbox_horizontal_margin"
-                    android:gravity="center"
-                    android:textSize="@dimen/courier_inbox_default_text_size"
-                    tools:text="No User Found" />
-
-                <com.courier.android.ui.CourierActionButton
-                    android:id="@+id/retryButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-            </androidx.appcompat.widget.LinearLayoutCompat>
+                android:layout_height="match_parent" />
 
             <ProgressBar
                 android:id="@+id/loadingIndicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        </RelativeLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <RelativeLayout
+        <com.courier.android.ui.bar.CourierBar
             android:id="@+id/courierBar"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/courier_inbox_footer_height"
+            android:layout_height="wrap_content"
             android:background="?android:colorBackground"
-            android:elevation="4dp">
+            android:elevation="4dp" />
 
-            <ImageView
-                android:id="@+id/courierBarButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:contentDescription="Powered by Courier"
-                android:foreground="?attr/selectableItemBackgroundBorderless"
-                android:padding="12dp"
-                android:src="@drawable/footer"
-                app:tint="@color/footer_image_tint" />
-
-        </RelativeLayout>
-
-    </androidx.appcompat.widget.LinearLayoutCompat>
+    </LinearLayout>
 
 </merge>
