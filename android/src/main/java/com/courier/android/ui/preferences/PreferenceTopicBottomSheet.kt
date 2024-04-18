@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
+import com.courier.android.Courier
 import com.courier.android.R
 import com.courier.android.models.CourierPreferenceTopic
 import com.courier.android.utils.isDarkModeOn
@@ -66,7 +67,7 @@ internal class PreferenceTopicBottomSheet(private val theme: CourierPreferencesT
             val fragmentManager = (context as FragmentActivity).supportFragmentManager
             show(fragmentManager, TAG)
         } catch (e: ClassCastException) {
-            print(e.toString())
+            Courier.log(e.toString())
         }
     }
 

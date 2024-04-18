@@ -1,5 +1,6 @@
 package com.courier.android.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
@@ -9,9 +10,11 @@ import android.net.Uri
 import android.util.TypedValue
 import android.widget.TextView
 import androidx.annotation.ColorInt
+import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.COURIER_COROUTINE_CONTEXT
 import com.courier.android.Courier.Companion.eventBus
+import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierPushEvent
 import com.courier.android.repositories.MessagingRepository
 import com.courier.android.ui.CourierStyles
@@ -234,4 +237,26 @@ internal fun TextView.setCourierFont(font: CourierStyles.Font?, @ColorInt fallba
 internal fun Context.launchCourierWebsite() {
     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.courier.com/"))
     startActivity(browserIntent)
+}
+
+@SuppressLint("NotifyDataSetChanged")
+internal fun RecyclerView.forceReactNativeLayoutFix() {
+
+    if (Courier.USER_AGENT != CourierAgent.REACT_NATIVE_ANDROID) {
+        return
+    }
+
+    try {
+
+        // Forces the layout to refresh
+        // This is a react native bug
+        adapter?.notifyDataSetChanged()
+        scrollBy(0, 0)
+
+    } catch (e: Exception) {
+
+        Courier.error(e.toString())
+
+    }
+
 }

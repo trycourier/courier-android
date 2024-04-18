@@ -16,7 +16,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.R
-import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.InboxAction
@@ -31,6 +30,7 @@ import com.courier.android.repositories.InboxRepository
 import com.courier.android.ui.bar.CourierBar
 import com.courier.android.ui.infoview.CourierInfoView
 import com.courier.android.ui.preferences.inbox.LoadingAdapter
+import com.courier.android.utils.forceReactNativeLayoutFix
 import com.courier.android.utils.isDarkMode
 import com.courier.android.utils.launchCourierWebsite
 import com.courier.android.utils.pxToDp
@@ -304,28 +304,6 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
         layoutManager?.apply {
             onRestoreInstanceState(onSaveInstanceState())
         }
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    private fun RecyclerView.forceReactNativeLayoutFix() {
-
-        if (Courier.USER_AGENT != CourierAgent.REACT_NATIVE_ANDROID) {
-            return
-        }
-
-        try {
-
-            // Forces the layout to refresh
-            // This is a react native bug
-            adapter?.notifyDataSetChanged()
-            scrollBy(0, 0)
-
-        } catch (e: Exception) {
-
-            Courier.error(e.toString())
-
-        }
-
     }
 
     // Opens all the current messages

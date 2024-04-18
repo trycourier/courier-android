@@ -22,6 +22,7 @@ import com.courier.android.modules.getUserPreferences
 import com.courier.android.modules.putUserPreferenceTopic
 import com.courier.android.ui.bar.CourierBar
 import com.courier.android.ui.infoview.CourierInfoView
+import com.courier.android.utils.forceReactNativeLayoutFix
 import com.courier.android.utils.isDarkMode
 import com.courier.android.utils.pxToDp
 import kotlinx.coroutines.Dispatchers
@@ -139,8 +140,7 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
         courierBar.setBrand(theme.brand)
 
         // Reload adapter views
-        preferencesAdapter.notifyDataSetChanged()
-        recyclerView.adapter?.notifyDataSetChanged()
+        recyclerView.forceReactNativeLayoutFix()
 
     }
 
@@ -433,41 +433,10 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
         adapter.notifyItemChanged(path.second + 1)
     }
 
-//    private fun RecyclerView.restoreScrollPosition() {
-//        layoutManager?.apply {
-//            onRestoreInstanceState(onSaveInstanceState())
-//        }
-//    }
-
-//    @SuppressLint("NotifyDataSetChanged")
-//    private fun RecyclerView.forceReactNativeLayoutFix() {
-//
-//        if (Courier.USER_AGENT != CourierAgent.REACT_NATIVE_ANDROID) {
-//            return
-//        }
-//
-//        try {
-//
-//            // Forces the layout to refresh
-//            // This is a react native bug
-//            adapter?.notifyDataSetChanged()
-//            scrollBy(0, 0)
-//
-//        } catch (e: Exception) {
-//
-//            Courier.error(e.toString())
-//
-//        }
-//
-//    }
-
-//    override fun onAttachedToWindow() {
-//        super.onAttachedToWindow()
-//
-//        // Reloads the inbox
-//        recyclerView.forceReactNativeLayoutFix()
-//
-//    }
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        recyclerView.forceReactNativeLayoutFix()
+    }
 
 }
 
