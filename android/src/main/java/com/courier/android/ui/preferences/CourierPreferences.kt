@@ -308,6 +308,9 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
             items = items,
             onDismiss = { newItems ->
                 handleChangeForMode(mode, topic, newItems, path)
+            },
+            onError = { error ->
+                onError?.invoke(error)
             }
         )
 

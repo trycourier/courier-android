@@ -12,13 +12,14 @@ import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.Courier
 import com.courier.android.R
+import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPreferenceTopic
 import com.courier.android.utils.isDarkModeOn
 import com.courier.android.utils.setCourierFont
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 
-internal class PreferenceTopicBottomSheet(private val theme: CourierPreferencesTheme, private val topic: CourierPreferenceTopic, private val items: List<CourierSheetItem>, private val onDismiss: (List<CourierSheetItem>) -> Unit) : BottomSheetDialogFragment() {
+internal class PreferenceTopicBottomSheet(private val theme: CourierPreferencesTheme, private val topic: CourierPreferenceTopic, private val items: List<CourierSheetItem>, private val onDismiss: (List<CourierSheetItem>) -> Unit, private val onError: (CourierException) -> Unit) : BottomSheetDialogFragment() {
 
     companion object {
         const val TAG = "PreferenceTopicBottomSheet"
@@ -67,6 +68,7 @@ internal class PreferenceTopicBottomSheet(private val theme: CourierPreferencesT
             val fragmentManager = (context as FragmentActivity).supportFragmentManager
             show(fragmentManager, TAG)
         } catch (e: ClassCastException) {
+            onError.invoke(CourierException(e.toString()))
             Courier.log(e.toString())
         }
     }
