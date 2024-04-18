@@ -22,7 +22,6 @@ import com.courier.android.modules.getUserPreferences
 import com.courier.android.modules.putUserPreferenceTopic
 import com.courier.android.ui.bar.CourierBar
 import com.courier.android.ui.infoview.CourierInfoView
-import com.courier.android.utils.forceReactNativeLayoutFix
 import com.courier.android.utils.isDarkMode
 import com.courier.android.utils.pxToDp
 import kotlinx.coroutines.Dispatchers
@@ -138,9 +137,6 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
 
         // Handle bar visibility
         courierBar.setBrand(theme.brand)
-
-        // Reload adapter views
-        recyclerView.forceReactNativeLayoutFix()
 
     }
 
@@ -434,11 +430,6 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
         val adapter = preferencesAdapter.adapters[path.first] as PreferencesSectionAdapter
         adapter.topics[path.second] = topic
         adapter.notifyItemChanged(path.second + 1)
-    }
-
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        recyclerView.forceReactNativeLayoutFix()
     }
 
 }
