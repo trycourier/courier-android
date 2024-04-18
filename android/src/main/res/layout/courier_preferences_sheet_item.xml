@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/courier_preferences_sheet_item_height"
     android:foreground="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingLeft="@dimen/courier_inbox_horizontal_margin"
     android:paddingRight="@dimen/courier_inbox_horizontal_margin">
