@@ -148,7 +148,7 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
     private lateinit var courierBar: CourierBar
     private lateinit var loadingIndicator: ProgressBar
 
-    private var onScrollInbox: ((Int) -> Unit)? = null
+    private var onScrollPreferences: ((Int) -> Unit)? = null
 
     private var preferencesAdapter = ConcatAdapter()
 
@@ -178,7 +178,7 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
         recyclerView.setOnScrollChangeListener { _, _, _, _, _ ->
 
             // Get the current offset if needed
-            onScrollInbox?.let {
+            onScrollPreferences?.let {
                 val offsetDp = recyclerView.computeVerticalScrollOffset().pxToDp
                 it.invoke(offsetDp)
             }
@@ -430,6 +430,10 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
         val adapter = preferencesAdapter.adapters[path.first] as PreferencesSectionAdapter
         adapter.topics[path.second] = topic
         adapter.notifyItemChanged(path.second + 1)
+    }
+
+    fun setOnScrollPreferencesListener(listener: ((offsetInDp: Int) -> Unit)?) {
+        onScrollPreferences = listener
     }
 
 }
