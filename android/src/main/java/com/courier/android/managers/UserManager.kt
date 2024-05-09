@@ -13,16 +13,18 @@ sealed class UserManager {
         private const val USER_ID = "courier_user_id"
         private const val ACCESS_TOKEN = "courier_access_token"
         private const val CLIENT_KEY = "courier_client_key"
+        private const val TENANT_ID = "courier_tenant_id"
 
         private val Context.sharedPrefs get(): SharedPreferences {
             return getSharedPreferences(Courier.TAG, Context.MODE_PRIVATE)
         }
 
-        suspend fun setCredentials(context: Context, userId: String, accessToken: String, clientKey: String?) = withContext(Dispatchers.IO) {
+        suspend fun setCredentials(context: Context, userId: String, accessToken: String, clientKey: String?, tenantId: String?) = withContext(Dispatchers.IO) {
             val prefs = context.sharedPrefs.edit()
             prefs.putString(ACCESS_TOKEN, accessToken)
             prefs.putString(USER_ID, userId)
             prefs.putString(CLIENT_KEY, clientKey)
+            prefs.putString(TENANT_ID, tenantId)
             return@withContext prefs.commit()
         }
 
@@ -38,11 +40,16 @@ sealed class UserManager {
             return context.sharedPrefs.getString(CLIENT_KEY, null)
         }
 
+        fun getTenantId(context: Context): String? {
+            return context.sharedPrefs.getString(TENANT_ID, null)
+        }
+
         suspend fun removeCredentials(context: Context) = withContext(Dispatchers.IO) {
             val prefs = context.sharedPrefs.edit()
             prefs.putString(ACCESS_TOKEN, null)
             prefs.putString(USER_ID, null)
             prefs.putString(CLIENT_KEY, null)
+            prefs.putString(TENANT_ID, null)
             return@withContext prefs.commit()
         }
 

@@ -13,7 +13,7 @@ import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.signIn
-import com.courier.android.modules.signOut
+import com.courier.android.modules.tenantId
 import com.courier.android.modules.userId
 import com.courier.example.databinding.ActivityMainBinding
 import com.courier.example.fragments.AuthFragment
@@ -52,10 +52,11 @@ class MainActivity : CourierActivity() {
                     userId = userId,
                 )
 
-                Courier.shared.signOut()
+                val tenantId = Courier.shared.tenantId
 
                 Courier.shared.signIn(
                     userId = userId,
+                    tenantId = tenantId,
                     accessToken = jwt,
                 )
 

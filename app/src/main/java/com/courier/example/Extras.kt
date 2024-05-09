@@ -28,7 +28,7 @@ suspend fun showAlert(context: Context, title: String, subtitle: String? = null,
     val editTexts = items.map { item ->
         val editText = EditText(context)
         editText.setSingleLine()
-        editText.hint = item.value
+        editText.hint = item.key
         layout.addView(editText)
         return@map editText
     }

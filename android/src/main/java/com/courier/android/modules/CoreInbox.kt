@@ -109,6 +109,7 @@ internal class CoreInbox {
                     clientKey = Courier.shared.clientKey,
                     jwt = Courier.shared.jwt,
                     userId = Courier.shared.userId!!,
+                    tenantId = Courier.shared.tenantId,
                     paginationLimit = limit
                 )
 
@@ -117,13 +118,15 @@ internal class CoreInbox {
                 inboxRepo.getUnreadMessageCount(
                     clientKey = Courier.shared.clientKey,
                     jwt = Courier.shared.jwt,
-                    userId = Courier.shared.userId!!
+                    userId = Courier.shared.userId!!,
+                    tenantId = Courier.shared.tenantId,
                 )
             },
             async {
                 inboxRepo.connectWebsocket(
                     clientKey = Courier.shared.clientKey,
                     userId = Courier.shared.userId!!,
+                    tenantId = Courier.shared.tenantId,
                     onMessageReceived = { message ->
 
                         // Add new message and notify
@@ -219,6 +222,7 @@ internal class CoreInbox {
             clientKey = Courier.shared.clientKey,
             jwt = Courier.shared.jwt,
             userId = Courier.shared.userId!!,
+            tenantId = Courier.shared.tenantId,
             paginationLimit = paginationLimit,
             startCursor = this@CoreInbox.inbox!!.startCursor
         )

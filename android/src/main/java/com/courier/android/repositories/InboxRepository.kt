@@ -13,7 +13,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 internal class InboxRepository : Repository() {
 
-    internal fun connectWebsocket(clientKey: String? = null, userId: String, onMessageReceived: (InboxMessage) -> Unit, onMessageReceivedError: (Exception) -> Unit) {
+    internal fun connectWebsocket(clientKey: String? = null, tenantId: String? = null, userId: String, onMessageReceived: (InboxMessage) -> Unit, onMessageReceivedError: (Exception) -> Unit) {
 
         if (CourierInboxWebsocket.shared?.isSocketConnected == true || CourierInboxWebsocket.shared?.isSocketConnecting == true) {
             return
@@ -30,6 +30,7 @@ internal class InboxRepository : Repository() {
 
         CourierInboxWebsocket.connect(
             userId = userId,
+            tenantId = tenantId,
             clientKey = clientKey
         )
 
@@ -39,11 +40,13 @@ internal class InboxRepository : Repository() {
         CourierInboxWebsocket.disconnect()
     }
 
-    internal suspend fun getMessages(clientKey: String? = null, jwt: String? = null, userId: String, paginationLimit: Int = 24, startCursor: String? = null): InboxData {
+    internal suspend fun getMessages(clientKey: String? = null, jwt: String? = null, userId: String, tenantId: String? = null, paginationLimit: Int = 24, startCursor: String? = null): InboxData {
+
+        val tenantParams = if (tenantId != null) """accountId: \"${tenantId}\"""" else ""
 
         val query = """
             query GetMessages(
-                ${'$'}params: FilterParamsInput
+                ${'$'}params: FilterParamsInput = { $tenantParams }
                 ${'$'}limit: Int = $paginationLimit
                 ${'$'}after: String ${if (startCursor != null) "= \\\"${startCursor}\\\"" else ""}
             ) {
@@ -97,20 +100,15 @@ internal class InboxRepository : Repository() {
 
     }
 
-    internal suspend fun getUnreadMessageCount(clientKey: String? = null, jwt: String? = null, userId: String): Int {
+    internal suspend fun getUnreadMessageCount(clientKey: String? = null, jwt: String? = null, userId: String, tenantId: String? = null): Int {
+
+        val tenantParams = if (tenantId != null) """, accountId: \"${tenantId}\"""" else ""
 
         val mutation = """
             query GetMessages(
-                ${'$'}params: FilterParamsInput = { status: \"unread\" }
-                ${'$'}limit: Int = ${1}
-                ${'$'}after: String
+                ${'$'}params: FilterParamsInput = { status: \"unread\" $tenantParams }
             ) {
                 count(params: ${'$'}params)
-                messages(params: ${'$'}params, limit: ${'$'}limit, after: ${'$'}after) {
-                    nodes {
-                        messageId
-                    }
-                }
             }
         """.toGraphQuery()
 
