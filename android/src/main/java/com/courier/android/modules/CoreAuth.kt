@@ -16,12 +16,11 @@ internal class CoreAuth {
      * Function to set the current credentials for the user and their access token
      * You should consider using this in areas where you update your local user's state
      */
-    suspend fun signIn(userId: String, accessToken: String, clientKey: String?, push: CorePush, inbox: CoreInbox) = withContext(Dispatchers.IO) {
+    suspend fun signIn(userId: String, tenantId: String?, accessToken: String, clientKey: String?, push: CorePush, inbox: CoreInbox) = withContext(Dispatchers.IO) {
 
-        // Check if the current user exists
+        // Sign user out if needed
         if (Courier.shared.isUserSignedIn) {
-            Courier.log("User Id '${Courier.shared.userId}' is already signed in. Please call Courier.shared.signOut() to change the current user.")
-            return@withContext
+            Courier.shared.signOut()
         }
 
         Courier.log("Signing user in")
@@ -34,18 +33,13 @@ internal class CoreAuth {
             context = Courier.shared.context,
             userId = userId,
             accessToken = accessToken,
-            clientKey = clientKey
+            clientKey = clientKey,
+            tenantId = tenantId,
         )
 
-        try {
-            push.putPushTokens()
-            inbox.restart()
-            notifyListeners()
-        } catch (e: Exception) {
-            Courier.error(e.message)
-            signOut(push, inbox)
-            throw e
-        }
+        push.putPushTokens()
+        inbox.restart()
+        notifyListeners()
 
     }
 
@@ -121,26 +115,33 @@ internal val Courier.clientKey: String? get() = UserManager.getClientKey(context
 internal val Courier.jwt: String? get() = clientKey?.let { null } ?: accessToken
 
 /**
+ * A read only value set to the current tenant id
+ */
+val Courier.tenantId: String? get() = UserManager.getTenantId(context)
+
+/**
  * Determine user state
  */
 val Courier.isUserSignedIn get() = userId != null && accessToken != null
 
-suspend fun Courier.signIn(userId: String, accessToken: String, clientKey: String? = null) {
+suspend fun Courier.signIn(userId: String, accessToken: String, clientKey: String? = null, tenantId: String? = null) {
     auth.signIn(
         userId = userId,
         accessToken = accessToken,
         clientKey = clientKey,
+        tenantId = tenantId,
         push = push,
         inbox = inbox,
     )
 }
 
-fun Courier.signIn(userId: String, accessToken: String, clientKey: String? = null, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
+fun Courier.signIn(userId: String, accessToken: String, clientKey: String? = null, tenantId: String? = null, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
     try {
         signIn(
             userId = userId,
             accessToken = accessToken,
-            clientKey = clientKey
+            clientKey = clientKey,
+            tenantId = tenantId,
         )
         onSuccess()
     } catch (e: Exception) {

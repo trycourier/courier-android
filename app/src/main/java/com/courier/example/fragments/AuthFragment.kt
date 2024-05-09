@@ -11,6 +11,7 @@ import com.courier.android.Courier
 import com.courier.android.modules.isUserSignedIn
 import com.courier.android.modules.signIn
 import com.courier.android.modules.signOut
+import com.courier.android.modules.tenantId
 import com.courier.android.modules.userId
 import com.courier.example.Env
 import com.courier.example.ExampleServer
@@ -38,7 +39,7 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
         authButton.isEnabled = true
 
         if (Courier.shared.isUserSignedIn) {
-            authTextView.text = "Courier user signed in: ${Courier.shared.userId}"
+            authTextView.text = "Courier User Id: ${Courier.shared.userId}\n\nTenant Id: ${Courier.shared.tenantId ?: "None"}"
             authButton.text = "Sign Out"
             authButton.setOnClickListener {
                 signOut()
@@ -61,13 +62,15 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
 
             val values = showAlert(
                 context = requireContext(),
-                title = "Enter a user id",
+                title = "Enter a User Id & Tenant Id",
                 items = mapOf(
-                    "userId" to ""
+                    "userId" to "",
+                    "tenantId" to ""
                 )
             )
 
             val userId = values["userId"]!!
+            val tenantId = values["tenantId"]!!.ifEmpty { null }
 
             val jwt = ExampleServer().generateJWT(
                 authKey = Env.COURIER_AUTH_KEY,
@@ -77,6 +80,7 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
             Courier.shared.signIn(
                 userId = userId,
                 accessToken = jwt,
+                tenantId = tenantId,
             )
 
         } catch (e: Exception) {
