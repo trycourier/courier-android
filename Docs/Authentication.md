@@ -51,7 +51,7 @@ Manages user credentials between app sessions.
 
 # Usage
 
-Put this code where you normally manage your user's state. The user's access to [`Courier Inbox`](https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md) and [`Push Notifications`](https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md) will automatically be managed by the SDK and stored in persistent storage. This means that if your user fully closes your app and starts it back up, they will still be "signed in".
+Put this code where you normally manage your user's state. The user's access to [`Inbox`](https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md), [`Push Notifications`](https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md) and [`Preferences`](https://github.com/trycourier/courier-android/blob/master/Docs/Preferences.md) will automatically be managed by the SDK and stored in persistent storage. This means that if your user fully closes your app and starts it back up, they will still be "signed in".
 
 ⚠️ Be sure to call `Courier.initialize(context)` before `Courier.shared.signIn(...)`. [`Click here`](https://github.com/trycourier/courier-android#3-initialize-the-sdk) for more details.
 
@@ -64,7 +64,8 @@ lifecycleScope.launch {
     Courier.shared.signIn(
         accessToken = "pk_prod_H12...",
         clientKey = "YWQxN...",
-        userId = "example_user_id"
+        userId = "example_user_id",
+        tenantId = "tenant_id" // Optional: Only needed if you are using Tenants
     )
 
     // If you are going to production
