@@ -21,6 +21,15 @@
           <timeTargetWasSelectedWithDropDown value="2024-04-17T22:28:46.955254Z" />
         </State>
       </entry>
+      <entry key="setupInbox()">
+        <State />
+      </entry>
+      <entry key="testInboxSocket()">
+        <State />
+      </entry>
+      <entry key="testSocket()">
+        <State />
+      </entry>
     </value>
   </component>
 </project>

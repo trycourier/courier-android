@@ -8,7 +8,7 @@ import com.courier.android.models.InboxData
 import com.courier.android.models.InboxMessage
 import com.courier.android.models.initialize
 import com.courier.android.repositories.InboxRepository
-import com.courier.android.socket.CourierInboxWebsocket
+import com.courier.android.socket.InboxSocket
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -16,6 +16,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.UUID
 
 
 internal class CoreInbox {
@@ -30,7 +31,8 @@ internal class CoreInbox {
     internal var paginationLimit = DEFAULT_PAGINATION_LIMIT
 
     private val inboxRepo by lazy { InboxRepository() }
-
+    private val connectionId = UUID.randomUUID().toString()
+    private var socket: InboxSocket? = null
     private var listeners: MutableList<CourierInboxListener> = mutableListOf()
     internal var inbox: Inbox? = null
 
@@ -54,7 +56,7 @@ internal class CoreInbox {
             } catch (error: Exception) {
 
                 // Disconnect existing socket
-                inboxRepo.disconnectWebsocket()
+                socket?.disconnect()
 
                 // Notify Error
                 dataPipe?.invokeOnCompletion {
@@ -123,20 +125,11 @@ internal class CoreInbox {
                 )
             },
             async {
-                inboxRepo.connectWebsocket(
-                    clientKey = Courier.shared.clientKey,
+                connectWebSocket(
                     userId = Courier.shared.userId!!,
+                    clientKey = Courier.shared.clientKey,
+                    jwt = Courier.shared.jwt,
                     tenantId = Courier.shared.tenantId,
-                    onMessageReceived = { message ->
-
-                        // Add new message and notify
-                        this@CoreInbox.inbox?.addNewMessage(message)
-                        notifyMessagesChanged()
-
-                    },
-                    onMessageReceivedError = { e ->
-                        notifyError(e)
-                    }
                 )
             }
         )
@@ -172,13 +165,69 @@ internal class CoreInbox {
         dataPipe = null
 
         // Close the socket
-        inboxRepo.disconnectWebsocket()
+        socket?.disconnect()
 
         // Remove values
         this.inbox = null
 
         // Update the listeners
         notifyError(CourierException.inboxUserNotFound)
+
+    }
+
+    private suspend fun connectWebSocket(userId: String, clientKey: String?, jwt: String?, tenantId: String?) {
+
+        socket?.disconnect()
+
+        // Create the socket
+        socket = InboxSocket(
+            clientKey = clientKey,
+            jwt = jwt,
+            onClose = { code, reason ->
+                Courier.log("$code :: ${reason ?: "No reason"}")
+            },
+            onError = { error ->
+                notifyError(error)
+            }
+        )
+
+        // Listen to the events
+        socket?.receivedMessage = { message ->
+            inbox?.addNewMessage(message)
+            notifyMessagesChanged()
+        }
+
+        socket?.receivedMessageEvent = { messageEvent ->
+            when (messageEvent.event) {
+                InboxSocket.EventType.MARK_ALL_READ -> {
+                    inbox?.readAllMessages()
+                    notifyMessagesChanged()
+                }
+                InboxSocket.EventType.READ -> {
+                    messageEvent.messageId?.let { messageId ->
+                        inbox?.readMessage(messageId)
+                        notifyMessagesChanged()
+                    }
+                }
+                InboxSocket.EventType.UNREAD -> {
+                    messageEvent.messageId?.let { messageId ->
+                        inbox?.unreadMessage(messageId)
+                        notifyMessagesChanged()
+                    }
+                }
+                InboxSocket.EventType.OPENED -> Courier.log("Message Opened")
+            }
+        }
+
+        // Connect the socket
+        socket?.connect()
+
+        // Subscribe to the events
+        socket?.sendSubscribe(
+            userId = userId,
+            tenantId = tenantId,
+            clientSourceId = connectionId
+        )
 
     }
 
@@ -467,7 +516,7 @@ internal class CoreInbox {
     // Called because the websocket may have disconnected or
     // new data may have been sent when the user closed their app
     internal fun link() {
-        if (listeners.isNotEmpty() && CourierInboxWebsocket.shared?.isSocketConnected == false) {
+        if (listeners.isNotEmpty()) {
             coroutineScope.launch(Dispatchers.IO) {
                 refresh()
             }
@@ -477,9 +526,9 @@ internal class CoreInbox {
     // Disconnects the websocket
     // Helps keep battery usage lower
     internal fun unlink() {
-        if (listeners.isNotEmpty() && CourierInboxWebsocket.shared?.isSocketConnected == true) {
+        if (listeners.isNotEmpty()) {
             coroutineScope.launch(Dispatchers.IO) {
-                inboxRepo.disconnectWebsocket()
+                socket?.disconnect()
             }
         }
     }
