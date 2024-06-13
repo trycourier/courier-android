@@ -3,42 +3,12 @@ package com.courier.android.repositories
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxResponse
 import com.courier.android.models.InboxData
-import com.courier.android.models.InboxMessage
-import com.courier.android.socket.CourierInboxWebsocket
 import com.courier.android.utils.dispatch
 import com.courier.android.utils.toGraphQuery
-import com.google.gson.Gson
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
 internal class InboxRepository : Repository() {
-
-    internal fun connectWebsocket(clientKey: String? = null, tenantId: String? = null, userId: String, onMessageReceived: (InboxMessage) -> Unit, onMessageReceivedError: (Exception) -> Unit) {
-
-        if (CourierInboxWebsocket.shared?.isSocketConnected == true || CourierInboxWebsocket.shared?.isSocketConnecting == true) {
-            return
-        }
-
-        CourierInboxWebsocket.onMessageReceived = { message ->
-            try {
-                val inboxMessage = Gson().fromJson(message, InboxMessage::class.java)
-                onMessageReceived(inboxMessage)
-            } catch (e: Exception) {
-                onMessageReceivedError(e)
-            }
-        }
-
-        CourierInboxWebsocket.connect(
-            userId = userId,
-            tenantId = tenantId,
-            clientKey = clientKey
-        )
-
-    }
-
-    fun disconnectWebsocket() {
-        CourierInboxWebsocket.disconnect()
-    }
 
     internal suspend fun getMessages(clientKey: String? = null, jwt: String? = null, userId: String, tenantId: String? = null, paginationLimit: Int = 24, startCursor: String? = null): InboxData {
 

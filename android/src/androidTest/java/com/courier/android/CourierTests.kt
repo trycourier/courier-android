@@ -32,16 +32,20 @@ import com.courier.android.modules.signOut
 import com.courier.android.modules.unreadMessage
 import com.courier.android.modules.userId
 import com.courier.android.repositories.InboxRepository
+import com.courier.android.socket.CourierSocket
+import com.courier.android.socket.InboxSocket
 import com.courier.android.utils.trackNotification
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.UUID
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -94,6 +98,122 @@ class CourierTests {
         assertEquals(Courier.shared.accessToken, accessToken)
         assertEquals(Courier.shared.userId, Env.COURIER_USER_ID)
         assertEquals(Courier.shared.clientKey, clientKey)
+
+    }
+
+    @Test
+    fun testCourierSocket() = runBlocking {
+
+        var hold = true
+
+        val userId = Env.COURIER_USER_ID
+        val clientKey = Env.COURIER_CLIENT_KEY
+        val clientSourceId = UUID.randomUUID().toString()
+
+        val socket = CourierSocket(
+            url = "wss://1x60p1o3h8.execute-api.us-east-1.amazonaws.com/production/?clientKey=$clientKey",
+            onClose = { code, reason ->
+                println("$code ${reason ?: "No reason"}")
+            },
+            onError = { error ->
+                println(error)
+            }
+        )
+
+        socket.onMessageReceived = { message ->
+            println(message)
+            hold = false
+        }
+
+        socket.connect()
+
+        val subscribe = mapOf(
+            "action" to "subscribe",
+            "data" to mapOf(
+                "channel" to userId,
+                "event" to "*",
+                "version" to 5,
+                "clientKey" to clientKey,
+                "clientSourceId" to clientSourceId
+            )
+        )
+
+        socket.send(subscribe)
+
+        delay(250)
+
+        val notify = mapOf(
+            "action" to "notify",
+            "data" to mapOf(
+                "channel" to userId,
+                "event" to "read",
+                "version" to 5,
+                "messageId" to "1-66635f83-355c711baae4cfa9db385902",
+                "clientKey" to clientKey,
+                "clientSourceId" to clientSourceId
+            )
+        )
+
+        socket.send(notify)
+
+        while (hold) {
+            // Wait for the message to be received
+        }
+
+        socket.disconnect()
+
+    }
+
+    @Test
+    fun testInboxSocket() = runBlocking {
+
+        var hold = true
+
+        val userId = Env.COURIER_USER_ID
+        val clientKey = Env.COURIER_CLIENT_KEY
+        val clientSourceId = UUID.randomUUID().toString()
+
+        val socket = InboxSocket(
+            clientKey = clientKey,
+            jwt = null,
+            onClose = { code, reason ->
+                println("$code ${reason ?: "No reason"}")
+            },
+            onError = { error ->
+                println(error)
+            }
+        )
+
+        socket.receivedMessageEvent = { event ->
+            println(event)
+        }
+
+        socket.receivedMessage = { message ->
+            println(message)
+            hold = false
+        }
+
+        socket.connect()
+
+        socket.sendSubscribe(
+            userId = userId,
+            tenantId = null,
+            clientSourceId = clientSourceId,
+        )
+
+        val messageId = ExampleServer().sendTest(
+            authKey = Env.COURIER_AUTH_KEY,
+            userId = userId,
+            channel = "inbox"
+        )
+
+        print(messageId)
+
+        while (hold) {
+            // Wait for the message to be received
+        }
+
+        socket.disconnect()
 
     }
 

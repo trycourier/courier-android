@@ -8,7 +8,8 @@ import org.json.JSONObject
 
 internal class ExampleServer : Repository() {
 
-    data class Response(val token: String)
+    data class TokenResponse(val token: String)
+    data class MessageResponse(val requestId: String)
 
     internal suspend fun generateJWT(authKey: String, userId: String): String {
 
@@ -22,11 +23,44 @@ internal class ExampleServer : Repository() {
         val request = Request.Builder()
             .url("https://api.courier.com/auth/issue-token")
             .addHeader("Authorization", "Bearer $authKey")
+            .addHeader("Content-Type", "application/json")
             .post(json.toRequestBody())
             .build()
 
-        val res = http.newCall(request).dispatch<Response>()
+        val res = http.newCall(request).dispatch<TokenResponse>()
         return res.token
+
+    }
+
+    internal suspend fun sendTest(authKey: String, userId: String, channel: String): String {
+
+        val json = JSONObject(
+            mapOf(
+                "message" to mapOf(
+                    "to" to mapOf(
+                        "user_id" to userId
+                    ),
+                    "content" to mapOf(
+                        "title" to "Test",
+                        "body" to "Body"
+                    ),
+                    "routing" to mapOf(
+                        "method" to "single",
+                        "channels" to listOf(channel)
+                    )
+                )
+            )
+        ).toString()
+
+        val request = Request.Builder()
+            .url("https://api.courier.com/send")
+            .addHeader("Authorization", "Bearer $authKey")
+            .addHeader("Content-Type", "application/json")
+            .post(json.toRequestBody())
+            .build()
+
+        val res = http.newCall(request).dispatch<MessageResponse>(validCodes = listOf(202))
+        return res.requestId
 
     }
 
