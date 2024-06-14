@@ -3,8 +3,6 @@ package com.courier.example.fragments.preferences
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.courier.android.Courier
@@ -14,6 +12,7 @@ import com.courier.android.ui.preferences.CourierPreferences
 import com.courier.android.ui.preferences.CourierPreferencesTheme
 import com.courier.example.Env
 import com.courier.example.R
+import com.courier.example.Theme
 
 class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences) {
 
@@ -38,40 +37,35 @@ class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences)
 
         }
 
-        val font = ResourcesCompat.getFont(requireContext(), R.font.poppins)
-        val purple = ContextCompat.getColor(requireContext(), R.color.courier_purple)
-        val purple200 = ContextCompat.getColor(requireContext(), R.color.purple_200)
-        val lightGrey = ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
-
         val theme = CourierPreferencesTheme(
             brandId = Env.COURIER_BRAND_ID,
-            loadingIndicatorColor = purple,
             sectionTitleFont = CourierStyles.Font(
-                typeface = font,
-                color = purple,
-                sizeInSp = 22,
+                typeface = Theme.getFont(requireContext()),
+                color = Theme.getPrimaryColor(requireContext()),
+                sizeInSp = Theme.getTitleFontSize(),
             ),
             topicDividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL),
             topicTitleFont = CourierStyles.Font(
-                typeface = font,
+                typeface = Theme.getFont(requireContext()),
             ),
             topicSubtitleFont = CourierStyles.Font(
-                typeface = font,
-                color = lightGrey,
+                typeface = Theme.getFont(requireContext()),
+                color = Theme.getSubtitleColor(requireContext()),
             ),
             sheetTitleFont = CourierStyles.Font(
-                typeface = font,
-                color = purple,
-                sizeInSp = 22,
+                typeface = Theme.getFont(requireContext()),
+                color = Theme.getPrimaryColor(requireContext()),
+                sizeInSp = Theme.getTitleFontSize(),
             ),
             sheetDividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL),
             sheetSettingStyles = CourierStyles.Preferences.SettingStyles(
                 font = CourierStyles.Font(
-                    typeface = font,
+                    typeface = Theme.getFont(requireContext()),
                 ),
-                toggleThumbColor = purple,
-                toggleTrackColor = purple200,
-            )
+                toggleThumbColor = Theme.getPrimaryColor(requireContext()),
+                toggleTrackColor = Theme.getPrimaryLightColor(requireContext()),
+            ),
+            infoViewStyle = Theme.getInfoViewStyles(requireContext())
         )
 
         preferences.lightTheme = theme
