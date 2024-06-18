@@ -122,7 +122,7 @@ internal class InboxRepository : Repository() {
 
     }
 
-    internal suspend fun readMessage(clientKey: String? = null, jwt: String? = null, userId: String, messageId: String) {
+    internal suspend fun readMessage(clientKey: String? = null, jwt: String? = null, userId: String, connectionId: String, messageId: String) {
 
         val mutation = """
             mutation TrackEvent(
@@ -135,6 +135,7 @@ internal class InboxRepository : Repository() {
         val request = Request.Builder()
             .url(inboxGraphQL)
             .addHeader("x-courier-user-id", userId)
+            .addHeader("x-courier-client-source-id", connectionId)
             .apply {
                 jwt?.let { addHeader("Authorization", "Bearer $it") }
                     ?: clientKey?.let { addHeader("x-courier-client-key", it) }
@@ -146,7 +147,7 @@ internal class InboxRepository : Repository() {
 
     }
 
-    internal suspend fun unreadMessage(clientKey: String? = null, jwt: String? = null, userId: String, messageId: String) {
+    internal suspend fun unreadMessage(clientKey: String? = null, jwt: String? = null, userId: String, connectionId: String, messageId: String) {
 
         val query = """
             mutation TrackEvent(
@@ -159,6 +160,7 @@ internal class InboxRepository : Repository() {
         val request = Request.Builder()
             .url(inboxGraphQL)
             .addHeader("x-courier-user-id", userId)
+            .addHeader("x-courier-client-source-id", connectionId)
             .apply {
                 jwt?.let { addHeader("Authorization", "Bearer $it") }
                     ?: clientKey?.let { addHeader("x-courier-client-key", it) }
@@ -170,7 +172,7 @@ internal class InboxRepository : Repository() {
 
     }
 
-    internal suspend fun readAllMessages(clientKey: String? = null, jwt: String? = null, userId: String, ) {
+    internal suspend fun readAllMessages(clientKey: String? = null, jwt: String? = null, connectionId: String, userId: String, ) {
 
         val query = """
             mutation TrackEvent {
@@ -181,6 +183,7 @@ internal class InboxRepository : Repository() {
         val request = Request.Builder()
             .url(inboxGraphQL)
             .addHeader("x-courier-user-id", userId)
+            .addHeader("x-courier-client-source-id", connectionId)
             .apply {
                 jwt?.let { addHeader("Authorization", "Bearer $it") }
                     ?: clientKey?.let { addHeader("x-courier-client-key", it) }

@@ -382,7 +382,8 @@ internal class CoreInbox {
                 inboxRepo.readAllMessages(
                     clientKey = Courier.shared.clientKey,
                     jwt = Courier.shared.jwt,
-                    userId = Courier.shared.userId!!
+                    userId = Courier.shared.userId!!,
+                    connectionId = connectionId,
                 )
             } catch (e: Exception) {
                 this@CoreInbox.inbox?.resetReadAll(original)
@@ -435,6 +436,7 @@ internal class CoreInbox {
                 clientKey = Courier.shared.clientKey,
                 jwt = Courier.shared.jwt,
                 userId = Courier.shared.userId!!,
+                connectionId = connectionId,
                 messageId = messageId,
             )
 
@@ -470,6 +472,7 @@ internal class CoreInbox {
                 jwt = Courier.shared.jwt,
                 userId = Courier.shared.userId!!,
                 messageId = messageId,
+                connectionId = connectionId,
             )
 
         } catch (e: Exception) {
