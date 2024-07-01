@@ -251,7 +251,7 @@ class CourierTests {
             }
         )
 
-        while (canPage) {
+        while (canPage && error == null) {
             // Hold
         }
 
@@ -527,7 +527,7 @@ class CourierTests {
         signUserIn()
 
         val topic = Courier.shared.getUserPreferenceTopic(
-            topicId = "VFPW1YD8Y64FRYNVQCKC9QFQCFVF",
+            topicId = Env.COURIER_PREFERENCE_ID
         )
 
         print(topic)
@@ -542,7 +542,7 @@ class CourierTests {
         signUserIn()
 
         Courier.shared.putUserPreferenceTopic(
-            topicId = "VFPW1YD8Y64FRYNVQCKC9QFQCFVF",
+            topicId = Env.COURIER_PREFERENCE_ID,
             status = CourierPreferenceStatus.OPTED_IN,
             hasCustomRouting = true,
             customRouting = listOf(CourierPreferenceChannel.SMS, CourierPreferenceChannel.PUSH)
