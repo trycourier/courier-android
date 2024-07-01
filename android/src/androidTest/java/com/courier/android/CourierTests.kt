@@ -17,6 +17,7 @@ import com.courier.android.modules.clickMessage
 import com.courier.android.modules.clientKey
 import com.courier.android.modules.fcmToken
 import com.courier.android.modules.fetchNextPageOfMessages
+import com.courier.android.modules.getBrand
 import com.courier.android.modules.getToken
 import com.courier.android.modules.getUserPreferenceTopic
 import com.courier.android.modules.getUserPreferences
@@ -424,6 +425,19 @@ class CourierTests {
         )
 
         print("Message tracked")
+
+    }
+
+    @Test
+    fun getBrand() = runBlocking {
+
+        print("🔬 Get Brand")
+
+        signUserIn()
+
+        val brand = Courier.shared.getBrand(Env.COURIER_BRAND_ID)
+
+        assertNotNull(brand)
 
     }
 

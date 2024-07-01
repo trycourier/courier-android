@@ -248,46 +248,58 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         inboxListener = Courier.shared.addInboxListener(
             onInitialLoad = {
 
-                refreshBrand()
+                coroutineScope.launch(Dispatchers.Main) {
 
-                state = State.LOADING
+                    refreshBrand()
 
-                refreshAdapters()
+                    state = State.LOADING
 
-                recyclerView.forceReactNativeLayoutFix()
+                    refreshAdapters()
+
+                    recyclerView.forceReactNativeLayoutFix()
+
+                }
 
             },
             onError = { e ->
 
-                refreshBrand()
+                coroutineScope.launch(Dispatchers.Main) {
 
-                state = State.ERROR.apply { title = e.message }
+                    refreshBrand()
 
-                Courier.error(e.message)
+                    state = State.ERROR.apply { title = e.message }
 
-                refreshAdapters()
+                    Courier.error(e.message)
 
-                recyclerView.forceReactNativeLayoutFix()
+                    refreshAdapters()
+
+                    recyclerView.forceReactNativeLayoutFix()
+
+                }
 
             },
             onMessagesChanged = { messages, _, _, canPaginate ->
 
-                refreshBrand()
+                coroutineScope.launch(Dispatchers.Main) {
 
-                state = if (messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
+                    refreshBrand()
 
-                refreshAdapters(
-                    showMessages = messages.isNotEmpty(),
-                    showLoading = canPaginate
-                )
+                    state = if (messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
 
-                refreshMessages(
-                    newMessages = messages.toList()
-                )
+                    refreshAdapters(
+                        showMessages = messages.isNotEmpty(),
+                        showLoading = canPaginate
+                    )
 
-                openVisibleMessages()
+                    refreshMessages(
+                        newMessages = messages.toList()
+                    )
 
-                recyclerView.forceReactNativeLayoutFix()
+                    openVisibleMessages()
+
+                    recyclerView.forceReactNativeLayoutFix()
+
+                }
 
             }
         )
@@ -416,7 +428,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         if (showLoading) adapter.addAdapter(loadingAdapter) else adapter.removeAdapter(loadingAdapter)
     }
 
-    private fun refreshBrand() = coroutineScope.launch(Dispatchers.Main) {
+    private suspend fun refreshBrand() {
         theme.getBrandIfNeeded()
         reloadViews()
     }

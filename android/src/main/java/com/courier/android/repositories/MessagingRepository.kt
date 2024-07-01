@@ -14,7 +14,7 @@ internal class MessagingRepository : Repository() {
 
     internal suspend fun send(authKey: String, userIds: List<String>, title: String, body: String, channels: List<CourierChannel>): String {
 
-        val url = "$baseRest/send"
+        val url = "$BASE_REST/send"
 
         val json = JSONObject(
             mapOf(

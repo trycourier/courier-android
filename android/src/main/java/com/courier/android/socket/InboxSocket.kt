@@ -70,7 +70,7 @@ internal class InboxSocket(private val clientKey: String?, private val jwt: Stri
     companion object {
 
         private fun buildUrl(clientKey: String?, jwt: String?): String {
-            var url = Repository.inboxWebSocket
+            var url = Repository.INBOX_WEBSOCKET
             url += when {
                 jwt != null -> "/?auth=$jwt"
                 clientKey != null -> "/?clientKey=$clientKey"

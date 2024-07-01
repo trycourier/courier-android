@@ -12,8 +12,8 @@ internal class BrandsRepository : Repository() {
     internal suspend fun getBrand(clientKey: String?, jwt: String?, userId: String, brandId: String): CourierBrand {
 
         val query = """
-            query GetBrand(${'$'}brandId: String = \"${brandId}\") {
-                brand(brandId: ${'$'}brandId) {
+            query GetBrand {
+                brand(brandId: \"${brandId}\") {
                     settings {
                         colors {
                             primary
@@ -30,7 +30,7 @@ internal class BrandsRepository : Repository() {
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(baseGraphQL)
+            .url(BASE_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .apply {
                 jwt?.let { addHeader("Authorization", "Bearer $it") }

@@ -55,7 +55,7 @@ internal class InboxRepository : Repository() {
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .apply {
                 jwt?.let { addHeader("Authorization", "Bearer $it") }
@@ -83,7 +83,7 @@ internal class InboxRepository : Repository() {
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .apply {
                 jwt?.let { addHeader("Authorization", "Bearer $it") }
@@ -109,7 +109,7 @@ internal class InboxRepository : Repository() {
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .apply {
                 jwt?.let { addHeader("Authorization", "Bearer $it") }
@@ -133,7 +133,7 @@ internal class InboxRepository : Repository() {
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .addHeader("x-courier-client-source-id", connectionId)
             .apply {
@@ -158,7 +158,7 @@ internal class InboxRepository : Repository() {
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .addHeader("x-courier-client-source-id", connectionId)
             .apply {
@@ -181,7 +181,7 @@ internal class InboxRepository : Repository() {
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .addHeader("x-courier-client-source-id", connectionId)
             .apply {
@@ -206,7 +206,7 @@ internal class InboxRepository : Repository() {
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .apply {
                 jwt?.let { addHeader("Authorization", "Bearer $it") }
