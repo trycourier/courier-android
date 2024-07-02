@@ -9,6 +9,7 @@ import com.courier.android.models.InboxMessage
 import com.courier.android.models.initialize
 import com.courier.android.repositories.InboxRepository
 import com.courier.android.socket.InboxSocket
+import com.courier.android.socket.InboxSocketManager
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -32,7 +33,6 @@ internal class CoreInbox {
 
     private val inboxRepo by lazy { InboxRepository() }
     private val connectionId = UUID.randomUUID().toString()
-    private var socket: InboxSocket? = null
     private var listeners: MutableList<CourierInboxListener> = mutableListOf()
     internal var inbox: Inbox? = null
 
@@ -56,7 +56,7 @@ internal class CoreInbox {
             } catch (error: Exception) {
 
                 // Disconnect existing socket
-                socket?.disconnect()
+                InboxSocketManager.closeSocket()
 
                 // Notify Error
                 dataPipe?.invokeOnCompletion {
@@ -165,7 +165,7 @@ internal class CoreInbox {
         dataPipe = null
 
         // Close the socket
-        socket?.disconnect()
+        InboxSocketManager.closeSocket()
 
         // Remove values
         this.inbox = null
@@ -177,10 +177,10 @@ internal class CoreInbox {
 
     private suspend fun connectWebSocket(userId: String, clientKey: String?, jwt: String?, tenantId: String?) {
 
-        socket?.disconnect()
+        InboxSocketManager.closeSocket()
 
         // Create the socket
-        socket = InboxSocket(
+        val socket = InboxSocketManager.getSocketInstance(
             clientKey = clientKey,
             jwt = jwt,
             onClose = { code, reason ->
@@ -192,12 +192,12 @@ internal class CoreInbox {
         )
 
         // Listen to the events
-        socket?.receivedMessage = { message ->
+        socket.receivedMessage = { message ->
             inbox?.addNewMessage(message)
             notifyMessagesChanged()
         }
 
-        socket?.receivedMessageEvent = { messageEvent ->
+        socket.receivedMessageEvent = { messageEvent ->
             when (messageEvent.event) {
                 InboxSocket.EventType.MARK_ALL_READ -> {
                     inbox?.readAllMessages()
@@ -220,10 +220,10 @@ internal class CoreInbox {
         }
 
         // Connect the socket
-        socket?.connect()
+        socket.connect()
 
         // Subscribe to the events
-        socket?.sendSubscribe(
+        socket.sendSubscribe(
             userId = userId,
             tenantId = tenantId,
             clientSourceId = connectionId
@@ -531,7 +531,7 @@ internal class CoreInbox {
     internal fun unlink() {
         if (listeners.isNotEmpty()) {
             coroutineScope.launch(Dispatchers.IO) {
-                socket?.disconnect()
+                InboxSocketManager.closeSocket()
             }
         }
     }
