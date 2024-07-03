@@ -13,10 +13,9 @@ error_exit() {
 declare -a steps=(
     "Run Tests:sh run_tests.sh"
     "Build Demo App:sh build_demo_app.sh"
-#    "Update Build Version:sh update_version.sh"
-#    "Install Brew:sh install_homebrew.sh"
-#    "Create Git Release:sh git_release.sh"
-#    "Release Cocoapod:sh release_pod.sh"
+    "Update Build Version:sh update_version.sh"
+    "Install Brew:sh install_homebrew.sh"
+    "Create Git Release:sh git_release.sh"
 )
 
 # Display available steps with indices
