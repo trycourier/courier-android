@@ -5,6 +5,32 @@ import com.courier.android.repositories.Repository
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 
+internal object InboxSocketManager {
+
+    private var socketInstance: InboxSocket? = null
+
+    fun getSocketInstance(clientKey: String?, jwt: String?, onClose: (code: Int, reason: String?) -> Unit, onError: (e: Exception) -> Unit): InboxSocket {
+        synchronized(this) {
+            if (socketInstance == null) {
+                socketInstance = InboxSocket(
+                    clientKey = clientKey,
+                    jwt = jwt,
+                    onClose = onClose,
+                    onError = onError
+                )
+            }
+            return socketInstance!!
+        }
+    }
+
+    fun closeSocket() {
+        synchronized(this) {
+            socketInstance?.disconnect()
+            socketInstance = null
+        }
+    }
+}
+
 internal class InboxSocket(private val clientKey: String?, private val jwt: String?, onClose: (code: Int, reason: String?) -> Unit, onError: (e: Exception) -> Unit) : CourierSocket(url = buildUrl(clientKey, jwt), onClose = onClose, onError = onError) {
 
     enum class PayloadType(val value: String) {
@@ -70,7 +96,7 @@ internal class InboxSocket(private val clientKey: String?, private val jwt: Stri
     companion object {
 
         private fun buildUrl(clientKey: String?, jwt: String?): String {
-            var url = Repository.inboxWebSocket
+            var url = Repository.INBOX_WEBSOCKET
             url += when {
                 jwt != null -> "/?auth=$jwt"
                 clientKey != null -> "/?clientKey=$clientKey"

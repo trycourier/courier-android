@@ -1,5 +1,7 @@
 package com.courier.android.models
 
+import com.google.gson.annotations.SerializedName
+
 internal data class CourierBrandResponse(
     val data: CourierBrandData
 )
@@ -22,7 +24,8 @@ data class CourierBrandColors(
 )
 
 data class CourierBrandInApp(
-    private val disableCourierFooter: Boolean?
+    @SerializedName("disableCourierFooter")
+    val disableCourierFooter: Boolean?
 ) {
     val showCourierFooter: Boolean
         get() = disableCourierFooter?.let { !it } ?: true

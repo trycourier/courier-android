@@ -5,6 +5,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import com.courier.android.models.CourierPreferenceTopic
+import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.GsonBuilder
@@ -112,6 +113,10 @@ fun Array<*>.toJsonArray(): JSONArray {
 }
 
 fun InboxMessage.toJson(): String? {
+    return GsonBuilder().setPrettyPrinting().create().toJson(this)
+}
+
+fun InboxAction.toJson(): String? {
     return GsonBuilder().setPrettyPrinting().create().toJson(this)
 }
 

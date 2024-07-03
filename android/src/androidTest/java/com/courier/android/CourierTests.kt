@@ -17,6 +17,7 @@ import com.courier.android.modules.clickMessage
 import com.courier.android.modules.clientKey
 import com.courier.android.modules.fcmToken
 import com.courier.android.modules.fetchNextPageOfMessages
+import com.courier.android.modules.getBrand
 import com.courier.android.modules.getToken
 import com.courier.android.modules.getUserPreferenceTopic
 import com.courier.android.modules.getUserPreferences
@@ -250,7 +251,7 @@ class CourierTests {
             }
         )
 
-        while (canPage) {
+        while (canPage && error == null) {
             // Hold
         }
 
@@ -428,6 +429,19 @@ class CourierTests {
     }
 
     @Test
+    fun getBrand() = runBlocking {
+
+        print("🔬 Get Brand")
+
+        signUserIn()
+
+        val brand = Courier.shared.getBrand(Env.COURIER_BRAND_ID)
+
+        assertNotNull(brand)
+
+    }
+
+    @Test
     fun setupInbox() = runBlocking {
 
         print("🔬 Testing Inbox Get Messages")
@@ -513,7 +527,7 @@ class CourierTests {
         signUserIn()
 
         val topic = Courier.shared.getUserPreferenceTopic(
-            topicId = "VFPW1YD8Y64FRYNVQCKC9QFQCFVF",
+            topicId = Env.COURIER_PREFERENCE_ID
         )
 
         print(topic)
@@ -528,7 +542,7 @@ class CourierTests {
         signUserIn()
 
         Courier.shared.putUserPreferenceTopic(
-            topicId = "VFPW1YD8Y64FRYNVQCKC9QFQCFVF",
+            topicId = Env.COURIER_PREFERENCE_ID,
             status = CourierPreferenceStatus.OPTED_IN,
             hasCustomRouting = true,
             customRouting = listOf(CourierPreferenceChannel.SMS, CourierPreferenceChannel.PUSH)

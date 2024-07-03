@@ -11,7 +11,7 @@ internal class UsersRepository : Repository() {
 
     suspend fun putUserToken(accessToken: String, userId: String, token: String, provider: String) {
 
-        val url = "$baseRest/users/$userId/tokens/$token"
+        val url = "$BASE_REST/users/$userId/tokens/$token"
 
         val json = gson.toJson(CourierToken(
             provider_key = provider,
@@ -30,7 +30,7 @@ internal class UsersRepository : Repository() {
 
     suspend fun deleteUserToken(accessToken: String, userId: String, token: String) {
 
-        val url = "$baseRest/users/$userId/tokens/$token"
+        val url = "$BASE_REST/users/$userId/tokens/$token"
 
         val request = Request.Builder()
             .url(url)
@@ -44,7 +44,7 @@ internal class UsersRepository : Repository() {
 
     suspend fun getUserPreferences(accessToken: String, userId: String, paginationCursor: String? = null): CourierUserPreferences {
 
-        var url = "$baseRest/users/$userId/preferences"
+        var url = "$BASE_REST/users/$userId/preferences"
 
         paginationCursor?.let { cursor ->
             url += "?cursor=$cursor"
@@ -62,7 +62,7 @@ internal class UsersRepository : Repository() {
 
     suspend fun getUserPreferenceTopic(accessToken: String, userId: String, topicId: String): CourierPreferenceTopic {
 
-        val url = "$baseRest/users/$userId/preferences/$topicId"
+        val url = "$BASE_REST/users/$userId/preferences/$topicId"
 
         val request = Request.Builder()
             .url(url)
@@ -77,7 +77,7 @@ internal class UsersRepository : Repository() {
 
     suspend fun putUserPreferenceTopic(accessToken: String, userId: String, topicId: String, status: CourierPreferenceStatus, hasCustomRouting: Boolean, customRouting: List<CourierPreferenceChannel>) {
 
-        val url = "$baseRest/users/$userId/preferences/$topicId"
+        val url = "$BASE_REST/users/$userId/preferences/$topicId"
 
         val json = gson.toJson(mapOf(
             "topic" to mapOf(

@@ -6,6 +6,7 @@ import com.courier.android.modules.isDebugging
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
+import com.google.gson.Strictness
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Request
@@ -45,7 +46,7 @@ internal fun Request.toPrettyJson(): String? {
 
 internal fun String.toPrettyJson(): String? {
     return try {
-        val gson = GsonBuilder().setLenient().setPrettyPrinting().create()
+        val gson = GsonBuilder().setStrictness(Strictness.LENIENT).setPrettyPrinting().create()
         val jsonObject = JsonParser.parseString(this).asJsonObject
         "\n${gson.toJson(jsonObject)}"
     } catch (e: Exception) {

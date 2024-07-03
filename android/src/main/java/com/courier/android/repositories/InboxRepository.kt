@@ -55,7 +55,7 @@ internal class InboxRepository : Repository() {
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .apply {
                 jwt?.let { addHeader("Authorization", "Bearer $it") }
@@ -75,15 +75,13 @@ internal class InboxRepository : Repository() {
         val tenantParams = if (tenantId != null) """, accountId: \"${tenantId}\"""" else ""
 
         val mutation = """
-            query GetMessages(
-                ${'$'}params: FilterParamsInput = { status: \"unread\" $tenantParams }
-            ) {
-                count(params: ${'$'}params)
+            query GetMessages {
+                count(params: { status: \"unread\" $tenantParams })
             }
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .apply {
                 jwt?.let { addHeader("Authorization", "Bearer $it") }
@@ -100,16 +98,13 @@ internal class InboxRepository : Repository() {
     internal suspend fun clickMessage(clientKey: String? = null, jwt: String? = null, userId: String, messageId: String, channelId: String) {
 
         val mutation = """
-            mutation TrackEvent(
-                ${'$'}messageId: String = \"${messageId}\"
-                ${'$'}trackingId: String = \"${channelId}\"
-            ) {
-                clicked(messageId: ${'$'}messageId, trackingId: ${'$'}trackingId)
+            mutation TrackEvent {
+                clicked(messageId: \"${messageId}\", trackingId: \"${channelId}\")
             }
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .apply {
                 jwt?.let { addHeader("Authorization", "Bearer $it") }
@@ -125,15 +120,13 @@ internal class InboxRepository : Repository() {
     internal suspend fun readMessage(clientKey: String? = null, jwt: String? = null, userId: String, connectionId: String, messageId: String) {
 
         val mutation = """
-            mutation TrackEvent(
-                ${'$'}messageId: String = \"${messageId}\"
-            ) {
-                read(messageId: ${'$'}messageId)
+            mutation TrackEvent {
+                read(messageId: \"${messageId}\")
             }
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .addHeader("x-courier-client-source-id", connectionId)
             .apply {
@@ -150,15 +143,13 @@ internal class InboxRepository : Repository() {
     internal suspend fun unreadMessage(clientKey: String? = null, jwt: String? = null, userId: String, connectionId: String, messageId: String) {
 
         val query = """
-            mutation TrackEvent(
-                ${'$'}messageId: String = \"${messageId}\"
-            ) {
-                unread(messageId: ${'$'}messageId)
+            mutation TrackEvent {
+                unread(messageId: \"${messageId}\")
             }
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .addHeader("x-courier-client-source-id", connectionId)
             .apply {
@@ -181,7 +172,7 @@ internal class InboxRepository : Repository() {
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .addHeader("x-courier-client-source-id", connectionId)
             .apply {
@@ -198,15 +189,13 @@ internal class InboxRepository : Repository() {
     internal suspend fun openMessage(clientKey: String? = null, jwt: String? = null, userId: String, messageId: String) {
 
         val query = """
-            mutation TrackEvent(
-                ${'$'}messageId: String = \"${messageId}\"
-            ) {
-                opened(messageId: ${'$'}messageId)
+            mutation TrackEvent {
+                opened(messageId: \"${messageId}\")
             }
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(inboxGraphQL)
+            .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
             .apply {
                 jwt?.let { addHeader("Authorization", "Bearer $it") }
