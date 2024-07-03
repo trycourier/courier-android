@@ -3,11 +3,6 @@
 # Change to the root directory
 cd "$(dirname "$0")/.." || { echo "Failed to change to root directory"; exit 1; }
 
-# Clean and clear cache
-./gradlew clean
-./gradlew --stop
-rm -rf ~/.gradle/caches/
-
 # Define ANSI color codes
 ORANGE='\033[0;33m'
 NC='\033[0m' # No Color
@@ -87,8 +82,5 @@ if [[ $confirmation == "y" || $confirmation == "Y" ]]; then
 else
     echo "Merge and release process canceled."
 fi
-
-# Publish the maven package
-./gradlew publish
 
 echo "🚀 View release here: https://jitpack.io/#trycourier/courier-android"
