@@ -88,4 +88,7 @@ else
     echo "Merge and release process canceled."
 fi
 
+# Publish the maven package
+./gradlew publish
+
 echo "🚀 View release here: https://jitpack.io/#trycourier/courier-android"
