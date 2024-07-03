@@ -164,6 +164,8 @@ Here is what the Courier Android SDK automatically handles with Proguard:
     <code>Proguard Rules</code>
 </a>
 
+&emsp;
+
 # Example Projects
 
 Starter projects using this SDK.
