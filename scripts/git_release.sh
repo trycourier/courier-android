@@ -82,3 +82,5 @@ if [[ $confirmation == "y" || $confirmation == "Y" ]]; then
 else
     echo "Merge and release process canceled."
 fi
+
+echo "🚀 View release here: https://jitpack.io/#trycourier/courier-android"
