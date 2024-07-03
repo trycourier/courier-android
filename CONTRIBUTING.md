@@ -6,7 +6,7 @@
 2. Open terminal navigate to root directory run 
 
 ```bash 
-sh env-setup.sh
+sh env_setup.sh
 ```
 
 3. Navigate to `app/java/com/courier/example/Env.kt`

@@ -5,6 +5,7 @@ plugins {
 }
 
 android {
+
     compileSdk 34
 
     defaultConfig {
@@ -13,17 +14,15 @@ android {
         targetSdk 34
         versionCode 13
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug
     }
 
+    lintOptions {
+        checkReleaseBuilds false
+    }
+
     buildTypes {
-        debug {
-            shrinkResources true
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
         release {
             shrinkResources true
             minifyEnabled true
