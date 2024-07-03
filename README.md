@@ -156,6 +156,14 @@ These are all the available features of the SDK.
 
 &emsp;
 
+# Proguard
+
+Here is what the Courier Android SDK automatically handles with Proguard:
+
+<a href="https://github.com/trycourier/courier-android/blob/master/android/consumer-rules.pro">
+    <code>Proguard Rules</code>
+</a>
+
 # Example Projects
 
 Starter projects using this SDK.
