@@ -7,19 +7,15 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import com.courier.android.client.CourierClient
-import com.courier.android.managers.UserManager
+import com.courier.android.client.warn
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierAuthenticationListener
 import com.courier.android.models.CourierException
-import com.courier.android.modules.isUserSignedIn
-import com.courier.android.modules.userId
 import com.courier.android.utils.NotificationEventBus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.UUID
 
 /**
 
@@ -45,7 +41,11 @@ Y8,           i8'    ,8I   I8,    ,8I  ,8'    8I   88   I8, ,8I  ,8'    8I
 
 class Courier private constructor(internal val context: Context) : Application.ActivityLifecycleCallbacks {
 
-    internal var client: CourierClient? = null
+    var client: CourierClient? = null
+        internal set
+
+    var authListeners: MutableList<CourierAuthenticationListener> = mutableListOf()
+        private set
 
     /**
      * Modules
@@ -119,99 +119,11 @@ class Courier private constructor(internal val context: Context) : Application.A
 
                 }
                 else -> {
-                    client?.warn("Initialization context does not support lifecycle callbacks. Please call Courier.initialize(context) with an Activity or Application context.")
+                    client?.options?.warn("Initialization context does not support lifecycle callbacks. Please call Courier.initialize(context) with an Activity or Application context.")
                 }
             }
         }
 
-    }
-
-    private var authListeners: MutableList<CourierAuthenticationListener> = mutableListOf()
-
-    /**
-     * Function to set the current credentials for the user and their access token
-     * You should consider using this in areas where you update your local user's state
-     */
-    suspend fun signIn(userId: String, tenantId: String?, accessToken: String, clientKey: String?, showLogs: Boolean = BuildConfig.DEBUG) = withContext(Dispatchers.IO) {
-
-        // Sign user out if needed
-        if (shared.isUserSignedIn) {
-            shared.signOut()
-        }
-
-        // Generate a new connection id
-        // Used for inbox socket
-        val connectionId = UUID.randomUUID().toString()
-
-        // Create the client
-        client = CourierClient(
-            jwt = accessToken,
-            clientKey = clientKey,
-            userId = userId,
-            connectionId = connectionId,
-            tenantId = tenantId,
-            showLogs = showLogs,
-        )
-
-        client?.log("Signing user in")
-        client?.log("User Id: $userId")
-        client?.log("Access Token: $accessToken")
-        client?.log("Client Key: $clientKey")
-
-        // Set the current user
-        UserManager.setCredentials(
-            context = shared.context,
-            userId = userId,
-            accessToken = accessToken,
-            clientKey = clientKey,
-            tenantId = tenantId,
-        )
-
-//        push.putPushTokens()
-//        inbox.restart()
-        notifyListeners()
-
-    }
-
-    /**
-     * Function that clears the current user id and access token
-     * You should call this when your user signs out
-     * It will remove the current tokens used for this user in Courier so they do not receive pushes they should not get
-     */
-    suspend fun signOut() = withContext(Dispatchers.IO) {
-
-        // Ensure we have a user to sign out
-        if (!shared.isUserSignedIn) {
-            client?.log("No user signed into Courier. A user must be signed in on order to sign out.")
-            return@withContext
-        }
-
-        client?.log("Signing user out")
-
-//        push.deletePushTokens()
-//
-//        inbox.close()
-
-        // Clear the user
-        // Must be called after tokens are deleted
-        UserManager.removeCredentials(shared.context)
-
-        notifyListeners()
-
-    }
-
-    internal fun addAuthChangeListener(onChange: (String?) -> Unit): CourierAuthenticationListener {
-        val listener = CourierAuthenticationListener(onChange)
-        authListeners.add(listener)
-        return listener
-    }
-
-    internal fun removeAuthenticationListener(listener: CourierAuthenticationListener) {
-        authListeners.removeAll { it == listener }
-    }
-
-    private fun notifyListeners() {
-        authListeners.forEach { it.onChange(Courier.shared.userId) }
     }
 
     override fun onActivityStarted(activity: Activity) {
