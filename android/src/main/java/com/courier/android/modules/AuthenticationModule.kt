@@ -66,10 +66,12 @@ suspend fun Courier.signOut() = withContext(Dispatchers.IO) {
     // Ensure we have a user to sign out
     if (!Courier.shared.isUserSignedIn) {
         client?.options?.log("No user signed into Courier. A user must be signed in on order to sign out.")
+        client = null
         return@withContext
     }
 
     client?.options?.log("Signing user out")
+    client = null
 
     deletePushTokens()
     closeInbox()

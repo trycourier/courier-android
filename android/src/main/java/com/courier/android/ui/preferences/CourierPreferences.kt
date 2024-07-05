@@ -200,7 +200,15 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
     @SuppressLint("NotifyDataSetChanged")
     private fun refresh() = coroutineScope.launch(Dispatchers.Main) {
 
-        val client = Courier.shared.client ?: return@launch
+        val client = Courier.shared.client
+
+        if (client == null) {
+            val e = CourierException.userNotFound
+            onError?.invoke(e)
+            state = State.ERROR.apply { title = e.message }
+            refreshLayout.isRefreshing = false
+            return@launch
+        }
 
         // Get the brand
         theme.getBrandIfNeeded()

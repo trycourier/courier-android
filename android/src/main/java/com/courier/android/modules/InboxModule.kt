@@ -67,7 +67,7 @@ private suspend fun Courier.loadInbox(refresh: Boolean = false): Inbox = withCon
 
     // Check if user is signed in
     if (!isUserSignedIn) {
-        throw CourierException.inboxUserNotFound
+        throw CourierException.userNotFound
     }
 
     // Get all inbox data and start the websocket
@@ -174,7 +174,7 @@ internal fun Courier.closeInbox() {
     this.inbox = null
 
     // Update the listeners
-    notifyError(CourierException.inboxUserNotFound)
+    notifyError(CourierException.userNotFound)
 
 }
 
@@ -210,7 +210,7 @@ private suspend fun Courier.fetchNextPageOfMessages(): List<InboxMessage> {
 
     // Check for auth
     if (!Courier.shared.isUserSignedIn || inbox == null) {
-        throw CourierException.inboxUserNotFound
+        throw CourierException.userNotFound
     }
 
     // Fetch the next page
@@ -250,7 +250,7 @@ fun Courier.addInboxListener(onInitialLoad: (() -> Unit)? = null, onError: ((Exc
     // Check for auth
     if (!Courier.shared.isUserSignedIn) {
         client?.options?.warn("User is not signed in. Please call Courier.shared.signIn(...) to setup the inbox listener.")
-        listener.onError?.invoke(CourierException.inboxUserNotFound)
+        listener.onError?.invoke(CourierException.userNotFound)
         return listener
     }
 
@@ -305,7 +305,7 @@ fun Courier.removeAllListeners() = coroutineScope.launch(Dispatchers.IO) {
 suspend fun Courier.readAllInboxMessages() {
 
     if (!isUserSignedIn) {
-        throw CourierException.inboxUserNotFound
+        throw CourierException.userNotFound
     }
 
     if (inbox == null) {
@@ -336,7 +336,7 @@ suspend fun Courier.readAllInboxMessages() {
 suspend fun Courier.clickMessage(messageId: String) {
 
     if (!isUserSignedIn) {
-        throw CourierException.inboxUserNotFound
+        throw CourierException.userNotFound
     }
 
     // Unwrap message
@@ -357,7 +357,7 @@ suspend fun Courier.clickMessage(messageId: String) {
 internal suspend fun Courier.readMessage(messageId: String) {
 
     if (!isUserSignedIn) {
-        throw CourierException.inboxUserNotFound
+        throw CourierException.userNotFound
     }
 
     // Mark the message as read instantly
@@ -388,7 +388,7 @@ internal suspend fun Courier.readMessage(messageId: String) {
 internal suspend fun Courier.unreadMessage(messageId: String) {
 
     if (!isUserSignedIn) {
-        throw CourierException.inboxUserNotFound
+        throw CourierException.userNotFound
     }
 
     // Mark the message as read instantly
@@ -419,7 +419,7 @@ internal suspend fun Courier.unreadMessage(messageId: String) {
 internal suspend fun Courier.openMessage(messageId: String) {
 
     if (!isUserSignedIn) {
-        throw CourierException.inboxUserNotFound
+        throw CourierException.userNotFound
     }
 
     client?.inbox?.trackOpened(
@@ -431,7 +431,7 @@ internal suspend fun Courier.openMessage(messageId: String) {
 internal suspend fun Courier.archiveMessage(messageId: String) {
 
     if (!isUserSignedIn) {
-        throw CourierException.inboxUserNotFound
+        throw CourierException.userNotFound
     }
 
     client?.inbox?.trackArchive(
