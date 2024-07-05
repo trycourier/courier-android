@@ -50,8 +50,8 @@ suspend fun Courier.signIn(userId: String, tenantId: String? = null, accessToken
         tenantId = tenantId,
     )
 
-//        push.putPushTokens()
-//        inbox.restart()
+    putPushTokens()
+    refreshInbox()
     notifyListeners()
 
 }
@@ -71,9 +71,8 @@ suspend fun Courier.signOut() = withContext(Dispatchers.IO) {
 
     client?.options?.log("Signing user out")
 
-//        push.deletePushTokens()
-//
-//        inbox.close()
+    deletePushTokens()
+    closeInbox()
 
     // Clear the user
     // Must be called after tokens are deleted

@@ -15,6 +15,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.R
+import com.courier.android.client.error
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.InboxAction
@@ -248,7 +249,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
                     state = State.ERROR.apply { title = e.message }
 
-                    Courier.error(e.message)
+                    Courier.shared.client?.options?.error(e.message)
 
                     refreshAdapters()
 
@@ -339,7 +340,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
             } catch (e: CourierException) {
 
-                Courier.error(e.message)
+                Courier.shared.client?.options?.error(e.message)
 
             }
 

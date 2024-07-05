@@ -1,6 +1,7 @@
 package com.courier.android.models
 
 import com.courier.android.Courier
+import com.courier.android.modules.removeInboxListener
 
 data class CourierInboxListener(
     val onInitialLoad: (() -> Unit)?,
@@ -20,5 +21,5 @@ internal fun CourierInboxListener.initialize() {
 }
 
 fun CourierInboxListener.remove() {
-    Courier.shared.inbox.removeInboxListener(listener = this)
+    Courier.shared.removeInboxListener(listener = this)
 }

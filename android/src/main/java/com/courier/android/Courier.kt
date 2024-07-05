@@ -11,7 +11,14 @@ import com.courier.android.client.warn
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierAuthenticationListener
 import com.courier.android.models.CourierException
+import com.courier.android.models.CourierInboxListener
+import com.courier.android.models.CourierPushProvider
+import com.courier.android.models.Inbox
+import com.courier.android.modules.linkInbox
+import com.courier.android.modules.refreshFcmToken
+import com.courier.android.modules.unlinkInbox
 import com.courier.android.utils.NotificationEventBus
+import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -41,31 +48,27 @@ Y8,           i8'    ,8I   I8,    ,8I  ,8'    8I   88   I8, ,8I  ,8'    8I
 
 class Courier private constructor(internal val context: Context) : Application.ActivityLifecycleCallbacks {
 
-    var client: CourierClient? = null
-        internal set
-
-    var authListeners: MutableList<CourierAuthenticationListener> = mutableListOf()
-        private set
-
-    /**
-     * Modules
-     */
-//    internal val auth by lazy { CoreAuth() }
-//    internal val push by lazy { CorePush() }
-//    internal val inbox by lazy { CoreInbox() }
-//    internal val preferences by lazy { CorePreferences() }
-//    internal val brand by lazy { CoreBrand() }
-//    internal val messaging by lazy { CoreMessaging() }
-
     companion object {
 
+        // Core
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
         internal const val VERSION = "3.5.10"
         internal const val TAG = "Courier SDK"
+
+        // Push
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
+
+        // Eventing
         internal val eventBus by lazy { NotificationEventBus() }
+
+        // Async
         internal val COURIER_COROUTINE_CONTEXT by lazy { Job() }
         internal val coroutineScope = CoroutineScope(COURIER_COROUTINE_CONTEXT)
+
+        // Inbox
+        const val DEFAULT_PAGINATION_LIMIT = 32
+        const val DEFAULT_MAX_PAGINATION_LIMIT = 100
+        const val DEFAULT_MIN_PAGINATION_LIMIT = 1
 
         // This will not create a memory leak
         // Please call Courier.initialize(context) before using Courier.shared
@@ -94,7 +97,7 @@ class Courier private constructor(internal val context: Context) : Application.A
 
             // Get the current fcmToken if possible
             coroutineScope.launch(Dispatchers.IO) {
-//                mInstance?.push?.refreshFcmToken()
+                mInstance?.refreshFcmToken()
             }
 
         }
@@ -126,12 +129,53 @@ class Courier private constructor(internal val context: Context) : Application.A
 
     }
 
+    // Client API
+    var client: CourierClient? = null
+        internal set
+
+    // Authentication
+    var authListeners: MutableList<CourierAuthenticationListener> = mutableListOf()
+        private set
+
+    // Inbox
+    internal var isPaging = false
+    internal var paginationLimit = DEFAULT_PAGINATION_LIMIT
+    internal var inbox: Inbox? = null
+    internal var inboxListeners: MutableList<CourierInboxListener> = mutableListOf()
+    val inboxMessages get() = inbox?.messages
+    internal var dataPipe: Job? = null
+
+    // Firebase
+    internal val isFirebaseInitialized get() = FirebaseApp.getApps(Courier.shared.context).isNotEmpty()
+
+    // Push
+    internal var tokens: MutableMap<String, String> = mutableMapOf()
+
+    // Stores a local copy of the fcmToken
+    internal var fcmToken: String? = null
+        set(value) {
+
+            // Set the value
+            field = value
+
+            val key = CourierPushProvider.FIREBASE_FCM.value
+
+            // Update the local cache
+            if (value != null) {
+                tokens[key] = value
+            } else {
+                tokens.remove(key)
+            }
+
+        }
+
+    // Lifecycle
     override fun onActivityStarted(activity: Activity) {
-//        inbox.link()
+        linkInbox()
     }
 
     override fun onActivityStopped(activity: Activity) {
-//        inbox.unlink()
+        unlinkInbox()
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}

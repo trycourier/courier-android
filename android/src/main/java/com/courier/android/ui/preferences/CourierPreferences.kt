@@ -14,12 +14,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.R
+import com.courier.android.client.error
+import com.courier.android.client.log
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.models.CourierPreferenceStatus
 import com.courier.android.models.CourierPreferenceTopic
-import com.courier.android.modules.getUserPreferences
-import com.courier.android.modules.putUserPreferenceTopic
 import com.courier.android.ui.bar.CourierBar
 import com.courier.android.ui.infoview.CourierInfoView
 import com.courier.android.utils.isDarkMode
@@ -200,13 +200,15 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
     @SuppressLint("NotifyDataSetChanged")
     private fun refresh() = coroutineScope.launch(Dispatchers.Main) {
 
+        val client = Courier.shared.client ?: return@launch
+
         // Get the brand
         theme.getBrandIfNeeded()
 
         // Get the preferences
         try {
 
-            val preferences = Courier.shared.getUserPreferences()
+            val preferences = client.preferences.getUserPreferences()
 
             val sections = mutableListOf<PreferencesSectionAdapter>()
 
@@ -354,20 +356,22 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
                 setTopicAtPath(topic = newTopic, path = path)
 
                 // Update the Topic
-                Courier.shared.putUserPreferenceTopic(
-                    topicId = originalTopic.topicId,
-                    status = newStatus,
-                    hasCustomRouting = newTopic.hasCustomRouting,
-                    customRouting = newTopic.customRouting,
-                    onSuccess = {
-                        Courier.log("Topic updated: ${originalTopic.topicId}")
-                    },
-                    onFailure = { error ->
-                        Courier.error(error.message)
+                coroutineScope.launch {
+                    val client = Courier.shared.client
+                    try {
+                        client?.preferences?.putUserPreferenceTopic(
+                            topicId = originalTopic.topicId,
+                            status = newStatus,
+                            hasCustomRouting = newTopic.hasCustomRouting,
+                            customRouting = newTopic.customRouting
+                        )
+                        client?.options?.log("Topic updated: ${originalTopic.topicId}")
+                    } catch (error: Exception) {
+                        client?.options?.error(error.message)
                         onError?.invoke(error as CourierException)
                         setTopicAtPath(topic = originalTopic, path = path)
                     }
-                )
+                }
             }
             is Mode.Channels -> {
                 val selectedItems = items.filter { it.isOn }.map { it.data as CourierPreferenceChannel }
@@ -408,20 +412,22 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
                 setTopicAtPath(topic = newTopic, path = path)
 
                 // Update the Topic
-                Courier.shared.putUserPreferenceTopic(
-                    topicId = originalTopic.topicId,
-                    status = newStatus,
-                    hasCustomRouting = hasCustomRouting,
-                    customRouting = customRouting,
-                    onSuccess = {
-                        Courier.log("Topic updated: ${originalTopic.topicId}")
-                    },
-                    onFailure = { error ->
-                        Courier.error(error.message)
+                coroutineScope.launch {
+                    val client = Courier.shared.client
+                    try {
+                        client?.preferences?.putUserPreferenceTopic(
+                            topicId = originalTopic.topicId,
+                            status = newStatus,
+                            hasCustomRouting = hasCustomRouting,
+                            customRouting = customRouting
+                        )
+                        client?.options?.log("Topic updated: ${originalTopic.topicId}")
+                    } catch (error: Exception) {
+                        client?.options?.error(error.message)
                         onError?.invoke(error as CourierException)
                         setTopicAtPath(topic = originalTopic, path = path)
                     }
-                )
+                }
             }
         }
     }

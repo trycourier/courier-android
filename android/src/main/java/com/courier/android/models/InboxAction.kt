@@ -1,7 +1,7 @@
 package com.courier.android.models
 
 import com.courier.android.Courier
-import com.courier.android.utils.trackClick
+import kotlinx.coroutines.launch
 
 data class InboxAction(
     val content: String?,
@@ -13,8 +13,8 @@ data class InboxAction(
  * Extensions
  */
 
-fun InboxAction.markAsClicked(messageId: String) {
+fun InboxAction.markAsClicked(messageId: String) = Courier.coroutineScope.launch {
     (data?.get("trackingId") as? String)?.let { trackingId ->
-        Courier.shared.trackClick(messageId = messageId, trackingId = trackingId, onFailure = null)
+        Courier.shared.client?.inbox?.trackClick(messageId = messageId, trackingId = trackingId)
     }
 }

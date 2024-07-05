@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.courier.android.Courier
+import com.courier.android.client.log
 import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.ui.CourierStyles
 import com.courier.android.ui.preferences.CourierPreferences
@@ -72,7 +73,7 @@ class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences)
         preferences.darkTheme = theme
 
         preferences.setOnScrollPreferencesListener { offsetInDp ->
-            Courier.log(offsetInDp.toString())
+            Courier.shared.client?.options?.log(offsetInDp.toString())
         }
 
     }

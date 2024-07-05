@@ -1,12 +1,15 @@
 package com.courier.android.service
 
 import com.courier.android.Courier
-import com.courier.android.utils.broadcastMessage
+import com.courier.android.client.error
+import com.courier.android.client.log
 import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.modules.setFCMToken
-import com.courier.android.utils.trackNotification
+import com.courier.android.utils.broadcastMessage
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 open class CourierService: FirebaseMessagingService() {
 
@@ -28,12 +31,14 @@ open class CourierService: FirebaseMessagingService() {
             // If the payload contains title and body, there will be
             // issues tracking the event
             // More info: https://stackoverflow.com/a/71253912/2415921
-            Courier.shared.trackNotification(
-                message = message,
-                event = CourierTrackingEvent.DELIVERED,
-                onSuccess = { Courier.log("Event tracked") },
-                onFailure = { Courier.error(it.toString()) }
-            )
+            message.data["trackingUrl"]?.let { trackingUrl ->
+                Courier.coroutineScope.launch(Dispatchers.IO) {
+                    Courier.shared.client?.tracking?.postTrackingUrl(
+                        url = trackingUrl,
+                        event = CourierTrackingEvent.DELIVERED,
+                    )
+                }
+            }
 
             // Broadcast the message to the app
             // This will allow us to handle when it's delivered
@@ -41,7 +46,7 @@ open class CourierService: FirebaseMessagingService() {
 
         } catch (e: Exception) {
 
-            Courier.error(e.toString())
+            Courier.shared.client?.options?.error(e.toString())
 
         }
 
@@ -57,13 +62,13 @@ open class CourierService: FirebaseMessagingService() {
 
             Courier.shared.setFCMToken(
                 token = token,
-                onSuccess = { Courier.log("Courier FCM token updated") },
-                onFailure = { Courier.error(it.toString()) }
+                onSuccess = { Courier.shared.client?.options?.log("Courier FCM token updated") },
+                onFailure = { Courier.shared.client?.options?.error(it.toString()) }
             )
 
         } catch (e: Exception) {
 
-            Courier.error(e.toString())
+            Courier.shared.client?.options?.error(e.toString())
 
         }
 

@@ -66,6 +66,20 @@ class InboxClientTests {
     }
 
     @Test
+    fun getArchivedMessages() = runBlocking {
+
+        val limit = 24
+
+        val res = client.inbox.getArchivedMessages(
+            paginationLimit = limit,
+            startCursor = null,
+        )
+
+        assertTrue(res.data?.messages?.nodes?.size!! <= limit)
+
+    }
+
+    @Test
     fun getUnreadMessageCount() = runBlocking {
 
         sendMessage()

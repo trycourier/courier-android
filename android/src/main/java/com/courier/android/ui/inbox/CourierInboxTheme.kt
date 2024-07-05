@@ -4,9 +4,9 @@ import android.graphics.Color
 import androidx.annotation.ColorInt
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.courier.android.Courier
+import com.courier.android.client.error
 import com.courier.android.models.CourierBrand
 import com.courier.android.models.CourierException
-import com.courier.android.modules.getBrand
 import com.courier.android.ui.CourierStyles
 
 data class CourierInboxTheme(
@@ -48,12 +48,15 @@ data class CourierInboxTheme(
         // Reset brand
         brand = null
 
+        val client = Courier.shared.client
+
         // Get the new brand if needed
         brandId?.let {
             try {
-                brand = Courier.shared.getBrand(it)
+                val res = client?.brands?.getBrand(it)
+                brand = res?.data?.brand
             } catch (e: CourierException) {
-                Courier.error(e.message)
+                client?.options?.error(e.message)
             }
         }
 

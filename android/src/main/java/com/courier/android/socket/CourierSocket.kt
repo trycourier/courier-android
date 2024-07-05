@@ -1,6 +1,5 @@
 package com.courier.android.socket
 
-import com.courier.android.Courier
 import com.courier.android.models.CourierException
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -60,7 +59,6 @@ open class CourierSocket(internal val url: String) {
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    Courier.error(t.message)
                     onError?.invoke(CourierException.inboxWebSocketFail)
                     if (continuation.isActive) {
                         continuation.resumeWith(Result.failure(t))

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.courier.android.Courier
+import com.courier.android.client.log
 import com.courier.android.models.markAsClicked
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
@@ -21,18 +22,16 @@ class PrebuiltInboxFragment: Fragment(R.layout.fragment_prebuilt_inbox) {
 
         inbox = view.findViewById(R.id.courierInbox)
 
-        // 5. Add get archived messages
-
         inbox.setOnClickMessageListener { message, index ->
             val str = message.toJson() ?: "Invalid"
-            Courier.log(str)
+            Courier.shared.client?.options?.log(str)
             if (!message.isRead) DetailSheet(str).show(childFragmentManager, null)
             if (message.isRead) message.markAsUnread() else message.markAsRead()
         }
 
         inbox.setOnClickActionListener { action, message, index ->
             val str = action.toJson() ?: "Invalid"
-            Courier.log(str)
+            Courier.shared.client?.options?.log(str)
             DetailSheet(str).show(childFragmentManager, null)
             action.markAsClicked(message.messageId)
         }
