@@ -1,5 +1,6 @@
 package com.courier.android
 
+import com.courier.android.client.CourierClient
 import com.courier.android.utils.dispatch
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -12,6 +13,15 @@ internal class ExampleServer {
     data class MessageResponse(val requestId: String)
 
     companion object {
+
+        private val mockOptions = CourierClient.Options(
+            null,
+            null,
+            Env.COURIER_USER_ID,
+            null,
+            null,
+            true,
+        )
 
         private val http = OkHttpClient.Builder().addNetworkInterceptor { chain ->
             chain.proceed(
@@ -39,7 +49,7 @@ internal class ExampleServer {
                 .post(json.toRequestBody())
                 .build()
 
-            val res = http.newCall(request).dispatch<TokenResponse>()
+            val res = http.newCall(request).dispatch<TokenResponse>(mockOptions)
             return res.token
 
         }
@@ -71,7 +81,11 @@ internal class ExampleServer {
                 .post(json.toRequestBody())
                 .build()
 
-            val res = http.newCall(request).dispatch<MessageResponse>(validCodes = listOf(202))
+            val res = http.newCall(request).dispatch<MessageResponse>(
+                options = mockOptions,
+                validCodes = listOf(202)
+            )
+
             return res.requestId
 
         }

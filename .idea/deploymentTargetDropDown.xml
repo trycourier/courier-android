@@ -2,10 +2,7 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="AuthTests">
-        <State />
-      </entry>
-      <entry key="InboxClientTests">
+      <entry key="InboxTests">
         <State />
       </entry>
       <entry key="Tests in 'com.courier.android'">
@@ -27,10 +24,13 @@
           <timeTargetWasSelectedWithDropDown value="2024-04-17T22:28:46.955254Z" />
         </State>
       </entry>
-      <entry key="getMessage()">
+      <entry key="openMessage()">
         <State />
       </entry>
-      <entry key="socketConnectionTest()">
+      <entry key="setupInbox()">
+        <State />
+      </entry>
+      <entry key="testInboxPagination()">
         <State />
       </entry>
     </value>

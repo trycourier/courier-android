@@ -16,7 +16,7 @@ internal class UserBuilder {
 
     companion object {
 
-        suspend fun authenticate(useJWT: Boolean = true, tenantId: String? = null) {
+        suspend fun authenticate(userId: String = Env.COURIER_USER_ID, useJWT: Boolean = true, tenantId: String? = null) {
 
             // Add listener. Just to make sure the listener is working
             val listener = Courier.shared.addAuthenticationListener { userId ->
@@ -31,7 +31,7 @@ internal class UserBuilder {
             if (useJWT) {
                 jwt = ExampleServer.generateJWT(
                     authKey = Env.COURIER_AUTH_KEY,
-                    userId = Env.COURIER_USER_ID
+                    userId = userId
                 )
             }
 
@@ -40,7 +40,7 @@ internal class UserBuilder {
             Courier.shared.signIn(
                 accessToken = accessToken,
                 clientKey = Env.COURIER_CLIENT_KEY,
-                userId = Env.COURIER_USER_ID,
+                userId = userId,
                 tenantId = tenantId,
             )
 
@@ -49,8 +49,8 @@ internal class UserBuilder {
 
             // Check values
             assertEquals(Courier.shared.accessToken, accessToken)
-            assertEquals(Courier.shared.userId, Env.COURIER_USER_ID)
-            assertEquals(Courier.shared.clientKey, Env.COURIER_USER_ID)
+            assertEquals(Courier.shared.userId, userId)
+            assertEquals(Courier.shared.clientKey, Env.COURIER_CLIENT_KEY)
 
         }
 
