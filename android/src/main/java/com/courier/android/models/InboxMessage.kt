@@ -1,12 +1,15 @@
 package com.courier.android.models
 
 import com.courier.android.Courier
+import com.courier.android.modules.archiveMessage
+import com.courier.android.modules.clickMessage
+import com.courier.android.modules.openMessage
 import com.courier.android.modules.readMessage
 import com.courier.android.modules.unreadMessage
 import com.courier.android.utils.isoToDate
 import com.courier.android.utils.timeSince
 import com.courier.android.utils.toIsoTimestamp
-import java.util.*
+import java.util.Date
 
 data class InboxMessage(
     val messageId: String,
@@ -27,14 +30,9 @@ data class InboxMessage(
     val isOpened get() = opened != null
     val isArchived get() = archived != null
 
+    // TODO: Make this cleaner. Need Riley's Changes.
     private val trackingIdsData: Map<String, Any>? get() = data?.get("trackingIds") as? Map<String, Any>?
-
-    val archiveTrackingId: String? get() = trackingIdsData?.get("archiveTrackingId") as? String ?: trackingIds?.archiveTrackingId
-    val openTrackingId: String? get() = trackingIdsData?.get("openTrackingId") as? String ?: trackingIds?.openTrackingId
     val clickTrackingId: String? get() = trackingIdsData?.get("clickTrackingId") as? String ?: trackingIds?.clickTrackingId
-    val deliverTrackingId: String? get() = trackingIdsData?.get("deliverTrackingId") as? String ?: trackingIds?.deliverTrackingId
-    val unreadTrackingId: String? get() = trackingIdsData?.get("unreadTrackingId") as? String ?: trackingIds?.unreadTrackingId
-    val readTrackingId: String? get() = trackingIdsData?.get("readTrackingId") as? String ?: trackingIds?.readTrackingId
 
     internal fun setRead() {
         read = Date().toIsoTimestamp()
@@ -72,4 +70,16 @@ fun InboxMessage.markAsRead() {
 
 fun InboxMessage.markAsUnread() {
     Courier.shared.unreadMessage(messageId = messageId, onFailure = null)
+}
+
+fun InboxMessage.markAsOpened() {
+    Courier.shared.openMessage(messageId = messageId, onFailure = null)
+}
+
+fun InboxMessage.markAsClicked() {
+    Courier.shared.clickMessage(messageId = messageId, onFailure = null)
+}
+
+fun InboxMessage.markAsArchived() {
+    Courier.shared.archiveMessage(messageId = messageId, onFailure = null)
 }

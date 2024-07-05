@@ -37,12 +37,7 @@ internal class InboxRepository : Repository() {
                         preview
                         data
                         trackingIds {
-                            openTrackingId
-                            archiveTrackingId
                             clickTrackingId
-                            deliverTrackingId
-                            readTrackingId
-                            unreadTrackingId
                         }
                         actions {
                             content
@@ -95,11 +90,11 @@ internal class InboxRepository : Repository() {
 
     }
 
-    internal suspend fun clickMessage(clientKey: String? = null, jwt: String? = null, userId: String, messageId: String, channelId: String) {
+    internal suspend fun trackClick(clientKey: String? = null, jwt: String? = null, userId: String, messageId: String, trackingId: String) {
 
         val mutation = """
             mutation TrackEvent {
-                clicked(messageId: \"${messageId}\", trackingId: \"${channelId}\")
+                clicked(messageId: \"${messageId}\", trackingId: \"${trackingId}\")
             }
         """.toGraphQuery()
 
@@ -117,7 +112,7 @@ internal class InboxRepository : Repository() {
 
     }
 
-    internal suspend fun readMessage(clientKey: String? = null, jwt: String? = null, userId: String, connectionId: String, messageId: String) {
+    internal suspend fun trackRead(clientKey: String? = null, jwt: String? = null, userId: String, connectionId: String, messageId: String) {
 
         val mutation = """
             mutation TrackEvent {
@@ -140,7 +135,7 @@ internal class InboxRepository : Repository() {
 
     }
 
-    internal suspend fun unreadMessage(clientKey: String? = null, jwt: String? = null, userId: String, connectionId: String, messageId: String) {
+    internal suspend fun trackUnread(clientKey: String? = null, jwt: String? = null, userId: String, connectionId: String, messageId: String) {
 
         val query = """
             mutation TrackEvent {
@@ -163,7 +158,7 @@ internal class InboxRepository : Repository() {
 
     }
 
-    internal suspend fun readAllMessages(clientKey: String? = null, jwt: String? = null, connectionId: String, userId: String, ) {
+    internal suspend fun trackAllRead(clientKey: String? = null, jwt: String? = null, connectionId: String, userId: String, ) {
 
         val query = """
             mutation TrackEvent {
@@ -186,7 +181,7 @@ internal class InboxRepository : Repository() {
 
     }
 
-    internal suspend fun openMessage(clientKey: String? = null, jwt: String? = null, userId: String, messageId: String) {
+    internal suspend fun trackOpened(clientKey: String? = null, jwt: String? = null, userId: String, connectionId: String, messageId: String) {
 
         val query = """
             mutation TrackEvent {
@@ -197,11 +192,35 @@ internal class InboxRepository : Repository() {
         val request = Request.Builder()
             .url(INBOX_GRAPH_QL)
             .addHeader("x-courier-user-id", userId)
+            .addHeader("x-courier-client-source-id", connectionId)
             .apply {
                 jwt?.let { addHeader("Authorization", "Bearer $it") }
                     ?: clientKey?.let { addHeader("x-courier-client-key", it) }
             }
             .post(query.toRequestBody())
+            .build()
+
+        http.newCall(request).dispatch<Any>()
+
+    }
+
+    internal suspend fun trackArchive(clientKey: String? = null, jwt: String? = null, userId: String, connectionId: String, messageId: String) {
+
+        val mutation = """
+            mutation TrackEvent {
+                archive(messageId: \"${messageId}\")
+            }
+        """.toGraphQuery()
+
+        val request = Request.Builder()
+            .url(INBOX_GRAPH_QL)
+            .addHeader("x-courier-user-id", userId)
+            .addHeader("x-courier-client-source-id", connectionId)
+            .apply {
+                jwt?.let { addHeader("Authorization", "Bearer $it") }
+                    ?: clientKey?.let { addHeader("x-courier-client-key", it) }
+            }
+            .post(mutation.toRequestBody())
             .build()
 
         http.newCall(request).dispatch<Any>()

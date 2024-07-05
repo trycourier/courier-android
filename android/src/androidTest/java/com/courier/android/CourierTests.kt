@@ -9,10 +9,16 @@ import com.courier.android.models.CourierPreferenceStatus
 import com.courier.android.models.CourierPushEvent
 import com.courier.android.models.CourierPushProvider
 import com.courier.android.models.FirebaseCloudMessagingChannel
+import com.courier.android.models.markAsArchived
+import com.courier.android.models.markAsClicked
+import com.courier.android.models.markAsOpened
+import com.courier.android.models.markAsRead
+import com.courier.android.models.markAsUnread
 import com.courier.android.models.remove
 import com.courier.android.modules.accessToken
 import com.courier.android.modules.addAuthenticationListener
 import com.courier.android.modules.addInboxListener
+import com.courier.android.modules.archiveMessage
 import com.courier.android.modules.clickMessage
 import com.courier.android.modules.clientKey
 import com.courier.android.modules.fcmToken
@@ -23,6 +29,7 @@ import com.courier.android.modules.getUserPreferenceTopic
 import com.courier.android.modules.getUserPreferences
 import com.courier.android.modules.inboxMessages
 import com.courier.android.modules.inboxPaginationLimit
+import com.courier.android.modules.openMessage
 import com.courier.android.modules.putUserPreferenceTopic
 import com.courier.android.modules.readMessage
 import com.courier.android.modules.sendMessage
@@ -32,7 +39,6 @@ import com.courier.android.modules.signIn
 import com.courier.android.modules.signOut
 import com.courier.android.modules.unreadMessage
 import com.courier.android.modules.userId
-import com.courier.android.repositories.InboxRepository
 import com.courier.android.socket.CourierSocket
 import com.courier.android.socket.InboxSocket
 import com.courier.android.utils.trackNotification
@@ -568,17 +574,13 @@ class CourierTests {
     @Test
     fun openMessage() = runBlocking {
 
-        print("🔬 Testing Open Message")
+        print("🔬 Open Message")
 
         signUserIn()
 
         val messageId = sendInboxMessage()
 
-        InboxRepository().openMessage(
-            clientKey = Env.COURIER_CLIENT_KEY,
-            userId = Env.COURIER_USER_ID,
-            messageId = messageId
-        )
+        Courier.shared.openMessage(messageId = messageId)
 
     }
 
@@ -626,6 +628,40 @@ class CourierTests {
         val messageId = sendInboxMessage()
 
         Courier.shared.unreadMessage(messageId = messageId)
+
+    }
+
+    @Test
+    fun archiveMessage() = runBlocking {
+
+        print("🔬 Archive Message")
+
+        signUserIn()
+
+        val messageId = sendInboxMessage()
+
+        Courier.shared.archiveMessage(messageId = messageId)
+
+    }
+
+    @Test
+    fun testExtensions() = runBlocking {
+
+        print("🔬 Testing InboxMessage Extensions")
+
+        signUserIn()
+
+        val listener = loadInboxMessages()
+
+        Courier.shared.inboxMessages?.firstOrNull()?.let { message ->
+            message.markAsOpened()
+            message.markAsRead()
+            message.markAsUnread()
+            message.markAsClicked()
+            message.markAsArchived()
+        }
+
+        listener.remove()
 
     }
 

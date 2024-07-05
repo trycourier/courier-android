@@ -16,6 +16,10 @@ import com.courier.android.Courier.Companion.COURIER_COROUTINE_CONTEXT
 import com.courier.android.Courier.Companion.eventBus
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierPushEvent
+import com.courier.android.modules.clientKey
+import com.courier.android.modules.jwt
+import com.courier.android.modules.userId
+import com.courier.android.repositories.InboxRepository
 import com.courier.android.repositories.MessagingRepository
 import com.courier.android.ui.CourierStyles
 import com.google.firebase.messaging.RemoteMessage
@@ -58,6 +62,27 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
 
     }
 
+}
+
+suspend fun Courier.trackClick(messageId: String, trackingId: String) {
+    userId?.let { userId ->
+        InboxRepository().trackClick(
+            clientKey = clientKey,
+            jwt = jwt,
+            userId = userId,
+            messageId = messageId,
+            trackingId = trackingId,
+        )
+    }
+}
+
+fun Courier.trackClick(messageId: String, trackingId: String, onSuccess: (() -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = Courier.coroutineScope.launch(Dispatchers.Main) {
+    try {
+        Courier.shared.trackClick(messageId, trackingId)
+        onSuccess?.invoke()
+    } catch (e: Exception) {
+        onFailure?.invoke(e)
+    }
 }
 
 suspend fun Courier.trackNotification(message: RemoteMessage, event: CourierPushEvent) = withContext(COURIER_COROUTINE_CONTEXT) {

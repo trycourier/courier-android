@@ -215,7 +215,12 @@ internal class CoreInbox {
                         notifyMessagesChanged()
                     }
                 }
-                InboxSocket.EventType.OPENED -> Courier.log("Message Opened")
+                InboxSocket.EventType.ARCHIVE -> {
+                    Courier.log("Message Archived")
+                }
+                InboxSocket.EventType.OPENED -> {
+                    Courier.log("Message Opened")
+                }
             }
         }
 
@@ -379,7 +384,7 @@ internal class CoreInbox {
         coroutineScope.launch(Dispatchers.IO) {
 
             try {
-                inboxRepo.readAllMessages(
+                inboxRepo.trackAllRead(
                     clientKey = Courier.shared.clientKey,
                     jwt = Courier.shared.jwt,
                     userId = Courier.shared.userId!!,
@@ -401,18 +406,21 @@ internal class CoreInbox {
             throw CourierException.inboxUserNotFound
         }
 
-        // 是的，这有点儿傻
-        val message = inbox?.messages?.first { it.messageId == messageId }
+        // Unwrap message
+        inbox?.messages?.firstOrNull { it.messageId == messageId }?.let { message ->
 
-        message?.clickTrackingId?.let { channelId ->
+            // Unwrap tracking id
+            message.clickTrackingId?.let { trackingId ->
 
-            inboxRepo.clickMessage(
-                clientKey = Courier.shared.clientKey,
-                jwt = Courier.shared.jwt,
-                userId = Courier.shared.userId!!,
-                messageId = messageId,
-                channelId = channelId
-            )
+                inboxRepo.trackClick(
+                    clientKey = Courier.shared.clientKey,
+                    jwt = Courier.shared.jwt,
+                    userId = Courier.shared.userId!!,
+                    messageId = messageId,
+                    trackingId = trackingId
+                )
+
+            }
 
         }
 
@@ -432,7 +440,7 @@ internal class CoreInbox {
 
         try {
 
-            inboxRepo.readMessage(
+            inboxRepo.trackRead(
                 clientKey = Courier.shared.clientKey,
                 jwt = Courier.shared.jwt,
                 userId = Courier.shared.userId!!,
@@ -467,7 +475,7 @@ internal class CoreInbox {
 
         try {
 
-            inboxRepo.unreadMessage(
+            inboxRepo.trackUnread(
                 clientKey = Courier.shared.clientKey,
                 jwt = Courier.shared.jwt,
                 userId = Courier.shared.userId!!,
@@ -485,6 +493,38 @@ internal class CoreInbox {
             notifyError(e)
 
         }
+
+    }
+
+    internal suspend fun openMessage(messageId: String) {
+
+        if (!hasInboxUser) {
+            throw CourierException.inboxUserNotFound
+        }
+
+        inboxRepo.trackOpened(
+            clientKey = Courier.shared.clientKey,
+            jwt = Courier.shared.jwt,
+            userId = Courier.shared.userId!!,
+            messageId = messageId,
+            connectionId = connectionId,
+        )
+
+    }
+
+    internal suspend fun archiveMessage(messageId: String) {
+
+        if (!hasInboxUser) {
+            throw CourierException.inboxUserNotFound
+        }
+
+        inboxRepo.trackArchive(
+            clientKey = Courier.shared.clientKey,
+            jwt = Courier.shared.jwt,
+            userId = Courier.shared.userId!!,
+            messageId = messageId,
+            connectionId = connectionId,
+        )
 
     }
 
@@ -644,6 +684,32 @@ suspend fun Courier.unreadMessage(messageId: String) {
 fun Courier.unreadMessage(messageId: String, onSuccess: (() -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = coroutineScope.launch(Dispatchers.Main) {
     try {
         inbox.unreadMessage(messageId)
+        onSuccess?.invoke()
+    } catch (e: Exception) {
+        onFailure?.invoke(e)
+    }
+}
+
+suspend fun Courier.openMessage(messageId: String) {
+    inbox.openMessage(messageId)
+}
+
+fun Courier.openMessage(messageId: String, onSuccess: (() -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = coroutineScope.launch(Dispatchers.Main) {
+    try {
+        inbox.openMessage(messageId)
+        onSuccess?.invoke()
+    } catch (e: Exception) {
+        onFailure?.invoke(e)
+    }
+}
+
+suspend fun Courier.archiveMessage(messageId: String) {
+    inbox.archiveMessage(messageId)
+}
+
+fun Courier.archiveMessage(messageId: String, onSuccess: (() -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = coroutineScope.launch(Dispatchers.Main) {
+    try {
+        inbox.archiveMessage(messageId)
         onSuccess?.invoke()
     } catch (e: Exception) {
         onFailure?.invoke(e)

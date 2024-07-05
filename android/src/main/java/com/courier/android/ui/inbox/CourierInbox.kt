@@ -7,7 +7,6 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ProgressBar
-import androidx.appcompat.app.AlertDialog
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,15 +23,14 @@ import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.clickMessage
 import com.courier.android.modules.clientKey
+import com.courier.android.modules.openMessage
 import com.courier.android.modules.refreshInbox
 import com.courier.android.modules.userId
-import com.courier.android.repositories.InboxRepository
 import com.courier.android.ui.bar.CourierBar
 import com.courier.android.ui.infoview.CourierInfoView
 import com.courier.android.ui.preferences.inbox.LoadingAdapter
 import com.courier.android.utils.forceReactNativeLayoutFix
 import com.courier.android.utils.isDarkMode
-import com.courier.android.utils.launchCourierWebsite
 import com.courier.android.utils.pxToDp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -156,15 +154,16 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
     private var onClickInboxActionForMessageAtIndex: ((InboxAction, InboxMessage, Int) -> Unit)? = null
     private var onScrollInbox: ((Int) -> Unit)? = null
 
-    private val inboxRepo by lazy { InboxRepository() }
-
     private val messagesAdapter = MessagesAdapter(
         theme = theme,
         messages = emptyList(),
         onMessageClick = { message, index ->
 
             // Handle message click
-            Courier.shared.clickMessage(message.messageId, onFailure = null)
+            Courier.shared.clickMessage(
+                messageId = message.messageId,
+                onFailure = null
+            )
 
             // Call the callback
             onClickInboxMessageAtIndex?.invoke(message, index)
@@ -189,26 +188,6 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun refreshTheme() {
         theme = if (context.isDarkMode) darkTheme else lightTheme
-    }
-
-    private fun openDialog() {
-
-        AlertDialog.Builder(context).apply {
-
-            setTitle("Learn more about Courier?")
-
-            setNegativeButton("Cancel") { _, _ ->
-                // Empty
-            }
-
-            setPositiveButton("Learn More") { _, _ ->
-                context.launchCourierWebsite()
-            }
-
-            show()
-
-        }
-
     }
 
     private fun setup() {
@@ -350,14 +329,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
                     // Bundle the request into an async function
                     return@map async {
-
-                        // Open the message in Courier
-                        inboxRepo.openMessage(
-                            clientKey = Courier.shared.clientKey!!,
-                            userId = Courier.shared.userId!!,
-                            messageId = message.messageId,
-                        )
-
+                        Courier.shared.openMessage(message.messageId)
                     }
 
                 }

@@ -29,6 +29,7 @@ internal object InboxSocketManager {
             socketInstance = null
         }
     }
+
 }
 
 internal class InboxSocket(private val clientKey: String?, private val jwt: String?, onClose: (code: Int, reason: String?) -> Unit, onError: (e: Exception) -> Unit) : CourierSocket(url = buildUrl(clientKey, jwt), onClose = onClose, onError = onError) {
@@ -42,7 +43,8 @@ internal class InboxSocket(private val clientKey: String?, private val jwt: Stri
         @SerializedName("read") READ("read"),
         @SerializedName("unread") UNREAD("unread"),
         @SerializedName("mark-all-read") MARK_ALL_READ("mark-all-read"),
-        @SerializedName("opened") OPENED("opened")
+        @SerializedName("opened") OPENED("opened"),
+        @SerializedName("archive") ARCHIVE("archive")
     }
 
     data class SocketPayload(val type: PayloadType, val event: EventType?)
