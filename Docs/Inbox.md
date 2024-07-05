@@ -361,9 +361,24 @@ lifecycle.coroutineScope.launch {
 
 }
 
-// Mark message as read/unread
+// Inbox Message functions
+lifecycle.coroutineScope.launch {
+    val messageId = "asdf"
+    Courier.shared.openMessage(messageId = messageId)
+    Courier.shared.clickMessage(messageId = messageId)
+    Courier.shared.readMessage(messageId = messageId)
+    Courier.shared.unreadMessage(messageId = messageId)
+    Courier.shared.archiveMessage(messageId = messageId)
+}
+
+// Extensions
 let message = InboxMessage(..)
+message.markAsOpened()
 message.markAsRead()
 message.markAsUnread()
+message.markAsClicked()
+message.markAsArchived()
 
+// Clicking an action
+message.actions?.first?.markAsClicked()
 ```
