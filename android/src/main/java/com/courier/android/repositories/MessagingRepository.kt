@@ -3,7 +3,7 @@ package com.courier.android.repositories
 import com.courier.android.Courier
 import com.courier.android.models.CourierChannel
 import com.courier.android.models.CourierMessageResponse
-import com.courier.android.models.CourierPushEvent
+import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.utils.dispatch
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -65,7 +65,7 @@ internal class MessagingRepository : Repository() {
 
     }
 
-    internal suspend fun postTrackingUrl(url: String, event: CourierPushEvent) {
+    internal suspend fun postTrackingUrl(url: String, event: CourierTrackingEvent) {
 
         val json = JSONObject(
             mapOf("event" to event.value)

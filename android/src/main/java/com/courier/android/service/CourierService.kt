@@ -2,7 +2,7 @@ package com.courier.android.service
 
 import com.courier.android.Courier
 import com.courier.android.utils.broadcastMessage
-import com.courier.android.models.CourierPushEvent
+import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.modules.setFCMToken
 import com.courier.android.utils.trackNotification
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -30,7 +30,7 @@ open class CourierService: FirebaseMessagingService() {
             // More info: https://stackoverflow.com/a/71253912/2415921
             Courier.shared.trackNotification(
                 message = message,
-                event = CourierPushEvent.DELIVERED,
+                event = CourierTrackingEvent.DELIVERED,
                 onSuccess = { Courier.log("Event tracked") },
                 onFailure = { Courier.error(it.toString()) }
             )

@@ -6,12 +6,12 @@ import android.app.Application
 import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import com.courier.android.core.Logging
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
 import com.courier.android.modules.CoreAuth
 import com.courier.android.modules.CoreBrand
 import com.courier.android.modules.CoreInbox
-import com.courier.android.modules.CoreLogging
 import com.courier.android.modules.CoreMessaging
 import com.courier.android.modules.CorePreferences
 import com.courier.android.modules.CorePush
@@ -48,7 +48,6 @@ class Courier private constructor(internal val context: Context) : Application.A
     /**
      * Modules
      */
-    internal val logging = CoreLogging()
     internal val auth by lazy { CoreAuth() }
     internal val push by lazy { CorePush() }
     internal val inbox by lazy { CoreInbox() }
@@ -126,9 +125,9 @@ class Courier private constructor(internal val context: Context) : Application.A
         /**
          * Logs to the console
          */
-        fun log(data: String) = shared.logging.log(data)
-        fun warn(data: String) = shared.logging.warn(data)
-        fun error(data: String?) = shared.logging.error(data)
+        fun log(data: String) = Logging.log(data)
+        fun warn(data: String) = Logging.warn(data)
+        fun error(data: String?) = Logging.error(data)
 
     }
 

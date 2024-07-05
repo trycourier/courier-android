@@ -15,7 +15,7 @@ import com.courier.android.Courier
 import com.courier.android.Courier.Companion.COURIER_COROUTINE_CONTEXT
 import com.courier.android.Courier.Companion.eventBus
 import com.courier.android.models.CourierAgent
-import com.courier.android.models.CourierPushEvent
+import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.modules.clientKey
 import com.courier.android.modules.jwt
 import com.courier.android.modules.userId
@@ -47,7 +47,7 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
             // Track when the notification was clicked
             Courier.shared.trackNotification(
                 message = message,
-                event = CourierPushEvent.CLICKED,
+                event = CourierTrackingEvent.CLICKED,
                 onSuccess = { Courier.log("Event tracked") },
                 onFailure = { Courier.error(it.toString()) }
             )
@@ -85,7 +85,7 @@ fun Courier.trackClick(messageId: String, trackingId: String, onSuccess: (() -> 
     }
 }
 
-suspend fun Courier.trackNotification(message: RemoteMessage, event: CourierPushEvent) = withContext(COURIER_COROUTINE_CONTEXT) {
+suspend fun Courier.trackNotification(message: RemoteMessage, event: CourierTrackingEvent) = withContext(COURIER_COROUTINE_CONTEXT) {
     val trackingUrl = message.data["trackingUrl"] ?: return@withContext
     MessagingRepository().postTrackingUrl(
         url = trackingUrl,
@@ -93,7 +93,7 @@ suspend fun Courier.trackNotification(message: RemoteMessage, event: CourierPush
     )
 }
 
-fun Courier.trackNotification(message: RemoteMessage, event: CourierPushEvent, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
+fun Courier.trackNotification(message: RemoteMessage, event: CourierTrackingEvent, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
     try {
         Courier.shared.trackNotification(
             message = message,
@@ -105,14 +105,14 @@ fun Courier.trackNotification(message: RemoteMessage, event: CourierPushEvent, o
     }
 }
 
-suspend fun Courier.trackNotification(trackingUrl: String, event: CourierPushEvent) = withContext(COURIER_COROUTINE_CONTEXT) {
+suspend fun Courier.trackNotification(trackingUrl: String, event: CourierTrackingEvent) = withContext(COURIER_COROUTINE_CONTEXT) {
     MessagingRepository().postTrackingUrl(
         url = trackingUrl,
         event = event
     )
 }
 
-fun Courier.trackNotification(trackingUrl: String, event: CourierPushEvent, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
+fun Courier.trackNotification(trackingUrl: String, event: CourierTrackingEvent, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.IO) {
     try {
         Courier.shared.trackNotification(
             trackingUrl = trackingUrl,

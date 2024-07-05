@@ -6,8 +6,8 @@ import com.courier.android.models.CourierElement
 import com.courier.android.models.CourierInboxChannel
 import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.models.CourierPreferenceStatus
-import com.courier.android.models.CourierPushEvent
 import com.courier.android.models.CourierPushProvider
+import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.models.FirebaseCloudMessagingChannel
 import com.courier.android.models.markAsArchived
 import com.courier.android.models.markAsClicked
@@ -82,7 +82,7 @@ class CourierTests {
 
         if (shouldUseJWT) {
 
-            accessToken = ExampleServer().generateJWT(
+            accessToken = ExampleServer.generateJWT(
                 authKey = Env.COURIER_AUTH_KEY,
                 userId = Env.COURIER_USER_ID
             )
@@ -208,7 +208,7 @@ class CourierTests {
             clientSourceId = clientSourceId,
         )
 
-        val messageId = ExampleServer().sendTest(
+        val messageId = ExampleServer.sendTest(
             authKey = Env.COURIER_AUTH_KEY,
             userId = userId,
             channel = "inbox"
@@ -340,7 +340,7 @@ class CourierTests {
 
         print("🔬 Setting credentials with JWT")
 
-        val jwt = ExampleServer().generateJWT(
+        val jwt = ExampleServer.generateJWT(
             authKey = Env.COURIER_AUTH_KEY,
             userId = Env.COURIER_USER_ID
         )
@@ -422,12 +422,12 @@ class CourierTests {
 
         Courier.shared.trackNotification(
             message = message,
-            event = CourierPushEvent.DELIVERED
+            event = CourierTrackingEvent.DELIVERED
         )
 
         Courier.shared.trackNotification(
             message = message,
-            event = CourierPushEvent.CLICKED
+            event = CourierTrackingEvent.CLICKED
         )
 
         print("Message tracked")
@@ -533,7 +533,7 @@ class CourierTests {
         signUserIn()
 
         val topic = Courier.shared.getUserPreferenceTopic(
-            topicId = Env.COURIER_PREFERENCE_ID
+            topicId = Env.COURIER_PREFERENCE_TOPIC_ID
         )
 
         print(topic)
@@ -548,7 +548,7 @@ class CourierTests {
         signUserIn()
 
         Courier.shared.putUserPreferenceTopic(
-            topicId = Env.COURIER_PREFERENCE_ID,
+            topicId = Env.COURIER_PREFERENCE_TOPIC_ID,
             status = CourierPreferenceStatus.OPTED_IN,
             hasCustomRouting = true,
             customRouting = listOf(CourierPreferenceChannel.SMS, CourierPreferenceChannel.PUSH)

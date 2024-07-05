@@ -2,11 +2,11 @@ package com.courier.android.models
 
 import com.google.gson.annotations.SerializedName
 
-internal data class CourierBrandResponse(
+data class CourierBrandResponse(
     val data: CourierBrandData
 )
 
-internal data class CourierBrandData(
+data class CourierBrandData(
     val brand: CourierBrand
 )
 

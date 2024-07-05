@@ -2,7 +2,10 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
-      <entry key="CourierTests">
+      <entry key="PreferencesClientTests">
+        <State />
+      </entry>
+      <entry key="TrackingClientTests">
         <State />
       </entry>
       <entry key="app">
@@ -21,16 +24,13 @@
           <timeTargetWasSelectedWithDropDown value="2024-04-17T22:28:46.955254Z" />
         </State>
       </entry>
-      <entry key="archiveMessage()">
-        <State />
-      </entry>
       <entry key="getBrand()">
         <State />
       </entry>
-      <entry key="setupInbox()">
+      <entry key="trackDelivered()">
         <State />
       </entry>
-      <entry key="testExtensions()">
+      <entry key="updateTopic()">
         <State />
       </entry>
     </value>
