@@ -7,7 +7,7 @@ internal class ClientBuilder {
 
     companion object {
 
-        suspend fun build(useJWT: Boolean = true, tenantId: String? = null): CourierClient {
+        suspend fun build(useJWT: Boolean = true, connectionId: String? = null, tenantId: String? = null): CourierClient {
 
             var jwt: String? = null
 
@@ -22,6 +22,7 @@ internal class ClientBuilder {
                 jwt = jwt,
                 clientKey = Env.COURIER_CLIENT_KEY,
                 userId = Env.COURIER_USER_ID,
+                connectionId = connectionId,
                 tenantId = tenantId,
                 showLogs = true,
             )

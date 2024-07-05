@@ -1,6 +1,8 @@
 package com.courier.android.client
 
-import com.courier.android.models.CourierInboxResponse
+import com.courier.android.models.CourierGetInboxMessageResponse
+import com.courier.android.models.CourierGetInboxMessagesResponse
+import com.courier.android.socket.NewInboxSocket
 import com.courier.android.utils.dispatch
 import com.courier.android.utils.toGraphQuery
 import okhttp3.Request
@@ -8,12 +10,58 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 class InboxClient(private val options: CourierClient.Options): CourierApiClient() {
 
-    suspend fun getMessages(paginationLimit: Int = 24, startCursor: String? = null): CourierInboxResponse {
+    val socket by lazy { NewInboxSocket(options = options) }
+
+    suspend fun getMessage(messageId: String): CourierGetInboxMessageResponse {
+
+        // TODO: Support tenants
+        val tenantParams = if (options.tenantId != null) """accountId: \"${options.tenantId}\"""" else ""
+
+        val query = """
+            query GetInboxMessage {
+                message(messageId: \"$messageId\") {
+                    messageId
+                    read
+                    archived
+                    created
+                    opened
+                    data
+                    trackingIds {
+                        clickTrackingId
+                    }
+                    content {
+                        title
+                        preview
+                        actions {
+                            background_color
+                            content
+                            href
+                            style
+                        }
+                    }
+                }
+            }
+        """.toGraphQuery()
+
+        val request = Request.Builder()
+            .url(INBOX_GRAPH_QL)
+            .addHeader("x-courier-user-id", options.userId)
+            .apply {
+                options.jwt?.let { addHeader("Authorization", "Bearer $it") } ?: options.clientKey?.let { addHeader("x-courier-client-key", it) }
+            }
+            .post(query.toRequestBody())
+            .build()
+
+        return http.newCall(request).dispatch<CourierGetInboxMessageResponse>()
+
+    }
+
+    suspend fun getMessages(paginationLimit: Int = 24, startCursor: String? = null): CourierGetInboxMessagesResponse {
 
         val tenantParams = if (options.tenantId != null) """accountId: \"${options.tenantId}\"""" else ""
 
         val query = """
-            query GetMessages(
+            query GetInboxMessages(
                 ${'$'}params: FilterParamsInput = { $tenantParams }
                 ${'$'}limit: Int = $paginationLimit
                 ${'$'}after: String ${if (startCursor != null) "= \\\"${startCursor}\\\"" else ""}
@@ -56,7 +104,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
             .post(query.toRequestBody())
             .build()
 
-        return http.newCall(request).dispatch<CourierInboxResponse>()
+        return http.newCall(request).dispatch<CourierGetInboxMessagesResponse>()
 
     }
 
@@ -79,7 +127,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
             .post(mutation.toRequestBody())
             .build()
 
-        val res = http.newCall(request).dispatch<CourierInboxResponse>()
+        val res = http.newCall(request).dispatch<CourierGetInboxMessagesResponse>()
         return res.data?.count ?: 0
 
     }

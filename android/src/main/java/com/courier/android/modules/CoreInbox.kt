@@ -4,7 +4,7 @@ import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
-import com.courier.android.models.InboxData
+import com.courier.android.models.GetInboxMessagesData
 import com.courier.android.models.InboxMessage
 import com.courier.android.models.initialize
 import com.courier.android.repositories.InboxRepository
@@ -135,7 +135,7 @@ internal class CoreInbox {
         )
 
         // Get the values
-        val inboxData = result[0] as InboxData
+        val inboxData = result[0] as GetInboxMessagesData
         val unreadCount = result[1] as Int
 
         // Return the values

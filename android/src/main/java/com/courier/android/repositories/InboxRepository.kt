@@ -1,8 +1,8 @@
 package com.courier.android.repositories
 
 import com.courier.android.models.CourierException
-import com.courier.android.models.CourierInboxResponse
-import com.courier.android.models.InboxData
+import com.courier.android.models.CourierGetInboxMessagesResponse
+import com.courier.android.models.GetInboxMessagesData
 import com.courier.android.utils.dispatch
 import com.courier.android.utils.toGraphQuery
 import okhttp3.Request
@@ -10,7 +10,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 internal class InboxRepository : Repository() {
 
-    internal suspend fun getMessages(clientKey: String? = null, jwt: String? = null, userId: String, tenantId: String? = null, paginationLimit: Int = 24, startCursor: String? = null): InboxData {
+    internal suspend fun getMessages(clientKey: String? = null, jwt: String? = null, userId: String, tenantId: String? = null, paginationLimit: Int = 24, startCursor: String? = null): GetInboxMessagesData {
 
         val tenantParams = if (tenantId != null) """accountId: \"${tenantId}\"""" else ""
 
@@ -59,7 +59,7 @@ internal class InboxRepository : Repository() {
             .post(query.toRequestBody())
             .build()
 
-        val res = http.newCall(request).dispatch<CourierInboxResponse>()
+        val res = http.newCall(request).dispatch<CourierGetInboxMessagesResponse>()
         res.data?.let { return it }
         throw CourierException.jsonParsingError
 
@@ -85,7 +85,7 @@ internal class InboxRepository : Repository() {
             .post(mutation.toRequestBody())
             .build()
 
-        val res = http.newCall(request).dispatch<CourierInboxResponse>()
+        val res = http.newCall(request).dispatch<CourierGetInboxMessagesResponse>()
         return res.data?.count ?: 0
 
     }
