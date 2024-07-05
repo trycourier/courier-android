@@ -1,24 +1,25 @@
-package com.courier.android.core
+package com.courier.android.utils
 
 import android.util.Log
+import com.courier.android.client.CourierClient
 
-internal class Logging {
+class Logger {
 
     companion object {
 
-        private const val TAG = "Courier SDK"
+        internal const val TAG = "Courier SDK"
 
         internal fun log(data: String) {
-            Log.d(TAG, data)
+            Log.d(CourierClient.TAG, data)
         }
 
         internal fun warn(data: String) {
-            Log.w(TAG, data)
+            Log.w(CourierClient.TAG, data)
         }
 
         internal fun error(data: String?) {
             val message = data ?: "Oops, an error occurred"
-            Log.e(TAG, message)
+            Log.e(CourierClient.TAG, message)
         }
 
     }

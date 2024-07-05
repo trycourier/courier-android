@@ -1,6 +1,7 @@
 package com.courier.android.utils
 
-import com.courier.android.core.Logging
+import com.courier.android.client.CourierClient
+import com.courier.android.client.log
 import com.courier.android.models.CourierServerError
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -53,7 +54,7 @@ internal fun String.toPrettyJson(): String? {
     }
 }
 
-internal suspend inline fun <reified T>Call.dispatch(showLogs: Boolean = true, validCodes: List<Int> = listOf(200)) = suspendCoroutine<T> { continuation ->
+internal suspend inline fun <reified T>Call.dispatch(options: CourierClient.Options, validCodes: List<Int> = listOf(200)) = suspendCoroutine<T> { continuation ->
 
     enqueue(object : Callback {
 
@@ -63,13 +64,11 @@ internal suspend inline fun <reified T>Call.dispatch(showLogs: Boolean = true, v
 
         override fun onResponse(call: Call, response: Response) {
 
-            if (showLogs) {
-                val request = request()
-                Logging.log("📡 New Courier API Request")
-                Logging.log("URL: ${request.url}")
-                Logging.log("Method: ${request.method}")
-                Logging.log("Body: ${request.toPrettyJson() ?: "Empty"}")
-            }
+            val request = request()
+            options.log("📡 New Courier API Request")
+            options.log("URL: ${request.url}")
+            options.log("Method: ${request.method}")
+            options.log("Body: ${request.toPrettyJson() ?: "Empty"}")
 
             val gson = Gson()
 
@@ -85,7 +84,7 @@ internal suspend inline fun <reified T>Call.dispatch(showLogs: Boolean = true, v
             } else {
 
                 val body = response.body?.string()
-                Logging.log("Response: ${body?.toPrettyJson() ?: "Empty"}")
+                options.log("Response: ${body?.toPrettyJson() ?: "Empty"}")
 
                 try {
 

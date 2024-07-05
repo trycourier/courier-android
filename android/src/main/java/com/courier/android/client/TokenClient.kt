@@ -25,7 +25,10 @@ class TokenClient(private val options: CourierClient.Options) : CourierApiClient
             .put(json.toRequestBody())
             .build()
 
-        http.newCall(request).dispatch<Any>(validCodes = listOf(202, 204))
+        http.newCall(request).dispatch<Any>(
+            options = options,
+            validCodes = listOf(202, 204),
+        )
 
     }
 
@@ -39,7 +42,10 @@ class TokenClient(private val options: CourierClient.Options) : CourierApiClient
             .delete()
             .build()
 
-        http.newCall(request).dispatch<Any>(validCodes = listOf(202, 204))
+        http.newCall(request).dispatch<Any>(
+            options = options,
+            validCodes = listOf(202, 204),
+        )
 
     }
 

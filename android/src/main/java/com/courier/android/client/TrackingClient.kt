@@ -19,7 +19,9 @@ class TrackingClient(private val options: CourierClient.Options): CourierApiClie
             .post(json.toRequestBody())
             .build()
 
-        return http.newCall(request).dispatch()
+        return http.newCall(request).dispatch(
+            options = options
+        )
 
     }
 

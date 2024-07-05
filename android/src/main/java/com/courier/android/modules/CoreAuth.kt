@@ -23,10 +23,10 @@ internal class CoreAuth {
             Courier.shared.signOut()
         }
 
-        Courier.log("Signing user in")
-        Courier.log("User Id: $userId")
-        Courier.log("Access Token: $accessToken")
-        Courier.log("Client Key: $clientKey")
+//        Courier.log("Signing user in")
+//        Courier.log("User Id: $userId")
+//        Courier.log("Access Token: $accessToken")
+//        Courier.log("Client Key: $clientKey")
 
         // Set the current user
         UserManager.setCredentials(
@@ -125,14 +125,14 @@ val Courier.tenantId: String? get() = UserManager.getTenantId(context)
 val Courier.isUserSignedIn get() = userId != null && accessToken != null
 
 suspend fun Courier.signIn(userId: String, accessToken: String, clientKey: String? = null, tenantId: String? = null) {
-    auth.signIn(
-        userId = userId,
-        accessToken = accessToken,
-        clientKey = clientKey,
-        tenantId = tenantId,
-        push = push,
-        inbox = inbox,
-    )
+//    auth.signIn(
+//        userId = userId,
+//        accessToken = accessToken,
+//        clientKey = clientKey,
+//        tenantId = tenantId,
+//        push = push,
+//        inbox = inbox,
+//    )
 }
 
 fun Courier.signIn(userId: String, accessToken: String, clientKey: String? = null, tenantId: String? = null, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.IO) {
@@ -155,10 +155,10 @@ You should call this when your user signs out
 It will remove the current tokens used for this user in Courier so they do not receive pushes they should not get
  */
 suspend fun Courier.signOut() {
-    auth.signOut(
-        push = push,
-        inbox = inbox
-    )
+//    auth.signOut(
+//        push = push,
+//        inbox = inbox
+//    )
 }
 
 fun Courier.signOut(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
@@ -173,6 +173,6 @@ fun Courier.signOut(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = cor
 /**
 Gets called when the Authentication state for the current user changes in Courier
  */
-fun Courier.addAuthenticationListener(onChange: (String?) -> Unit): CourierAuthenticationListener {
-    return auth.addAuthChangeListener(onChange)
-}
+//fun Courier.addAuthenticationListener(onChange: (String?) -> Unit): CourierAuthenticationListener {
+//    return auth.addAuthChangeListener(onChange)
+//}

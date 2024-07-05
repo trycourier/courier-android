@@ -25,7 +25,9 @@ class PreferenceClient(private val options: CourierClient.Options): CourierApiCl
             .get()
             .build()
 
-        return http.newCall(request).dispatch()
+        return http.newCall(request).dispatch(
+            options = options
+        )
 
     }
 
@@ -39,7 +41,10 @@ class PreferenceClient(private val options: CourierClient.Options): CourierApiCl
             .get()
             .build()
 
-        val res = http.newCall(request).dispatch<CourierUserPreferencesTopic>()
+        val res = http.newCall(request).dispatch<CourierUserPreferencesTopic>(
+            options = options
+        )
+
         return res.topic
 
     }
@@ -62,7 +67,9 @@ class PreferenceClient(private val options: CourierClient.Options): CourierApiCl
             .put(json.toRequestBody())
             .build()
 
-        return http.newCall(request).dispatch()
+        return http.newCall(request).dispatch(
+            options = options
+        )
 
     }
 

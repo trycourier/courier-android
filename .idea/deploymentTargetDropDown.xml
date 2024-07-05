@@ -2,6 +2,9 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="AuthTests">
+        <State />
+      </entry>
       <entry key="InboxClientTests">
         <State />
       </entry>
@@ -28,9 +31,6 @@
         <State />
       </entry>
       <entry key="socketConnectionTest()">
-        <State />
-      </entry>
-      <entry key="socketTest()">
         <State />
       </entry>
     </value>

@@ -3,7 +3,6 @@ package com.courier.android.modules
 import com.courier.android.Courier
 import com.courier.android.models.CourierBrand
 import com.courier.android.models.CourierException
-import com.courier.android.repositories.BrandsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

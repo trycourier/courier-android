@@ -52,7 +52,9 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
             .post(query.toRequestBody())
             .build()
 
-        return http.newCall(request).dispatch<CourierGetInboxMessageResponse>()
+        return http.newCall(request).dispatch<CourierGetInboxMessageResponse>(
+            options = options
+        )
 
     }
 
@@ -104,7 +106,9 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
             .post(query.toRequestBody())
             .build()
 
-        return http.newCall(request).dispatch<CourierGetInboxMessagesResponse>()
+        return http.newCall(request).dispatch<CourierGetInboxMessagesResponse>(
+            options = options
+        )
 
     }
 
@@ -127,7 +131,10 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
             .post(mutation.toRequestBody())
             .build()
 
-        val res = http.newCall(request).dispatch<CourierGetInboxMessagesResponse>()
+        val res = http.newCall(request).dispatch<CourierGetInboxMessagesResponse>(
+            options = options
+        )
+
         return res.data?.count ?: 0
 
     }
@@ -150,7 +157,9 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
             .post(mutation.toRequestBody())
             .build()
 
-        http.newCall(request).dispatch<Any>()
+        http.newCall(request).dispatch<Any>(
+            options = options
+        )
 
     }
 
@@ -172,7 +181,9 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
             .post(mutation.toRequestBody())
             .build()
 
-        http.newCall(request).dispatch<Any>()
+        http.newCall(request).dispatch<Any>(
+            options = options
+        )
 
     }
 
@@ -194,7 +205,9 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
             .post(query.toRequestBody())
             .build()
 
-        http.newCall(request).dispatch<Any>()
+        http.newCall(request).dispatch<Any>(
+            options = options
+        )
 
     }
 
@@ -216,7 +229,9 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
             .post(query.toRequestBody())
             .build()
 
-        http.newCall(request).dispatch<Any>()
+        http.newCall(request).dispatch<Any>(
+            options = options
+        )
 
     }
 
@@ -238,7 +253,9 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
             .post(query.toRequestBody())
             .build()
 
-        http.newCall(request).dispatch<Any>()
+        http.newCall(request).dispatch<Any>(
+            options = options
+        )
 
     }
 
@@ -260,7 +277,9 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
             .post(mutation.toRequestBody())
             .build()
 
-        http.newCall(request).dispatch<Any>()
+        http.newCall(request).dispatch<Any>(
+            options = options
+        )
 
     }
 

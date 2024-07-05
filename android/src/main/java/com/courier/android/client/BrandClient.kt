@@ -37,7 +37,9 @@ class BrandClient(private val options: CourierClient.Options): CourierApiClient(
             .post(query.toRequestBody())
             .build()
 
-        return http.newCall(request).dispatch<CourierBrandResponse>()
+        return http.newCall(request).dispatch<CourierBrandResponse>(
+            options = options,
+        )
 
     }
 
