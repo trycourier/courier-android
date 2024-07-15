@@ -527,7 +527,7 @@ class CourierTests {
         signUserIn()
 
         val topic = Courier.shared.getUserPreferenceTopic(
-            topicId = Env.COURIER_PREFERENCE_ID
+            topicId = Env.COURIER_PREFERENCE_TOPIC_ID
         )
 
         print(topic)
@@ -542,7 +542,7 @@ class CourierTests {
         signUserIn()
 
         Courier.shared.putUserPreferenceTopic(
-            topicId = Env.COURIER_PREFERENCE_ID,
+            topicId = Env.COURIER_PREFERENCE_TOPIC_ID,
             status = CourierPreferenceStatus.OPTED_IN,
             hasCustomRouting = true,
             customRouting = listOf(CourierPreferenceChannel.SMS, CourierPreferenceChannel.PUSH)
