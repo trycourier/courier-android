@@ -14,6 +14,7 @@ import com.courier.android.models.InboxMessage
 import com.courier.android.models.initialize
 import com.courier.android.socket.InboxSocket
 import com.courier.android.socket.InboxSocketManager
+import com.courier.android.utils.toCourierException
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -478,7 +479,7 @@ private fun Courier.notifyMessagesChanged() = coroutineScope.launch(Dispatchers.
 
 private fun Courier.notifyError(error: Exception) = coroutineScope.launch(Dispatchers.Main) {
     inboxListeners.forEach {
-        it.onError?.invoke(error)
+        it.onError?.invoke(error.toCourierException)
     }
 }
 
