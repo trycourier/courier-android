@@ -1,4 +1,4 @@
-package com.courier.android.ui.preferences.inbox
+package com.courier.android.ui.inbox
 
 import android.content.res.ColorStateList
 import android.view.LayoutInflater
@@ -6,10 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import androidx.recyclerview.widget.RecyclerView
-import com.courier.android.Courier
 import com.courier.android.R
-import com.courier.android.modules.fetchNextPageOfMessages
-import com.courier.android.ui.inbox.CourierInboxTheme
 
 internal class LoadingItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -20,7 +17,7 @@ internal class LoadingItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
 
 }
 
-internal class LoadingAdapter(internal var theme: CourierInboxTheme) : RecyclerView.Adapter<LoadingItemViewHolder>() {
+internal class LoadingAdapter(internal var theme: CourierInboxTheme, internal var canPage: Boolean = false, internal val onShown: () -> Unit) : RecyclerView.Adapter<LoadingItemViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LoadingItemViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.courier_inbox_loading_item, parent, false)
@@ -37,14 +34,10 @@ internal class LoadingAdapter(internal var theme: CourierInboxTheme) : RecyclerV
 
         }
 
-        Courier.shared.fetchNextPageOfMessages(
-            onSuccess = { newMessages ->
-                print(newMessages)
-            },
-            onFailure = { error ->
-                print(error)
-            }
-        )
+        // Attempt pagination
+        if (canPage) {
+            onShown.invoke()
+        }
 
     }
 

@@ -230,6 +230,9 @@ private suspend fun Courier.fetchNextPageOfMessages(): List<InboxMessage> {
         hasNextPage = hasNextPage,
     )
 
+    // Tell the listeners
+    notifyMessagesChanged()
+
     // Return the new messages
     return messages
 
@@ -503,16 +506,12 @@ var Courier.inboxPaginationLimit
  * Traditional Callbacks
  */
 
-fun Courier.fetchNextPageOfMessages(onSuccess: (List<InboxMessage>) -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
+fun Courier.fetchNextPageOfMessages(onSuccess: ((List<InboxMessage>) -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = coroutineScope.launch(Dispatchers.Main) {
     try {
         val messages = fetchNextPageOfMessages()
-        coroutineScope.launch(Dispatchers.Main) {
-            onSuccess.invoke(messages)
-        }
+        onSuccess?.invoke(messages)
     } catch (e: Exception) {
-        coroutineScope.launch(Dispatchers.Main) {
-            onFailure.invoke(e)
-        }
+        onFailure?.invoke(e)
     }
 }
 

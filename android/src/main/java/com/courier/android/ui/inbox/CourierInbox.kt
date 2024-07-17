@@ -20,16 +20,16 @@ import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
+import com.courier.android.models.markAsClicked
+import com.courier.android.models.markAsOpened
 import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
-import com.courier.android.modules.clickMessage
 import com.courier.android.modules.clientKey
-import com.courier.android.modules.openMessage
+import com.courier.android.modules.fetchNextPageOfMessages
 import com.courier.android.modules.refreshInbox
 import com.courier.android.modules.userId
 import com.courier.android.ui.bar.CourierBar
 import com.courier.android.ui.infoview.CourierInfoView
-import com.courier.android.ui.preferences.inbox.LoadingAdapter
 import com.courier.android.utils.forceReactNativeLayoutFix
 import com.courier.android.utils.isDarkMode
 import com.courier.android.utils.pxToDp
@@ -38,7 +38,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
-open class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
+class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
     private enum class State(var title: String? = null) {
         LOADING, ERROR, CONTENT, EMPTY
@@ -139,15 +139,13 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
     }
 
-    lateinit var recyclerView: RecyclerView
-        private set
+    val recyclerView: RecyclerView by lazy { findViewById(R.id.recyclerView) }
+    private val refreshLayout: SwipeRefreshLayout by lazy { findViewById(R.id.refreshLayout) }
+    private val infoView: CourierInfoView by lazy { findViewById(R.id.infoView) }
+    private val courierBar: CourierBar by lazy { findViewById(R.id.courierBar) }
+    private val loadingIndicator: ProgressBar by lazy { findViewById(R.id.loadingIndicator) }
 
     private val layoutManager get() = recyclerView.layoutManager as? LinearLayoutManager
-
-    private lateinit var refreshLayout: SwipeRefreshLayout
-    private lateinit var infoView: CourierInfoView
-    private lateinit var courierBar: CourierBar
-    private lateinit var loadingIndicator: ProgressBar
 
     private lateinit var inboxListener: CourierInboxListener
 
@@ -159,51 +157,39 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         theme = theme,
         messages = emptyList(),
         onMessageClick = { message, index ->
-
-            // Handle message click
-            Courier.shared.clickMessage(
-                messageId = message.messageId,
-                onFailure = null
-            )
-
-            // Call the callback
+            message.markAsClicked()
             onClickInboxMessageAtIndex?.invoke(message, index)
-
         },
         onActionClick = { action, message, index ->
+            action.markAsClicked(message.messageId)
             onClickInboxActionForMessageAtIndex?.invoke(action, message, index)
         }
     )
 
     private val loadingAdapter = LoadingAdapter(
-        theme = theme
+        theme = theme,
+        onShown = {
+            Courier.shared.fetchNextPageOfMessages()
+        }
     )
 
     private val adapter = ConcatAdapter(messagesAdapter)
 
     init {
         View.inflate(context, R.layout.courier_inbox, this)
-        setup()
         refreshTheme()
+        setup()
     }
 
     private fun refreshTheme() {
         theme = if (context.isDarkMode) darkTheme else lightTheme
     }
 
-    private fun setup() {
+    private fun setup() = coroutineScope.launch(Dispatchers.Main) {
 
-        // Loading
-        loadingIndicator = findViewById(R.id.loadingIndicator)
-
-        // Info View
-        infoView = findViewById(R.id.infoView)
-
-        // Courier Bar
-        courierBar = findViewById(R.id.courierBar)
+        state = State.LOADING
 
         // Create the list
-        recyclerView = findViewById(R.id.recyclerView)
         recyclerView.adapter = adapter
         recyclerView.setOnScrollChangeListener { _, _, _, _, _ ->
 
@@ -219,77 +205,62 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
         // Handle pull to refresh
-        refreshLayout = findViewById(R.id.refreshLayout)
         refreshLayout.setOnRefreshListener {
             refresh()
         }
+
+        theme.getBrandIfNeeded()
 
         // Setup the listener
         inboxListener = Courier.shared.addInboxListener(
             onInitialLoad = {
 
-                coroutineScope.launch(Dispatchers.Main) {
+                state = State.LOADING
 
-                    refreshBrand()
+                refreshAdapters()
 
-                    state = State.LOADING
-
-                    refreshAdapters()
-
-                    recyclerView.forceReactNativeLayoutFix()
-
-                }
+                recyclerView.forceReactNativeLayoutFix()
 
             },
             onError = { e ->
 
-                coroutineScope.launch(Dispatchers.Main) {
+                state = State.ERROR.apply { title = e.message }
 
-                    refreshBrand()
+                Courier.shared.client?.options?.error(e.message)
 
-                    state = State.ERROR.apply { title = e.message }
+                refreshAdapters()
 
-                    Courier.shared.client?.options?.error(e.message)
-
-                    refreshAdapters()
-
-                    recyclerView.forceReactNativeLayoutFix()
-
-                }
+                recyclerView.forceReactNativeLayoutFix()
 
             },
             onMessagesChanged = { messages, _, _, canPaginate ->
 
-                coroutineScope.launch(Dispatchers.Main) {
+                loadingAdapter.canPage = false
 
-                    refreshBrand()
+                state = if (messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
 
-                    state = if (messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
+                refreshAdapters(
+                    showMessages = messages.isNotEmpty(),
+                    showLoading = canPaginate
+                )
 
-                    refreshAdapters(
-                        showMessages = messages.isNotEmpty(),
-                        showLoading = canPaginate
-                    )
+                refreshMessages(
+                    newMessages = messages.toList()
+                )
 
-                    refreshMessages(
-                        newMessages = messages.toList()
-                    )
+                recyclerView.forceReactNativeLayoutFix()
 
-                    openVisibleMessages()
-
-                    recyclerView.forceReactNativeLayoutFix()
-
-                }
+                loadingAdapter.canPage = canPaginate
 
             }
         )
 
     }
 
-    private fun refresh() {
-        Courier.shared.refreshInbox {
-            refreshLayout.isRefreshing = false
-        }
+    private fun refresh() = coroutineScope.launch(Dispatchers.Main) {
+        theme.getBrandIfNeeded()
+        Courier.shared.refreshInbox()
+        refreshLayout.isRefreshing = false
     }
 
     private fun RecyclerView.restoreScrollPosition() {
@@ -301,7 +272,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
     // Opens all the current messages
     // Performs this on an async thread
     // Fails silently
-    private fun openVisibleMessages() = coroutineScope.launch(context = Dispatchers.IO) {
+    private fun openVisibleMessages() = coroutineScope.launch(Dispatchers.IO) {
 
         // Ensure we have a user
         if (Courier.shared.clientKey == null || Courier.shared.userId == null) {
@@ -325,18 +296,20 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
                 // Find the messages
                 val messagesToOpen = messagesAdapter.messages.subList(firstIndex, lastIndex).filter { !it.isOpened }.map { message ->
 
-                    // Mark the message as open locally
-                    message.setOpened()
+                    if (message.isOpened) {
+                        return@map null
+                    }
 
-                    // Bundle the request into an async function
+                    // Mark the message as opened
                     return@map async {
-                        Courier.shared.openMessage(message.messageId)
+                        message.setOpened()
+                        message.markAsOpened()
                     }
 
                 }
 
                 // Perform all the changes together
-                messagesToOpen.awaitAll()
+                messagesToOpen.filterNotNull().awaitAll()
 
             } catch (e: CourierException) {
 
@@ -375,7 +348,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
         // Manually sync all view holders
-        // This ensure the click animation is nice and clean
+        // This ensures the click animation is nice and clean
         if (newMessages.size == existingMessages.size) {
             newMessages.forEachIndexed { index, message ->
                 val viewHolder = recyclerView.findViewHolderForLayoutPosition(index) as? MessageItemViewHolder
@@ -399,11 +372,6 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
     private fun refreshAdapters(showMessages: Boolean = false, showLoading: Boolean = false) {
         if (showMessages) adapter.addAdapter(0, messagesAdapter) else adapter.removeAdapter(messagesAdapter)
         if (showLoading) adapter.addAdapter(loadingAdapter) else adapter.removeAdapter(loadingAdapter)
-    }
-
-    private suspend fun refreshBrand() {
-        theme.getBrandIfNeeded()
-        reloadViews()
     }
 
     override fun onAttachedToWindow() {
