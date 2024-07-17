@@ -172,7 +172,7 @@ class InboxTests {
     }
 
     @Test
-    fun setupInbox() = runBlocking {
+    fun multipleListeners() = runBlocking {
 
         UserBuilder.authenticate()
 
@@ -197,7 +197,7 @@ class InboxTests {
     }
 
     @Test
-    fun testInboxPagination() = runBlocking {
+    fun pagination() = runBlocking {
 
         val userId = UUID.randomUUID().toString()
 

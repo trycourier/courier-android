@@ -26,10 +26,10 @@ class InboxClientTests {
         )
     }
 
-    private suspend fun sendMessage(): String {
+    private suspend fun sendMessage(userId: String = Env.COURIER_USER_ID): String {
         return ExampleServer.sendTest(
             authKey = Env.COURIER_AUTH_KEY,
-            userId = Env.COURIER_USER_ID,
+            userId = userId,
             channel = "inbox"
         )
     }
@@ -41,11 +41,9 @@ class InboxClientTests {
 
         delay(5000) // Pipeline delay
 
-        val res = client.inbox.getMessage(
+        val message = client.inbox.getMessage(
             messageId = messageId
         )
-
-        val message = res.data?.message
 
         assertNotNull(message)
 
@@ -171,7 +169,7 @@ class InboxClientTests {
     }
 
     @Test
-    fun socketConnectionTest() = runBlocking {
+    fun multipleSocketsOnSingleUser() = runBlocking {
 
         var hold1 = true
         var hold2 = true
@@ -241,6 +239,57 @@ class InboxClientTests {
         val messageId = sendMessage()
 
         print(messageId)
+
+        while (hold1 && hold2) {
+            // Wait for the message to be received in the sockets
+        }
+
+        client1.inbox.socket.disconnect()
+        client2.inbox.socket.disconnect()
+
+    }
+
+    @Test
+    fun multipleUserConnections() = runBlocking {
+
+        val userId1 = "user_1"
+        val userId2 = "user_2"
+
+        var hold1 = true
+        var hold2 = true
+
+        // Open the first socket connection
+        val client1 = CourierClient(clientKey = Env.COURIER_CLIENT_KEY, userId = userId1).apply {
+
+            val socket = inbox.socket
+
+            socket.receivedMessage = { message ->
+                println(message)
+                hold1 = false
+            }
+
+            socket.connect()
+            socket.sendSubscribe()
+
+        }
+
+        // Open the second socket connection
+        val client2 = CourierClient(clientKey = Env.COURIER_CLIENT_KEY, userId = userId2).apply {
+
+            val socket = inbox.socket
+
+            socket.receivedMessage = { message ->
+                println(message)
+                hold2 = false
+            }
+
+            socket.connect()
+            socket.sendSubscribe()
+
+        }
+
+        sendMessage(userId = userId1)
+        sendMessage(userId = userId2)
 
         while (hold1 && hold2) {
             // Wait for the message to be received in the sockets

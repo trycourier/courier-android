@@ -1,6 +1,7 @@
 package com.courier.android.client
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.courier.android.models.CourierDevice
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,6 +19,28 @@ class TokenClientTests {
         client.tokens.putUserToken(
             token = exampleToken,
             provider = "firebase-fcm",
+        )
+
+    }
+
+    @Test
+    fun upsertTokenWithCustomDevice() = runBlocking {
+
+        val client = ClientBuilder.build()
+
+        val device = CourierDevice(
+            app_id = "APP_ID",
+            ad_id = "AD_ID",
+            device_id = "DEVICE_ID",
+            platform = "android",
+            manufacturer = "Google",
+            model = "Pixel 99"
+        )
+
+        client.tokens.putUserToken(
+            token = exampleToken,
+            provider = "firebase-fcm",
+            device = device
         )
 
     }

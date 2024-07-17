@@ -8,14 +8,14 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 class TokenClient(private val options: CourierClient.Options) : CourierApiClient() {
 
-    suspend fun putUserToken(token: String, provider: String) {
+    suspend fun putUserToken(token: String, provider: String, device: CourierDevice = CourierDevice.current) {
 
         val url = "${BASE_REST}/users/${options.userId}/tokens/$token"
 
         val json = gson.toJson(
             CourierToken(
                 provider_key = provider,
-                device = CourierDevice.current
+                device = device
             )
         )
 

@@ -7,7 +7,7 @@ internal enum class CourierPlatform(val platform: String) {
     ANDROID("android")
 }
 
-internal data class CourierDevice(
+data class CourierDevice(
     val app_id: String?,
     val ad_id: String?,
     val device_id: String?,

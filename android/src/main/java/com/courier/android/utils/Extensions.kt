@@ -16,6 +16,7 @@ import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.Courier.Companion.eventBus
 import com.courier.android.client.error
 import com.courier.android.models.CourierAgent
+import com.courier.android.models.CourierException
 import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.ui.CourierStyles
 import com.google.firebase.messaging.RemoteMessage
@@ -200,6 +201,8 @@ internal fun Context.launchCourierWebsite() {
     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.courier.com/"))
     startActivity(browserIntent)
 }
+
+internal val Exception.toCourierException get() = CourierException(message ?: "Unknown Error")
 
 @SuppressLint("NotifyDataSetChanged")
 internal fun RecyclerView.forceReactNativeLayoutFix() {
