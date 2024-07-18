@@ -1,0 +1,6 @@
+before_cache:
+  - echo "Skipping app directory"
+
+build:
+  skip:
+    - app/
