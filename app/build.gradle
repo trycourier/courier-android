@@ -18,15 +18,12 @@ android {
         applicationId "com.courier.example"
         minSdk 23
         targetSdk 34
-        versionCode 41
+        versionCode 42
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug
     }
 
-    lintOptions {
-        checkReleaseBuilds false
-    }
 
     signingConfigs {
         release {
@@ -46,16 +43,19 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '11'
     }
     buildFeatures {
         viewBinding true
     }
     namespace 'com.courier.example'
+    lint {
+        checkReleaseBuilds false
+    }
 }
 
 dependencies {
