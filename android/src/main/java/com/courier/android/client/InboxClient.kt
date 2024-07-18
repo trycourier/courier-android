@@ -5,6 +5,7 @@ import com.courier.android.models.CourierGetInboxMessagesResponse
 import com.courier.android.socket.InboxSocket
 import com.courier.android.utils.dispatch
 import com.courier.android.utils.toGraphQuery
+import com.courier.android.utils.warn
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
@@ -13,6 +14,8 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
     val socket by lazy { InboxSocket(options = options) }
 
     suspend fun getMessage(messageId: String): CourierGetInboxMessageResponse {
+
+        options.warn("🚧 getMessage is under construction and may result in data you do not expect")
 
         // TODO: Support tenants
         val tenantParams = if (options.tenantId != null) """accountId: \"${options.tenantId}\"""" else ""

@@ -54,6 +54,8 @@ class AuthTests {
 
         listener.remove()
 
+        assertEquals(Courier.shared.authListeners.size, 0)
+
     }
 
     @Test
@@ -79,6 +81,8 @@ class AuthTests {
         }
 
         listener.remove()
+
+        assertEquals(Courier.shared.authListeners.size, 0)
 
     }
 
