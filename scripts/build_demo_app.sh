@@ -32,20 +32,20 @@ rm "app/build.gradle.bak"
 
 echo "Version code incremented from $CURRENT_VERSION_CODE to $NEW_VERSION_CODE"
 
-# Build the app for release
+# Build the app bundle for release
 ./gradlew clean
-./gradlew assembleRelease
+./gradlew bundleRelease
 
 # Check if the build was successful
 if [ $? -ne 0 ]; then
-    echo "Failed to build the app for release"
+    echo "Failed to build the app bundle for release"
     exit 1
 fi
 
-echo "App built successfully for release"
+echo "App bundle built successfully for release"
 
-# Open the folder where the release APK is located
-RELEASE_FOLDER="./app/build/outputs/apk/release/"
+# Open the folder where the release AAB is located
+RELEASE_FOLDER="./app/build/outputs/bundle/release/"
 open "$RELEASE_FOLDER"
 
 echo "Opened folder: $RELEASE_FOLDER"
