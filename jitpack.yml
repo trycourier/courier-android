@@ -1,0 +1,14 @@
+version: 2.0
+
+before_cache:
+  - echo "Setting up Java 1.8"
+  - sdk install java 8.0.332-open
+  - sdk use java 8.0.332-open
+
+build:
+  gradle:
+    version: 8.0.2
+
+# Define the Java version to use for the build
+java:
+  version: 1.8
