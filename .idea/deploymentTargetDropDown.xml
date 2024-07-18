@@ -2,13 +2,13 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="All Tests">
+        <State />
+      </entry>
       <entry key="Tests in 'com.courier.android'">
         <State />
       </entry>
       <entry key="app">
-        <State />
-      </entry>
-      <entry key="demoDay()">
         <State />
       </entry>
       <entry key="getArchivedMessages()">

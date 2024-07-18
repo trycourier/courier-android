@@ -1,7 +1,6 @@
 package com.courier.android.utils
 
 import com.courier.android.client.CourierClient
-import com.courier.android.client.log
 import com.courier.android.models.CourierServerError
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder

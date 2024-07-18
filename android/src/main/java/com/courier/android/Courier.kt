@@ -7,7 +7,6 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import com.courier.android.client.CourierClient
-import com.courier.android.client.warn
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierAuthenticationListener
 import com.courier.android.models.CourierException
@@ -18,6 +17,7 @@ import com.courier.android.modules.linkInbox
 import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.unlinkInbox
 import com.courier.android.utils.NotificationEventBus
+import com.courier.android.utils.warn
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -62,7 +62,7 @@ class Courier private constructor(internal val context: Context) : Application.A
         internal val eventBus by lazy { NotificationEventBus() }
 
         // Async
-        internal val COURIER_COROUTINE_CONTEXT by lazy { Job() }
+        private val COURIER_COROUTINE_CONTEXT by lazy { Job() }
         internal val coroutineScope = CoroutineScope(COURIER_COROUTINE_CONTEXT)
 
         // Inbox
@@ -122,7 +122,7 @@ class Courier private constructor(internal val context: Context) : Application.A
 
                 }
                 else -> {
-                    client?.options?.warn("Initialization context does not support lifecycle callbacks. Please call Courier.initialize(context) with an Activity or Application context.")
+                    client?.warn("Initialization context does not support lifecycle callbacks. Please call Courier.initialize(context) with an Activity or Application context.")
                 }
             }
         }

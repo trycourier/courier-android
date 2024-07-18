@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.Courier.Companion.eventBus
-import com.courier.android.client.error
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierTrackingEvent
@@ -56,7 +55,7 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
 
     } catch (e: Exception) {
 
-        Courier.shared.client?.options?.error(e.toString())
+        Courier.shared.client?.error(e.toString())
 
     }
 
@@ -66,7 +65,7 @@ internal fun Courier.broadcastMessage(message: RemoteMessage) = Courier.coroutin
     try {
         eventBus.emitEvent(message)
     } catch (e: Exception) {
-        Courier.shared.client?.options?.error(e.toString())
+        Courier.shared.client?.error(e.toString())
     }
 }
 
@@ -220,7 +219,7 @@ internal fun RecyclerView.forceReactNativeLayoutFix() {
 
     } catch (e: Exception) {
 
-        Courier.shared.client?.options?.error(e.toString())
+        Courier.shared.client?.error(e.toString())
 
     }
 

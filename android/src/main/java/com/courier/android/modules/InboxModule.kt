@@ -4,8 +4,6 @@ import com.courier.android.Courier
 import com.courier.android.Courier.Companion.DEFAULT_MAX_PAGINATION_LIMIT
 import com.courier.android.Courier.Companion.DEFAULT_MIN_PAGINATION_LIMIT
 import com.courier.android.Courier.Companion.coroutineScope
-import com.courier.android.client.log
-import com.courier.android.client.warn
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierGetInboxMessagesResponse
 import com.courier.android.models.CourierInboxListener
@@ -14,7 +12,9 @@ import com.courier.android.models.InboxMessage
 import com.courier.android.models.initialize
 import com.courier.android.socket.InboxSocket
 import com.courier.android.socket.InboxSocketManager
+import com.courier.android.utils.log
 import com.courier.android.utils.toCourierException
+import com.courier.android.utils.warn
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -146,10 +146,10 @@ private suspend fun Courier.connectWebSocket() {
                 }
             }
             InboxSocket.EventType.ARCHIVE -> {
-                client?.options?.log("Message Archived")
+                client?.log("Message Archived")
             }
             InboxSocket.EventType.OPENED -> {
-                client?.options?.log("Message Opened")
+                client?.log("Message Opened")
             }
         }
     }
@@ -253,7 +253,7 @@ fun Courier.addInboxListener(onInitialLoad: (() -> Unit)? = null, onError: ((Exc
 
     // Check for auth
     if (!Courier.shared.isUserSignedIn) {
-        client?.options?.warn("User is not signed in. Please call Courier.shared.signIn(...) to setup the inbox listener.")
+        client?.warn("User is not signed in. Please call Courier.shared.signIn(...) to setup the inbox listener.")
         listener.onError?.invoke(CourierException.userNotFound)
         return listener
     }
@@ -290,7 +290,7 @@ fun Courier.removeInboxListener(listener: CourierInboxListener) = coroutineScope
 
     } catch (e: Exception) {
 
-        client?.options?.log(e.toString())
+        client?.log(e.toString())
 
     }
 

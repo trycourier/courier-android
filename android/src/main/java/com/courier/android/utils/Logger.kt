@@ -7,8 +7,6 @@ class Logger {
 
     companion object {
 
-        internal const val TAG = "Courier SDK"
-
         internal fun log(data: String) {
             Log.d(CourierClient.TAG, data)
         }
@@ -25,3 +23,34 @@ class Logger {
     }
 
 }
+
+/**
+ * Extensions
+ */
+
+internal fun CourierClient.Options.log(data: String) {
+    if (showLogs) {
+        Logger.log(data)
+    }
+}
+
+internal fun CourierClient.Options.warn(data: String) {
+    if (showLogs) {
+        Logger.warn(data)
+    }
+}
+
+internal fun CourierClient.Options.error(data: String?) {
+    if (showLogs) {
+        val message = data ?: "Oops, an error occurred"
+        Logger.error(message)
+    }
+}
+
+/**
+ * Courier Client Extensions
+ */
+
+fun CourierClient.log(data: String) = options.log(data)
+fun CourierClient.warn(data: String) = options.warn(data)
+fun CourierClient.error(data: String?) = options.error(data)

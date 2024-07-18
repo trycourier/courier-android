@@ -3,9 +3,9 @@ package com.courier.android.modules
 import com.courier.android.BuildConfig
 import com.courier.android.Courier
 import com.courier.android.client.CourierClient
-import com.courier.android.client.log
 import com.courier.android.managers.UserManager
 import com.courier.android.models.CourierAuthenticationListener
+import com.courier.android.utils.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,10 +36,10 @@ suspend fun Courier.signIn(userId: String, tenantId: String? = null, accessToken
         showLogs = showLogs,
     )
 
-    client?.options?.log("Signing user in")
-    client?.options?.log("User Id: $userId")
-    client?.options?.log("Access Token: $accessToken")
-    client?.options?.log("Client Key: $clientKey")
+    client?.log("Signing user in")
+    client?.log("User Id: $userId")
+    client?.log("Access Token: $accessToken")
+    client?.log("Client Key: $clientKey")
 
     // Set the current user
     UserManager.setCredentials(
@@ -65,12 +65,12 @@ suspend fun Courier.signOut() = withContext(Dispatchers.IO) {
 
     // Ensure we have a user to sign out
     if (!Courier.shared.isUserSignedIn) {
-        client?.options?.log("No user signed into Courier. A user must be signed in on order to sign out.")
+        client?.log("No user signed into Courier. A user must be signed in on order to sign out.")
         client = null
         return@withContext
     }
 
-    client?.options?.log("Signing user out")
+    client?.log("Signing user out")
     client = null
 
     deletePushTokens()

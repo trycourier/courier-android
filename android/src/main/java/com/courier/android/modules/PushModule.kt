@@ -7,10 +7,10 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import com.courier.android.Courier
-import com.courier.android.client.error
-import com.courier.android.client.log
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPushProvider
+import com.courier.android.utils.error
+import com.courier.android.utils.log
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import kotlinx.coroutines.Dispatchers
@@ -21,11 +21,11 @@ import kotlinx.coroutines.withTimeout
 
 // Get the token but will timeout after some time if the token is not found
 // This is some sort of issue with Firebase Messaging and Emulators
-private suspend fun Courier.getFcmToken(timeout: Long = 8000): String? {
+private suspend fun Courier.getFcmToken(timeout: Long): String? {
 
     // Ensure firebase is setup
     if (!isFirebaseInitialized) {
-        client?.options?.error("Firebase is not initialized. Courier will not be able to get the FCM token until Firebase is initialized.")
+        client?.error("Firebase is not initialized. Courier will not be able to get the FCM token until Firebase is initialized.")
         return null
     }
 
@@ -41,7 +41,7 @@ private suspend fun Courier.getFcmToken(timeout: Long = 8000): String? {
             return@withTimeout Firebase.messaging.token.await()
         }
     } catch (e: Exception) {
-        client?.options?.error(e.toString())
+        client?.error(e.toString())
         null
     }
 
@@ -103,9 +103,9 @@ suspend fun Courier.setToken(provider: CourierPushProvider, token: String) {
     )
 }
 
-suspend fun Courier.refreshFcmToken() = withContext(Dispatchers.IO) {
+suspend fun Courier.refreshFcmToken(timeout: Long = 8000) = withContext(Dispatchers.IO) {
     if (fcmToken == null) {
-        fcmToken = getFcmToken()
+        fcmToken = getFcmToken(timeout)
     }
 }
 
@@ -146,7 +146,7 @@ private suspend fun Courier.putToken(provider: String, token: String) {
         throw CourierException.missingAccessToken
     }
 
-    client?.options?.log("Putting $provider Token: $token")
+    client?.log("Putting $provider Token: $token")
 
     client?.tokens?.putUserToken(
         token = token,
@@ -167,7 +167,7 @@ private suspend fun Courier.putTokenIfNeeded(provider: String, token: String?) {
             token = token
         )
     } catch (e: Exception) {
-        client?.options?.log(e.toString())
+        client?.log(e.toString())
     }
 
 }
@@ -178,7 +178,7 @@ private suspend fun Courier.deleteToken(token: String) {
         throw CourierException.missingAccessToken
     }
 
-    client?.options?.log("Deleting Token: $token")
+    client?.log("Deleting Token: $token")
 
     client?.tokens?.deleteUserToken(
         token = token
@@ -197,7 +197,7 @@ private suspend fun Courier.deleteTokenIfNeeded(token: String?) {
             token = token
         )
     } catch (e: Exception) {
-        client?.options?.log(e.toString())
+        client?.log(e.toString())
     }
 
 }

@@ -12,10 +12,10 @@ import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.Courier
 import com.courier.android.R
-import com.courier.android.client.log
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPreferenceTopic
 import com.courier.android.utils.isDarkModeOn
+import com.courier.android.utils.log
 import com.courier.android.utils.setCourierFont
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
@@ -70,7 +70,7 @@ internal class PreferenceTopicBottomSheet(private val theme: CourierPreferencesT
             show(fragmentManager, TAG)
         } catch (e: ClassCastException) {
             onError.invoke(CourierException(e.toString()))
-            Courier.shared.client?.options?.log(e.toString())
+            Courier.shared.client?.log(e.toString())
         }
     }
 

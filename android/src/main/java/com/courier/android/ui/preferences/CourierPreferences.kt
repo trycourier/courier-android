@@ -14,15 +14,15 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.R
-import com.courier.android.client.error
-import com.courier.android.client.log
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.models.CourierPreferenceStatus
 import com.courier.android.models.CourierPreferenceTopic
 import com.courier.android.ui.bar.CourierBar
 import com.courier.android.ui.infoview.CourierInfoView
+import com.courier.android.utils.error
 import com.courier.android.utils.isDarkMode
+import com.courier.android.utils.log
 import com.courier.android.utils.pxToDp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -373,9 +373,9 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
                             hasCustomRouting = newTopic.hasCustomRouting,
                             customRouting = newTopic.customRouting
                         )
-                        client?.options?.log("Topic updated: ${originalTopic.topicId}")
+                        client?.log("Topic updated: ${originalTopic.topicId}")
                     } catch (error: Exception) {
-                        client?.options?.error(error.message)
+                        client?.error(error.message)
                         onError?.invoke(error as CourierException)
                         setTopicAtPath(topic = originalTopic, path = path)
                     }
@@ -429,9 +429,9 @@ class CourierPreferences @JvmOverloads constructor(context: Context, attrs: Attr
                             hasCustomRouting = hasCustomRouting,
                             customRouting = customRouting
                         )
-                        client?.options?.log("Topic updated: ${originalTopic.topicId}")
+                        client?.log("Topic updated: ${originalTopic.topicId}")
                     } catch (error: Exception) {
-                        client?.options?.error(error.message)
+                        client?.error(error.message)
                         onError?.invoke(error as CourierException)
                         setTopicAtPath(topic = originalTopic, path = path)
                     }

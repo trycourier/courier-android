@@ -19,8 +19,8 @@ internal class UserBuilder {
         suspend fun authenticate(userId: String = Env.COURIER_USER_ID, useJWT: Boolean = true, tenantId: String? = null) {
 
             // Add listener. Just to make sure the listener is working
-            val listener = Courier.shared.addAuthenticationListener { userId ->
-                print(userId ?: "No userId found")
+            val listener = Courier.shared.addAuthenticationListener { uid ->
+                print(uid ?: "No userId found")
             }
 
             // Sign the user out, if there is one
