@@ -3,7 +3,7 @@
 cd "$(dirname "$0")/.." || { echo "Failed to change to root directory"; exit 1; }
 
 # Use a specific Gradle version (if needed)
-./gradlew wrapper --gradle-version 8.4
+./gradlew wrapper --gradle-version 8.6
 
 # Prompt user to start emulator manually
 echo "🚧 Please start the emulator manually. Press Enter to continue."
