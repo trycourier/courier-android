@@ -1,4 +1,4 @@
-package com.courier.android.singleton
+package com.courier.android.shared
 
 import com.courier.android.Courier
 import com.courier.android.Env

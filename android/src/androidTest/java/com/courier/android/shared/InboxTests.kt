@@ -1,4 +1,4 @@
-package com.courier.android.singleton
+package com.courier.android.shared
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry

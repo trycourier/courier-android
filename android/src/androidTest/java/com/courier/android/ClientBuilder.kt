@@ -1,7 +1,6 @@
-package com.courier.android.client
+package com.courier.android
 
-import com.courier.android.Env
-import com.courier.android.ExampleServer
+import com.courier.android.client.CourierClient
 
 internal class ClientBuilder {
 

@@ -1,5 +1,6 @@
 package com.courier.android.client
 
+import com.courier.android.ClientBuilder
 import com.courier.android.Env
 import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.models.CourierPreferenceStatus
