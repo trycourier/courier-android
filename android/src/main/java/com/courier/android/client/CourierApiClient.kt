@@ -1,10 +1,10 @@
-package com.courier.android.repositories
+package com.courier.android.client
 
 import com.courier.android.Courier
 import com.google.gson.Gson
 import okhttp3.OkHttpClient
 
-internal open class Repository {
+open class CourierApiClient {
 
     companion object {
         const val BASE_REST = "https://api.courier.com"

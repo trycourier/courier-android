@@ -1,8 +1,7 @@
 package com.courier.android.utils
 
-import com.courier.android.Courier
+import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierServerError
-import com.courier.android.modules.isDebugging
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
@@ -54,7 +53,7 @@ internal fun String.toPrettyJson(): String? {
     }
 }
 
-internal suspend inline fun <reified T>Call.dispatch(validCodes: List<Int> = listOf(200)) = suspendCoroutine<T> { continuation ->
+internal suspend inline fun <reified T>Call.dispatch(options: CourierClient.Options, validCodes: List<Int> = listOf(200)) = suspendCoroutine<T> { continuation ->
 
     enqueue(object : Callback {
 
@@ -64,13 +63,11 @@ internal suspend inline fun <reified T>Call.dispatch(validCodes: List<Int> = lis
 
         override fun onResponse(call: Call, response: Response) {
 
-            if (Courier.shared.isDebugging) {
-                val request = request()
-                Courier.log("📡 New Courier API Request")
-                Courier.log("URL: ${request.url}")
-                Courier.log("Method: ${request.method}")
-                Courier.log("Body: ${request.toPrettyJson() ?: "Empty"}")
-            }
+            val request = request()
+            options.log("📡 New Courier API Request")
+            options.log("URL: ${request.url}")
+            options.log("Method: ${request.method}")
+            options.log("Body: ${request.toPrettyJson() ?: "Empty"}")
 
             val gson = Gson()
 
@@ -86,7 +83,7 @@ internal suspend inline fun <reified T>Call.dispatch(validCodes: List<Int> = lis
             } else {
 
                 val body = response.body?.string()
-                Courier.log("Response: ${body?.toPrettyJson() ?: "Empty"}")
+                options.log("Response: ${body?.toPrettyJson() ?: "Empty"}")
 
                 try {
 

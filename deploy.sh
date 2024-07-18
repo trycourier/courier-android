@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Move to Scripts
-cd scripts
+cd scripts || { echo "Failed to change to root directory"; exit 1; }
 
 # Function to handle errors and exit
 error_exit() {

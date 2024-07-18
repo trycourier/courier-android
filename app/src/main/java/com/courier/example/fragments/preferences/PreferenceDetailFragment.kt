@@ -13,8 +13,6 @@ import com.courier.android.Courier
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.models.CourierPreferenceStatus
-import com.courier.android.modules.getUserPreferenceTopic
-import com.courier.android.modules.putUserPreferenceTopic
 import com.courier.example.R
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.tabs.TabLayout
@@ -72,32 +70,34 @@ class PreferenceDetailFragment(private val topicId: String) : Fragment(R.layout.
 
         try {
 
-            val topic = Courier.shared.getUserPreferenceTopic(topicId)
+            Courier.shared.client?.preferences?.getUserPreferenceTopic(topicId)?.let { topic ->
 
-            // Setup tabs
-            statusTabs.removeAllTabs()
-            val selectedTabIndex = CourierPreferenceStatus.allCases.indexOf(topic.status)
-            CourierPreferenceStatus.allCases.forEachIndexed { index, status ->
+                // Setup tabs
+                statusTabs.removeAllTabs()
+                val selectedTabIndex = CourierPreferenceStatus.allCases.indexOf(topic.status)
+                CourierPreferenceStatus.allCases.forEachIndexed { index, status ->
 
-                val tabItem = statusTabs.newTab()
-                tabItem.text = status.value
-                statusTabs.addTab(tabItem)
+                    val tabItem = statusTabs.newTab()
+                    tabItem.text = status.value
+                    statusTabs.addTab(tabItem)
 
-                if (index == selectedTabIndex) {
-                    statusTabs.selectTab(tabItem)
+                    if (index == selectedTabIndex) {
+                        statusTabs.selectTab(tabItem)
+                    }
+
                 }
 
+                // Custom Routing
+                customRoutingSwitch.isChecked = topic.hasCustomRouting
+
+                // Routing
+                pushSwitch.isChecked = topic.customRouting.contains(CourierPreferenceChannel.PUSH)
+                smsSwitch.isChecked = topic.customRouting.contains(CourierPreferenceChannel.SMS)
+                emailSwitch.isChecked = topic.customRouting.contains(CourierPreferenceChannel.EMAIL)
+                dmSwitch.isChecked = topic.customRouting.contains(CourierPreferenceChannel.DIRECT_MESSAGE)
+                webhooksSwitch.isChecked = topic.customRouting.contains(CourierPreferenceChannel.WEBHOOK)
+
             }
-
-            // Custom Routing
-            customRoutingSwitch.isChecked = topic.hasCustomRouting
-
-            // Routing
-            pushSwitch.isChecked = topic.customRouting.contains(CourierPreferenceChannel.PUSH)
-            smsSwitch.isChecked = topic.customRouting.contains(CourierPreferenceChannel.SMS)
-            emailSwitch.isChecked = topic.customRouting.contains(CourierPreferenceChannel.EMAIL)
-            dmSwitch.isChecked = topic.customRouting.contains(CourierPreferenceChannel.DIRECT_MESSAGE)
-            webhooksSwitch.isChecked = topic.customRouting.contains(CourierPreferenceChannel.WEBHOOK)
 
         } catch (e: CourierException) {
 
@@ -127,7 +127,7 @@ class PreferenceDetailFragment(private val topicId: String) : Fragment(R.layout.
                 CourierPreferenceChannel.WEBHOOK to webhooksSwitch.isChecked,
             )
 
-            Courier.shared.putUserPreferenceTopic(
+            Courier.shared.client?.preferences?.putUserPreferenceTopic(
                 topicId = topicId,
                 status = status,
                 hasCustomRouting = customRoutingSwitch.isChecked,

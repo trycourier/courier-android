@@ -34,7 +34,8 @@
             <com.courier.android.ui.infoview.CourierInfoView
                 android:id="@+id/infoView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:visibility="gone" />
 
             <ProgressBar
                 android:id="@+id/loadingIndicator"

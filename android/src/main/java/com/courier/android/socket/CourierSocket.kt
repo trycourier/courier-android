@@ -1,6 +1,5 @@
 package com.courier.android.socket
 
-import com.courier.android.Courier
 import com.courier.android.models.CourierException
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +13,7 @@ import okhttp3.WebSocketListener
 import okio.ByteString
 import kotlin.coroutines.resume
 
-internal open class CourierSocket(internal val url: String, internal val onClose: (code: Int, reason: String?) -> Unit, internal val onError: (e: Exception) -> Unit) {
+open class CourierSocket(internal val url: String) {
 
     companion object {
         const val NORMAL_CLOSURE_STATUS = 1000
@@ -22,8 +21,11 @@ internal open class CourierSocket(internal val url: String, internal val onClose
 
     private var webSocket: WebSocket? = null
     private val client: OkHttpClient = OkHttpClient()
+
+    var onOpen: (() -> Unit)? = null
     var onMessageReceived: ((String) -> Unit)? = null
-    private var onOpen: (() -> Unit)? = null
+    var onClose: ((code: Int, reason: String?) -> Unit)? = null
+    var onError: ((error: Exception) -> Unit)? = null
 
     suspend fun connect() {
 
@@ -53,12 +55,11 @@ internal open class CourierSocket(internal val url: String, internal val onClose
 
                 override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
                     webSocket.close(NORMAL_CLOSURE_STATUS, null)
-                    onClose(code, reason)
+                    onClose?.invoke(code, reason)
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                    Courier.error(t.message)
-                    onError(CourierException.inboxWebSocketFail)
+                    onError?.invoke(CourierException.inboxWebSocketFail)
                     if (continuation.isActive) {
                         continuation.resumeWith(Result.failure(t))
                     }

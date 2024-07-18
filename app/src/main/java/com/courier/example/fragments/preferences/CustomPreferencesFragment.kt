@@ -4,21 +4,26 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.coroutineScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
+import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPreferenceTopic
-import com.courier.android.modules.getUserPreferences
 import com.courier.android.modules.refreshInbox
 import com.courier.example.MainActivity
 import com.courier.example.R
-import com.courier.example.fragments.MessageItemViewHolder
+import com.courier.example.fragments.inbox.MessageItemViewHolder
 import com.courier.example.toJson
+import kotlinx.coroutines.launch
 
 class CustomPreferencesFragment : Fragment(R.layout.fragment_custom_preferences) {
 
+    private lateinit var stateTextView: TextView
     private lateinit var recyclerView: RecyclerView
     private lateinit var refreshLayout: SwipeRefreshLayout
 
@@ -26,6 +31,8 @@ class CustomPreferencesFragment : Fragment(R.layout.fragment_custom_preferences)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        stateTextView = view.findViewById(R.id.stateTextView)
 
         // Create the list
         recyclerView = view.findViewById(R.id.recyclerView)
@@ -53,21 +60,35 @@ class CustomPreferencesFragment : Fragment(R.layout.fragment_custom_preferences)
 
     }
 
-    private fun load() {
+    private fun load() = lifecycle.coroutineScope.launch {
+
+        val client = Courier.shared.client
+
+        if (client == null) {
+            val e = CourierException.userNotFound
+            stateTextView.text = e.message
+            stateTextView.isVisible = true
+            return@launch
+        }
 
         refreshLayout.isRefreshing = true
 
-        Courier.shared.getUserPreferences(
-            onSuccess = { preferences ->
-                preferencesAdapter.topics = preferences.items
-                refreshLayout.isRefreshing = false
-            },
-            onFailure = { error ->
-                print(error)
-                preferencesAdapter.topics = emptyList()
-                refreshLayout.isRefreshing = false
-            }
-        )
+        try {
+
+            val preferences = client.preferences.getUserPreferences()
+            preferencesAdapter.topics = preferences.items
+            refreshLayout.isRefreshing = false
+            stateTextView.isVisible = false
+
+        } catch (e: Exception) {
+
+            print(e)
+            preferencesAdapter.topics = emptyList()
+            refreshLayout.isRefreshing = false
+            stateTextView.isVisible = true
+            stateTextView.text = e.message
+
+        }
 
     }
 

@@ -1,15 +1,14 @@
-package com.courier.android.repositories
+package com.courier.android.client
 
-import com.courier.android.models.CourierBrand
 import com.courier.android.models.CourierBrandResponse
 import com.courier.android.utils.dispatch
 import com.courier.android.utils.toGraphQuery
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
-internal class BrandsRepository : Repository() {
+class BrandClient(private val options: CourierClient.Options): CourierApiClient() {
 
-    internal suspend fun getBrand(clientKey: String?, jwt: String?, userId: String, brandId: String): CourierBrand {
+    suspend fun getBrand(brandId: String): CourierBrandResponse {
 
         val query = """
             query GetBrand {
@@ -31,16 +30,16 @@ internal class BrandsRepository : Repository() {
 
         val request = Request.Builder()
             .url(BASE_GRAPH_QL)
-            .addHeader("x-courier-user-id", userId)
+            .addHeader("x-courier-user-id", options.userId)
             .apply {
-                jwt?.let { addHeader("Authorization", "Bearer $it") }
-                    ?: clientKey?.let { addHeader("x-courier-client-key", it) }
+                options.jwt?.let { addHeader("Authorization", "Bearer $it") } ?: options.clientKey?.let { addHeader("x-courier-client-key", it) }
             }
             .post(query.toRequestBody())
             .build()
 
-        val res = http.newCall(request).dispatch<CourierBrandResponse>()
-        return res.data.brand
+        return http.newCall(request).dispatch<CourierBrandResponse>(
+            options = options,
+        )
 
     }
 

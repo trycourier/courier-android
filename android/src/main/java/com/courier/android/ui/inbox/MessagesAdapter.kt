@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.R
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
+import com.courier.android.models.markAsClicked
 import com.courier.android.ui.CourierActionButton
 import com.courier.android.ui.CourierStyles
 import com.courier.android.utils.isDarkModeOn
@@ -89,7 +90,13 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
                 this.setTheme(theme = theme, isRead = message.isRead, fallbackColor = if (message.isRead) fallbackColor else null)
                 this.text = action.content
                 this.onClick = {
+
+                    // Click the action
+                    action.markAsClicked(message.messageId)
+
+                    // Invoke callback
                     onActionClick?.invoke(action, message)
+
                 }
                 buttonContainer.addView(this)
             }

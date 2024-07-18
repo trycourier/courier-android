@@ -10,6 +10,7 @@ import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.ui.CourierStyles
 import com.courier.android.ui.preferences.CourierPreferences
 import com.courier.android.ui.preferences.CourierPreferencesTheme
+import com.courier.android.utils.log
 import com.courier.example.Env
 import com.courier.example.R
 import com.courier.example.Theme
@@ -72,7 +73,7 @@ class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences)
         preferences.darkTheme = theme
 
         preferences.setOnScrollPreferencesListener { offsetInDp ->
-            Courier.log(offsetInDp.toString())
+            Courier.shared.client?.log(offsetInDp.toString())
         }
 
     }

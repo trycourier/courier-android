@@ -1,7 +1,8 @@
 package com.courier.android.socket
 
+import com.courier.android.client.CourierApiClient
+import com.courier.android.client.CourierClient
 import com.courier.android.models.InboxMessage
-import com.courier.android.repositories.Repository
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 
@@ -9,15 +10,10 @@ internal object InboxSocketManager {
 
     private var socketInstance: InboxSocket? = null
 
-    fun getSocketInstance(clientKey: String?, jwt: String?, onClose: (code: Int, reason: String?) -> Unit, onError: (e: Exception) -> Unit): InboxSocket {
+    fun getSocketInstance(options: CourierClient.Options): InboxSocket {
         synchronized(this) {
             if (socketInstance == null) {
-                socketInstance = InboxSocket(
-                    clientKey = clientKey,
-                    jwt = jwt,
-                    onClose = onClose,
-                    onError = onError
-                )
+                socketInstance = InboxSocket(options)
             }
             return socketInstance!!
         }
@@ -29,20 +25,34 @@ internal object InboxSocketManager {
             socketInstance = null
         }
     }
+
 }
 
-internal class InboxSocket(private val clientKey: String?, private val jwt: String?, onClose: (code: Int, reason: String?) -> Unit, onError: (e: Exception) -> Unit) : CourierSocket(url = buildUrl(clientKey, jwt), onClose = onClose, onError = onError) {
+class InboxSocket(private val options: CourierClient.Options) : CourierSocket(url = buildUrl(options.clientKey, options.jwt)) {
 
     enum class PayloadType(val value: String) {
-        @SerializedName("event") EVENT("event"),
-        @SerializedName("message") MESSAGE("message")
+        @SerializedName("event")
+        EVENT("event"),
+
+        @SerializedName("message")
+        MESSAGE("message")
     }
 
     enum class EventType(val value: String) {
-        @SerializedName("read") READ("read"),
-        @SerializedName("unread") UNREAD("unread"),
-        @SerializedName("mark-all-read") MARK_ALL_READ("mark-all-read"),
-        @SerializedName("opened") OPENED("opened")
+        @SerializedName("read")
+        READ("read"),
+
+        @SerializedName("unread")
+        UNREAD("unread"),
+
+        @SerializedName("mark-all-read")
+        MARK_ALL_READ("mark-all-read"),
+
+        @SerializedName("opened")
+        OPENED("opened"),
+
+        @SerializedName("archive")
+        ARCHIVE("archive")
     }
 
     data class SocketPayload(val type: PayloadType, val event: EventType?)
@@ -61,7 +71,6 @@ internal class InboxSocket(private val clientKey: String?, private val jwt: Stri
         try {
             val gson = Gson()
             val payload = gson.fromJson(data, SocketPayload::class.java)
-
             when (payload.type) {
                 PayloadType.EVENT -> {
                     val messageEvent = gson.fromJson(data, MessageEvent::class.java)
@@ -73,21 +82,21 @@ internal class InboxSocket(private val clientKey: String?, private val jwt: Stri
                 }
             }
         } catch (e: Exception) {
-            this.onError(e)
+            this.onError?.invoke(e)
         }
     }
 
-    suspend fun sendSubscribe(userId: String, tenantId: String?, clientSourceId: String, version: Int = 5) {
-        val data = mutableMapOf(
+    suspend fun sendSubscribe(version: Int = 5) {
+        val data = mapOf(
             "action" to "subscribe",
             "data" to mutableMapOf(
-                "channel" to userId,
+                "channel" to options.userId,
                 "event" to "*",
                 "version" to version,
-                "clientSourceId" to clientSourceId
             ).apply {
-                clientKey?.let { put("clientKey", it) }
-                tenantId?.let { put("accountId", it) }
+                options.connectionId?.let { put("clientSourceId", it) }
+                options.clientKey?.let { put("clientKey", it) }
+                options.tenantId?.let { put("accountId", it) }
             }
         )
         send(data)
@@ -96,7 +105,7 @@ internal class InboxSocket(private val clientKey: String?, private val jwt: Stri
     companion object {
 
         private fun buildUrl(clientKey: String?, jwt: String?): String {
-            var url = Repository.INBOX_WEBSOCKET
+            var url = CourierApiClient.INBOX_WEBSOCKET
             url += when {
                 jwt != null -> "/?auth=$jwt"
                 clientKey != null -> "/?clientKey=$clientKey"
