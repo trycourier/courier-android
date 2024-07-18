@@ -1,6 +1,13 @@
-before_cache:
-  - echo "Skipping app directory"
+version: 2.0
 
+# Optional: Commands to run before the actual build
+before_script:
+  - echo "Ignoring the app directory"
+  # Remove or exclude the 'app' directory from the build context
+  - rm -rf app/
+
+# Main build script
 build:
-  skip:
-    - app/
+  script:
+    - echo "Starting the build"
+    - ./gradlew build
