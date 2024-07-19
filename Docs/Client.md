@@ -1,14 +1,13 @@
 # `CourierClient`
 
-The base level API wrapper for Courier endpoints.
-
-&emsp;
+Base layer Courier API wrapper.
 
 ## Initialization
 
-Creating a client stores request authentication credentials temporarily. You can create as many clients as you'd like. More info about getting and generating keys can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md#going-to-production"><code>here</code></a>
+Creating a client stores request authentication credentials only for that specific client. You can create as many clients as you'd like. More info about authentication can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md#going-to-production"><code>here</code></a>
 
 ```kotlin
+// Creating a client
 val client = CourierClient(
     jwt          = "...",          // Optional. Likely needed for your use case. See above for more authentication details.
     clientKey    = "...",          // Optional. Used only for Inbox
@@ -17,6 +16,77 @@ val client = CourierClient(
     tenantId     = "...",          // Optional
     showLogs     = ...,            // Optional. Defaults to your current BuildConfig
 )
+
+// Details about the client
+val options = client.options
+
+// Logging to the console
+client.log("...")
+client.warn("...")
+client.error("...")
+```
+
+## Inbox
+
+All available APIs for Inbox
+
+```kotlin
+// Get all inbox messages
+// Includes the total count in the response
+val messages = client.inbox.getMessages(
+    paginationLimit = 123, // Optional
+    startCursor = null, // Optional
+)
+
+// Returns only archived messages
+// Includes the total count of archived message in the response
+val archivedMessages = client.inbox.getArchivedMessages(
+    paginationLimit = 123, // Optional
+    startCursor = null, // Optional
+)
+
+// Gets the number of unread messages
+val unreadCount = client.inbox.getUnreadMessageCount()
+
+// Tracking messages
+client.inbox.trackOpened(messageId = "...")
+client.inbox.trackRead(messageId = "...")
+client.inbox.trackUnread(messageId = "...")
+client.inbox.trackAllRead()
+
+// Inbox Websocket
+client.inbox.socket.apply {
+
+    onOpen = {
+        print("Socket Opened")
+    }
+
+    onClose = { code, reason ->
+        print("Socket closed: $code, $reason")
+    }
+
+    onError = { error ->
+        print(error)
+    }
+
+    // Returns the event received
+    // Available events: READ("read"), UNREAD("unread"), MARK_ALL_READ("mark-all-read"), OPENED("opened"), ARCHIVE("archive")
+    // Note: This will not fire unless you provide a connectionId to the client and the event comes from another app using a different connectionId
+    receivedMessageEvent = { event ->
+        print(event)
+    }
+
+    // Returns the InboxMessage received
+    receivedMessage = { message ->
+        print(message)
+    }
+
+    connect()       // Connects the socket
+    sendSubscribe() // Subscribes to socket events for the user id in the client
+    disconnect()    // Disconnects the socket
+
+}
+```
 
 // Token Management
 
@@ -38,63 +108,6 @@ client.tokens.putUserToken(
 client.tokens.deleteUserToken(
     token = "...",
 )
-
-// Inbox
-
-client.inbox.getMessages(
-    paginationLimit = 123, // Optional
-    startCursor = null, // Optional
-)
-
-client.inbox.getArchivedMessages(
-    paginationLimit = 123, // Optional
-    startCursor = null, // Optional
-)
-
-val count = client.inbox.getUnreadMessageCount()
-
-client.inbox.trackOpened(
-    messageId = "...",
-)
-
-client.inbox.trackRead(
-    messageId = "...",
-)
-
-client.inbox.trackUnread(
-    messageId = "...",
-)
-
-client.inbox.trackAllRead()
-
-// Inbox Socket
-
-val socket = client.inbox.socket
-
-socket.onOpen = {
-    println("Socket Opened")
-}
-
-socket.onClose = { code, reason ->
-    println("Socket closed: $code, $reason")
-}
-
-socket.onError = { error ->
-    assertNull(error)
-}
-
-socket.receivedMessageEvent = { event ->
-    println(event)
-}
-
-socket.receivedMessage = { message ->
-    println(message)
-    hold2 = false
-}
-
-socket.connect()
-socket.sendSubscribe() // Needed to listen to socket events
-socket.disconnect()
 
 // Preferences
 
