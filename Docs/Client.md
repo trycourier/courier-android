@@ -57,6 +57,8 @@ client.inbox.trackUnread(
 
 client.inbox.trackAllRead()
 
+// Inbox Socket
+
 val socket = client.inbox.socket
 
 socket.onOpen = {
