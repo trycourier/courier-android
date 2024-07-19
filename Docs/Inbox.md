@@ -194,7 +194,9 @@ inbox.lightTheme = theme
 inbox.darkTheme = theme
 ```
 
-Base level APIs for Branding can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md#branding-apis"><code>here</code></a>
+&emsp;
+
+👋 Base level APIs for Branding can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md#branding-apis"><code>here</code></a>
 
 &emsp;
 
@@ -385,4 +387,6 @@ message.markAsArchived()
 message.actions?.first?.markAsClicked()
 ```
 
-Base level APIs for Inbox can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md#inbox-apis"><code>here</code></a>
+&emsp;
+
+👋 Base level APIs for Inbox can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md#inbox-apis"><code>here</code></a>
