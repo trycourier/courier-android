@@ -33,7 +33,7 @@
 
 # Installation
 
-### 1. Add Jitpack repository support in your `settings.gradle` file
+### 1. Add Jitpack repository to your `settings.gradle` file
 
 ```gradle
 pluginManagement {
