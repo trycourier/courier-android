@@ -60,7 +60,9 @@ dependencies {
 }
 ```
 
-### 3. Initialize the SDK
+### Optional. Initialize the SDK (Only needed is you are using `Courier.shared...` APIs)
+
+If you are using the <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md"><code>CourierClient</code></a> exclusively, you can skip this step.
 
 ```kotlin
 // This example is on an Application class
