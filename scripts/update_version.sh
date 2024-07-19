@@ -40,18 +40,11 @@ update_version() {
 update_readme_version() {
     local new_version=$1
 
-    cat README.md | while read -r READ_ME_VERSION; do
-        if [[ $READ_ME_VERSION == *"implementation 'com.github.trycourier:courier-android"* ]]; then
-            # Replace README version
-            local NEW_READ_ME_VERSION="implementation 'com.github.trycourier:courier-android:$new_version'"
-            if [[ $READ_ME_VERSION != "" && $NEW_READ_ME_VERSION != "" ]]; then
-                sed -i '.bak' "s|$READ_ME_VERSION|$NEW_READ_ME_VERSION|g" "README.md"
-            fi
-        fi
-    done
+    # Update the Groovy implementation line in README.md
+    sed -i '' "s/implementation 'com.github.trycourier:courier-android:[^']*'/implementation 'com.github.trycourier:courier-android:$new_version'/" README.md
 
-    # Clean up backup file
-    rm README.md.bak
+    # Update the Gradle.kts implementation line in README.md
+    sed -i '' "s/implementation(\"com.github.trycourier:courier-android:[^\"]*\")/implementation(\"com.github.trycourier:courier-android:$new_version\")/" README.md
 }
 
 # Get the current version
