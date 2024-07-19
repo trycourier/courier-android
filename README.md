@@ -51,7 +51,7 @@ dependencyResolutionManagement {
 }
 ```
 
-### 2. Add the implementation to your app `build.gradle` file
+### 2. Add the implementation to your app's `build.gradle` file
 
 ```gradle
 dependencies {
@@ -62,7 +62,7 @@ dependencies {
 
 &emsp;
 
-### SDK Stack
+# SDK Stack
 
 <table>
     <thead>
@@ -78,12 +78,10 @@ dependencies {
                 1
             </td>
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md">
-                    <code>Authentication</code>
-                </a>
+                UI
             </td>
             <td align="left">
-                <code>Authentication</code>
+                The drop-in components that make it easy to build <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md">Inbox</a> and <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Preferences.md">Preferences</a>
             </td>
         </tr>
     </tbody>
