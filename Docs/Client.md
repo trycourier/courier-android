@@ -26,7 +26,7 @@ client.warn("...")
 client.error("...")
 ```
 
-## Device Token APIs
+## Token Management APIs
 
 All available APIs for Device Token Management
 
