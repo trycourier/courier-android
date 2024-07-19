@@ -14,7 +14,7 @@ val client = CourierClient(
     userId       = "your_user_id",
     connectionId = "...",          // Optional. Used for inbox websocket
     tenantId     = "...",          // Optional
-    showLogs     = ..,            // Optional. Defaults to your current BuildConfig
+    showLogs     = ..,             // Optional. Defaults to your current BuildConfig
 )
 
 // Details about the client
