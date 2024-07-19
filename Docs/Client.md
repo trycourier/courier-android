@@ -1,11 +1,21 @@
+# `CourierClient`
+
+The base level API wrapper for Courier endpoints.
+
+&emsp;
+
+## Initialization
+
+Creating a client stores request authentication credentials temporarily. You can create as many clients as you'd like. More info about getting and generating keys can be found here <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md#going-to-production"><code>here</code></a>
+
 ```kotlin
 val client = CourierClient(
-    jwt = "...",
-    clientKey = "...",
-    userId = "user_id",
-    connectionId = "uuid_used_for_websockets", // Optional
-    tenantId = "tenant_id", // Optional
-    showLogs = true, // Optional. Defaults to BuildConfig
+    jwt          = "...",          // Optional. Likely needed for your use case. See above for more authentication details.
+    clientKey    = "...",          // Optional. Used only for Inbox
+    userId       = "your_user_id",
+    connectionId = "...",          // Optional. Used for inbox websocket
+    tenantId     = "...",          // Optional
+    showLogs     = ...,            // Optional. Defaults to your current BuildConfig
 )
 
 // Token Management
