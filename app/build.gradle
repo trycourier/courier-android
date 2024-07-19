@@ -18,7 +18,7 @@ android {
         applicationId "com.courier.example"
         minSdk 23
         targetSdk 34
-        versionCode 49
+        versionCode 51
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.debug
@@ -27,18 +27,14 @@ android {
 
     signingConfigs {
         release {
-
-            def keystoreFile = file(keystoreProperties['storeFile'])
-
-            if (keystoreFile) {
+            if (keystoreProperties['storeFile']) {
                 keyAlias keystoreProperties['keyAlias']
                 keyPassword keystoreProperties['keyPassword']
-                storeFile keystoreFile
+                storeFile file(keystoreProperties['storeFile'])
                 storePassword keystoreProperties['storePassword']
             } else {
                 println "Warning: Store file not found or path is null. Signing configuration will be skipped."
             }
-
         }
     }
 
