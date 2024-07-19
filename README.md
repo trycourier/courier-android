@@ -68,6 +68,25 @@ dependencies {
 | Courier Instance | Manages courier services          |
 | Courier Client   | Client for interacting with couriers|
 
+<table>
+    <tbody>
+        <tr width="1200px">
+            <td align="left">Courier Account</td>
+            <td align="center">
+                <a href="https://app.courier.com/channels/courier">
+                    <code>Sign Up</code>
+                </a>
+            </td>
+        </tr>
+        <tr width="1200px">
+            <td align="left">Minimum Android SDK Version</td>
+            <td align="center">
+                <code>23</code>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
 ### 3. Initialize the SDK
 
 ```kotlin
