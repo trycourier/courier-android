@@ -8,7 +8,7 @@
     <thead>
         <tr>
             <th width="880px" align="left">Requirements</th>
-            <th width="120px" align="center"></th>
+            <th width="140px" align="center"></th>
         </tr>
     </thead>
     <tbody>
