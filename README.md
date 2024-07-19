@@ -60,44 +60,6 @@ dependencies {
 }
 ```
 
-&emsp;
-
-# SDK Stack
-
-<table>
-    <thead>
-        <tr>
-            <th width="25px"></th>
-            <th width="250px" align="left">Layer</th>
-            <th width="725px" align="left">Description</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr width="600px">
-            <td align="center">
-                1
-            </td>
-            <td align="left">
-                UI
-            </td>
-            <td align="left">
-                Components that make it easier and faster to add notifications into your app <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md"><code>Inbox</code></a> and <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Preferences.md"><code>Preferences</code></a>
-            </td>
-        </tr>
-        <tr width="600px">
-            <td align="center">
-                2
-            </td>
-            <td align="left">
-                Shared Instance
-            </td>
-            <td align="left">
-                Manages user state between app sessions. Incredibly useful for ensuring users that are signed in receive <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md"><code>Push Notifications</code></a> and user's that aren't don't
-            </td>
-        </tr>
-    </tbody>
-</table>
-
 ### 3. Initialize the SDK
 
 ```kotlin
