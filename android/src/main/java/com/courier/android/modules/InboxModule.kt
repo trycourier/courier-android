@@ -210,14 +210,18 @@ suspend fun Courier.fetchNextPage(): List<InboxMessage> {
 private suspend fun Courier.fetchNextPageOfMessages(): List<InboxMessage> {
 
     // Check for auth
-    if (!Courier.shared.isUserSignedIn || inbox == null) {
+    if (!Courier.shared.isUserSignedIn) {
         throw CourierException.userNotFound
+    }
+
+    if (inbox == null) {
+        throw CourierException.inboxNotInitialized
     }
 
     // Fetch the next page
     val inboxData = client?.inbox?.getMessages(
         paginationLimit = paginationLimit,
-        startCursor = inbox!!.startCursor
+        startCursor = inbox?.startCursor
     )
 
     val messages = inboxData?.data?.messages?.nodes.orEmpty()
@@ -225,7 +229,7 @@ private suspend fun Courier.fetchNextPageOfMessages(): List<InboxMessage> {
     val hasNextPage = inboxData?.data?.messages?.pageInfo?.hasNextPage
 
     // Add the page of messages
-    inbox!!.addPage(
+    inbox?.addPage(
         messages = messages,
         startCursor = startCursor,
         hasNextPage = hasNextPage,

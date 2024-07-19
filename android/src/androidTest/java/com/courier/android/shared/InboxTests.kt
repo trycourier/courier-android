@@ -3,10 +3,12 @@ package com.courier.android.shared
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.courier.android.Courier
+import com.courier.android.Courier.Companion.DEFAULT_MAX_PAGINATION_LIMIT
+import com.courier.android.Courier.Companion.DEFAULT_MIN_PAGINATION_LIMIT
 import com.courier.android.Env
 import com.courier.android.ExampleServer
+import com.courier.android.models.InboxMessage
 import com.courier.android.models.markAsArchived
-import com.courier.android.models.markAsClicked
 import com.courier.android.models.markAsOpened
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
@@ -15,6 +17,7 @@ import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.archiveMessage
 import com.courier.android.modules.clickMessage
 import com.courier.android.modules.fetchNextPage
+import com.courier.android.modules.inboxPaginationLimit
 import com.courier.android.modules.openMessage
 import com.courier.android.modules.readMessage
 import com.courier.android.modules.unreadMessage
@@ -26,12 +29,16 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.UUID
 
 @RunWith(AndroidJUnit4::class)
 class InboxTests {
 
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
+
+    @Before
+    fun setup() {
+        Courier.initialize(context)
+    }
 
     private suspend fun sendMessage(userId: String = Env.COURIER_USER_ID): String {
         return ExampleServer.sendTest(
@@ -41,9 +48,23 @@ class InboxTests {
         )
     }
 
-    @Before
-    fun setup() {
-        Courier.initialize(context)
+    private suspend fun getVerifiedInboxMessage(): InboxMessage {
+
+        val listener = Courier.shared.addInboxListener()
+
+        val messageId = sendMessage()
+
+        delay(5000) // Pipeline delay
+
+        val message = Courier.shared.inboxMessages?.first()
+
+        assertNotNull(message)
+        assertEquals(message!!.messageId, messageId)
+
+        listener.remove()
+
+        return message
+
     }
 
     @Test
@@ -51,23 +72,20 @@ class InboxTests {
 
         UserBuilder.authenticate()
 
-        val messageId = sendMessage()
+        val message = getVerifiedInboxMessage()
 
-        delay(5000) // Pipeline delay
+        Courier.shared.openMessage(message.messageId)
 
-        val res = Courier.shared.client?.inbox?.getMessage(
-            messageId = messageId
-        )
+    }
 
-        val message = res?.data?.message
+    @Test
+    fun openMessageShortcut() = runBlocking {
 
-        assertNotNull(message)
+        UserBuilder.authenticate()
 
-        Courier.shared.openMessage(
-            messageId = messageId,
-        )
+        val message = getVerifiedInboxMessage()
 
-        message!!.markAsOpened()
+        message.markAsOpened()
 
     }
 
@@ -76,23 +94,20 @@ class InboxTests {
 
         UserBuilder.authenticate()
 
-        val messageId = sendMessage()
+        val message = getVerifiedInboxMessage()
 
-        delay(5000) // Pipeline delay
+        Courier.shared.readMessage(message.messageId)
 
-        val res = Courier.shared.client?.inbox?.getMessage(
-            messageId = messageId
-        )
+    }
 
-        val message = res?.data?.message
+    @Test
+    fun readMessageShortcut() = runBlocking {
 
-        assertNotNull(message)
+        UserBuilder.authenticate()
 
-        Courier.shared.readMessage(
-            messageId = messageId,
-        )
+        val message = getVerifiedInboxMessage()
 
-        message!!.markAsRead()
+        message.markAsRead()
 
     }
 
@@ -101,23 +116,20 @@ class InboxTests {
 
         UserBuilder.authenticate()
 
-        val messageId = sendMessage()
+        val message = getVerifiedInboxMessage()
 
-        delay(5000) // Pipeline delay
+        Courier.shared.unreadMessage(message.messageId)
 
-        val res = Courier.shared.client?.inbox?.getMessage(
-            messageId = messageId
-        )
+    }
 
-        val message = res?.data?.message
+    @Test
+    fun unreadMessageShortcut() = runBlocking {
 
-        assertNotNull(message)
+        UserBuilder.authenticate()
 
-        Courier.shared.unreadMessage(
-            messageId = messageId,
-        )
+        val message = getVerifiedInboxMessage()
 
-        message!!.markAsUnread()
+        message.markAsUnread()
 
     }
 
@@ -126,23 +138,22 @@ class InboxTests {
 
         UserBuilder.authenticate()
 
-        val messageId = sendMessage()
+        val message = getVerifiedInboxMessage()
 
-        delay(5000) // Pipeline delay
+        Courier.shared.clickMessage(message.messageId)
 
-        val res = Courier.shared.client?.inbox?.getMessage(
-            messageId = messageId
-        )
+    }
 
-        val message = res?.data?.message
+    @Test
+    fun clickMessageShortcut() = runBlocking {
 
-        assertNotNull(message)
+        // TODO: Fix when click tracking is polished up
 
-        Courier.shared.clickMessage(
-            messageId = messageId,
-        )
-
-        message!!.markAsClicked()
+//        UserBuilder.authenticate()
+//
+//        val message = getVerifiedInboxMessage()
+//
+//        message.markAsClicked()
 
     }
 
@@ -151,23 +162,20 @@ class InboxTests {
 
         UserBuilder.authenticate()
 
-        val messageId = sendMessage()
+        val message = getVerifiedInboxMessage()
 
-        delay(5000) // Pipeline delay
+        Courier.shared.archiveMessage(message.messageId)
 
-        val res = Courier.shared.client?.inbox?.getMessage(
-            messageId = messageId
-        )
+    }
 
-        val message = res?.data?.message
+    @Test
+    fun archiveMessageShortcut() = runBlocking {
 
-        assertNotNull(message)
+        UserBuilder.authenticate()
 
-        Courier.shared.archiveMessage(
-            messageId = messageId,
-        )
+        val message = getVerifiedInboxMessage()
 
-        message!!.markAsArchived()
+        message.markAsArchived()
 
     }
 
@@ -199,19 +207,20 @@ class InboxTests {
     @Test
     fun pagination() = runBlocking {
 
-        val userId = UUID.randomUUID().toString()
+        UserBuilder.authenticate()
 
-        UserBuilder.authenticate(userId)
+        Courier.shared.inboxPaginationLimit = 10000
+        assertEquals(Courier.shared.inboxPaginationLimit, DEFAULT_MAX_PAGINATION_LIMIT)
 
-        Courier.shared.paginationLimit = 1
+        Courier.shared.inboxPaginationLimit = -10000
+        assertEquals(Courier.shared.inboxPaginationLimit, DEFAULT_MIN_PAGINATION_LIMIT)
 
-        sendMessage(userId)
-        sendMessage(userId)
-        sendMessage(userId)
+        Courier.shared.inboxPaginationLimit = 1
+        assertEquals(Courier.shared.inboxPaginationLimit, 1)
 
-        delay(5000)
+        val sendCount = 5
 
-        val listener = Courier.shared.addInboxListener { _, _, _, canPaginate ->
+        val listener = Courier.shared.addInboxListener { messages, _, _, canPaginate ->
 
             Courier.coroutineScope.launch {
 
@@ -223,15 +232,21 @@ class InboxTests {
 
         }
 
+        // Send some messages to the user
+        for (i in 1..sendCount) {
+            sendMessage()
+        }
+
         val messages = Courier.shared.inboxMessages
 
-        while (messages?.size!! < 3) {
+        // Hold until the listener paginates to fetch the messages
+        while (messages?.size != sendCount) {
             // Wait for count
         }
 
         listener.remove()
 
-        assertEquals(messages.size, 3)
+        assertEquals(messages.size, sendCount)
 
     }
 

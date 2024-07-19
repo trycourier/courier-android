@@ -8,18 +8,21 @@ internal data class Inbox(
     var startCursor: String?,
 ) {
 
+    @Synchronized
     fun addNewMessage(message: InboxMessage) {
         this.messages?.add(0, message)
         this.totalCount += 1
         this.unreadCount += 1
     }
 
+    @Synchronized
     fun addPage(messages: List<InboxMessage>, startCursor: String?, hasNextPage: Boolean?) {
         this.messages?.addAll(messages)
         this.startCursor = startCursor
         this.hasNextPage = hasNextPage
     }
 
+    @Synchronized
     fun readAllMessages(): ReadAllOperation {
 
         // Copy previous values
@@ -38,6 +41,7 @@ internal data class Inbox(
     }
 
     // Return the index up the updated message
+    @Synchronized
     fun readMessage(messageId: String): UpdateOperation {
 
         if (messages == null) {
@@ -71,6 +75,7 @@ internal data class Inbox(
 
     }
 
+    @Synchronized
     fun unreadMessage(messageId: String): UpdateOperation {
 
         if (messages == null) {
@@ -104,11 +109,13 @@ internal data class Inbox(
 
     }
 
+    @Synchronized
     fun resetReadAll(update: ReadAllOperation) {
         this.messages = update.messages
         this.unreadCount = update.unreadCount
     }
 
+    @Synchronized
     fun resetUpdate(update: UpdateOperation) {
         this.messages?.set(update.index, update.message)
         this.unreadCount = update.unreadCount
