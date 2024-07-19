@@ -162,7 +162,7 @@ These are all the available features of the SDK.
                 </a>
             </td>
             <td align="left">
-                The base level API wrapper around the Courier endpoints
+                The base level API wrapper around the Courier endpoints. Useful if you have a highly customized user experience or codebase requirements.
             </td>
         </tr>
     </tbody>
