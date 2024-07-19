@@ -62,11 +62,11 @@ dependencies {
 }
 ```
 
-| UI layer         |
-|------------------|
-| Courier Instance |
-|------------------|
-| Courier Client   |
+| SDK Stack        | Description                       |
+|------------------|-----------------------------------|
+| UI layer         | The user interface layer          |
+| Courier Instance | Manages courier services          |
+| Courier Client   | Client for interacting with couriers|
 
 ### 3. Initialize the SDK
 
