@@ -1,4 +1,4 @@
-<img width="1000" alt="android-banner" src="https://github.com/trycourier/courier-android/assets/6370613/6bcd48eb-5c5f-4746-bc8b-f20aa21228e1">
+<img width="1000" alt="android-banner" src="https://github.com/user-attachments/assets/e40f7db0-3b6c-4b5e-a2de-bf6d42b6751d">
 
 &emsp;
 
