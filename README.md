@@ -62,15 +62,11 @@ dependencies {
 }
 ```
 
-+-------------------+
-| UI layer          |
-+-------------------+
-+-------------------+
-| Courier Instance  |
-+-------------------+
-+-------------------+
-| Courier Client    |
-+-------------------+
+| UI layer         |
+|------------------|
+| Courier Instance |
+|------------------|
+| Courier Client   |
 
 ### 3. Initialize the SDK
 
