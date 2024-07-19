@@ -138,42 +138,4 @@ If you are interested in using a Courier "Brand", here is where you can adjust t
 
 &emsp;
 
-## Custom Preferences APIs
-
-The raw data you can use to build whatever UI you'd like.
-
-# Get All User Preferences
-
-Returns all the user's preferences. [`listAllUserPreferences`](https://www.courier.com/docs/reference/user-preferences/list-all-user-preferences/)
-
-```kotlin
-// paginationCursor is optional
-val preferences = Courier.shared.getUserPreferences()
-```
-
-&emsp;
-
-# Update Preference Topic
-
-Updates a specific user preference topic. [`updateUserSubscriptionTopic`](https://www.courier.com/docs/reference/user-preferences/update-subscription-topic-preferences/)
-
-```kotlin
-Courier.shared.putUserPreferenceTopic(
-    topicId = "6QHD7Z1D4Q436SMECGXENTQYWVQQ",
-    status = CourierPreferenceStatus.OPTED_IN,
-    hasCustomRouting = true,
-    customRouting = listOf(CourierPreferenceChannel.SMS, CourierPreferenceChannel.PUSH)
-)
-```
-
-&emsp;
-
-# Get Preference Topic
-
-Gets a specific preference topic. [`getUserSubscriptionTopic`](https://www.courier.com/docs/reference/user-preferences/get-subscription-topic-preferences/)
-
-```kotlin
-val topic = Courier.shared.getUserPreferenceTopic(
-    topicId = "6QHD7Z1D4Q436SMECGXENTQYWVQQ",
-)
-```
+👋 Base level APIs for Preferences can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md#preferences-apis"><code>here</code></a>
