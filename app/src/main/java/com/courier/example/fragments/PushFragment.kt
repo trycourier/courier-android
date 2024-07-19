@@ -10,11 +10,15 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.modules.fcmToken
 import com.courier.android.modules.isPushPermissionGranted
+import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.requestNotificationPermission
 import com.courier.example.R
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 class PushFragment : Fragment(R.layout.fragment_push) {
@@ -43,7 +47,11 @@ class PushFragment : Fragment(R.layout.fragment_push) {
 
         val refreshTokensButton = view.findViewById<Button>(R.id.refreshTokens)
         refreshTokensButton.setOnClickListener {
-            fcmToken.text = Courier.shared.fcmToken ?: "No token found"
+            lifecycleScope.launch(Dispatchers.Main) {
+                fcmToken.text = "Refreshing FCM Token"
+                Courier.shared.refreshFcmToken()
+                fcmToken.text = Courier.shared.fcmToken ?: "No token found"
+            }
         }
 
         val requestPermissionsButton = view.findViewById<Button>(R.id.requestPermissions)

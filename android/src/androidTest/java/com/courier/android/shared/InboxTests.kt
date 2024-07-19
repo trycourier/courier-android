@@ -9,6 +9,7 @@ import com.courier.android.Env
 import com.courier.android.ExampleServer
 import com.courier.android.models.InboxMessage
 import com.courier.android.models.markAsArchived
+import com.courier.android.models.markAsClicked
 import com.courier.android.models.markAsOpened
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
@@ -79,17 +80,6 @@ class InboxTests {
     }
 
     @Test
-    fun openMessageShortcut() = runBlocking {
-
-        UserBuilder.authenticate()
-
-        val message = getVerifiedInboxMessage()
-
-        message.markAsOpened()
-
-    }
-
-    @Test
     fun readMessage() = runBlocking {
 
         UserBuilder.authenticate()
@@ -97,17 +87,6 @@ class InboxTests {
         val message = getVerifiedInboxMessage()
 
         Courier.shared.readMessage(message.messageId)
-
-    }
-
-    @Test
-    fun readMessageShortcut() = runBlocking {
-
-        UserBuilder.authenticate()
-
-        val message = getVerifiedInboxMessage()
-
-        message.markAsRead()
 
     }
 
@@ -123,17 +102,6 @@ class InboxTests {
     }
 
     @Test
-    fun unreadMessageShortcut() = runBlocking {
-
-        UserBuilder.authenticate()
-
-        val message = getVerifiedInboxMessage()
-
-        message.markAsUnread()
-
-    }
-
-    @Test
     fun clickMessage() = runBlocking {
 
         UserBuilder.authenticate()
@@ -141,19 +109,6 @@ class InboxTests {
         val message = getVerifiedInboxMessage()
 
         Courier.shared.clickMessage(message.messageId)
-
-    }
-
-    @Test
-    fun clickMessageShortcut() = runBlocking {
-
-        // TODO: Fix when click tracking is polished up
-
-//        UserBuilder.authenticate()
-//
-//        val message = getVerifiedInboxMessage()
-//
-//        message.markAsClicked()
 
     }
 
@@ -169,12 +124,16 @@ class InboxTests {
     }
 
     @Test
-    fun archiveMessageShortcut() = runBlocking {
+    fun shortcuts() = runBlocking {
 
         UserBuilder.authenticate()
 
         val message = getVerifiedInboxMessage()
 
+        message.markAsOpened()
+        message.markAsUnread()
+        message.markAsRead()
+        message.markAsClicked()
         message.markAsArchived()
 
     }
