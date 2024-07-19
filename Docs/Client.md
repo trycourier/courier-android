@@ -28,7 +28,7 @@ client.error("...")
 
 ## Token Management APIs
 
-All available APIs for Device Token Management
+All available APIs for Token Management
 
 ```kotlin
 // Saves a token into Courier Token Management
@@ -49,6 +49,7 @@ val device = CourierDevice(
 
 // Alternatively, you can use CourierDevice.current to get what
 // the Courier SDK can find about the current device being use
+// CourierDevice.current is the default param
 
 client.tokens.putUserToken(
     token = "...",
@@ -124,54 +125,52 @@ client.inbox.socket.apply {
 }
 ```
 
-// Token Management
+## Preferences APIs
 
-val device = CourierDevice(
-    app_id = "APP_ID",
-    ad_id = "AD_ID",
-    device_id = "DEVICE_ID",
-    platform = "android",
-    manufacturer = "Google",
-    model = "Pixel 99"
-)
+All available APIs for Preferences
 
-client.tokens.putUserToken(
-    token = "...",
-    provider = "firebase-fcm",
-    device = device, // Optional
-)
-
-client.tokens.deleteUserToken(
-    token = "...",
-)
-
-// Preferences
-
+```kotlin
+// Get all the available preference topics
 client.preferences.getUserPreferences(
     paginationCursor = null, // Optional
 )
 
+// Gets a specific preference topic
 client.preferences.getUserPreferenceTopic(
     topicId = "...",
 )
 
+// Updates a user preference topic
 client.preferences.putUserPreferenceTopic(
     topicId = "...",
     status = CourierPreferenceStatus.OPTED_IN,
     hasCustomRouting = true,
     customRouting = listOf(CourierPreferenceChannel.PUSH),
 )
+```
 
-// Branding
+## Branding APIs
 
+All available APIs for Branding
+
+```kotlin
 client.brands.getBrand(
     brandId = "...",
 )
+```
 
-// Tracking
+## URL Tracking APIs
 
+All available APIs for URL Tracking
+
+```kotlin
+// Pass a trackingUrl, usually found inside of a push notification payload or Inbox message
+// Tell which event happened. All available events:
+// CLICKED("CLICKED"), DELIVERED("DELIVERED"), OPENED("OPENED"), READ("READ"), UNREAD("UNREAD")
 client.tracking.postTrackingUrl(
     url = "courier_tracking_url",
-    event = CourierTrackingEvent.DELIVERED, // Clicked etc are supported
+    event = CourierTrackingEvent.DELIVERED,
 )
 ```
+
+See the full suite of Courier APIs <a href="https://www.courier.com/docs/reference/"><code>here</code></a>
