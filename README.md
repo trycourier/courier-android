@@ -4,8 +4,6 @@
 
 # Requirements & Support
 
-&emsp;
-
 <table>
     <thead>
         <tr>
@@ -62,17 +60,15 @@ dependencies {
 }
 ```
 
-| SDK Stack        | Description                       |
-|------------------|-----------------------------------|
-| UI layer         | The user interface layer          |
-| Courier Instance | Manages courier services          |
-| Courier Client   | Client for interacting with couriers|
+&emsp;
+
+### SDK Stack
 
 <table>
     <thead>
         <tr>
             <th width="25px"></th>
-            <th width="250px" align="left">Feature</th>
+            <th width="250px" align="left">Layer</th>
             <th width="725px" align="left">Description</th>
         </tr>
     </thead>
