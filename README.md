@@ -69,19 +69,25 @@ dependencies {
 | Courier Client   | Client for interacting with couriers|
 
 <table>
+    <thead>
+        <tr>
+            <th width="25px"></th>
+            <th width="250px" align="left">Feature</th>
+            <th width="725px" align="left">Description</th>
+        </tr>
+    </thead>
     <tbody>
-        <tr width="1200px">
-            <td align="left">Courier Account</td>
+        <tr width="600px">
             <td align="center">
-                <a href="https://app.courier.com/channels/courier">
-                    <code>Sign Up</code>
+                1
+            </td>
+            <td align="left">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md">
+                    <code>Authentication</code>
                 </a>
             </td>
-        </tr>
-        <tr width="1200px">
-            <td align="left">Minimum Android SDK Version</td>
-            <td align="center">
-                <code>23</code>
+            <td align="left">
+                <code>Authentication</code>
             </td>
         </tr>
     </tbody>
