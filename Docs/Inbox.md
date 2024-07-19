@@ -196,10 +196,6 @@ inbox.darkTheme = theme
 
 &emsp;
 
-👋 Base level APIs for Branding can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md#branding-apis"><code>here</code></a>
-
-&emsp;
-
 <table>
     <thead>
         <tr>
@@ -218,6 +214,10 @@ inbox.darkTheme = theme
         </tr>
     </tbody>
 </table>
+
+&emsp;
+
+👋 Base level APIs for Branding can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md#branding-apis"><code>here</code></a>
 
 &emsp;
 
