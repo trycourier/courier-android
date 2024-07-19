@@ -150,6 +150,19 @@ These are all the available features of the SDK.
                 Allow users to update which types of notifications they would like to receive.
             </td>
         </tr>
+        <tr width="600px">
+            <td align="center">
+                5
+            </td>
+            <td align="left">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md">
+                    <code>CourierClient</code>
+                </a>
+            </td>
+            <td align="left">
+                The base level API wrapper around the Courier endpoints
+            </td>
+        </tr>
     </tbody>
 </table>
 
