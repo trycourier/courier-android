@@ -81,7 +81,7 @@ dependencies {
                 UI
             </td>
             <td align="left">
-                The drop-in components that make it easy to build <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md">Inbox</a> and <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Preferences.md">Preferences</a>
+                Components that make it easier and faster to add notifications into your app <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md"><code>Inbox</code></a> and <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Preferences.md"><code>Preferences</code></a>
             </td>
         </tr>
     </tbody>
