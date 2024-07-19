@@ -39,13 +39,16 @@ client.tokens.putUserToken(
 
 // To customize the device of the token being saved
 val device = CourierDevice(
-    app_id = "APP_ID",
-    ad_id = "AD_ID",
-    device_id = "DEVICE_ID",
-    platform = "android",
-    manufacturer = "Google",
-    model = "Pixel 123"
+    app_id       = "APP_ID",    // Optional
+    ad_id        = "AD_ID",     // Optional
+    device_id    = "DEVICE_ID", // Optional
+    platform     = "android",   // Optional
+    manufacturer = "Google",    // Optional
+    model        = "Pixel 123"  // Optional
 )
+
+// Alternatively, you can use CourierDevice.current to get what
+// the Courier SDK can find about the current device being use
 
 client.tokens.putUserToken(
     token = "...",
