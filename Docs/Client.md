@@ -14,7 +14,7 @@ val client = CourierClient(
     userId       = "your_user_id",
     connectionId = "...",          // Optional. Used for inbox websocket
     tenantId     = "...",          // Optional
-    showLogs     = ...,            // Optional. Defaults to your current BuildConfig
+    showLogs     = ..,            // Optional. Defaults to your current BuildConfig
 )
 
 // Details about the client
@@ -26,7 +26,40 @@ client.warn("...")
 client.error("...")
 ```
 
-## Inbox
+## Device Token APIs
+
+All available APIs for Device Token Management
+
+```kotlin
+// Saves a token into Courier Token Management
+client.tokens.putUserToken(
+    token = "...",
+    provider = "firebase-fcm",
+)
+
+// To customize the device of the token being saved
+val device = CourierDevice(
+    app_id = "APP_ID",
+    ad_id = "AD_ID",
+    device_id = "DEVICE_ID",
+    platform = "android",
+    manufacturer = "Google",
+    model = "Pixel 123"
+)
+
+client.tokens.putUserToken(
+    token = "...",
+    provider = "firebase-fcm",
+    device: device
+)
+
+// Deletes the token from Courier Token Management
+client.tokens.deleteUserToken(
+    token = "...",
+)
+```
+
+## Inbox APIs
 
 All available APIs for Inbox
 
@@ -35,14 +68,14 @@ All available APIs for Inbox
 // Includes the total count in the response
 val messages = client.inbox.getMessages(
     paginationLimit = 123, // Optional
-    startCursor = null, // Optional
+    startCursor = null,    // Optional
 )
 
 // Returns only archived messages
 // Includes the total count of archived message in the response
 val archivedMessages = client.inbox.getArchivedMessages(
     paginationLimit = 123, // Optional
-    startCursor = null, // Optional
+    startCursor = null,    // Optional
 )
 
 // Gets the number of unread messages
