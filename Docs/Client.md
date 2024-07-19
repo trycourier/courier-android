@@ -4,7 +4,7 @@ Base layer Courier API wrapper.
 
 ## Initialization
 
-Creating a client stores request authentication credentials only for that specific client. You can create as many clients as you'd like. More info about authentication can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md#going-to-production"><code>here</code></a>
+Creating a client stores request authentication credentials only for that specific client. You can create as many clients as you'd like. See the "Going to production" section <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md#going-to-production"><code>here</code></a> for more info.
 
 ```kotlin
 // Creating a client
