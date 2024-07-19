@@ -48,7 +48,7 @@ val device = CourierDevice(
 )
 
 // Alternatively, you can use CourierDevice.current to get what
-// the Courier SDK can find about the current device being use
+// the Courier SDK can find about the current device being used
 // CourierDevice.current is the default param
 
 client.tokens.putUserToken(
