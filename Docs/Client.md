@@ -50,7 +50,7 @@ val device = CourierDevice(
 client.tokens.putUserToken(
     token = "...",
     provider = "firebase-fcm",
-    device: device
+    device = device,
 )
 
 // Deletes the token from Courier Token Management
