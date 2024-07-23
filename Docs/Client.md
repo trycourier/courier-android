@@ -9,11 +9,11 @@ Creating a client stores request authentication credentials only for that specif
 ```kotlin
 // Creating a client
 val client = CourierClient(
-    jwt          = "...",          // Optional. Likely needed for your use case. See above for more authentication details.
+    jwt          = "...",          // Optional. Likely needed for your use case. See above for more authentication details
     clientKey    = "...",          // Optional. Used only for Inbox
     userId       = "your_user_id",
     connectionId = "...",          // Optional. Used for inbox websocket
-    tenantId     = "...",          // Optional
+    tenantId     = "...",          // Optional. Used for scoping a client to a specific tenant
     showLogs     = ..,             // Optional. Defaults to your current BuildConfig
 )
 
@@ -54,7 +54,7 @@ val device = CourierDevice(
 client.tokens.putUserToken(
     token = "...",
     provider = "firebase-fcm",
-    device = device,
+    device = device,            // Optional
 )
 
 // Deletes the token from Courier Token Management
