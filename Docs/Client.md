@@ -107,8 +107,9 @@ client.inbox.socket.apply {
     }
 
     // Returns the event received
-    // Available events: READ("read"), UNREAD("unread"), MARK_ALL_READ("mark-all-read"), OPENED("opened"), ARCHIVE("archive")
     // Note: This will not fire unless you provide a connectionId to the client and the event comes from another app using a different connectionId
+    // Available events:
+    // READ("read"), UNREAD("unread"), MARK_ALL_READ("mark-all-read"), OPENED("opened"), ARCHIVE("archive")
     receivedMessageEvent = { event ->
         print(event)
     }
