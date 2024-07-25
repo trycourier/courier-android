@@ -89,6 +89,7 @@ val unreadCount = client.inbox.getUnreadMessageCount()
 client.inbox.trackOpened(messageId = "...")
 client.inbox.trackRead(messageId = "...")
 client.inbox.trackUnread(messageId = "...")
+client.inbox.trackArchive(messageId = "...")
 client.inbox.trackAllRead()
 
 // Inbox Websocket
