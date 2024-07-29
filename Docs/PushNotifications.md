@@ -365,4 +365,4 @@ val isGranted = Courier.shared.isPushPermissionGranted(context)
 
 ---
 
-👋 Base level APIs for Push Notifications can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md#token-management-apis"><code>here</code></a>
+👋 `TokenManagement APIs` can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md#token-management-apis"><code>here</code></a>
