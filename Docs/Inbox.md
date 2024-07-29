@@ -179,23 +179,6 @@ inbox.setOnScrollInboxListener { offsetInDp ->
 
 You can control your branding from the [`Courier Studio`](https://app.courier.com/designer/brands).
 
-```kotlin
-// Sets the brand for the inbox
-Courier.shared.inboxBrandId = "YOUR_BRAND_ID"
-
-val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
-
-// ⚠️ Any colors you apply to the theme will override the brand you applied
-val theme = CourierInboxTheme(
-    loadingIndicatorColor = ContextCompat.getColor(requireContext(), R.color.courier_purple)
-)
-
-inbox.lightTheme = theme
-inbox.darkTheme = theme
-```
-
-&emsp;
-
 <table>
     <thead>
         <tr>
