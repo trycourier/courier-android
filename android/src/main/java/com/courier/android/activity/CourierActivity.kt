@@ -13,9 +13,6 @@ open class CourierActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Init Courier if needed
-        Courier.initialize(context = this)
-
         // See if there is a pending click event
         checkIntentForPushNotificationClick(intent)
 

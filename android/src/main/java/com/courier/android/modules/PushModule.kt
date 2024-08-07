@@ -21,16 +21,16 @@ import kotlinx.coroutines.withTimeout
 
 // Get the token but will timeout after some time if the token is not found
 // This is some sort of issue with Firebase Messaging and Emulators
-private suspend fun Courier.getFcmToken(timeout: Long): String? {
+private suspend fun Courier.getFcmToken(context: Context, timeout: Long): String? {
 
     // Ensure firebase is setup
-    if (!isFirebaseInitialized) {
+    if (!isFirebaseInitialized(context)) {
         client?.error("Firebase is not initialized. Courier will not be able to get the FCM token until Firebase is initialized.")
         return null
     }
 
     // Check for push permissions
-    if (!Courier.shared.isPushPermissionGranted(Courier.shared.context)) {
+    if (!Courier.shared.isPushPermissionGranted(context)) {
         return null
     }
 
@@ -47,11 +47,11 @@ private suspend fun Courier.getFcmToken(timeout: Long): String? {
 
 }
 
-suspend fun Courier.setFcmToken(token: String) {
+suspend fun Courier.setFcmToken(context: Context, token: String) {
 
     val key = CourierPushProvider.FIREBASE_FCM.value
 
-    if (Courier.shared.accessToken == null || Courier.shared.userId == null) {
+    if (Courier.shared.getAccessToken(context) == null || Courier.shared.getUserId(context) == null) {
         fcmToken = token
         tokens[key] = token
         return
@@ -59,6 +59,7 @@ suspend fun Courier.setFcmToken(token: String) {
 
     // Remove the old token
     deleteTokenIfNeeded(
+        context = context,
         token = tokens[key]
     )
 
@@ -68,21 +69,23 @@ suspend fun Courier.setFcmToken(token: String) {
 
     // Put the new token
     putToken(
+        context = context,
         provider = key,
         token = token
     )
 
 }
 
-suspend fun Courier.setToken(provider: String, token: String) {
+suspend fun Courier.setToken(context: Context, provider: String, token: String) {
 
-    if (Courier.shared.accessToken == null || Courier.shared.userId == null) {
+    if (Courier.shared.getAccessToken(context) == null || Courier.shared.getUserId(context) == null) {
         tokens[provider] = token
         return
     }
 
     // Remove the old token
     deleteTokenIfNeeded(
+        context = context,
         token = tokens[provider]
     )
 
@@ -91,35 +94,38 @@ suspend fun Courier.setToken(provider: String, token: String) {
 
     // Put the new token
     putToken(
+        context = context,
         provider = provider,
         token = token
     )
 
 }
 
-suspend fun Courier.setToken(provider: CourierPushProvider, token: String) {
+suspend fun Courier.setToken(context: Context, provider: CourierPushProvider, token: String) {
     setToken(
+        context = context,
         provider = provider.value,
         token = token
     )
 }
 
-suspend fun Courier.refreshFcmToken(timeout: Long = 8000) = withContext(Dispatchers.IO) {
+suspend fun Courier.refreshFcmToken(context: Context, timeout: Long = 8000) = withContext(Dispatchers.IO) {
     if (fcmToken == null) {
-        getFcmToken(timeout)?.let { newToken ->
-            setFcmToken(newToken)
+        getFcmToken(context, timeout)?.let { newToken ->
+            setFcmToken(context, newToken)
         }
     }
 }
 
-internal suspend fun Courier.putPushTokens() = withContext(Dispatchers.IO) {
+internal suspend fun Courier.putPushTokens(context: Context) = withContext(Dispatchers.IO) {
 
     // Check if we do not have an fcm token
-    refreshFcmToken()
+    refreshFcmToken(context)
 
     // Save all the tokens
     tokens.forEach { token ->
         putTokenIfNeeded(
+            context = context,
             provider = token.key,
             token = token.value
         )
@@ -129,23 +135,24 @@ internal suspend fun Courier.putPushTokens() = withContext(Dispatchers.IO) {
 
 // Delete all the current tokens for the user
 // Done like this in case we have other tokens for the user at some point
-internal suspend fun Courier.deletePushTokens() = withContext(Dispatchers.IO) {
+internal suspend fun Courier.deletePushTokens(context: Context) = withContext(Dispatchers.IO) {
 
     // Check if we do not have an fcm token
-    refreshFcmToken()
+    refreshFcmToken(context)
 
     // Remove the old tokens
     tokens.forEach { token ->
         deleteTokenIfNeeded(
+            context = context,
             token = token.value
         )
     }
 
 }
 
-private suspend fun Courier.putToken(provider: String, token: String) {
+private suspend fun Courier.putToken(context: Context, provider: String, token: String) {
 
-    if (Courier.shared.accessToken == null || Courier.shared.userId == null) {
+    if (Courier.shared.getAccessToken(context) == null || Courier.shared.getUserId(context) == null) {
         throw CourierException.missingAccessToken
     }
 
@@ -158,14 +165,15 @@ private suspend fun Courier.putToken(provider: String, token: String) {
 
 }
 
-private suspend fun Courier.putTokenIfNeeded(provider: String, token: String?) {
+private suspend fun Courier.putTokenIfNeeded(context: Context, provider: String, token: String?) {
 
-    if (Courier.shared.accessToken == null || Courier.shared.userId == null || token == null) {
+    if (Courier.shared.getAccessToken(context) == null || Courier.shared.getUserId(context) == null || token == null) {
         return
     }
 
     try {
         putToken(
+            context = context,
             provider = provider,
             token = token
         )
@@ -175,9 +183,9 @@ private suspend fun Courier.putTokenIfNeeded(provider: String, token: String?) {
 
 }
 
-private suspend fun Courier.deleteToken(token: String) {
+private suspend fun Courier.deleteToken(context: Context, token: String) {
 
-    if (Courier.shared.accessToken == null || Courier.shared.userId == null) {
+    if (Courier.shared.getAccessToken(context) == null || Courier.shared.getUserId(context) == null) {
         throw CourierException.missingAccessToken
     }
 
@@ -189,14 +197,15 @@ private suspend fun Courier.deleteToken(token: String) {
 
 }
 
-private suspend fun Courier.deleteTokenIfNeeded(token: String?) {
+private suspend fun Courier.deleteTokenIfNeeded(context: Context, token: String?) {
 
-    if (Courier.shared.accessToken == null || Courier.shared.userId == null || token == null) {
+    if (Courier.shared.getAccessToken(context) == null || Courier.shared.getUserId(context) == null || token == null) {
         return
     }
 
     try {
         deleteToken(
+            context = context,
             token = token
         )
     } catch (e: Exception) {
@@ -215,9 +224,9 @@ val Courier.fcmToken get() = fcmToken
  * Traditional Callbacks
  */
 
-fun Courier.setFcmToken(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
+fun Courier.setFcmToken(context: Context, token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
     try {
-        setFcmToken(token)
+        setFcmToken(context, token)
         onSuccess()
     } catch (e: Exception) {
         onFailure(e)
@@ -232,18 +241,18 @@ fun Courier.getToken(provider: String) = tokens[provider]
 
 fun Courier.getToken(provider: CourierPushProvider) = tokens[provider.value]
 
-fun Courier.setToken(provider: String, token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
+fun Courier.setToken(context: Context, provider: String, token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
     try {
-        setToken(provider, token)
+        setToken(context, provider, token)
         onSuccess()
     } catch (e: Exception) {
         onFailure(e)
     }
 }
 
-fun Courier.setToken(provider: CourierPushProvider, token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
+fun Courier.setToken(context: Context, provider: CourierPushProvider, token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
     try {
-        setToken(provider, token)
+        setToken(context, provider, token)
         onSuccess()
     } catch (e: Exception) {
         onFailure(e)
@@ -256,9 +265,8 @@ fun Courier.requestNotificationPermission(activity: Activity, requestCode: Int =
     }
 }
 
-fun Courier.isPushPermissionGranted(context: Context?): Boolean {
+fun Courier.isPushPermissionGranted(context: Context): Boolean {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        if (context == null) { return false }
         ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
     } else {
         true

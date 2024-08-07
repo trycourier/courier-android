@@ -1,6 +1,5 @@
 package com.courier.android
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
@@ -12,15 +11,12 @@ import com.courier.android.models.CourierAuthenticationListener
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.Inbox
 import com.courier.android.modules.linkInbox
-import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.unlinkInbox
 import com.courier.android.utils.NotificationEventBus
 import com.courier.android.utils.warn
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 
 /**
 
@@ -44,7 +40,7 @@ Android Documentation: https://github.com/trycourier/courier-android
 
  */
 
-class Courier private constructor(val context: Context?) : Application.ActivityLifecycleCallbacks {
+class Courier : Application.ActivityLifecycleCallbacks {
 
     companion object {
 
@@ -68,76 +64,39 @@ class Courier private constructor(val context: Context?) : Application.ActivityL
         const val DEFAULT_MAX_PAGINATION_LIMIT = 100
         const val DEFAULT_MIN_PAGINATION_LIMIT = 1
 
-        // This will not create a memory leak
-        // Please call Courier.initialize(context) before using Courier.shared
-        @SuppressLint("StaticFieldLeak")
-        private var mInstance: Courier? = null
+        private var mShared: Courier? = null
         val shared: Courier
             get() {
 
                 // Initialize if needed
-                if (mInstance == null) {
-                    mInstance = Courier(null)
+                if (mShared == null) {
+                    mShared = Courier()
                 }
 
                 // Return the instance
-                return mInstance!!
+                return mShared!!
 
             }
 
-        /**
-         * Initializes the SDK with a static reference to a Courier singleton
-         * This function must be called before you can use the Courier.shared value
-         * Courier.shared is required for nearly all features of the SDK
-         */
-        fun initialize(context: Context): Courier {
-
-            // Create the new instance if needed
-            if (mInstance == null) {
-                mInstance = Courier(context)
-            }
-
-            // Register lifecycle callbacks
-            mInstance?.registerLifecycleCallbacks()
-
-            // Get the current fcmToken if possible
-            coroutineScope.launch(Dispatchers.IO) {
-                mInstance?.refreshFcmToken()
-            }
-
-            return mInstance!!
-
-        }
-
-        private fun Courier.registerLifecycleCallbacks() {
-
-            if (context == null) {
-                client?.warn("Context is null. Please call Courier.initialize(context) with a valid context.")
-                return
-            }
-
+        internal fun Courier.registerLifecycleCallbacks(context: Context) {
             when (context) {
                 is Application -> {
-                    val application = context as Application
-                    application.unregisterActivityLifecycleCallbacks(this)
-                    application.registerActivityLifecycleCallbacks(this)
+                    context.unregisterActivityLifecycleCallbacks(this)
+                    context.registerActivityLifecycleCallbacks(this)
                 }
-
                 is Activity -> {
 
                     // Only available in 29+
                     // Fallback to the Application
-                    val activity = context as Activity
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        activity.unregisterActivityLifecycleCallbacks(this)
-                        activity.registerActivityLifecycleCallbacks(this)
+                        context.unregisterActivityLifecycleCallbacks(this)
+                        context.registerActivityLifecycleCallbacks(this)
                     } else {
-                        activity.application.unregisterActivityLifecycleCallbacks(this)
-                        activity.application.registerActivityLifecycleCallbacks(this)
+                        context.application.unregisterActivityLifecycleCallbacks(this)
+                        context.application.registerActivityLifecycleCallbacks(this)
                     }
 
                 }
-
                 else -> {
                     client?.warn("Initialization context does not support lifecycle callbacks. Please call Courier.initialize(context) with an Activity or Application context.")
                 }
@@ -163,10 +122,9 @@ class Courier private constructor(val context: Context?) : Application.ActivityL
     internal var dataPipe: Job? = null
 
     // Firebase
-    internal val isFirebaseInitialized
-        get() = shared.context?.let {
-            FirebaseApp.getApps(it).isNotEmpty()
-        } ?: false
+    internal fun isFirebaseInitialized(context: Context): Boolean {
+        return FirebaseApp.getApps(context).isNotEmpty()
+    }
 
     // Push
     internal var tokens: MutableMap<String, String> = mutableMapOf()
