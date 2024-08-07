@@ -91,32 +91,15 @@ class InboxClientTests {
 
     }
 
-    // TODO: This response object is botched. Need identical objects.
     @Test
     fun trackClick() = runBlocking {
 
-        print("Skipped Click Tracking Inbox Message. Needs updates.")
+        val messageId = sendMessage()
 
-//        val messageId = sendMessage()
-//
-//        delay(5000) // Pipeline delay
-//
-//        val res = client.inbox.getMessage(
-//            messageId = messageId
-//        )
-//
-//        val message = res.data?.message
-//
-//        assertNotNull(message)
-//
-//        val trackingId = message!!.clickTrackingId
-//
-//        assertNotNull(trackingId)
-//
-//        client.inbox.trackClick(
-//            messageId = message.messageId,
-//            trackingId = trackingId!!
-//        )
+        client.inbox.click(
+            messageId = messageId,
+            trackingId = "example_id"
+        )
 
     }
 
@@ -125,7 +108,7 @@ class InboxClientTests {
 
         val messageId = sendMessage()
 
-        client.inbox.trackOpened(
+        client.inbox.open(
             messageId = messageId,
         )
 
@@ -136,7 +119,7 @@ class InboxClientTests {
 
         val messageId = sendMessage()
 
-        client.inbox.trackRead(
+        client.inbox.read(
             messageId = messageId,
         )
 
@@ -147,7 +130,7 @@ class InboxClientTests {
 
         val messageId = sendMessage()
 
-        client.inbox.trackUnread(
+        client.inbox.unread(
             messageId = messageId,
         )
 
@@ -158,7 +141,7 @@ class InboxClientTests {
 
         val messageId = sendMessage()
 
-        client.inbox.trackArchive(
+        client.inbox.archive(
             messageId = messageId,
         )
 
@@ -167,7 +150,7 @@ class InboxClientTests {
     @Test
     fun trackReadAll() = runBlocking {
 
-        client.inbox.trackAllRead()
+        client.inbox.readAll()
 
     }
 

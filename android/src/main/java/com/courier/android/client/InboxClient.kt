@@ -196,7 +196,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
     }
 
-    suspend fun trackClick(messageId: String, trackingId: String) {
+    suspend fun click(messageId: String, trackingId: String) {
 
         val mutation = """
             mutation TrackEvent {
@@ -220,7 +220,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
     }
 
-    suspend fun trackRead(messageId: String) {
+    suspend fun read(messageId: String) {
 
         val mutation = """
             mutation TrackEvent {
@@ -244,7 +244,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
     }
 
-    suspend fun trackUnread(messageId: String) {
+    suspend fun unread(messageId: String) {
 
         val query = """
             mutation TrackEvent {
@@ -268,7 +268,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
     }
 
-    suspend fun trackAllRead() {
+    suspend fun readAll() {
 
         val query = """
             mutation TrackEvent {
@@ -292,7 +292,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
     }
 
-    suspend fun trackOpened(messageId: String) {
+    suspend fun open(messageId: String) {
 
         val query = """
             mutation TrackEvent {
@@ -316,7 +316,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
     }
 
-    suspend fun trackArchive(messageId: String) {
+    suspend fun archive(messageId: String) {
 
         val mutation = """
             mutation TrackEvent {
