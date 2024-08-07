@@ -30,13 +30,13 @@ class TokenTests {
     @Test
     fun defaultDeviceToken() {
         val device = CourierDevice()
-        assertEquals(device.appId, context.packageName)
+        assertEquals(device.appId, null)
     }
 
     @Test
     fun customDeviceToken() {
-        val device = CourierDevice(appId = "Example")
-        assertEquals(device.appId, "Example")
+        val device = CourierDevice.current(context)
+        assertEquals(device.appId, context.packageName)
     }
 
     @Test
