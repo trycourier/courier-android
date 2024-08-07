@@ -8,7 +8,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 
 class TokenClient(private val options: CourierClient.Options) : CourierApiClient() {
 
-    suspend fun putUserToken(token: String, provider: String, device: CourierDevice = CourierDevice()) {
+    suspend fun putUserToken(token: String, provider: String, device: CourierDevice) {
 
         val url = "${BASE_REST}/users/${options.userId}/tokens/$token"
 

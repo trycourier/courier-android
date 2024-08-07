@@ -5,7 +5,6 @@ import com.courier.android.Courier
 import com.courier.android.client.CourierClient
 import com.courier.android.managers.UserManager
 import com.courier.android.models.CourierAuthenticationListener
-import com.courier.android.models.CourierException
 import com.courier.android.utils.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -17,11 +16,6 @@ import java.util.UUID
  * You should consider using this in areas where you update your local user's state
  */
 suspend fun Courier.signIn(userId: String, tenantId: String? = null, accessToken: String, clientKey: String? = null, showLogs: Boolean = BuildConfig.DEBUG) = withContext(Dispatchers.IO) {
-
-    // Ensure context is set
-    if (Courier.shared.context == null) {
-        throw CourierException.initializationError
-    }
 
     // Sign user out if needed
     if (Courier.shared.isUserSignedIn) {
@@ -49,7 +43,7 @@ suspend fun Courier.signIn(userId: String, tenantId: String? = null, accessToken
 
     // Set the current user
     UserManager.setCredentials(
-        context = Courier.shared.context!!,
+        context = Courier.shared.context,
         userId = userId,
         accessToken = accessToken,
         clientKey = clientKey,
@@ -68,11 +62,6 @@ suspend fun Courier.signIn(userId: String, tenantId: String? = null, accessToken
  * It will remove the current tokens used for this user in Courier so they do not receive pushes they should not get
  */
 suspend fun Courier.signOut() = withContext(Dispatchers.IO) {
-
-    // Ensure context is set
-    if (Courier.shared.context == null) {
-        throw CourierException.initializationError
-    }
 
     // Ensure we have a user to sign out
     if (!Courier.shared.isUserSignedIn) {
@@ -119,18 +108,18 @@ private fun Courier.notifyListeners() {
  * or
  * https://www.courier.com/docs/reference/auth/issue-token/
  */
-internal val Courier.accessToken: String? get() = context?.let { UserManager.getAccessToken(it) }
+internal val Courier.accessToken: String? get() = UserManager.getAccessToken(context)
 
 /**
  * A read only value set to the current user id
  */
-val Courier.userId: String? get() = context?.let { UserManager.getUserId(it) }
+val Courier.userId: String? get() = UserManager.getUserId(context)
 
 /**
  * A read only value set to the current user client key
  * https://app.courier.com/channels/courier
  */
-internal val Courier.clientKey: String? get() = context?.let { UserManager.getClientKey(it) }
+internal val Courier.clientKey: String? get() = UserManager.getClientKey(context)
 
 /**
  * Token needed to authenticate with JWTs for GraphQL requests
@@ -140,7 +129,7 @@ internal val Courier.jwt: String? get() = clientKey?.let { null } ?: accessToken
 /**
  * A read only value set to the current tenant id
  */
-val Courier.tenantId: String? get() = context?.let { UserManager.getTenantId(it) }
+val Courier.tenantId: String? get() = UserManager.getTenantId(context)
 
 /**
  * Determine user state

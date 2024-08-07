@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.app.ActivityCompat
 import com.courier.android.Courier
+import com.courier.android.models.CourierDevice
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPushProvider
 import com.courier.android.utils.error
@@ -153,7 +154,8 @@ private suspend fun Courier.putToken(provider: String, token: String) {
 
     client?.tokens?.putUserToken(
         token = token,
-        provider = provider
+        provider = provider,
+        device = CourierDevice.current(Courier.shared.context),
     )
 
 }

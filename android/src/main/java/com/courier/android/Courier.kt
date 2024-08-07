@@ -9,6 +9,7 @@ import android.os.Bundle
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierAuthenticationListener
+import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.Inbox
 import com.courier.android.modules.linkInbox
@@ -44,7 +45,7 @@ Android Documentation: https://github.com/trycourier/courier-android
 
  */
 
-class Courier private constructor(val context: Context?) : Application.ActivityLifecycleCallbacks {
+class Courier private constructor(val context: Context) : Application.ActivityLifecycleCallbacks {
 
     companion object {
 
@@ -74,15 +75,8 @@ class Courier private constructor(val context: Context?) : Application.ActivityL
         private var mInstance: Courier? = null
         val shared: Courier
             get() {
-
-                // Initialize if needed
-                if (mInstance == null) {
-                    mInstance = Courier(null)
-                }
-
-                // Return the instance
-                return mInstance!!
-
+                mInstance?.let { return it }
+                throw CourierException.initializationError
             }
 
         /**
@@ -90,7 +84,7 @@ class Courier private constructor(val context: Context?) : Application.ActivityL
          * This function must be called before you can use the Courier.shared value
          * Courier.shared is required for nearly all features of the SDK
          */
-        fun initialize(context: Context): Courier {
+        fun initialize(context: Context) {
 
             // Create the new instance if needed
             if (mInstance == null) {
@@ -105,39 +99,26 @@ class Courier private constructor(val context: Context?) : Application.ActivityL
                 mInstance?.refreshFcmToken()
             }
 
-            return mInstance!!
-
         }
 
         private fun Courier.registerLifecycleCallbacks() {
 
-            if (context == null) {
-                client?.warn("Context is null. Please call Courier.initialize(context) with a valid context.")
-                return
-            }
-
             when (context) {
                 is Application -> {
-                    val application = context as Application
-                    application.unregisterActivityLifecycleCallbacks(this)
-                    application.registerActivityLifecycleCallbacks(this)
+                    context.unregisterActivityLifecycleCallbacks(this)
+                    context.registerActivityLifecycleCallbacks(this)
                 }
-
                 is Activity -> {
-
                     // Only available in 29+
                     // Fallback to the Application
-                    val activity = context as Activity
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        activity.unregisterActivityLifecycleCallbacks(this)
-                        activity.registerActivityLifecycleCallbacks(this)
+                        context.unregisterActivityLifecycleCallbacks(this)
+                        context.registerActivityLifecycleCallbacks(this)
                     } else {
-                        activity.application.unregisterActivityLifecycleCallbacks(this)
-                        activity.application.registerActivityLifecycleCallbacks(this)
+                        context.application.unregisterActivityLifecycleCallbacks(this)
+                        context.application.registerActivityLifecycleCallbacks(this)
                     }
-
                 }
-
                 else -> {
                     client?.warn("Initialization context does not support lifecycle callbacks. Please call Courier.initialize(context) with an Activity or Application context.")
                 }
@@ -163,10 +144,7 @@ class Courier private constructor(val context: Context?) : Application.ActivityL
     internal var dataPipe: Job? = null
 
     // Firebase
-    internal val isFirebaseInitialized
-        get() = shared.context?.let {
-            FirebaseApp.getApps(it).isNotEmpty()
-        } ?: false
+    internal val isFirebaseInitialized get() = FirebaseApp.getApps(context).isNotEmpty()
 
     // Push
     internal var tokens: MutableMap<String, String> = mutableMapOf()
