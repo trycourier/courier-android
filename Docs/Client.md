@@ -86,11 +86,11 @@ val archivedMessages = client.inbox.getArchivedMessages(
 val unreadCount = client.inbox.getUnreadMessageCount()
 
 // Tracking messages
-client.inbox.trackOpened(messageId = "...")
-client.inbox.trackRead(messageId = "...")
-client.inbox.trackUnread(messageId = "...")
-client.inbox.trackArchive(messageId = "...")
-client.inbox.trackAllRead()
+client.inbox.open(messageId = "...")
+client.inbox.read(messageId = "...")
+client.inbox.unread(messageId = "...")
+client.inbox.archive(messageId = "...")
+client.inbox.readAll()
 
 // Inbox Websocket
 client.inbox.socket.apply {
