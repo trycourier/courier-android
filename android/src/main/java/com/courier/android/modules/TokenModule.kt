@@ -330,7 +330,7 @@ suspend fun Courier.readAllInboxMessages() {
     coroutineScope.launch(Dispatchers.IO) {
 
         try {
-            client?.inbox?.trackAllRead()
+            client?.inbox?.readAll()
         } catch (e: Exception) {
             inbox?.resetReadAll(original)
             notifyMessagesChanged()
@@ -352,7 +352,7 @@ suspend fun Courier.clickMessage(messageId: String) {
 
         // Unwrap tracking id
         message.clickTrackingId?.let { trackingId ->
-            client?.inbox?.trackClick(
+            client?.inbox?.click(
                 messageId = messageId,
                 trackingId = trackingId
             )
@@ -376,7 +376,7 @@ internal suspend fun Courier.readMessage(messageId: String) {
 
     try {
 
-        client?.inbox?.trackRead(
+        client?.inbox?.read(
             messageId = messageId,
         )
 
@@ -407,7 +407,7 @@ internal suspend fun Courier.unreadMessage(messageId: String) {
 
     try {
 
-        client?.inbox?.trackUnread(
+        client?.inbox?.unread(
             messageId = messageId,
         )
 
@@ -430,7 +430,7 @@ internal suspend fun Courier.openMessage(messageId: String) {
         throw CourierException.userNotFound
     }
 
-    client?.inbox?.trackOpened(
+    client?.inbox?.open(
         messageId = messageId,
     )
 
@@ -442,7 +442,7 @@ internal suspend fun Courier.archiveMessage(messageId: String) {
         throw CourierException.userNotFound
     }
 
-    client?.inbox?.trackArchive(
+    client?.inbox?.archive(
         messageId = messageId,
     )
 

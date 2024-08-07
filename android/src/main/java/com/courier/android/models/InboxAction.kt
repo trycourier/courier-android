@@ -15,6 +15,6 @@ data class InboxAction(
 
 fun InboxAction.markAsClicked(messageId: String) = Courier.coroutineScope.launch {
     (data?.get("trackingId") as? String)?.let { trackingId ->
-        Courier.shared.client?.inbox?.trackClick(messageId = messageId, trackingId = trackingId)
+        Courier.shared.client?.inbox?.click(messageId = messageId, trackingId = trackingId)
     }
 }
