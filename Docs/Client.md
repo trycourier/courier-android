@@ -31,11 +31,6 @@ client.error("...")
 All available APIs for Token Management
 
 ```kotlin
-// Saves a token into Courier Token Management
-client.tokens.putUserToken(
-    token = "...",
-    provider = "firebase-fcm",
-)
 
 // To customize the device of the token being saved
 val device = CourierDevice(
@@ -49,7 +44,7 @@ val device = CourierDevice(
 
 // Alternatively, you can use CourierDevice.current to get what
 // the Courier SDK can find about the current device being used
-// CourierDevice.current is the default param
+// CourierDevice.current(context)
 
 client.tokens.putUserToken(
     token = "...",
