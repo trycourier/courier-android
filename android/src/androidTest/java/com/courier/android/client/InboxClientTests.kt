@@ -95,6 +95,8 @@ class InboxClientTests {
     @Test
     fun trackClick() = runBlocking {
 
+        print("Skipped Click Tracking Inbox Message. Needs updates.")
+
 //        val messageId = sendMessage()
 //
 //        delay(5000) // Pipeline delay
@@ -241,7 +243,7 @@ class InboxClientTests {
 
         print(messageId)
 
-        while (hold1 && hold2) {
+        while (hold1 || hold2) {
             // Wait for the message to be received in the sockets
         }
 
@@ -292,7 +294,7 @@ class InboxClientTests {
         sendMessage(userId = userId1)
         sendMessage(userId = userId2)
 
-        while (hold1 && hold2) {
+        while (hold1 || hold2) {
             // Wait for the message to be received in the sockets
         }
 

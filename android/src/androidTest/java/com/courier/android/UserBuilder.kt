@@ -1,8 +1,5 @@
-package com.courier.android.shared
+package com.courier.android
 
-import com.courier.android.Courier
-import com.courier.android.Env
-import com.courier.android.ExampleServer
 import com.courier.android.models.remove
 import com.courier.android.modules.accessToken
 import com.courier.android.modules.addAuthenticationListener

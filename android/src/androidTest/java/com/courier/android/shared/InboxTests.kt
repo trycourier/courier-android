@@ -7,6 +7,7 @@ import com.courier.android.Courier.Companion.DEFAULT_MAX_PAGINATION_LIMIT
 import com.courier.android.Courier.Companion.DEFAULT_MIN_PAGINATION_LIMIT
 import com.courier.android.Env
 import com.courier.android.ExampleServer
+import com.courier.android.UserBuilder
 import com.courier.android.models.InboxMessage
 import com.courier.android.models.markAsArchived
 import com.courier.android.models.markAsClicked

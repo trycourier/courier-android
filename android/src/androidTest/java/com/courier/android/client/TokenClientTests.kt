@@ -30,9 +30,9 @@ class TokenClientTests {
         val client = ClientBuilder.build()
 
         val device = CourierDevice(
-            app_id = "APP_ID",
-            ad_id = "AD_ID",
-            device_id = "DEVICE_ID",
+            appId = "APP_ID",
+            adId = "AD_ID",
+            deviceId = "DEVICE_ID",
             platform = "android",
             manufacturer = "Google",
             model = "Pixel 99"

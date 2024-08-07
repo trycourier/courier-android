@@ -3,8 +3,11 @@ package com.courier.android.shared
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.courier.android.Courier
+import com.courier.android.UserBuilder
+import com.courier.android.models.CourierDevice
 import com.courier.android.models.CourierPushProvider
 import com.courier.android.modules.getToken
+import com.courier.android.modules.setFcmToken
 import com.courier.android.modules.setToken
 import com.courier.android.modules.signOut
 import junit.framework.TestCase.assertEquals
@@ -22,6 +25,18 @@ class TokenTests {
     @Before
     fun setup() {
         Courier.initialize(context)
+    }
+
+    @Test
+    fun defaultDeviceToken() {
+        val device = CourierDevice()
+        assertEquals(device.appId, context.packageName)
+    }
+
+    @Test
+    fun customDeviceToken() {
+        val device = CourierDevice(appId = "Example")
+        assertEquals(device.appId, "Example")
     }
 
     @Test
@@ -49,7 +64,11 @@ class TokenTests {
 
         UserBuilder.authenticate()
 
-        val provider = CourierPushProvider.FIREBASE_FCM
+        Courier.shared.setFcmToken(
+            token = exampleToken
+        )
+
+        val provider = CourierPushProvider.EXPO
 
         Courier.shared.setToken(
             provider = provider,
@@ -62,7 +81,8 @@ class TokenTests {
             provider = provider,
         )
 
-        assertEquals(userToken, null)
+        assertEquals(Courier.shared.fcmToken, exampleToken)
+        assertEquals(userToken, exampleToken)
 
     }
 

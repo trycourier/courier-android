@@ -9,9 +9,7 @@ import android.os.Bundle
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierAuthenticationListener
-import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
-import com.courier.android.models.CourierPushProvider
 import com.courier.android.models.Inbox
 import com.courier.android.modules.linkInbox
 import com.courier.android.modules.refreshFcmToken
@@ -26,27 +24,27 @@ import kotlinx.coroutines.launch
 
 /**
 
-     ,gggg,
-   ,88"""Y8b,
-  d8"     `Y8
- d8'   8b  d8                                      gg
+,gggg,
+,88"""Y8b,
+d8"     `Y8
+d8'   8b  d8                                      gg
 ,8I    "Y88P'                                      ""
 I8'             ,ggggg,    gg      gg   ,gggggg,   gg    ,ggg,    ,gggggg,
 d8             dP"  "Y8ggg I8      8I   dP""""8I   88   i8" "8i   dP""""8I
 Y8,           i8'    ,8I   I8,    ,8I  ,8'    8I   88   I8, ,8I  ,8'    8I
 `Yba,,_____, ,d8,   ,d8'  ,d8b,  ,d8b,,dP     Y8,_,88,_ `YbadP' ,dP     Y8,
-  `"Y8888888 P"Y8888P"    8P'"Y88P"`Y88P      `Y88P""Y8888P"Y8888P      `Y8
+`"Y8888888 P"Y8888P"    8P'"Y88P"`Y88P      `Y88P""Y8888P"Y8888P      `Y8
 
 ===========================================================================
 
- More about Courier: https://courier.com
- Android Documentation: https://github.com/trycourier/courier-android
+More about Courier: https://courier.com
+Android Documentation: https://github.com/trycourier/courier-android
 
 ===========================================================================
 
-*/
+ */
 
-class Courier private constructor(internal val context: Context) : Application.ActivityLifecycleCallbacks {
+class Courier private constructor(val context: Context?) : Application.ActivityLifecycleCallbacks {
 
     companion object {
 
@@ -76,8 +74,15 @@ class Courier private constructor(internal val context: Context) : Application.A
         private var mInstance: Courier? = null
         val shared: Courier
             get() {
-                mInstance?.let { return it }
-                throw CourierException.initializationError
+
+                // Initialize if needed
+                if (mInstance == null) {
+                    mInstance = Courier(null)
+                }
+
+                // Return the instance
+                return mInstance!!
+
             }
 
         /**
@@ -85,7 +90,7 @@ class Courier private constructor(internal val context: Context) : Application.A
          * This function must be called before you can use the Courier.shared value
          * Courier.shared is required for nearly all features of the SDK
          */
-        fun initialize(context: Context) {
+        fun initialize(context: Context): Courier {
 
             // Create the new instance if needed
             if (mInstance == null) {
@@ -100,27 +105,39 @@ class Courier private constructor(internal val context: Context) : Application.A
                 mInstance?.refreshFcmToken()
             }
 
+            return mInstance!!
+
         }
 
         private fun Courier.registerLifecycleCallbacks() {
+
+            if (context == null) {
+                client?.warn("Context is null. Please call Courier.initialize(context) with a valid context.")
+                return
+            }
+
             when (context) {
                 is Application -> {
-                    context.unregisterActivityLifecycleCallbacks(this)
-                    context.registerActivityLifecycleCallbacks(this)
+                    val application = context as Application
+                    application.unregisterActivityLifecycleCallbacks(this)
+                    application.registerActivityLifecycleCallbacks(this)
                 }
+
                 is Activity -> {
 
                     // Only available in 29+
                     // Fallback to the Application
+                    val activity = context as Activity
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        context.unregisterActivityLifecycleCallbacks(this)
-                        context.registerActivityLifecycleCallbacks(this)
+                        activity.unregisterActivityLifecycleCallbacks(this)
+                        activity.registerActivityLifecycleCallbacks(this)
                     } else {
-                        context.application.unregisterActivityLifecycleCallbacks(this)
-                        context.application.registerActivityLifecycleCallbacks(this)
+                        activity.application.unregisterActivityLifecycleCallbacks(this)
+                        activity.application.registerActivityLifecycleCallbacks(this)
                     }
 
                 }
+
                 else -> {
                     client?.warn("Initialization context does not support lifecycle callbacks. Please call Courier.initialize(context) with an Activity or Application context.")
                 }
@@ -146,28 +163,16 @@ class Courier private constructor(internal val context: Context) : Application.A
     internal var dataPipe: Job? = null
 
     // Firebase
-    internal val isFirebaseInitialized get() = FirebaseApp.getApps(Courier.shared.context).isNotEmpty()
+    internal val isFirebaseInitialized
+        get() = shared.context?.let {
+            FirebaseApp.getApps(it).isNotEmpty()
+        } ?: false
 
     // Push
     internal var tokens: MutableMap<String, String> = mutableMapOf()
 
     // Stores a local copy of the fcmToken
     internal var fcmToken: String? = null
-        set(value) {
-
-            // Set the value
-            field = value
-
-            val key = CourierPushProvider.FIREBASE_FCM.value
-
-            // Update the local cache
-            if (value != null) {
-                tokens[key] = value
-            } else {
-                tokens.remove(key)
-            }
-
-        }
 
     // Lifecycle
     override fun onActivityStarted(activity: Activity) {
