@@ -47,15 +47,15 @@ private suspend fun Courier.getFcmToken(timeout: Long): String? {
 
 }
 
-internal suspend fun Courier.setFCMToken(newToken: String) {
+suspend fun Courier.setFcmToken(token: String) {
+
+    val key = CourierPushProvider.FIREBASE_FCM.value
 
     if (Courier.shared.accessToken == null || Courier.shared.userId == null) {
-        fcmToken = newToken
+        fcmToken = token
+        tokens[key] = token
         return
     }
-
-    // FCM key
-    val key = CourierPushProvider.FIREBASE_FCM.value
 
     // Remove the old token
     deleteTokenIfNeeded(
@@ -63,12 +63,13 @@ internal suspend fun Courier.setFCMToken(newToken: String) {
     )
 
     // Save the local token
-    fcmToken = newToken
+    fcmToken = token
+    tokens[key] = token
 
     // Put the new token
     putToken(
         provider = key,
-        token = newToken
+        token = token
     )
 
 }
@@ -105,7 +106,9 @@ suspend fun Courier.setToken(provider: CourierPushProvider, token: String) {
 
 suspend fun Courier.refreshFcmToken(timeout: Long = 8000) = withContext(Dispatchers.IO) {
     if (fcmToken == null) {
-        fcmToken = getFcmToken(timeout)
+        getFcmToken(timeout)?.let { newToken ->
+            setFcmToken(newToken)
+        }
     }
 }
 
@@ -212,9 +215,9 @@ val Courier.fcmToken get() = fcmToken
  * Traditional Callbacks
  */
 
-fun Courier.setFCMToken(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
+fun Courier.setFcmToken(token: String, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
     try {
-        setFCMToken(token)
+        setFcmToken(token)
         onSuccess()
     } catch (e: Exception) {
         onFailure(e)
@@ -253,8 +256,9 @@ fun Courier.requestNotificationPermission(activity: Activity, requestCode: Int =
     }
 }
 
-fun Courier.isPushPermissionGranted(context: Context): Boolean {
+fun Courier.isPushPermissionGranted(context: Context?): Boolean {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (context == null) { return false }
         ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
     } else {
         true

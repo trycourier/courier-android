@@ -1,32 +1,14 @@
 package com.courier.android.models
 
 import android.os.Build
-
-internal enum class CourierPlatform(val platform: String) {
-    IOS("ios"),
-    ANDROID("android")
-}
+import com.courier.android.Courier
+import com.google.gson.annotations.SerializedName
 
 data class CourierDevice(
-    val app_id: String?,
-    val ad_id: String?,
-    val device_id: String?,
-    val platform: String?,
-    val manufacturer: String?,
-    val model: String?
-) {
-
-    companion object {
-
-        val current = CourierDevice(
-            app_id = null, // Paused due to potential static leaking and additional params
-            ad_id = null, // Requires Google Play services
-            device_id = null, // Not consistent way to tell a UUID
-            platform = CourierPlatform.ANDROID.platform,
-            manufacturer = Build.MANUFACTURER,
-            model = Build.MODEL
-        )
-
-    }
-
-}
+    @SerializedName("app_id") val appId: String? = Courier.shared.context?.packageName,
+    @SerializedName("ad_id") val adId: String? = null,
+    @SerializedName("device_id") val deviceId: String? = null,
+    val platform: String? = "android",
+    val manufacturer: String? = Build.MANUFACTURER,
+    val model: String? = Build.MODEL,
+)

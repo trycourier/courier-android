@@ -12,9 +12,9 @@ import com.courier.android.models.InboxMessage
 import com.courier.android.models.initialize
 import com.courier.android.socket.InboxSocket
 import com.courier.android.socket.InboxSocketManager
+import com.courier.android.utils.Logger
 import com.courier.android.utils.log
 import com.courier.android.utils.toCourierException
-import com.courier.android.utils.warn
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -256,8 +256,8 @@ fun Courier.addInboxListener(onInitialLoad: (() -> Unit)? = null, onError: ((Exc
     inboxListeners.add(listener)
 
     // Check for auth
-    if (!Courier.shared.isUserSignedIn) {
-        client?.warn("User is not signed in. Please call Courier.shared.signIn(...) to setup the inbox listener.")
+    if (!isUserSignedIn) {
+        Logger.warn("User is not signed in. Please call Courier.shared.signIn(...) to setup the inbox listener.")
         listener.onError?.invoke(CourierException.userNotFound)
         return listener
     }
