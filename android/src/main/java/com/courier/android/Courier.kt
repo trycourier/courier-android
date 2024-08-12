@@ -51,7 +51,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
 
         // Core
         var USER_AGENT = CourierAgent.NATIVE_ANDROID
-        internal const val VERSION = "4.2.2"
+        internal const val VERSION = "4.2.3"
         internal const val TAG = "Courier SDK"
 
         // Push
