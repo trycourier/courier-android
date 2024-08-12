@@ -1,6 +1,7 @@
 package com.courier.android.service
 
 import com.courier.android.Courier
+import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.modules.setFcmToken
 import com.courier.android.utils.broadcastMessage
@@ -33,7 +34,7 @@ open class CourierService: FirebaseMessagingService() {
             // More info: https://stackoverflow.com/a/71253912/2415921
             message.data["trackingUrl"]?.let { trackingUrl ->
                 Courier.coroutineScope.launch(Dispatchers.IO) {
-                    Courier.shared.client?.tracking?.postTrackingUrl(
+                    CourierClient.default.tracking.postTrackingUrl(
                         url = trackingUrl,
                         event = CourierTrackingEvent.DELIVERED,
                     )
@@ -46,7 +47,7 @@ open class CourierService: FirebaseMessagingService() {
 
         } catch (e: Exception) {
 
-            Courier.shared.client?.error(e.toString())
+            CourierClient.default.error(e.toString())
 
         }
 

@@ -17,7 +17,7 @@ import com.courier.android.models.markAsUnread
 import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.archiveMessage
-import com.courier.android.modules.fetchNextPage
+import com.courier.android.modules.fetchNextInboxPage
 import com.courier.android.modules.inboxPaginationLimit
 import com.courier.android.modules.openMessage
 import com.courier.android.modules.readMessage
@@ -186,7 +186,7 @@ class InboxTests {
             Courier.coroutineScope.launch {
 
                 if (canPaginate) {
-                    Courier.shared.fetchNextPage()
+                    Courier.shared.fetchNextInboxPage()
                 }
 
             }

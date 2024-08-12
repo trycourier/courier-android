@@ -179,7 +179,7 @@ internal fun Courier.closeInbox() {
 
 }
 
-suspend fun Courier.fetchNextPage(): List<InboxMessage> {
+suspend fun Courier.fetchNextInboxPage(): List<InboxMessage> {
 
     if (inbox == null) {
         throw CourierException.inboxNotInitialized
@@ -341,7 +341,7 @@ suspend fun Courier.readAllInboxMessages() {
 
 }
 
-suspend fun Courier.clickMessage(messageId: String) {
+internal suspend fun Courier.clickMessage(messageId: String) {
 
     if (!isUserSignedIn) {
         throw CourierException.userNotFound
@@ -511,9 +511,9 @@ var Courier.inboxPaginationLimit
  * Traditional Callbacks
  */
 
-fun Courier.fetchNextPageOfMessages(onSuccess: ((List<InboxMessage>) -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = coroutineScope.launch(Dispatchers.Main) {
+fun Courier.fetchNextInboxPage(onSuccess: ((List<InboxMessage>) -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = coroutineScope.launch(Dispatchers.Main) {
     try {
-        val messages = fetchNextPageOfMessages()
+        val messages = fetchNextInboxPage()
         onSuccess?.invoke(messages)
     } catch (e: Exception) {
         onFailure?.invoke(e)

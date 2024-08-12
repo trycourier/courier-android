@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.Courier.Companion.eventBus
+import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierTrackingEvent
@@ -42,7 +43,7 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
             // Track when the notification was clicked
             message.data["trackingUrl"]?.let { trackingUrl ->
                 coroutineScope.launch(Dispatchers.IO) {
-                    Courier.shared.client?.tracking?.postTrackingUrl(
+                    CourierClient.default.tracking.postTrackingUrl(
                         url = trackingUrl,
                         event = CourierTrackingEvent.CLICKED,
                     )
@@ -55,7 +56,7 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
 
     } catch (e: Exception) {
 
-        Courier.shared.client?.error(e.toString())
+        CourierClient.default.error(e.toString())
 
     }
 

@@ -13,6 +13,7 @@ class CourierClient(
 
     companion object {
         internal const val TAG = "Courier SDK Client"
+        val default = CourierClient(userId = "default")
     }
 
     data class Options(

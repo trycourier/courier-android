@@ -24,7 +24,7 @@ import com.courier.android.models.markAsOpened
 import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.clientKey
-import com.courier.android.modules.fetchNextPageOfMessages
+import com.courier.android.modules.fetchNextInboxPage
 import com.courier.android.modules.refreshInbox
 import com.courier.android.modules.userId
 import com.courier.android.ui.bar.CourierBar
@@ -169,7 +169,7 @@ class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeS
     private val loadingAdapter = LoadingAdapter(
         theme = theme,
         onShown = {
-            Courier.shared.fetchNextPageOfMessages()
+            Courier.shared.fetchNextInboxPage {}
         }
     )
 
