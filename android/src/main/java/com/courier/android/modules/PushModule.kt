@@ -213,6 +213,8 @@ private suspend fun Courier.deleteTokenIfNeeded(token: String?) {
 
 val Courier.fcmToken get() = fcmToken
 
+val Courier.tokens get() = tokens
+
 /**
  * Traditional Callbacks
  */
