@@ -67,6 +67,15 @@ class InboxClientTests {
     @Test
     fun getArchivedMessages() = runBlocking {
 
+        // Archive a new message
+        val messageId = sendMessage(userId = client.options.userId)
+
+        delay(5000) // Pipeline delay
+
+        client.inbox.archive(messageId)
+
+        delay(5000) // Pipeline delay
+
         val limit = 24
 
         val res = client.inbox.getArchivedMessages(
@@ -74,7 +83,9 @@ class InboxClientTests {
             startCursor = null,
         )
 
-        assertTrue(res.data?.messages?.nodes?.size!! <= limit)
+        val message = res.data?.messages?.nodes?.firstOrNull()
+
+        assertTrue(message?.isArchived == true)
 
     }
 

@@ -16,10 +16,10 @@ data class InboxMessage(
     val title: String?,
     val body: String?,
     val preview: String?,
-    val created: String?,
     val actions: List<InboxAction>?,
     val data: Map<String, Any>?,
-    val archived: Boolean?,
+    val created: String?,
+    val archived: String?,
     var read: String?,
     var opened: String?,
     private val trackingIds: CourierTrackingIds?
