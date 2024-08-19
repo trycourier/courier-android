@@ -298,9 +298,11 @@ This is how you can tell Courier when a notification has been delivered or click
 ```kotlin
 lifecycleScope.launch {
 
-    Courier.shared.trackNotification(
-        trackingUrl = "https://courier.com/your_tracking_url", 
-        event = CourierPushEvent.CLICKED
+    val client = Courier.shared.client // or use CourierClient(...)
+
+    client.tracking.postTrackingUrl(
+        url = "https://courier.com/your_tracking_url",
+        event = CourierTrackingEvent.CLICKED,
     )
 
 }
