@@ -13,16 +13,16 @@ import java.util.Date
 
 data class InboxMessage(
     val messageId: String,
-    val title: String?,
-    val body: String?,
-    val preview: String?,
-    val actions: List<InboxAction>?,
-    val data: Map<String, Any>?,
-    val created: String?,
-    val archived: String?,
-    var read: String?,
-    var opened: String?,
-    private val trackingIds: CourierTrackingIds?
+    val title: String? = null,
+    val body: String? = null,
+    val preview: String? = null,
+    val actions: List<InboxAction>? = null,
+    val data: Map<String, Any>? = null,
+    val created: String? = null,
+    val archived: String? = null,
+    var read: String? = null,
+    var opened: String? = null,
+    private val trackingIds: CourierTrackingIds? = null,
 ) {
 
     val subtitle get() = body ?: preview

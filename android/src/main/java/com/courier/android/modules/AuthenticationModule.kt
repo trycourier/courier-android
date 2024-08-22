@@ -78,7 +78,7 @@ suspend fun Courier.signOut() = withContext(Dispatchers.IO) {
 
     // Clear the user
     // Must be called after tokens are deleted
-    UserManager.removeCredentials(Courier.shared.context!!)
+    UserManager.removeCredentials(Courier.shared.context)
 
     notifyListeners()
 

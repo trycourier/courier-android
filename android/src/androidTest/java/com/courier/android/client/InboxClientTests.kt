@@ -255,8 +255,13 @@ class InboxClientTests {
         var hold1 = true
         var hold2 = true
 
+        val jwt1 = ExampleServer.generateJWT(
+            authKey = Env.COURIER_AUTH_KEY,
+            userId = userId1,
+        )
+
         // Open the first socket connection
-        val client1 = CourierClient(clientKey = Env.COURIER_CLIENT_KEY, userId = userId1).apply {
+        val client1 = CourierClient(jwt = jwt1, userId = userId1).apply {
 
             val socket = inbox.socket
 
@@ -270,8 +275,13 @@ class InboxClientTests {
 
         }
 
+        val jwt2 = ExampleServer.generateJWT(
+            authKey = Env.COURIER_AUTH_KEY,
+            userId = userId2,
+        )
+
         // Open the second socket connection
-        val client2 = CourierClient(clientKey = Env.COURIER_CLIENT_KEY, userId = userId2).apply {
+        val client2 = CourierClient(jwt = jwt2, userId = userId2).apply {
 
             val socket = inbox.socket
 

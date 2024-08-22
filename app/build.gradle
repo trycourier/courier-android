@@ -24,7 +24,6 @@ android {
         signingConfig signingConfigs.debug
     }
 
-
     signingConfigs {
         release {
             if (keystoreProperties['storeFile']) {
