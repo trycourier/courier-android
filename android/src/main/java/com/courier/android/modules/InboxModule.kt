@@ -13,6 +13,7 @@ import com.courier.android.models.initialize
 import com.courier.android.socket.InboxSocket
 import com.courier.android.socket.InboxSocketManager
 import com.courier.android.utils.Logger
+import com.courier.android.utils.error
 import com.courier.android.utils.log
 import com.courier.android.utils.toCourierException
 import kotlinx.coroutines.CoroutineStart
@@ -352,10 +353,16 @@ internal suspend fun Courier.clickMessage(messageId: String) {
 
         // Unwrap tracking id
         message.clickTrackingId?.let { trackingId ->
-            client?.inbox?.click(
-                messageId = messageId,
-                trackingId = trackingId
-            )
+
+            try {
+                client?.inbox?.click(
+                    messageId = messageId,
+                    trackingId = trackingId
+                )
+            } catch (e: Exception) {
+                client?.error(e.toString())
+            }
+
         }
 
     }
