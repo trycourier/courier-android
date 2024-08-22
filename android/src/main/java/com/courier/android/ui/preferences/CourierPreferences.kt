@@ -27,7 +27,7 @@ import com.courier.android.utils.pxToDp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class CourierPreferences @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
+open class CourierPreferences @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
     private enum class State(var title: String? = null) {
         LOADING, ERROR, CONTENT, EMPTY
