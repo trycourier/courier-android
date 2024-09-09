@@ -5,6 +5,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.courier.android.ClientBuilder
 import com.courier.android.Courier
 import com.courier.android.UserBuilder
+import com.courier.android.models.CourierAgent
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotSame
 import kotlinx.coroutines.runBlocking
@@ -36,6 +37,14 @@ class CoreClientTests {
 
         assertNotSame(client1, client3)
         assertNotSame(client2, client3)
+
+    }
+
+    @Test
+    fun userAgent() = runBlocking {
+
+        Courier.USER_AGENT = CourierAgent.NativeAndroid(version = "1.2.3")
+        assertEquals(Courier.USER_AGENT.value(), "courier-android/1.2.3")
 
     }
 

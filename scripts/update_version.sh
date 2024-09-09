@@ -9,7 +9,7 @@ NC='\033[0m' # No Color
 
 # Function to read the current version
 get_current_version() {
-    grep 'internal const val VERSION =' android/src/main/java/com/courier/android/Courier.kt | awk -F '"' '{print $2}'
+    grep 'private const val VERSION =' android/src/main/java/com/courier/android/Courier.kt | awk -F '"' '{print $2}'
 }
 
 # Function to parse the version and suggest the next version

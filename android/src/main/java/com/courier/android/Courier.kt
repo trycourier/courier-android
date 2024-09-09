@@ -52,7 +52,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
         // Core
         private const val VERSION = "4.3.1"
         internal const val TAG = "Courier SDK"
-        var USER_AGENT = CourierAgent.NativeIOS(VERSION)
+        var USER_AGENT = CourierAgent.NativeAndroid(VERSION)
 
         // Push
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"

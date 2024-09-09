@@ -2,19 +2,19 @@ package com.courier.android.models
 
 sealed class CourierAgent(val version: String) {
 
-    class NativeIOS(version: String) : CourierAgent(version)
-    class ReactNativeIOS(version: String) : CourierAgent(version)
-    class FlutterIOS(version: String) : CourierAgent(version)
+    class NativeAndroid(version: String) : CourierAgent(version)
+    class ReactNativeAndroid(version: String) : CourierAgent(version)
+    class FlutterAndroid(version: String) : CourierAgent(version)
 
     fun value(): String {
         return when (this) {
-            is NativeIOS -> "courier-ios/$version"
-            is ReactNativeIOS -> "courier-react-native-ios/$version"
-            is FlutterIOS -> "courier-flutter-ios/$version"
+            is NativeAndroid -> "courier-android/$version"
+            is ReactNativeAndroid -> "courier-react-native-android/$version"
+            is FlutterAndroid -> "courier-flutter-android/$version"
         }
     }
 
     internal val isReactNative: Boolean
-        get() = this is ReactNativeIOS
+        get() = this is ReactNativeAndroid
 
 }
