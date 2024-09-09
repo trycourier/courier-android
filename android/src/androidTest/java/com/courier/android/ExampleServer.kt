@@ -27,7 +27,6 @@ internal class ExampleServer {
             chain.proceed(
                 chain.request()
                     .newBuilder()
-                    .header("User-Agent", "${Courier.USER_AGENT.value}/${Courier.VERSION}")
                     .header("Content-Type", "application/json")
                     .build()
             )

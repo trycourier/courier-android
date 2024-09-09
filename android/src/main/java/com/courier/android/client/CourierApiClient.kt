@@ -19,7 +19,7 @@ open class CourierApiClient {
         chain.proceed(
             chain.request()
                 .newBuilder()
-                .header("User-Agent", "${Courier.USER_AGENT.value}/${Courier.VERSION}")
+                .header("User-Agent", Courier.USER_AGENT.value())
                 .header("Content-Type", "application/json")
                 .build()
         )
