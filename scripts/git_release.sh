@@ -15,7 +15,7 @@ error_exit() {
 
 # Function to get the current version from Courier.kt
 get_current_version() {
-    local version=$(grep 'internal const val VERSION =' android/src/main/java/com/courier/android/Courier.kt | awk -F '"' '{print $2}')
+    local version=$(grep 'private const val VERSION =' android/src/main/java/com/courier/android/Courier.kt | awk -F '"' '{print $2}')
     echo "$version"
 }
 

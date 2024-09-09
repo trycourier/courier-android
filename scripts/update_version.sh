@@ -33,7 +33,7 @@ update_version() {
     local new_version=$1
 
     # Update the version in Courier.kt
-    sed -i '' "s/internal const val VERSION = \".*\"/internal const val VERSION = \"$new_version\"/" android/src/main/java/com/courier/android/Courier.kt
+    sed -i '' "s/private const val VERSION = \".*\"/private const val VERSION = \"$new_version\"/" android/src/main/java/com/courier/android/Courier.kt
 }
 
 # Function to update the version in README.md
