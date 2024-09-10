@@ -2,7 +2,6 @@ package com.courier.android.managers
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.courier.android.Courier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -10,13 +9,14 @@ sealed class UserManager {
 
     companion object {
 
+        private const val TAG = "Courier SDK"
         private const val USER_ID = "courier_user_id"
         private const val ACCESS_TOKEN = "courier_access_token"
         private const val CLIENT_KEY = "courier_client_key"
         private const val TENANT_ID = "courier_tenant_id"
 
         private val Context.sharedPrefs get(): SharedPreferences {
-            return getSharedPreferences(Courier.TAG, Context.MODE_PRIVATE)
+            return getSharedPreferences(TAG, Context.MODE_PRIVATE)
         }
 
         suspend fun setCredentials(context: Context, userId: String, accessToken: String, clientKey: String?, tenantId: String?) = withContext(Dispatchers.IO) {

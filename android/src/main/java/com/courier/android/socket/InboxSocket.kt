@@ -1,5 +1,6 @@
 package com.courier.android.socket
 
+import com.courier.android.Courier
 import com.courier.android.client.CourierApiClient
 import com.courier.android.client.CourierClient
 import com.courier.android.models.InboxMessage
@@ -90,6 +91,7 @@ class InboxSocket(private val options: CourierClient.Options) : CourierSocket(ur
         val data = mapOf(
             "action" to "subscribe",
             "data" to mutableMapOf(
+                "userAgent" to Courier.agent.value(),
                 "channel" to options.userId,
                 "event" to "*",
                 "version" to version,

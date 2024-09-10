@@ -50,9 +50,8 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     companion object {
 
         // Core
-        private const val VERSION = "4.4.0"
-        internal const val TAG = "Courier SDK"
-        var USER_AGENT = CourierAgent.NativeAndroid(VERSION)
+        private const val VERSION = "4.4.1"
+        var agent: CourierAgent = CourierAgent.NativeAndroid(VERSION)
 
         // Push
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"

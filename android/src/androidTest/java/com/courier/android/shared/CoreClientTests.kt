@@ -43,8 +43,8 @@ class CoreClientTests {
     @Test
     fun userAgent() = runBlocking {
 
-        Courier.USER_AGENT = CourierAgent.NativeAndroid(version = "1.2.3")
-        assertEquals(Courier.USER_AGENT.value(), "courier-android/1.2.3")
+        Courier.agent = CourierAgent.NativeAndroid(version = "1.2.3")
+        assertEquals(Courier.agent.value(), "courier-android/1.2.3")
 
     }
 

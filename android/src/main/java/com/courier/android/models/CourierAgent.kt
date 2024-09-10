@@ -14,7 +14,4 @@ sealed class CourierAgent(val version: String) {
         }
     }
 
-    internal val isReactNative: Boolean
-        get() = this is ReactNativeAndroid
-
 }
