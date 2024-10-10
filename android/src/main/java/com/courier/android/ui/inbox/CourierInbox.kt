@@ -26,6 +26,8 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
     internal data class Page(val title: String, val list: InboxListView)
 
+    internal enum class MessageFeed { FEED, ARCHIVE }
+
     var lightTheme: CourierInboxTheme = CourierInboxTheme.DEFAULT_LIGHT
         set(value) {
             if (field != value) {
@@ -54,8 +56,8 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
     private val pages = listOf(
-        Page(title = "Notifications", list = InboxListView(context)),
-        Page(title = "Archived", list = InboxListView(context))
+        Page(title = "Notifications", list = InboxListView(context, attrs, defStyleAttr, MessageFeed.FEED)),
+        Page(title = "Archived", list = InboxListView(context, attrs, defStyleAttr, MessageFeed.ARCHIVE))
     )
 
     private val tabLayout: TabLayout by lazy { findViewById(R.id.tabLayout) }

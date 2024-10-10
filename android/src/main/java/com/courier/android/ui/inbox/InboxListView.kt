@@ -31,14 +31,18 @@ import com.courier.android.ui.bar.CourierBar
 import com.courier.android.ui.infoview.CourierInfoView
 import com.courier.android.utils.error
 import com.courier.android.utils.forceReactNativeLayoutFix
-import com.courier.android.utils.isDarkMode
 import com.courier.android.utils.pxToDp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 
-internal class InboxListView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
+internal class InboxListView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+    private val feed: CourierInbox.MessageFeed = CourierInbox.MessageFeed.FEED
+) : FrameLayout(context, attrs, defStyleAttr) {
 
     private enum class State(var title: String? = null) {
         LOADING, ERROR, CONTENT, EMPTY
@@ -71,22 +75,6 @@ internal class InboxListView @JvmOverloads constructor(context: Context, attrs: 
                     infoView.setTitle(field.title)
                     loadingIndicator.isVisible = false
                 }
-            }
-        }
-
-    var lightTheme: CourierInboxTheme = CourierInboxTheme.DEFAULT_LIGHT
-        set(value) {
-            if (field != value) {
-                field = value
-                refreshTheme()
-            }
-        }
-
-    var darkTheme: CourierInboxTheme = CourierInboxTheme.DEFAULT_DARK
-        set(value) {
-            if (field != value) {
-                field = value
-                refreshTheme()
             }
         }
 
@@ -177,12 +165,7 @@ internal class InboxListView @JvmOverloads constructor(context: Context, attrs: 
 
     init {
         View.inflate(context, R.layout.courier_inbox_list_view, this)
-        refreshTheme()
         setup()
-    }
-
-    private fun refreshTheme() {
-        theme = if (context.isDarkMode) darkTheme else lightTheme
     }
 
     private fun setup() = coroutineScope.launch(Dispatchers.Main) {
