@@ -38,12 +38,20 @@ class CourierInboxData(
         }
     }
 
-    //    @Synchronized
-//    fun addNewMessage(message: InboxMessage) {
-//        this.messages?.add(0, message)
-//        this.totalCount += 1
-//        this.unreadCount += 1
-//    }
+    @Synchronized
+    fun addNewMessage(feed: InboxMessageFeed, index: Int, message: InboxMessage) {
+        this.unreadCount += 1
+        when (feed) {
+            InboxMessageFeed.FEED -> {
+                this.feed.messages.add(index, message)
+                this.feed.totalCount += 1
+            }
+            InboxMessageFeed.ARCHIVE -> {
+                this.archived.messages.add(index, message)
+                this.archived.totalCount += 1
+            }
+        }
+    }
 //
 //
 //    @Synchronized

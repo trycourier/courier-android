@@ -19,6 +19,7 @@ import com.courier.android.modules.linkInbox
 import com.courier.android.modules.notifyError
 import com.courier.android.modules.notifyInboxUpdated
 import com.courier.android.modules.notifyLoading
+import com.courier.android.modules.notifyMessageAdded
 import com.courier.android.modules.notifyPageAdded
 import com.courier.android.modules.notifyUnreadCountChange
 import com.courier.android.modules.refreshFcmToken
@@ -209,8 +210,15 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
         println("Inbox killed")
     }
 
+    override suspend fun onInboxMessageReceived(message: InboxMessage) {
+        val index = 0
+        val feed = if (message.isArchived) InboxMessageFeed.ARCHIVE else InboxMessageFeed.FEED
+        this.courierInboxData?.addNewMessage(feed, index, message)
+        onInboxItemAdded(index, feed, message)
+    }
+
     override suspend fun onInboxItemAdded(index: Int, feed: InboxMessageFeed, message: InboxMessage) {
-        println("Inbox item added at index: $index, feed: $feed, message: $message")
+        notifyMessageAdded(feed, index, message)
     }
 
     override suspend fun onInboxItemRemove(index: Int, feed: InboxMessageFeed, message: InboxMessage) {
@@ -224,10 +232,6 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     override suspend fun onInboxPageFetched(feed: InboxMessageFeed, messageSet: InboxMessageSet) {
         this.courierInboxData?.addPage(feed, messageSet)
         notifyPageAdded(feed, messageSet)
-    }
-
-    override suspend fun onInboxMessageReceived(message: InboxMessage) {
-        println("Inbox message received: $message")
     }
 
     override suspend fun onInboxEventReceived(event: InboxSocket.MessageEvent) {

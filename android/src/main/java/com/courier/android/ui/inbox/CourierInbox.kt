@@ -127,7 +127,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
                 println("Message changed at index $index")  // Example print for message changed
             },
             onMessageAdded = { feed, index, message ->
-                println("Message added at index $index")  // Example print for message added
+                getPage(feed).list.addMessage(index, message)
             },
             onMessageRemoved = { feed, index, message ->
                 println("Message removed at index $index")  // Example print for message removed

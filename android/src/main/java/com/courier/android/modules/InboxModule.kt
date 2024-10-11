@@ -158,8 +158,9 @@ private suspend fun Courier.connectWebSocket() {
 
     // Listen to the events
     socket.receivedMessage = { message ->
-//        inbox?.addNewMessage(message)
-//        notifyMessagesChanged()
+        coroutineScope.launch(Dispatchers.IO) {
+            inboxMutationHandler.onInboxMessageReceived(message)
+        }
     }
 
     socket.receivedMessageEvent = { messageEvent ->

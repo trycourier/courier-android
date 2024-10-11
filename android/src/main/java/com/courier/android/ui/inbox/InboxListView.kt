@@ -198,7 +198,7 @@ internal class InboxListView @JvmOverloads constructor(
             showLoading = set.canPaginate
         )
 
-        messagesAdapter.messages = set.messages.toList()
+        messagesAdapter.messages = set.messages
 
         state = if (messagesAdapter.messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
         messagesAdapter.notifyDataSetChanged()
@@ -224,11 +224,32 @@ internal class InboxListView @JvmOverloads constructor(
         // Add new messages to the end of the list
         val newMessages = set.messages
         if (newMessages.isNotEmpty()) {
-            messagesAdapter.messages = messagesAdapter.messages.toList() + newMessages.toList()
+            messagesAdapter.messages.addAll(newMessages)
+            state = if (messagesAdapter.messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
             messagesAdapter.notifyItemRangeInserted(currentMessageCount, newMessages.size)
         }
 
-        state = if (messagesAdapter.messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
+        openVisibleMessages()
+        recyclerView.forceReactNativeLayoutFix()
+
+    }
+
+    internal fun addMessage(index: Int, message: InboxMessage) {
+
+        refreshLayout.isRefreshing = false
+        loadingAdapter.canPage = loadingAdapter.canPage
+
+        refreshAdapters(
+            showMessages = true,
+            showLoading = loadingAdapter.canPage
+        )
+
+        state = State.CONTENT
+
+        messagesAdapter.messages.add(index, message)
+        messagesAdapter.notifyItemInserted(index)
+        recyclerView.restoreScrollPosition()
+
         openVisibleMessages()
         recyclerView.forceReactNativeLayoutFix()
 

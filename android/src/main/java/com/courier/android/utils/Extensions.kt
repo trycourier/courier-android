@@ -15,7 +15,6 @@ import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.Courier.Companion.eventBus
 import com.courier.android.client.CourierClient
-import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.ui.CourierStyles
@@ -208,7 +207,7 @@ internal val Exception.toCourierException get() = CourierException(message ?: "U
 internal fun RecyclerView.forceReactNativeLayoutFix() {
 
     // Break if not React Native
-    if (Courier.agent !is CourierAgent.NativeAndroid) {
+    if (!Courier.agent.isReactNative) {
         return
     }
 

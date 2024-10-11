@@ -3,6 +3,7 @@ package com.courier.android.modules
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.models.CourierInboxData
+import com.courier.android.models.InboxMessage
 import com.courier.android.models.InboxMessageSet
 import com.courier.android.ui.inbox.InboxMessageFeed
 import com.courier.android.utils.toCourierException
@@ -41,5 +42,11 @@ internal fun Courier.notifyUnreadCountChange(count: Int) = runOnMain {
 internal fun Courier.notifyPageAdded(feed: InboxMessageFeed, messageSet: InboxMessageSet) = runOnMain {
     inboxListeners.forEach {
         it.onPageAdded?.invoke(feed, messageSet)
+    }
+}
+
+internal fun Courier.notifyMessageAdded(feed: InboxMessageFeed, index: Int, message: InboxMessage) = runOnMain {
+    inboxListeners.forEach {
+        it.onMessageAdded?.invoke(feed, index, message)
     }
 }
