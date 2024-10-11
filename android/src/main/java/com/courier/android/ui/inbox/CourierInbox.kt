@@ -121,7 +121,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
                 pages[1].list.setMessageSet(messageSet)
             },
             onPageAdded = { feed, messageSet ->
-                println("Page added")  // Example print for page added
+                getPage(feed).list.addPage(messageSet)
             },
             onMessageChanged = { feed, index, message ->
                 println("Message changed at index $index")  // Example print for message changed
@@ -134,6 +134,10 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
             }
         )
 
+    }
+
+    private fun getPage(feed: InboxMessageFeed): Page {
+        return if (feed == InboxMessageFeed.FEED) pages[0] else pages[1]
     }
 
     fun setOnClickMessageListener(listener: ((message: InboxMessage, index: Int) -> Unit)?) {

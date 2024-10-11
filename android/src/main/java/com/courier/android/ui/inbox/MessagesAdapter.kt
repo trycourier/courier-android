@@ -139,7 +139,7 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
 
 internal class MessagesAdapter(
     internal var theme: CourierInboxTheme,
-    internal var messages: List<InboxMessage>,
+    internal var messages: MutableList<InboxMessage>,
     private val onMessageClick: (InboxMessage, Int) -> Unit,
     private val onActionClick: (InboxAction, InboxMessage, Int) -> Unit
 ) : RecyclerView.Adapter<MessageItemViewHolder>() {

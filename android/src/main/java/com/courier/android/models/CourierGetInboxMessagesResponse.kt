@@ -6,7 +6,7 @@ data class CourierGetInboxMessagesResponse(
 
 fun CourierGetInboxMessagesResponse.toMessageSet(): InboxMessageSet {
     return InboxMessageSet(
-        messages = data?.messages?.nodes ?: emptyList(),
+        messages = data?.messages?.nodes.orEmpty().toMutableList(),
         totalCount = data?.count ?: 0,
         canPaginate = data?.messages?.pageInfo?.hasNextPage ?: false,
         paginationCursor = data?.messages?.pageInfo?.startCursor

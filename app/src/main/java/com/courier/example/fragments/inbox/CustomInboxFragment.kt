@@ -21,6 +21,7 @@ import com.courier.android.models.markAsUnread
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.fetchNextInboxPage
 import com.courier.android.modules.refreshInbox
+import com.courier.android.ui.inbox.InboxMessageFeed
 import com.courier.example.R
 import com.courier.example.toJson
 
@@ -152,6 +153,7 @@ class LoadingAdapter : RecyclerView.Adapter<LoadingItemViewHolder>() {
 
     override fun onBindViewHolder(holder: LoadingItemViewHolder, position: Int) {
         Courier.shared.fetchNextInboxPage(
+            feed = InboxMessageFeed.FEED,
             onSuccess = { newMessages ->
                 print(newMessages)
             },

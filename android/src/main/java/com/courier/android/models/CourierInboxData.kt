@@ -134,12 +134,13 @@ class CourierInboxData(
 }
 
 class InboxMessageSet(
-    messages: List<InboxMessage>,
+    messages: MutableList<InboxMessage>,
     totalCount: Int,
     canPaginate: Boolean,
     paginationCursor: String?
 ) {
-    var messages: List<InboxMessage> = messages
+
+    var messages: MutableList<InboxMessage> = messages
         internal set
     var totalCount: Int = totalCount
         internal set
@@ -147,6 +148,14 @@ class InboxMessageSet(
         internal set
     var paginationCursor: String? = paginationCursor
         internal set
+
+    internal fun addPage(messageSet: InboxMessageSet) {
+        messages.addAll(messageSet.messages)
+        totalCount = messageSet.totalCount
+        canPaginate = messageSet.canPaginate
+        paginationCursor = messageSet.paginationCursor
+    }
+
 }
 
 internal data class ReadAllOperation(

@@ -136,7 +136,7 @@ internal class InboxListView @JvmOverloads constructor(
 
     private val messagesAdapter = MessagesAdapter(
         theme = theme,
-        messages = emptyList(),
+        messages = mutableListOf(),
         onMessageClick = { message, index ->
             message.markAsClicked()
             onClickInboxMessageAtIndex?.invoke(message, index)
@@ -150,7 +150,11 @@ internal class InboxListView @JvmOverloads constructor(
     private val loadingAdapter = LoadingAdapter(
         theme = theme,
         onShown = {
-            Courier.shared.fetchNextInboxPage {}
+            Courier.shared.fetchNextInboxPage(
+                feed = feed,
+                onSuccess = null,
+                onFailure = null
+            )
         }
     )
 
@@ -183,22 +187,49 @@ internal class InboxListView @JvmOverloads constructor(
         recyclerView.forceReactNativeLayoutFix()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     internal fun setMessageSet(set: InboxMessageSet) {
 
         refreshLayout.isRefreshing = false
         loadingAdapter.canPage = set.canPaginate
-
-        state = if (set.messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
 
         refreshAdapters(
             showMessages = set.messages.isNotEmpty(),
             showLoading = set.canPaginate
         )
 
-        refreshMessages(
-            newMessages = set.messages.toList()
+        messagesAdapter.messages = set.messages
+
+        state = if (messagesAdapter.messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
+        messagesAdapter.notifyDataSetChanged()
+        openVisibleMessages()
+
+        recyclerView.forceReactNativeLayoutFix()
+
+    }
+
+    internal fun addPage(set: InboxMessageSet) {
+
+        refreshLayout.isRefreshing = false
+        loadingAdapter.canPage = set.canPaginate
+
+        refreshAdapters(
+            showMessages = set.messages.isNotEmpty(),
+            showLoading = set.canPaginate
         )
 
+        // Get the current size of the existing messages
+        val currentMessageCount = messagesAdapter.messages.size
+
+        // Add new messages to the end of the list
+        val newMessages = set.messages
+        if (newMessages.isNotEmpty()) {
+            messagesAdapter.messages.addAll(newMessages)
+            messagesAdapter.notifyItemRangeInserted(currentMessageCount, newMessages.size)
+        }
+
+        state = if (messagesAdapter.messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
+        openVisibleMessages()
         recyclerView.forceReactNativeLayoutFix()
 
     }
@@ -293,53 +324,53 @@ internal class InboxListView @JvmOverloads constructor(
 
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    private fun refreshMessages(newMessages: List<InboxMessage>) {
-
-        val existingMessages = messagesAdapter.messages
-
-        // Set the new messages
-        messagesAdapter.messages = newMessages
-
-        // Check if we need to insert
-        val didInsert = newMessages.size - existingMessages.size == 1
-
-        // Handle insert
-        if (newMessages.firstOrNull()?.messageId != existingMessages.firstOrNull()?.messageId && didInsert) {
-            messagesAdapter.notifyItemInserted(0)
-            recyclerView.restoreScrollPosition()
-            return
-        }
-
-        // Handle pagination
-        if (newMessages.size > existingMessages.size) {
-            val firstIndex = existingMessages.size
-            val itemCount = newMessages.size - existingMessages.size
-            messagesAdapter.notifyItemRangeInserted(firstIndex, itemCount)
-            return
-        }
-
-        // Manually sync all view holders
-        // This ensures the click animation is nice and clean
-        if (newMessages.size == existingMessages.size) {
-            newMessages.forEachIndexed { index, message ->
-                val viewHolder = recyclerView.findViewHolderForLayoutPosition(index) as? MessageItemViewHolder
-                viewHolder?.setMessage(
-                    theme = theme,
-                    message = message
-                )
-            }
-            return
-        }
-
-        // Reload all other data
-        // Forces a hard reload
-        messagesAdapter.notifyDataSetChanged()
-
-        // Read new messages if possible
-        openVisibleMessages()
-
-    }
+//    @SuppressLint("NotifyDataSetChanged")
+//    private fun refreshMessages(newMessages: List<InboxMessage>) {
+//
+////        val existingMessages = messagesAdapter.messages
+//
+//        // Set the new messages
+//        messagesAdapter.messages = newMessages
+//
+//        // Check if we need to insert
+////        val didInsert = newMessages.size - existingMessages.size == 1
+//
+////        // Handle insert
+////        if (newMessages.firstOrNull()?.messageId != existingMessages.firstOrNull()?.messageId && didInsert) {
+////            messagesAdapter.notifyItemInserted(0)
+////            recyclerView.restoreScrollPosition()
+////            return
+////        }
+//
+////        // Handle pagination
+////        if (newMessages.size > existingMessages.size) {
+////            val firstIndex = existingMessages.size
+////            val itemCount = newMessages.size - existingMessages.size
+////            messagesAdapter.notifyItemRangeInserted(firstIndex, itemCount)
+////            return
+////        }
+//
+////        // Manually sync all view holders
+////        // This ensures the click animation is nice and clean
+////        if (newMessages.size == existingMessages.size) {
+////            newMessages.forEachIndexed { index, message ->
+////                val viewHolder = recyclerView.findViewHolderForLayoutPosition(index) as? MessageItemViewHolder
+////                viewHolder?.setMessage(
+////                    theme = theme,
+////                    message = message
+////                )
+////            }
+////            return
+////        }
+//
+//        // Reload all other data
+//        // Forces a hard reload
+//        messagesAdapter.notifyDataSetChanged()
+//
+//        // Read new messages if possible
+//        openVisibleMessages()
+//
+//    }
 
     private fun refreshAdapters(showMessages: Boolean = false, showLoading: Boolean = false) {
         if (showMessages) adapter.addAdapter(0, messagesAdapter) else adapter.removeAdapter(messagesAdapter)

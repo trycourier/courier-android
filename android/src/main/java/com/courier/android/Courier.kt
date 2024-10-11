@@ -19,6 +19,7 @@ import com.courier.android.modules.linkInbox
 import com.courier.android.modules.notifyError
 import com.courier.android.modules.notifyInboxUpdated
 import com.courier.android.modules.notifyLoading
+import com.courier.android.modules.notifyPageAdded
 import com.courier.android.modules.notifyUnreadCountChange
 import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.unlinkInbox
@@ -145,7 +146,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
         private set
 
     // Inbox
-    internal var isPaging = false
+    internal var isPagingInbox = false
     internal var paginationLimit = DEFAULT_PAGINATION_LIMIT
     internal var courierInboxData: CourierInboxData? = null
     internal var inboxListeners: MutableList<CourierInboxListener> = mutableListOf()
@@ -221,7 +222,11 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     }
 
     override suspend fun onInboxPageFetched(feed: InboxMessageFeed, messageSet: InboxMessageSet) {
-        println("Inbox page fetched for feed: $feed, messageSet: $messageSet")
+        when (feed) {
+            InboxMessageFeed.FEED -> this.courierInboxData?.feed?.addPage(messageSet)
+            InboxMessageFeed.ARCHIVE -> this.courierInboxData?.archived?.addPage(messageSet)
+        }
+        notifyPageAdded(feed, messageSet)
     }
 
     override suspend fun onInboxMessageReceived(message: InboxMessage) {

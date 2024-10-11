@@ -245,69 +245,69 @@ internal fun Courier.closeInbox() {
 
 }
 
-suspend fun Courier.fetchNextInboxPage(): List<InboxMessage> {
+suspend fun Courier.fetchNextInboxPage(feed: InboxMessageFeed): InboxMessageSet? {
 
-//    if (inbox == null) {
-//        throw CourierException.inboxNotInitialized
-//    }
-//
-//    // Determine if we are safe to page
-//    if (isPaging || inbox?.hasNextPage == false) {
-//        return emptyList()
-//    }
-//
-//    isPaging = true
-//
-//    var messages = listOf<InboxMessage>()
-//
-//    try {
-//        messages = fetchNextPageOfMessages()
-//        notifyMessagesChanged()
-//    } catch (error: CourierException) {
-//        notifyError(error)
-//    }
-//
-//    isPaging = false
-//
-//    return messages
+    try {
 
-    return emptyList()
+        fetchNextPageOfMessages(feed)?.let {
+            inboxMutationHandler.onInboxPageFetched(feed, it)
+            return it
+        }
+
+    } catch (error: CourierException) {
+
+        inboxMutationHandler.onInboxError(error)
+
+    }
+
+    return null
 
 }
 
-private suspend fun Courier.fetchNextPageOfMessages(): List<InboxMessage> {
+private suspend fun Courier.fetchNextPageOfMessages(feed: InboxMessageFeed): InboxMessageSet? {
 
-//    // Check for auth
-//    if (!Courier.shared.isUserSignedIn) {
-//        throw CourierException.userNotFound
-//    }
-//
-//    if (inbox == null) {
-//        throw CourierException.inboxNotInitialized
-//    }
-//
-//    // Fetch the next page
-//    val inboxData = client?.inbox?.getMessages(
-//        paginationLimit = paginationLimit,
-//        startCursor = inbox?.startCursor
-//    )
-//
-//    val messages = inboxData?.data?.messages?.nodes.orEmpty()
-//    val startCursor = inboxData?.data?.messages?.pageInfo?.startCursor
-//    val hasNextPage = inboxData?.data?.messages?.pageInfo?.hasNextPage
-//
-//    // Add the page of messages
-//    inbox?.addPage(
-//        messages = messages,
-//        startCursor = startCursor,
-//        hasNextPage = hasNextPage,
-//    )
-//
-//    // Tell the listeners
-//    notifyMessagesChanged()
+    val messageSet = if (feed == InboxMessageFeed.FEED) courierInboxData?.feed else courierInboxData?.archived
 
-    // Return the new messages
-    return emptyList()
+    // Determine if we are safe to page
+    val canPage = messageSet?.canPaginate == true
+    val paginationCursor = messageSet?.paginationCursor
+    if (isPagingInbox || !canPage || paginationCursor == null) {
+        return null
+    }
+
+    if (!Courier.shared.isUserSignedIn) {
+        throw CourierException.userNotFound
+    }
+
+    if (dataPipe?.isActive == true) {
+        return null
+    }
+
+    if (courierInboxData == null) {
+        throw CourierException.inboxNotInitialized
+    }
+
+    isPagingInbox = true
+
+    // Fetch the next page
+    val res = when (feed) {
+        InboxMessageFeed.FEED -> {
+            client?.inbox?.getMessages(
+                paginationLimit = paginationLimit,
+                startCursor = paginationCursor
+            )
+        }
+        InboxMessageFeed.ARCHIVE -> {
+            client?.inbox?.getArchivedMessages(
+                paginationLimit = paginationLimit,
+                startCursor = paginationCursor
+            )
+        }
+    }
+
+    isPagingInbox = false
+
+    return res?.toMessageSet()
 
 }
 
@@ -571,10 +571,10 @@ var Courier.inboxPaginationLimit
  * Traditional Callbacks
  */
 
-fun Courier.fetchNextInboxPage(onSuccess: ((List<InboxMessage>) -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = coroutineScope.launch(Dispatchers.Main) {
+fun Courier.fetchNextInboxPage(feed: InboxMessageFeed, onSuccess: ((InboxMessageSet?) -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = coroutineScope.launch(Dispatchers.Main) {
     try {
-        val messages = fetchNextInboxPage()
-        onSuccess?.invoke(messages)
+        val set = fetchNextInboxPage(feed)
+        onSuccess?.invoke(set)
     } catch (e: Exception) {
         onFailure?.invoke(e)
     }

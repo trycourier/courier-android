@@ -3,6 +3,8 @@ package com.courier.android.modules
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.models.CourierInboxData
+import com.courier.android.models.InboxMessageSet
+import com.courier.android.ui.inbox.InboxMessageFeed
 import com.courier.android.utils.toCourierException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,5 +35,11 @@ internal fun Courier.notifyInboxUpdated(inboxData: CourierInboxData) = runOnMain
 internal fun Courier.notifyUnreadCountChange(count: Int) = runOnMain {
     inboxListeners.forEach {
         it.onUnreadCountChanged?.invoke(count)
+    }
+}
+
+internal fun Courier.notifyPageAdded(feed: InboxMessageFeed, messageSet: InboxMessageSet) = runOnMain {
+    inboxListeners.forEach {
+        it.onPageAdded?.invoke(feed, messageSet)
     }
 }
