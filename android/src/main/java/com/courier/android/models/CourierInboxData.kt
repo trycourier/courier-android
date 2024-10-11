@@ -1,5 +1,7 @@
 package com.courier.android.models
 
+import com.courier.android.ui.inbox.InboxMessageFeed
+
 class CourierInboxData(
     feed: InboxMessageSet,
     archived: InboxMessageSet,
@@ -18,19 +20,31 @@ class CourierInboxData(
         this.unreadCount = count
     }
 
-//    @Synchronized
+    @Synchronized
+    fun addPage(feed: InboxMessageFeed, messageSet: InboxMessageSet) {
+        when (feed) {
+            InboxMessageFeed.FEED -> {
+                this.feed.messages.addAll(messageSet.messages)
+                this.feed.totalCount = messageSet.totalCount
+                this.feed.canPaginate = messageSet.canPaginate
+                this.feed.paginationCursor = messageSet.paginationCursor
+            }
+            InboxMessageFeed.ARCHIVE -> {
+                this.archived.messages.addAll(messageSet.messages)
+                this.archived.totalCount = messageSet.totalCount
+                this.archived.canPaginate = messageSet.canPaginate
+                this.archived.paginationCursor = messageSet.paginationCursor
+            }
+        }
+    }
+
+    //    @Synchronized
 //    fun addNewMessage(message: InboxMessage) {
 //        this.messages?.add(0, message)
 //        this.totalCount += 1
 //        this.unreadCount += 1
 //    }
 //
-//    @Synchronized
-//    fun addPage(messages: List<InboxMessage>, startCursor: String?, hasNextPage: Boolean?) {
-//        this.messages?.addAll(messages)
-//        this.startCursor = startCursor
-//        this.hasNextPage = hasNextPage
-//    }
 //
 //    @Synchronized
 //    fun readAllMessages(): ReadAllOperation {
@@ -148,13 +162,6 @@ class InboxMessageSet(
         internal set
     var paginationCursor: String? = paginationCursor
         internal set
-
-    internal fun addPage(messageSet: InboxMessageSet) {
-        messages.addAll(messageSet.messages)
-        totalCount = messageSet.totalCount
-        canPaginate = messageSet.canPaginate
-        paginationCursor = messageSet.paginationCursor
-    }
 
 }
 

@@ -39,42 +39,6 @@ internal interface InboxMutationHandler {
     suspend fun onUnreadCountChange(count: Int)
 }
 
-//private suspend fun Courier.get(isRefresh: Boolean, handler: InboxMutationHandler): CourierInboxData? {
-//
-//    try {
-//
-//        // Notify the handler that inbox reload is starting
-//        handler.onInboxReload(isRefresh)
-//
-//        // Fetch initial inbox data (assuming this is a suspend function)
-//        val newData = loadInbox()
-//
-//        // Notify success after data is successfully loaded
-//        handler.onInboxUpdated(newData)
-//
-//        // Return the fetched data
-//        return newData
-//
-//    } catch (error: Exception) {
-//
-//        // Disconnect existing socket on error
-//        InboxSocketManager.closeSocket()
-//
-//        // Notify the handler about the error
-//        handler.onInboxError(error)
-//
-//        // Return null in case of an error
-//        return null
-//    }
-//
-//}
-
-//private fun Courier.get(isRefresh: Boolean, handler: InboxMutationHandler) {
-//    dataPipe?.cancel()
-//    dataPipe = startDataPipe(isRefresh, handler)
-//    dataPipe?.start()
-//}
-
 internal fun Courier.load(isRefresh: Boolean): Deferred<CourierInboxData?> {
     dataPipe?.cancel()
     dataPipe = getInboxData(isRefresh)
@@ -89,7 +53,7 @@ internal fun Courier.getInboxData(isRefresh: Boolean) = coroutineScope.async(Dis
         inboxMutationHandler.onInboxReload(isRefresh)
 
         // Fetch initial inbox data (assuming this is a suspend function)
-        val newData = loadInbox()
+        val newData = loadInbox(isRefresh)
 
         // Notify success after data is successfully loaded
         inboxMutationHandler.onInboxUpdated(newData)
@@ -117,7 +81,26 @@ suspend fun Courier.refreshInbox(): CourierInboxData? {
     return load(isRefresh = true).await()
 }
 
-private suspend fun Courier.loadInbox(refresh: Boolean = false): CourierInboxData = withContext(Dispatchers.IO) {
+private fun Courier.getFetchParams(isRefresh: Boolean, set: InboxMessageSet?): Pair<Int, String?> {
+
+    // First load
+    if (set == null) {
+        return Pair(paginationLimit, null)
+    }
+
+    // Pull to refresh usually
+    if (isRefresh) {
+        val min = paginationLimit.coerceAtLeast(set.messages.size)
+        val max = min.coerceAtMost(DEFAULT_MAX_PAGINATION_LIMIT)
+        return Pair(max, null)
+    }
+
+    // Pagination from footer
+    return Pair(paginationLimit, set.paginationCursor)
+
+}
+
+private suspend fun Courier.loadInbox(isRefresh: Boolean): CourierInboxData = withContext(Dispatchers.IO) {
 
     // Check if user is signed in
     if (!isUserSignedIn) {
@@ -127,32 +110,18 @@ private suspend fun Courier.loadInbox(refresh: Boolean = false): CourierInboxDat
     // Get all inbox data and start the websocket
     val result = awaitAll(
         async {
-
-            // Determine a safe pagination limit
-//            val currentMessageCount = inbox?.messages?.size ?: paginationLimit
-            val minPaginationLimit = paginationLimit.coerceAtLeast(paginationLimit) // TODO
-            val maxRefreshLimit = minPaginationLimit.coerceAtMost(DEFAULT_MAX_PAGINATION_LIMIT)
-            val limit = if (refresh) maxRefreshLimit else paginationLimit
-
-            // Grab the messages
+            val (limit, cursor) = getFetchParams(isRefresh, courierInboxData?.feed)
             return@async client?.inbox?.getMessages(
-                paginationLimit = limit
+                paginationLimit = limit,
+                startCursor = cursor
             )
-
         },
         async {
-
-            // Determine a safe pagination limit
-//            val currentMessageCount = inbox?.messages?.size ?: paginationLimit
-            val minPaginationLimit = paginationLimit.coerceAtLeast(paginationLimit) // TODO
-            val maxRefreshLimit = minPaginationLimit.coerceAtMost(DEFAULT_MAX_PAGINATION_LIMIT)
-            val limit = if (refresh) maxRefreshLimit else paginationLimit
-
-            // Grab the messages
+            val (limit, cursor) = getFetchParams(isRefresh, courierInboxData?.archived)
             return@async client?.inbox?.getArchivedMessages(
-                paginationLimit = limit
+                paginationLimit = limit,
+                startCursor = cursor
             )
-
         },
         async {
             client?.inbox?.getUnreadMessageCount()

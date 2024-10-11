@@ -222,10 +222,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     }
 
     override suspend fun onInboxPageFetched(feed: InboxMessageFeed, messageSet: InboxMessageSet) {
-        when (feed) {
-            InboxMessageFeed.FEED -> this.courierInboxData?.feed?.addPage(messageSet)
-            InboxMessageFeed.ARCHIVE -> this.courierInboxData?.archived?.addPage(messageSet)
-        }
+        this.courierInboxData?.addPage(feed, messageSet)
         notifyPageAdded(feed, messageSet)
     }
 

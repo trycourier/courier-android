@@ -198,7 +198,7 @@ internal class InboxListView @JvmOverloads constructor(
             showLoading = set.canPaginate
         )
 
-        messagesAdapter.messages = set.messages
+        messagesAdapter.messages = set.messages.toList()
 
         state = if (messagesAdapter.messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
         messagesAdapter.notifyDataSetChanged()
@@ -224,7 +224,7 @@ internal class InboxListView @JvmOverloads constructor(
         // Add new messages to the end of the list
         val newMessages = set.messages
         if (newMessages.isNotEmpty()) {
-            messagesAdapter.messages.addAll(newMessages)
+            messagesAdapter.messages = messagesAdapter.messages.toList() + newMessages.toList()
             messagesAdapter.notifyItemRangeInserted(currentMessageCount, newMessages.size)
         }
 
