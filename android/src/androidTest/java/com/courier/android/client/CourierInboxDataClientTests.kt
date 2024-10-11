@@ -15,7 +15,7 @@ import org.junit.runner.RunWith
 import java.util.UUID
 
 @RunWith(AndroidJUnit4::class)
-class InboxClientTests {
+class CourierInboxDataClientTests {
 
     private lateinit var client: CourierClient
     private val connectionId = UUID.randomUUID().toString()

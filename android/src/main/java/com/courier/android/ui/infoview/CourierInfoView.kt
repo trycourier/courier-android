@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.core.view.isVisible
 import com.courier.android.R
 import com.courier.android.ui.CourierActionButton
 import com.courier.android.ui.inbox.CourierInboxTheme
@@ -30,6 +31,10 @@ class CourierInfoView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     fun setTitle(title: String?) {
         titleTextView.text = title
+    }
+
+    fun showButton(show: Boolean) {
+        retryButton.isVisible = show
     }
 
     fun setTheme(theme: CourierInboxTheme) {

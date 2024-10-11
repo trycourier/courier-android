@@ -3,7 +3,6 @@ package com.courier.android.ui.inbox
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -15,7 +14,9 @@ import com.courier.android.R
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
+import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.refreshInbox
+import com.courier.android.ui.bar.CourierBar
 import com.courier.android.utils.isDarkMode
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -25,8 +26,6 @@ import kotlinx.coroutines.launch
 open class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
     internal data class Page(val title: String, val list: InboxListView)
-
-    internal enum class MessageFeed { FEED, ARCHIVE }
 
     var lightTheme: CourierInboxTheme = CourierInboxTheme.DEFAULT_LIGHT
         set(value) {
@@ -56,12 +55,13 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
     private val pages = listOf(
-        Page(title = "Notifications", list = InboxListView(context, attrs, defStyleAttr, MessageFeed.FEED)),
-        Page(title = "Archived", list = InboxListView(context, attrs, defStyleAttr, MessageFeed.ARCHIVE))
+        Page(title = "Notifications", list = InboxListView(context, attrs, defStyleAttr, InboxMessageFeed.FEED)),
+        Page(title = "Archived", list = InboxListView(context, attrs, defStyleAttr, InboxMessageFeed.ARCHIVE))
     )
 
     private val tabLayout: TabLayout by lazy { findViewById(R.id.tabLayout) }
     private val viewPager: ViewPager2 by lazy { findViewById(R.id.viewPager) }
+    private val courierBar: CourierBar by lazy { findViewById(R.id.courierBar) }
 
     private lateinit var inboxListener: CourierInboxListener
 
@@ -85,75 +85,55 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         }.attach()
     }
 
-    private fun reloadViews() {
-
-        print("Something")
-
-    }
-
     private fun refreshTheme() {
         theme = if (context.isDarkMode) darkTheme else lightTheme
     }
 
+    private fun reloadViews() {
+        courierBar.setBrand(theme.brand)
+    }
+
     private fun setup() = coroutineScope.launch(Dispatchers.Main) {
+
+        // Setup UI
         setupViewPager(viewPager)
         setupTabs()
+
+        // Grab the brand
+        pages.forEach { it.list.setLoading(false) }
         theme.getBrandIfNeeded()
 
-//        // Setup the listener
-//        inboxListener = Courier.shared.addInboxListener(
-//            onInitialLoad = {
-//
-//                state = State.LOADING
-//
-//                refreshAdapters()
-//
-//                recyclerView.forceReactNativeLayoutFix()
-//
-//            },
-//            onError = { e ->
-//
-//                state = State.ERROR.apply { title = e.message }
-//
-//                Courier.shared.client?.error(e.message)
-//
-//                refreshAdapters()
-//
-//                recyclerView.forceReactNativeLayoutFix()
-//
-//            },
-//            onMessagesChanged = { messages, _, _, canPaginate ->
-//
-//                loadingAdapter.canPage = false
-//
-//                state = if (messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
-//
-//                refreshAdapters(
-//                    showMessages = messages.isNotEmpty(),
-//                    showLoading = canPaginate
-//                )
-//
-//                refreshMessages(
-//                    newMessages = messages.toList()
-//                )
-//
-//                recyclerView.forceReactNativeLayoutFix()
-//
-//                loadingAdapter.canPage = canPaginate
-//
-//            }
-//        )
+        // Setup the listener
+        inboxListener = Courier.shared.addInboxListener(
+            onLoading = { isRefresh ->
+                pages.forEach { it.list.setLoading(isRefresh) }
+            },
+            onError = { e ->
+                pages.forEach { it.list.setError(e) }
+            },
+            onUnreadCountChanged = { count ->
+                println("Unread count: $count")  // Example print for unread count
+            },
+            onFeedChanged = { messageSet ->
+                pages[0].list.setMessageSet(messageSet)
+            },
+            onArchiveChanged = { messageSet ->
+                pages[1].list.setMessageSet(messageSet)
+            },
+            onPageAdded = { feed, messageSet ->
+                println("Page added")  // Example print for page added
+            },
+            onMessageChanged = { feed, index, message ->
+                println("Message changed at index $index")  // Example print for message changed
+            },
+            onMessageAdded = { feed, index, message ->
+                println("Message added at index $index")  // Example print for message added
+            },
+            onMessageRemoved = { feed, index, message ->
+                println("Message removed at index $index")  // Example print for message removed
+            }
+        )
 
-    }
-
-    internal fun refresh() = coroutineScope.launch(Dispatchers.Main) {
-        theme.getBrandIfNeeded()
-        Courier.shared.refreshInbox()
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-//        inboxListener.remove()
     }
 
     fun setOnClickMessageListener(listener: ((message: InboxMessage, index: Int) -> Unit)?) {
@@ -168,27 +148,45 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         onScrollInbox = listener
     }
 
+    internal fun refresh() = coroutineScope.launch(Dispatchers.Main) {
+        theme.getBrandIfNeeded()
+        Courier.shared.refreshInbox()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        inboxListener.remove()
+    }
+
     private inner class ViewPagerAdapter(private val pages: List<Page>) : RecyclerView.Adapter<ViewPagerAdapter.PageViewHolder>() {
 
-        inner class PageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-            val container: FrameLayout = itemView.findViewById(R.id.inbox_container)
+        inner class PageViewHolder(page: Page) : RecyclerView.ViewHolder(page.list) {
+            init {
+                page.list.layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.inbox_page_layout, parent, false)
-            return PageViewHolder(view)
+            val page = pages[viewType]
+            return PageViewHolder(page)
         }
 
         override fun onBindViewHolder(holder: PageViewHolder, position: Int) {
             val page = pages[position]
-            holder.container.removeAllViews()
-            holder.container.addView(page.list)
         }
 
         override fun getItemCount(): Int = pages.size
+
+        override fun getItemViewType(position: Int) = position
+
     }
 
 }
+
+enum class InboxMessageFeed { FEED, ARCHIVE }
 
 /**
  * Extensions

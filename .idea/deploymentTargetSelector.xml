@@ -19,13 +19,13 @@
       <SelectionState runConfigName="getArchivedMessages()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="InboxTests">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="archiveMessage()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="userAgent()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="multipleListeners()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

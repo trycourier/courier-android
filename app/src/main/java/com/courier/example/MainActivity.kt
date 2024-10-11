@@ -10,7 +10,6 @@ import com.courier.android.Courier
 import com.courier.android.activity.CourierActivity
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
-import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.signIn
 import com.courier.android.modules.tenantId
@@ -85,9 +84,9 @@ class MainActivity : CourierActivity() {
         }
 
         inboxListener = Courier.shared.addInboxListener(
-            onInitialLoad = { setBadge(0) },
-            onError = { setBadge(0) },
-            onMessagesChanged = { _, unreadMessageCount, _, _ -> setBadge(unreadMessageCount) }
+            onUnreadCountChanged = { count ->
+                setBadge(count)
+            }
         )
 
     }

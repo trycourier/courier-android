@@ -16,18 +16,15 @@ import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.R
 import com.courier.android.models.CourierException
-import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
+import com.courier.android.models.InboxMessageSet
 import com.courier.android.models.markAsClicked
 import com.courier.android.models.markAsOpened
-import com.courier.android.models.remove
-import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.clientKey
 import com.courier.android.modules.fetchNextInboxPage
 import com.courier.android.modules.refreshInbox
 import com.courier.android.modules.userId
-import com.courier.android.ui.bar.CourierBar
 import com.courier.android.ui.infoview.CourierInfoView
 import com.courier.android.utils.error
 import com.courier.android.utils.forceReactNativeLayoutFix
@@ -41,7 +38,7 @@ internal class InboxListView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    private val feed: CourierInbox.MessageFeed = CourierInbox.MessageFeed.FEED
+    private val feed: InboxMessageFeed = InboxMessageFeed.FEED
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private enum class State(var title: String? = null) {
@@ -53,26 +50,28 @@ internal class InboxListView @JvmOverloads constructor(
             field = value
             when (field) {
                 State.LOADING -> {
-                    refreshLayout.isVisible = false
+                    recyclerView.isVisible = false
                     infoView.isVisible = false
                     loadingIndicator.isVisible = true
                 }
                 State.ERROR -> {
-                    refreshLayout.isVisible = false
+                    recyclerView.isVisible = false
                     infoView.isVisible = true
                     infoView.setTitle(field.title)
+                    infoView.showButton(true)
                     loadingIndicator.isVisible = false
                 }
                 State.CONTENT -> {
-                    refreshLayout.isVisible = true
+                    recyclerView.isVisible = true
                     infoView.isVisible = false
                     infoView.setTitle(null)
                     loadingIndicator.isVisible = false
                 }
                 State.EMPTY -> {
-                    refreshLayout.isVisible = false
+                    recyclerView.isVisible = false
                     infoView.isVisible = true
                     infoView.setTitle(field.title)
+                    infoView.showButton(false)
                     loadingIndicator.isVisible = false
                 }
             }
@@ -122,20 +121,14 @@ internal class InboxListView @JvmOverloads constructor(
             loadingIndicator.indeterminateTintList = ColorStateList.valueOf(it)
         }
 
-        // Handle bar brand
-        courierBar.setBrand(theme.brand)
-
     }
 
     val recyclerView: RecyclerView by lazy { findViewById(R.id.recyclerView) }
     private val refreshLayout: SwipeRefreshLayout by lazy { findViewById(R.id.refreshLayout) }
     private val infoView: CourierInfoView by lazy { findViewById(R.id.infoView) }
-    private val courierBar: CourierBar by lazy { findViewById(R.id.courierBar) }
     private val loadingIndicator: ProgressBar by lazy { findViewById(R.id.loadingIndicator) }
 
     private val layoutManager get() = recyclerView.layoutManager as? LinearLayoutManager
-
-    private lateinit var inboxListener: CourierInboxListener
 
     private var onClickInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
     private var onClickInboxActionForMessageAtIndex: ((InboxAction, InboxMessage, Int) -> Unit)? = null
@@ -168,6 +161,48 @@ internal class InboxListView @JvmOverloads constructor(
         setup()
     }
 
+    internal fun setLoading(isRefresh: Boolean) {
+
+        // Show the refresh indicator
+        refreshLayout.isRefreshing = isRefresh
+        if (isRefresh) {
+            return
+        }
+
+        // Show full loading
+        state = State.LOADING
+        refreshAdapters()
+        recyclerView.forceReactNativeLayoutFix()
+
+    }
+
+    internal fun setError(e: Throwable) {
+        state = State.ERROR.apply { title = e.message }
+        Courier.shared.client?.error(e.message)
+        refreshAdapters()
+        recyclerView.forceReactNativeLayoutFix()
+    }
+
+    internal fun setMessageSet(set: InboxMessageSet) {
+
+        refreshLayout.isRefreshing = false
+        loadingAdapter.canPage = set.canPaginate
+
+        state = if (set.messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
+
+        refreshAdapters(
+            showMessages = set.messages.isNotEmpty(),
+            showLoading = set.canPaginate
+        )
+
+        refreshMessages(
+            newMessages = set.messages.toList()
+        )
+
+        recyclerView.forceReactNativeLayoutFix()
+
+    }
+
     private fun setup() = coroutineScope.launch(Dispatchers.Main) {
 
         state = State.LOADING
@@ -191,52 +226,6 @@ internal class InboxListView @JvmOverloads constructor(
         refreshLayout.setOnRefreshListener {
             refresh()
         }
-
-        theme.getBrandIfNeeded()
-
-        // Setup the listener
-        inboxListener = Courier.shared.addInboxListener(
-            onInitialLoad = {
-
-                state = State.LOADING
-
-                refreshAdapters()
-
-                recyclerView.forceReactNativeLayoutFix()
-
-            },
-            onError = { e ->
-
-                state = State.ERROR.apply { title = e.message }
-
-                Courier.shared.client?.error(e.message)
-
-                refreshAdapters()
-
-                recyclerView.forceReactNativeLayoutFix()
-
-            },
-            onMessagesChanged = { messages, _, _, canPaginate ->
-
-                loadingAdapter.canPage = false
-
-                state = if (messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
-
-                refreshAdapters(
-                    showMessages = messages.isNotEmpty(),
-                    showLoading = canPaginate
-                )
-
-                refreshMessages(
-                    newMessages = messages.toList()
-                )
-
-                recyclerView.forceReactNativeLayoutFix()
-
-                loadingAdapter.canPage = canPaginate
-
-            }
-        )
 
     }
 
@@ -363,11 +352,6 @@ internal class InboxListView @JvmOverloads constructor(
         // Reloads the inbox
         recyclerView.forceReactNativeLayoutFix()
 
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        inboxListener.remove()
     }
 
     fun setOnClickMessageListener(listener: ((message: InboxMessage, index: Int) -> Unit)?) {
