@@ -19,10 +19,10 @@ data class InboxMessage(
     val actions: List<InboxAction>? = null,
     val data: Map<String, Any>? = null,
     val created: String? = null,
-    val archived: String? = null,
+    var archived: String? = null,
     var read: String? = null,
     var opened: String? = null,
-    private val trackingIds: CourierTrackingIds? = null,
+    val trackingIds: CourierTrackingIds? = null,
 ) {
 
     val subtitle get() = body ?: preview
@@ -46,17 +46,21 @@ data class InboxMessage(
         opened = Date().toIsoTimestamp()
     }
 
-    val time: String get() {
-
-        val date = created?.isoToDate()
-
-        if (created == null || date == null) {
-            return "now"
-        }
-
-        return date.timeSince()
-
+    internal fun setUnopened() {
+        opened = null
     }
+
+    internal fun setArchived() {
+        archived = Date().toIsoTimestamp()
+    }
+
+    internal fun setUnarchived() {
+        archived = null
+    }
+
+    val createdAt: Date get() = created?.isoToDate() ?: Date()
+
+    val time: String get() = createdAt.timeSince()
 
 }
 

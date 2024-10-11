@@ -187,6 +187,9 @@ private suspend fun Courier.connectWebSocket() {
             InboxSocket.EventType.OPENED -> {
                 client?.log("Message Opened")
             }
+            else -> {
+                client?.log("Unsupported option")
+            }
         }
     }
 
@@ -421,74 +424,30 @@ internal suspend fun Courier.clickMessage(messageId: String) {
 
 internal suspend fun Courier.readMessage(messageId: String) {
 
-//    if (!isUserSignedIn) {
-//        throw CourierException.userNotFound
-//    }
-//
-//    // Mark the message as read instantly
-//    val original = inbox?.readMessage(messageId)
-//
-//    // Notify
-//    notifyMessagesChanged()
-//
-//    try {
-//
-//        client?.inbox?.read(
-//            messageId = messageId,
-//        )
-//
-//    } catch (e: Exception) {
-//
-//        original?.let {
-//            inbox?.resetUpdate(it)
-//        }
-//
-//        notifyMessagesChanged()
-//        notifyError(e)
-//
-//    }
+    if (!isUserSignedIn) {
+        throw CourierException.userNotFound
+    }
+
+    courierInboxData?.updateMessage(
+        messageId = messageId,
+        event = InboxSocket.EventType.READ,
+        client = client,
+        handler = inboxMutationHandler
+    )
 
 }
 
 internal suspend fun Courier.unreadMessage(messageId: String) {
 
-//    if (!isUserSignedIn) {
-//        throw CourierException.userNotFound
-//    }
-//
-//    // Mark the message as read instantly
-//    val original = inbox?.unreadMessage(messageId)
-//
-//    // Notify
-//    notifyMessagesChanged()
-//
-//    try {
-//
-//        client?.inbox?.unread(
-//            messageId = messageId,
-//        )
-//
-//    } catch (e: Exception) {
-//
-//        original?.let {
-//            inbox?.resetUpdate(it)
-//        }
-//
-//        notifyMessagesChanged()
-//        notifyError(e)
-//
-//    }
-
-}
-
-internal suspend fun Courier.openMessage(messageId: String) {
-
     if (!isUserSignedIn) {
         throw CourierException.userNotFound
     }
 
-    client?.inbox?.open(
+    courierInboxData?.updateMessage(
         messageId = messageId,
+        event = InboxSocket.EventType.UNREAD,
+        client = client,
+        handler = inboxMutationHandler
     )
 
 }
@@ -499,8 +458,26 @@ internal suspend fun Courier.archiveMessage(messageId: String) {
         throw CourierException.userNotFound
     }
 
-    client?.inbox?.archive(
+    courierInboxData?.updateMessage(
         messageId = messageId,
+        event = InboxSocket.EventType.ARCHIVE,
+        client = client,
+        handler = inboxMutationHandler
+    )
+
+}
+
+internal suspend fun Courier.openMessage(messageId: String) {
+
+    if (!isUserSignedIn) {
+        throw CourierException.userNotFound
+    }
+
+    courierInboxData?.updateMessage(
+        messageId = messageId,
+        event = InboxSocket.EventType.OPENED,
+        client = client,
+        handler = inboxMutationHandler
     )
 
 }

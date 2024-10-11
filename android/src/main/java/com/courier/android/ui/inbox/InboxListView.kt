@@ -198,7 +198,7 @@ internal class InboxListView @JvmOverloads constructor(
             showLoading = set.canPaginate
         )
 
-        messagesAdapter.messages = set.messages
+        messagesAdapter.messages = set.messages.toMutableList()
 
         state = if (messagesAdapter.messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
         messagesAdapter.notifyDataSetChanged()
@@ -222,7 +222,7 @@ internal class InboxListView @JvmOverloads constructor(
         val currentMessageCount = messagesAdapter.messages.size
 
         // Add new messages to the end of the list
-        val newMessages = set.messages
+        val newMessages = set.messages.toMutableList()
         if (newMessages.isNotEmpty()) {
             messagesAdapter.messages.addAll(newMessages)
             state = if (messagesAdapter.messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
@@ -246,8 +246,35 @@ internal class InboxListView @JvmOverloads constructor(
 
         state = State.CONTENT
 
-        messagesAdapter.messages.add(index, message)
+        messagesAdapter.messages.add(index, message.copy())
         messagesAdapter.notifyItemInserted(index)
+        recyclerView.restoreScrollPosition()
+
+        openVisibleMessages()
+        recyclerView.forceReactNativeLayoutFix()
+
+    }
+
+    internal fun updateMessage(index: Int, message: InboxMessage) {
+        messagesAdapter.messages[index] = message.copy()
+        messagesAdapter.notifyItemChanged(index)
+    }
+
+    internal fun removeMessage(index: Int, message: InboxMessage) {
+
+        refreshLayout.isRefreshing = false
+        loadingAdapter.canPage = loadingAdapter.canPage
+
+        messagesAdapter.messages.removeAt(index)
+
+        refreshAdapters(
+            showMessages = messagesAdapter.messages.isNotEmpty(),
+            showLoading = loadingAdapter.canPage
+        )
+
+        state = if (messagesAdapter.messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
+
+        messagesAdapter.notifyItemRemoved(index)
         recyclerView.restoreScrollPosition()
 
         openVisibleMessages()

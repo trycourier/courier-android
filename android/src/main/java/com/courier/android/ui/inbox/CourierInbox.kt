@@ -54,9 +54,23 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
         }
 
-    private val pages = listOf(
-        Page(title = "Notifications", list = InboxListView(context, attrs, defStyleAttr, InboxMessageFeed.FEED)),
-        Page(title = "Archived", list = InboxListView(context, attrs, defStyleAttr, InboxMessageFeed.ARCHIVE))
+    private fun makeListView(feed: InboxMessageFeed, context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0): InboxListView {
+        return InboxListView(context, attrs, defStyleAttr, feed).apply {
+            setOnClickMessageListener { message, index ->
+                onClickInboxMessageAtIndex?.invoke(message, index)
+            }
+            setOnClickActionListener { action, message, index ->
+                onClickInboxActionForMessageAtIndex?.invoke(action, message, index)
+            }
+            setOnScrollInboxListener { offsetInDp ->
+                onScrollInbox?.invoke(offsetInDp)
+            }
+        }
+    }
+
+    private val pages: List<Page> = listOf(
+        Page(title = "Notifications", list = makeListView(InboxMessageFeed.FEED, context, attrs, defStyleAttr)),
+        Page(title = "Archived", list = makeListView(InboxMessageFeed.ARCHIVE, context, attrs, defStyleAttr))
     )
 
     private val tabLayout: TabLayout by lazy { findViewById(R.id.tabLayout) }
@@ -124,13 +138,13 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
                 getPage(feed).list.addPage(messageSet)
             },
             onMessageChanged = { feed, index, message ->
-                println("Message changed at index $index")  // Example print for message changed
+                getPage(feed).list.updateMessage(index, message)
             },
             onMessageAdded = { feed, index, message ->
                 getPage(feed).list.addMessage(index, message)
             },
             onMessageRemoved = { feed, index, message ->
-                println("Message removed at index $index")  // Example print for message removed
+                getPage(feed).list.removeMessage(index, message) // Example print for message removed
             }
         )
 

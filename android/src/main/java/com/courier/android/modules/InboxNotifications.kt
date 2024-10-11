@@ -50,3 +50,15 @@ internal fun Courier.notifyMessageAdded(feed: InboxMessageFeed, index: Int, mess
         it.onMessageAdded?.invoke(feed, index, message)
     }
 }
+
+internal fun Courier.notifyMessageUpdated(feed: InboxMessageFeed, index: Int, message: InboxMessage) = runOnMain {
+    inboxListeners.forEach {
+        it.onMessageChanged?.invoke(feed, index, message)
+    }
+}
+
+internal fun Courier.notifyMessageRemoved(feed: InboxMessageFeed, index: Int, message: InboxMessage) = runOnMain {
+    inboxListeners.forEach {
+        it.onMessageRemoved?.invoke(feed, index, message)
+    }
+}

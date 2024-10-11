@@ -15,18 +15,26 @@ import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.InboxMessage
 import com.courier.android.models.InboxMessageSet
 import com.courier.android.modules.InboxMutationHandler
+import com.courier.android.modules.archiveMessage
+import com.courier.android.modules.clickMessage
 import com.courier.android.modules.linkInbox
 import com.courier.android.modules.notifyError
 import com.courier.android.modules.notifyInboxUpdated
 import com.courier.android.modules.notifyLoading
 import com.courier.android.modules.notifyMessageAdded
+import com.courier.android.modules.notifyMessageRemoved
+import com.courier.android.modules.notifyMessageUpdated
 import com.courier.android.modules.notifyPageAdded
 import com.courier.android.modules.notifyUnreadCountChange
+import com.courier.android.modules.openMessage
+import com.courier.android.modules.readMessage
 import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.unlinkInbox
+import com.courier.android.modules.unreadMessage
 import com.courier.android.socket.InboxSocket
 import com.courier.android.ui.inbox.InboxMessageFeed
 import com.courier.android.utils.NotificationEventBus
+import com.courier.android.utils.log
 import com.courier.android.utils.warn
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
@@ -222,11 +230,11 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     }
 
     override suspend fun onInboxItemRemove(index: Int, feed: InboxMessageFeed, message: InboxMessage) {
-        println("Inbox item removed at index: $index, feed: $feed, message: $message")
+        notifyMessageRemoved(feed, index, message)
     }
 
     override suspend fun onInboxItemUpdated(index: Int, feed: InboxMessageFeed, message: InboxMessage) {
-        println("Inbox item updated at index: $index, feed: $feed, message: $message")
+        notifyMessageUpdated(feed, index, message)
     }
 
     override suspend fun onInboxPageFetched(feed: InboxMessageFeed, messageSet: InboxMessageSet) {
@@ -235,7 +243,49 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     }
 
     override suspend fun onInboxEventReceived(event: InboxSocket.MessageEvent) {
-        println("Inbox event received: $event")
+        try {
+            when (event.event) {
+                InboxSocket.EventType.MARK_ALL_READ -> {
+//                    Courier.shared.readAllInboxMessages()
+                }
+                InboxSocket.EventType.READ -> {
+                    event.messageId?.let { messageId ->
+                        Courier.shared.readMessage(messageId)
+                    }
+                }
+                InboxSocket.EventType.UNREAD -> {
+                    event.messageId?.let { messageId ->
+                        Courier.shared.unreadMessage(messageId)
+                    }
+                }
+                InboxSocket.EventType.OPENED -> {
+                    event.messageId?.let { messageId ->
+                        Courier.shared.openMessage(messageId)
+                    }
+                }
+                InboxSocket.EventType.UNOPENED -> {
+                    // No action needed for unopened
+                }
+                InboxSocket.EventType.ARCHIVE -> {
+                    event.messageId?.let { messageId ->
+                        Courier.shared.archiveMessage(messageId)
+                    }
+                }
+                InboxSocket.EventType.UNARCHIVE -> {
+                    // No action needed for unarchive
+                }
+                InboxSocket.EventType.CLICK -> {
+                    event.messageId?.let { messageId ->
+                        Courier.shared.clickMessage(messageId)
+                    }
+                }
+                InboxSocket.EventType.UNCLICK -> {
+                    // No action needed for unclick
+                }
+            }
+        } catch (e: Exception) {
+            Courier.shared.client?.log(e.localizedMessage ?: "Error occurred")
+        }
     }
 
 }
