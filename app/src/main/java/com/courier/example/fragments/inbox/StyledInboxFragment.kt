@@ -26,6 +26,8 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
 
         inbox = view.findViewById(R.id.courierInbox)
 
+        inbox.canSwipePages = true
+
         val theme = CourierInboxTheme(
             brandId = Env.COURIER_BRAND_ID,
             unreadIndicatorStyle = CourierStyles.Inbox.UnreadIndicatorStyle(

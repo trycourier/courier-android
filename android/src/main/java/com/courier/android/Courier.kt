@@ -27,6 +27,7 @@ import com.courier.android.modules.notifyMessageUpdated
 import com.courier.android.modules.notifyPageAdded
 import com.courier.android.modules.notifyUnreadCountChange
 import com.courier.android.modules.openMessage
+import com.courier.android.modules.readAllInboxMessages
 import com.courier.android.modules.readMessage
 import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.unlinkInbox
@@ -203,6 +204,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     override suspend fun onInboxUpdated(inbox: CourierInboxData) {
         this.courierInboxData = inbox
         notifyInboxUpdated(inbox)
+        onUnreadCountChange(inbox.unreadCount)
     }
 
     override suspend fun onInboxReset(inbox: CourierInboxData, error: Throwable) {
@@ -215,14 +217,15 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     }
 
     override suspend fun onInboxKilled() {
-        println("Inbox killed")
+        Courier.shared.client?.log("Inbox killed")
     }
 
     override suspend fun onInboxMessageReceived(message: InboxMessage) {
         val index = 0
         val feed = if (message.isArchived) InboxMessageFeed.ARCHIVE else InboxMessageFeed.FEED
-        this.courierInboxData?.addNewMessage(feed, index, message)
+        val unreadCount = this.courierInboxData?.addNewMessage(feed, index, message)
         onInboxItemAdded(index, feed, message)
+        onUnreadCountChange(count = unreadCount ?: 0)
     }
 
     override suspend fun onInboxItemAdded(index: Int, feed: InboxMessageFeed, message: InboxMessage) {
@@ -246,7 +249,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
         try {
             when (event.event) {
                 InboxSocket.EventType.MARK_ALL_READ -> {
-//                    Courier.shared.readAllInboxMessages()
+                    Courier.shared.readAllInboxMessages()
                 }
                 InboxSocket.EventType.READ -> {
                     event.messageId?.let { messageId ->

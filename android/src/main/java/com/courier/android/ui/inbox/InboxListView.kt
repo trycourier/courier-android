@@ -3,6 +3,7 @@ package com.courier.android.ui.inbox
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
@@ -19,8 +20,11 @@ import com.courier.android.models.CourierException
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
 import com.courier.android.models.InboxMessageSet
+import com.courier.android.models.markAsArchived
 import com.courier.android.models.markAsClicked
 import com.courier.android.models.markAsOpened
+import com.courier.android.models.markAsRead
+import com.courier.android.models.markAsUnread
 import com.courier.android.modules.clientKey
 import com.courier.android.modules.fetchNextInboxPage
 import com.courier.android.modules.refreshInbox
@@ -127,8 +131,25 @@ internal class InboxListView @JvmOverloads constructor(
     private val refreshLayout: SwipeRefreshLayout by lazy { findViewById(R.id.refreshLayout) }
     private val infoView: CourierInfoView by lazy { findViewById(R.id.infoView) }
     private val loadingIndicator: ProgressBar by lazy { findViewById(R.id.loadingIndicator) }
-
     private val layoutManager get() = recyclerView.layoutManager as? LinearLayoutManager
+
+    private val swipeHandler by lazy {
+        SwipeHandler(
+            context = context,
+            rightToLeftSwipeBackgroundColor = Color.RED,
+            rightToLeftSwipeIconResId = android.R.drawable.ic_menu_delete,
+            leftToRightSwipeBackgroundColor = Color.BLUE,
+            leftToRightSwipeIconResId = android.R.drawable.ic_dialog_email,
+            onLeftToRightSwipe = { index ->
+                val message = messagesAdapter.messages[index]
+                if (message.isRead) message.markAsUnread() else message.markAsRead()
+            },
+            onRightToLeftSwipe = { index ->
+                val message = messagesAdapter.messages[index]
+                message.markAsArchived()
+            }
+        )
+    }
 
     private var onClickInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
     private var onClickInboxActionForMessageAtIndex: ((InboxAction, InboxMessage, Int) -> Unit)? = null
@@ -306,6 +327,11 @@ internal class InboxListView @JvmOverloads constructor(
             refresh()
         }
 
+        // Attach handler
+        if (feed == InboxMessageFeed.FEED) {
+            swipeHandler.attach(recyclerView)
+        }
+
     }
 
     private fun refresh() = coroutineScope.launch(Dispatchers.Main) {
@@ -371,54 +397,6 @@ internal class InboxListView @JvmOverloads constructor(
         }
 
     }
-
-//    @SuppressLint("NotifyDataSetChanged")
-//    private fun refreshMessages(newMessages: List<InboxMessage>) {
-//
-////        val existingMessages = messagesAdapter.messages
-//
-//        // Set the new messages
-//        messagesAdapter.messages = newMessages
-//
-//        // Check if we need to insert
-////        val didInsert = newMessages.size - existingMessages.size == 1
-//
-////        // Handle insert
-////        if (newMessages.firstOrNull()?.messageId != existingMessages.firstOrNull()?.messageId && didInsert) {
-////            messagesAdapter.notifyItemInserted(0)
-////            recyclerView.restoreScrollPosition()
-////            return
-////        }
-//
-////        // Handle pagination
-////        if (newMessages.size > existingMessages.size) {
-////            val firstIndex = existingMessages.size
-////            val itemCount = newMessages.size - existingMessages.size
-////            messagesAdapter.notifyItemRangeInserted(firstIndex, itemCount)
-////            return
-////        }
-//
-////        // Manually sync all view holders
-////        // This ensures the click animation is nice and clean
-////        if (newMessages.size == existingMessages.size) {
-////            newMessages.forEachIndexed { index, message ->
-////                val viewHolder = recyclerView.findViewHolderForLayoutPosition(index) as? MessageItemViewHolder
-////                viewHolder?.setMessage(
-////                    theme = theme,
-////                    message = message
-////                )
-////            }
-////            return
-////        }
-//
-//        // Reload all other data
-//        // Forces a hard reload
-//        messagesAdapter.notifyDataSetChanged()
-//
-//        // Read new messages if possible
-//        openVisibleMessages()
-//
-//    }
 
     private fun refreshAdapters(showMessages: Boolean = false, showLoading: Boolean = false) {
         if (showMessages) adapter.addAdapter(0, messagesAdapter) else adapter.removeAdapter(messagesAdapter)

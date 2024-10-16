@@ -54,6 +54,28 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
         }
 
+    var canSwipePages = false
+        set(value) {
+            field = value
+            viewPager.isUserInputEnabled = value
+        }
+
+    private var onClickInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
+    private var onClickInboxActionForMessageAtIndex: ((InboxAction, InboxMessage, Int) -> Unit)? = null
+    private var onScrollInbox: ((Int) -> Unit)? = null
+
+    fun setOnClickMessageListener(listener: ((message: InboxMessage, index: Int) -> Unit)?) {
+        onClickInboxMessageAtIndex = listener
+    }
+
+    fun setOnClickActionListener(listener: ((action: InboxAction, message: InboxMessage, index: Int) -> Unit)?) {
+        onClickInboxActionForMessageAtIndex = listener
+    }
+
+    fun setOnScrollInboxListener(listener: ((offsetInDp: Int) -> Unit)?) {
+        onScrollInbox = listener
+    }
+
     private fun makeListView(feed: InboxMessageFeed, context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0): InboxListView {
         return InboxListView(context, attrs, defStyleAttr, feed).apply {
             setOnClickMessageListener { message, index ->
@@ -79,10 +101,6 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
     private lateinit var inboxListener: CourierInboxListener
 
-    private var onClickInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
-    private var onClickInboxActionForMessageAtIndex: ((InboxAction, InboxMessage, Int) -> Unit)? = null
-    private var onScrollInbox: ((Int) -> Unit)? = null
-
     init {
         View.inflate(context, R.layout.courier_inbox, this)
         refreshTheme()
@@ -91,6 +109,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun setupViewPager(viewPager: ViewPager2) {
         viewPager.adapter = ViewPagerAdapter(pages)
+        viewPager.isUserInputEnabled = canSwipePages
     }
 
     private fun setupTabs() {
@@ -152,18 +171,6 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun getPage(feed: InboxMessageFeed): Page {
         return if (feed == InboxMessageFeed.FEED) pages[0] else pages[1]
-    }
-
-    fun setOnClickMessageListener(listener: ((message: InboxMessage, index: Int) -> Unit)?) {
-        onClickInboxMessageAtIndex = listener
-    }
-
-    fun setOnClickActionListener(listener: ((action: InboxAction, message: InboxMessage, index: Int) -> Unit)?) {
-        onClickInboxActionForMessageAtIndex = listener
-    }
-
-    fun setOnScrollInboxListener(listener: ((offsetInDp: Int) -> Unit)?) {
-        onScrollInbox = listener
     }
 
     internal fun refresh() = coroutineScope.launch(Dispatchers.Main) {

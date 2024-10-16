@@ -57,7 +57,6 @@ internal fun Courier.getInboxData(isRefresh: Boolean) = coroutineScope.async(Dis
 
         // Notify success after data is successfully loaded
         inboxMutationHandler.onInboxUpdated(newData)
-        inboxMutationHandler.onUnreadCountChange(newData.unreadCount)
 
         // Return the fetched data
         return@async newData
@@ -166,26 +165,57 @@ private suspend fun Courier.connectWebSocket() {
     socket.receivedMessageEvent = { messageEvent ->
         when (messageEvent.event) {
             InboxSocket.EventType.MARK_ALL_READ -> {
-//                inbox?.readAllMessages()
-//                notifyMessagesChanged()
+                coroutineScope.launch(Dispatchers.IO) {
+                    courierInboxData?.readAllLocalMessages(inboxMutationHandler)
+                }
             }
             InboxSocket.EventType.READ -> {
-                messageEvent.messageId?.let { messageId ->
-//                    inbox?.readMessage(messageId)
-//                    notifyMessagesChanged()
+                coroutineScope.launch(Dispatchers.IO) {
+                    val index = courierInboxData?.feed?.messages?.indexOfFirst { it.messageId == messageEvent.messageId }
+                    if (index != null && index != -1) {
+                        courierInboxData?.read(
+                            index = index,
+                            inboxFeed = InboxMessageFeed.FEED,
+                            handler = inboxMutationHandler
+                        )
+                    }
                 }
             }
             InboxSocket.EventType.UNREAD -> {
-                messageEvent.messageId?.let { messageId ->
-//                    inbox?.unreadMessage(messageId)
-//                    notifyMessagesChanged()
+                coroutineScope.launch(Dispatchers.IO) {
+                    val index = courierInboxData?.feed?.messages?.indexOfFirst { it.messageId == messageEvent.messageId }
+                    if (index != null && index != -1) {
+                        courierInboxData?.unread(
+                            index = index,
+                            inboxFeed = InboxMessageFeed.FEED,
+                            handler = inboxMutationHandler
+                        )
+                    }
                 }
             }
             InboxSocket.EventType.ARCHIVE -> {
-                client?.log("Message Archived")
+                coroutineScope.launch(Dispatchers.IO) {
+                    val index = courierInboxData?.feed?.messages?.indexOfFirst { it.messageId == messageEvent.messageId }
+                    if (index != null && index != -1) {
+                        courierInboxData?.archive(
+                            index = index,
+                            inboxFeed = InboxMessageFeed.FEED,
+                            handler = inboxMutationHandler
+                        )
+                    }
+                }
             }
             InboxSocket.EventType.OPENED -> {
-                client?.log("Message Opened")
+                coroutineScope.launch(Dispatchers.IO) {
+                    val index = courierInboxData?.feed?.messages?.indexOfFirst { it.messageId == messageEvent.messageId }
+                    if (index != null && index != -1) {
+                        courierInboxData?.open(
+                            index = index,
+                            inboxFeed = InboxMessageFeed.FEED,
+                            handler = inboxMutationHandler
+                        )
+                    }
+                }
             }
             else -> {
                 client?.log("Unsupported option")
@@ -366,32 +396,13 @@ fun Courier.removeAllListeners() = coroutineScope.launch(Dispatchers.IO) {
 
 suspend fun Courier.readAllInboxMessages() {
 
-//    if (!isUserSignedIn) {
-//        throw CourierException.userNotFound
-//    }
-//
-//    if (inbox == null) {
-//        return
-//    }
-//
-//    // Read the messages
-//    val original = inbox!!.readAllMessages()
-//
-//    // Notify
-//    notifyMessagesChanged()
-//
-//    // Perform datasource change in background
-//    coroutineScope.launch(Dispatchers.IO) {
-//
-//        try {
-//            client?.inbox?.readAll()
-//        } catch (e: Exception) {
-//            inbox?.resetReadAll(original)
-//            notifyMessagesChanged()
-//            notifyError(e)
-//        }
-//
-//    }
+    if (!isUserSignedIn) {
+        throw CourierException.userNotFound
+    }
+
+    courierInboxData?.readAll(
+        handler = inboxMutationHandler
+    )
 
 }
 

@@ -1,5 +1,6 @@
 package com.courier.android.models
 
+import com.courier.android.Courier
 import com.courier.android.client.CourierClient
 import com.courier.android.modules.InboxMutationHandler
 import com.courier.android.socket.InboxSocket
@@ -28,11 +29,6 @@ class CourierInboxData(
     }
 
     @Synchronized
-    internal fun updateUnreadCount(count: Int) {
-        this.unreadCount = count
-    }
-
-    @Synchronized
     internal fun addPage(feed: InboxMessageFeed, messageSet: InboxMessageSet) {
         when (feed) {
             InboxMessageFeed.FEED -> {
@@ -51,7 +47,7 @@ class CourierInboxData(
     }
 
     @Synchronized
-    internal fun addNewMessage(feed: InboxMessageFeed, index: Int, message: InboxMessage) {
+    internal fun addNewMessage(feed: InboxMessageFeed, index: Int, message: InboxMessage): Int {
         this.unreadCount += 1
         when (feed) {
             InboxMessageFeed.FEED -> {
@@ -63,6 +59,7 @@ class CourierInboxData(
                 this.archived.totalCount += 1
             }
         }
+        return this.unreadCount
     }
 
     @Synchronized
@@ -159,7 +156,7 @@ class CourierInboxData(
         }
     }
 
-    private suspend fun read(
+    internal suspend fun read(
         index: Int,
         inboxFeed: InboxMessageFeed,
         handler: InboxMutationHandler
@@ -187,7 +184,7 @@ class CourierInboxData(
 
     }
 
-    private suspend fun unread(
+    internal suspend fun unread(
         index: Int,
         inboxFeed: InboxMessageFeed,
         handler: InboxMutationHandler
@@ -213,7 +210,7 @@ class CourierInboxData(
         }
     }
 
-    private suspend fun open(
+    internal suspend fun open(
         index: Int,
         inboxFeed: InboxMessageFeed,
         handler: InboxMutationHandler
@@ -249,7 +246,7 @@ class CourierInboxData(
         }
     }
 
-    private suspend fun archive(
+    internal suspend fun archive(
         index: Int,
         inboxFeed: InboxMessageFeed,
         handler: InboxMutationHandler
@@ -289,107 +286,31 @@ class CourierInboxData(
         return messages.indexOfFirst { newMessage.createdAt >= it.createdAt }.takeIf { it >= 0 }
     }
 
+    internal suspend fun readAllLocalMessages(handler: InboxMutationHandler) {
+        feed.messages.forEach { it.setArchived() }
+        archived.messages.forEach { it.setArchived() }
+        unreadCount = 0
+        handler.onInboxUpdated(this)
+    }
 
-//
-//
-//    @Synchronized
-//    fun readAllMessages(): ReadAllOperation {
-//
-//        // Copy previous values
-//        val originalMessages = this.messages?.map { it.copy() }?.toMutableList()
-//        val originalUnreadCount = this.unreadCount
-//
-//        // Read all messages
-//        this.messages?.forEach { it.setRead() }
-//        this.unreadCount = 0
-//
-//        return ReadAllOperation(
-//            messages = originalMessages,
-//            unreadCount = originalUnreadCount
-//        )
-//
-//    }
-//
-//    // Return the index up the updated message
-//    @Synchronized
-//    fun readMessage(messageId: String): UpdateOperation {
-//
-//        if (messages == null) {
-//            throw CourierException.inboxNotInitialized
-//        }
-//
-//        val index = messages!!.indexOfFirst { it.messageId == messageId }
-//
-//        if (index == -1) {
-//            throw CourierException.inboxMessageNotFound
-//        }
-//
-//        // Save copy
-//        val message = messages!![index]
-//        val originalMessage = message.copy()
-//        val originalUnreadCount = this.unreadCount
-//
-//        // Update
-//        message.setRead()
-//
-//        // Change data
-//        this.messages?.set(index, message)
-//        this.unreadCount -= 1
-//        this.unreadCount = this.unreadCount.coerceAtLeast(0)
-//
-//        return UpdateOperation(
-//            index = index,
-//            unreadCount = originalUnreadCount,
-//            message = originalMessage
-//        )
-//
-//    }
-//
-//    @Synchronized
-//    fun unreadMessage(messageId: String): UpdateOperation {
-//
-//        if (messages == null) {
-//            throw CourierException.inboxNotInitialized
-//        }
-//
-//        val index = messages!!.indexOfFirst { it.messageId == messageId }
-//
-//        if (index == -1) {
-//            throw CourierException.inboxMessageNotFound
-//        }
-//
-//        // Save copy
-//        val message = messages!![index]
-//        val originalMessage = message.copy()
-//        val originalUnreadCount = this.unreadCount
-//
-//        // Update
-//        message.setUnread()
-//
-//        // Change data
-//        this.messages?.set(index, message)
-//        this.unreadCount += 1
-//        this.unreadCount = this.unreadCount.coerceAtLeast(0)
-//
-//        return UpdateOperation(
-//            index = index,
-//            unreadCount = originalUnreadCount,
-//            message = originalMessage
-//        )
-//
-//    }
-//
-//    @Synchronized
-//    fun resetReadAll(update: ReadAllOperation) {
-//        this.messages = update.messages
-//        this.unreadCount = update.unreadCount
-//    }
-//
-//    @Synchronized
-//    fun resetUpdate(update: UpdateOperation) {
-//        this.messages?.set(update.index, update.message)
-//        this.unreadCount = update.unreadCount
-//    }
+    internal suspend fun readAll(handler: InboxMutationHandler) {
+
+        val client = Courier.shared.client ?: throw CourierException.inboxNotInitialized
+
+        val original = copy()
+
+        // Perform the local change
+        readAllLocalMessages(handler)
+
+        // Perform server update
+        try {
+            client.inbox.readAll()
+        } catch (e: Exception) {
+            client.options.log(e.localizedMessage ?: "Error occurred")
+            handler.onInboxReset(original, e)
+        }
+
+    }
 
 }
 
@@ -410,14 +331,3 @@ class InboxMessageSet(
         internal set
 
 }
-
-internal data class ReadAllOperation(
-    val messages: MutableList<InboxMessage>?,
-    val unreadCount: Int,
-)
-
-internal data class UpdateOperation(
-    val index: Int,
-    val unreadCount: Int,
-    val message: InboxMessage,
-)
