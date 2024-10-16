@@ -11,11 +11,12 @@
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="?attr/colorPrimary"
+        android:background="?android:colorBackground"
+        android:elevation="4dp"
         app:tabGravity="fill"
         app:tabIndicatorColor="?attr/colorPrimary"
         app:tabMode="fixed"
-        app:tabSelectedTextColor="?attr/colorAccent" />
+        app:tabSelectedTextColor="?attr/colorPrimary" />
 
     <!-- ViewPager2 filling the space between TabLayout and CourierBar -->
     <androidx.viewpager2.widget.ViewPager2

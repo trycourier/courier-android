@@ -124,6 +124,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun reloadViews() {
         courierBar.setBrand(theme.brand)
+        pages.forEach { it.list.theme = theme }
     }
 
     private fun setup() = coroutineScope.launch(Dispatchers.Main) {

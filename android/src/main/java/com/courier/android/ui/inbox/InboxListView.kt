@@ -81,7 +81,7 @@ internal class InboxListView @JvmOverloads constructor(
             }
         }
 
-    private var theme: CourierInboxTheme = CourierInboxTheme.DEFAULT_LIGHT
+    internal var theme: CourierInboxTheme = CourierInboxTheme.DEFAULT_LIGHT
         @SuppressLint("NotifyDataSetChanged")
         set(value) {
 

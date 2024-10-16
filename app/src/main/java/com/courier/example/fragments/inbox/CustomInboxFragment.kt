@@ -15,11 +15,11 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.courier.android.Courier
 import com.courier.android.models.CourierInboxListener
-import com.courier.android.models.InboxMessage
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.fetchNextInboxPage
+import com.courier.android.modules.inboxData
 import com.courier.android.modules.refreshInbox
 import com.courier.android.ui.inbox.InboxMessageFeed
 import com.courier.example.R
@@ -115,8 +115,7 @@ class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
 
 class MessagesAdapter : RecyclerView.Adapter<MessageItemViewHolder>() {
 
-//    private val messages get() = Courier.shared.inboxMessages.orEmpty()
-    private val messages get() = emptyList<InboxMessage>()
+    private val messages get() = Courier.shared.inboxData?.feed?.messages.orEmpty()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageItemViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.message_item, parent, false)

@@ -77,13 +77,11 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
         inbox.setOnClickMessageListener { message, index ->
             val str = message.toJson() ?: "Invalid"
             Courier.shared.client?.log(str)
-            if (!message.isRead) DetailSheet(str).show(childFragmentManager, null)
             if (message.isRead) message.markAsUnread() else message.markAsRead()
         }
 
         inbox.setOnClickActionListener { action, message, index ->
             val str = action.toJson() ?: "Invalid"
-            Courier.shared.client?.log(str)
             DetailSheet(str).show(childFragmentManager, null)
         }
 

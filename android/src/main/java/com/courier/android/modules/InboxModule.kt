@@ -233,18 +233,18 @@ private suspend fun Courier.connectWebSocket() {
 
 internal fun Courier.closeInbox() {
 
-//    // Stops all the jobs
-//    dataPipe?.cancel()
-//    dataPipe = null
-//
-//    // Close the socket
-//    InboxSocketManager.closeSocket()
-//
-//    // Remove values
-//    this.courierInboxData = null
-//
-//    // Update the listeners
-//    notifyError(CourierException.userNotFound)
+    // Stops all the jobs
+    dataPipe?.cancel()
+    dataPipe = null
+
+    // Close the socket
+    InboxSocketManager.closeSocket()
+
+    // Remove values
+    this.courierInboxData = null
+
+    // Update the listeners
+    notifyError(CourierException.userNotFound)
 
 }
 
@@ -524,6 +524,9 @@ var Courier.inboxPaginationLimit
         val min = value.coerceAtMost(DEFAULT_MAX_PAGINATION_LIMIT)
         paginationLimit = min.coerceAtLeast(DEFAULT_MIN_PAGINATION_LIMIT)
     }
+
+val Courier.inboxData
+    get() = courierInboxData
 
 /**
  * Traditional Callbacks
