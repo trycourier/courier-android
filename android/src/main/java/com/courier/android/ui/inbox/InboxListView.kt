@@ -96,6 +96,9 @@ internal class InboxListView @JvmOverloads constructor(
             loadingAdapter.theme = theme
             loadingAdapter.notifyDataSetChanged()
 
+            swipeHandler.unreadIcon = theme.readingSwipeActionStyle.unread.icon
+            swipeHandler.readIcon = theme.readingSwipeActionStyle.read.icon
+            swipeHandler.archiveIcon = theme.archivingSwipeActionStyle.archive.icon
             swipeHandler.readBackgroundColor = theme.readingSwipeActionStyle.read.color
             swipeHandler.unreadBackgroundColor = theme.readingSwipeActionStyle.unread.color
             swipeHandler.archiveBackgroundColor = theme.archivingSwipeActionStyle.archive.color
