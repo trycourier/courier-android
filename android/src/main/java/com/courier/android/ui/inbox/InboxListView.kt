@@ -3,7 +3,6 @@ package com.courier.android.ui.inbox
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
@@ -97,6 +96,10 @@ internal class InboxListView @JvmOverloads constructor(
             loadingAdapter.theme = theme
             loadingAdapter.notifyDataSetChanged()
 
+            swipeHandler.readBackgroundColor = theme.readingSwipeActionStyle.read.color
+            swipeHandler.unreadBackgroundColor = theme.readingSwipeActionStyle.unread.color
+            swipeHandler.archiveBackgroundColor = theme.archivingSwipeActionStyle.archive.color
+
         }
 
     private fun reloadViews() {
@@ -136,10 +139,6 @@ internal class InboxListView @JvmOverloads constructor(
     private val swipeHandler by lazy {
         SwipeHandler(
             context = context,
-            rightToLeftSwipeBackgroundColor = Color.RED,
-            rightToLeftSwipeIconResId = android.R.drawable.ic_menu_delete,
-            leftToRightSwipeBackgroundColor = Color.BLUE,
-            leftToRightSwipeIconResId = android.R.drawable.ic_dialog_email,
             onLeftToRightSwipe = { index ->
                 val message = messagesAdapter.messages[index]
                 if (message.isRead) message.markAsUnread() else message.markAsRead()

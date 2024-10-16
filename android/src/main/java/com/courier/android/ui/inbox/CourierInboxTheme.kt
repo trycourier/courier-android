@@ -36,6 +36,8 @@ data class CourierInboxTheme(
             )
         )
     ),
+    internal val readingSwipeActionStyle: CourierStyles.Inbox.ReadingSwipeActionStyle = CourierStyles.Inbox.ReadingSwipeActionStyle(),
+    internal val archivingSwipeActionStyle: CourierStyles.Inbox.ArchivingSwipeActionStyle = CourierStyles.Inbox.ArchivingSwipeActionStyle(),
     @ColorInt private val loadingIndicatorColor: Int? = null,
     internal val unreadIndicatorStyle: CourierStyles.Inbox.UnreadIndicatorStyle = CourierStyles.Inbox.UnreadIndicatorStyle(),
     internal val titleStyle: CourierStyles.Inbox.TextStyle = CourierStyles.Inbox.TextStyle(

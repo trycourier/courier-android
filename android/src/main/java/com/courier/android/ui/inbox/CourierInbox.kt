@@ -18,7 +18,6 @@ import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
 import com.courier.android.modules.addInboxListener
-import com.courier.android.modules.refreshInbox
 import com.courier.android.ui.CourierStyles.Inbox.TabItemStyle
 import com.courier.android.ui.bar.CourierBar
 import com.courier.android.utils.isDarkMode
@@ -232,11 +231,6 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         return if (feed == InboxMessageFeed.FEED) pages[0] else pages[1]
     }
 
-    internal fun refresh() = coroutineScope.launch(Dispatchers.Main) {
-        theme.getBrandIfNeeded()
-        Courier.shared.refreshInbox()
-    }
-
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         inboxListener.remove()
@@ -259,7 +253,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
         override fun onBindViewHolder(holder: PageViewHolder, position: Int) {
-            val page = pages[position]
+            // Empty
         }
 
         override fun getItemCount(): Int = pages.size

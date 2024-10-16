@@ -4,19 +4,49 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
+import android.os.Build
+import android.util.TypedValue
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.courier.android.Courier
+import com.courier.android.R
+import com.courier.android.modules.inboxData
 
 internal class SwipeHandler(
     private val context: Context,
-    private val rightToLeftSwipeBackgroundColor: Int,
-    private val leftToRightSwipeBackgroundColor: Int,
-    private val rightToLeftSwipeIconResId: Int,
-    private val leftToRightSwipeIconResId: Int,
     private val onLeftToRightSwipe: (Int) -> Unit,
     private val onRightToLeftSwipe: (Int) -> Unit,
 ) {
+
+    var readIcon: Int? = null
+    var unreadIcon: Int? = null
+    var archiveIcon: Int? = null
+    var readBackgroundColor: Int? = null
+    var unreadBackgroundColor: Int? = null
+    var archiveBackgroundColor: Int? = null
+
+    private fun getThemeColors(context: Context): Map<String, Int> {
+        val primaryColor = getColorFromAttr(context, android.R.attr.colorPrimary)
+        val greyColor = ContextCompat.getColor(context, android.R.color.darker_gray)
+        val destructiveColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            getColorFromAttr(context, android.R.attr.colorError)
+        } else {
+            ContextCompat.getColor(context, android.R.color.holo_red_light)
+        }
+        return mapOf(
+            "primaryColor" to primaryColor,
+            "greyColor" to greyColor,
+            "destructiveColor" to destructiveColor
+        )
+    }
+
+    // Helper function to get color from a theme attribute
+    private fun getColorFromAttr(context: Context, attr: Int): Int {
+        val typedValue = TypedValue()
+        context.theme.resolveAttribute(attr, typedValue, true)
+        return typedValue.data
+    }
 
     private val itemTouchHelper = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
 
@@ -45,6 +75,21 @@ internal class SwipeHandler(
             }
         }
 
+        private fun getReadAssetForIndex(index: Int): Map<String, Int> {
+            val isRead = Courier.shared.inboxData?.feed?.messages?.get(index)?.isRead
+            return if (isRead == true) {
+                mapOf(
+                    "icon" to (unreadIcon ?: R.drawable.mark_email_unread),
+                    "color" to (unreadBackgroundColor ?: getThemeColors(context)["greyColor"]!!)
+                )
+            } else {
+                mapOf(
+                    "icon" to (readIcon ?: R.drawable.mark_email_read),
+                    "color" to (readBackgroundColor ?: getThemeColors(context)["primaryColor"]!!)
+                )
+            }
+        }
+
         override fun onChildDraw(
             c: Canvas,
             recyclerView: RecyclerView,
@@ -59,8 +104,12 @@ internal class SwipeHandler(
             val paint = Paint()
 
             if (dX > 0) {
+
+                val position = viewHolder.layoutPosition
+                val assets = getReadAssetForIndex(position)
+
                 // Set the background color for right swipe
-                paint.color = leftToRightSwipeBackgroundColor
+                paint.color = assets["color"]!!
 
                 // Draw the background
                 c.drawRect(
@@ -72,7 +121,7 @@ internal class SwipeHandler(
                 )
 
                 // Set the icon for right swipe
-                val icon: Drawable? = ContextCompat.getDrawable(context, leftToRightSwipeIconResId)
+                val icon: Drawable? = ContextCompat.getDrawable(context, assets["icon"]!!)
                 val iconMargin = (itemView.height - (icon?.intrinsicHeight ?: 0)) / 2
                 val iconTop = itemView.top + (itemView.height - (icon?.intrinsicHeight ?: 0)) / 2
                 val iconBottom = iconTop + (icon?.intrinsicHeight ?: 0)
@@ -83,9 +132,10 @@ internal class SwipeHandler(
                 icon?.setBounds(iconLeft, iconTop, iconRight, iconBottom)
                 icon?.draw(c)
 
-            } else if (dX < 0) { // Swiping to the left (e.g., delete)
+            } else if (dX < 0) {
+
                 // Set the background color for left swipe
-                paint.color = rightToLeftSwipeBackgroundColor
+                paint.color = archiveBackgroundColor ?: getThemeColors(context)["destructiveColor"]!!
 
                 // Draw the background
                 c.drawRect(
@@ -97,7 +147,8 @@ internal class SwipeHandler(
                 )
 
                 // Set the icon for left swipe
-                val icon: Drawable? = ContextCompat.getDrawable(context, rightToLeftSwipeIconResId)
+                val res = archiveIcon ?: R.drawable.archive
+                val icon: Drawable? = ContextCompat.getDrawable(context, res)
                 val iconMargin = (itemView.height - (icon?.intrinsicHeight ?: 0)) / 2
                 val iconTop = itemView.top + (itemView.height - (icon?.intrinsicHeight ?: 0)) / 2
                 val iconBottom = iconTop + (icon?.intrinsicHeight ?: 0)
