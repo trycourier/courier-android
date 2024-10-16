@@ -22,6 +22,21 @@ class CourierStyles {
             LINE
         }
 
+        data class TabStyle(
+            val selected: TabItemStyle,
+            val unselected: TabItemStyle
+        )
+
+        data class TabItemStyle(
+            val font: Font,
+            val indicator: TabIndicatorStyle
+        )
+
+        data class TabIndicatorStyle(
+            val font: Font,
+            @ColorInt val color: Int? = null
+        )
+
         data class UnreadIndicatorStyle(
             val indicator: UnreadIndicator = UnreadIndicator.LINE,
             @ColorInt val color: Int? = null

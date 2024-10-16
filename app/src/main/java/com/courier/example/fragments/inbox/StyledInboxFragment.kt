@@ -30,6 +30,39 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
 
         val theme = CourierInboxTheme(
             brandId = Env.COURIER_BRAND_ID,
+            tabIndicatorColor = Theme.getPrimaryColor(requireContext()),
+            tabStyle = CourierStyles.Inbox.TabStyle(
+                selected = CourierStyles.Inbox.TabItemStyle(
+                    font = CourierStyles.Font(
+                        typeface = Theme.getFont(requireContext()),
+                        sizeInSp = 18,
+                        color = Theme.getPrimaryColor(requireContext())
+                    ),
+                    indicator = CourierStyles.Inbox.TabIndicatorStyle(
+                        font = CourierStyles.Font(
+                            typeface = Theme.getFont(requireContext()),
+                            sizeInSp = 14,
+                            color = Theme.getWhiteColor(requireContext())
+                        ),
+                        color = Theme.getPrimaryColor(requireContext())
+                    )
+                ),
+                unselected = CourierStyles.Inbox.TabItemStyle(
+                    font = CourierStyles.Font(
+                        typeface = Theme.getFont(requireContext()),
+                        sizeInSp = 18,
+                        color = Theme.getSubtitleColor(requireContext())
+                    ),
+                    indicator = CourierStyles.Inbox.TabIndicatorStyle(
+                        font = CourierStyles.Font(
+                            typeface = Theme.getFont(requireContext()),
+                            sizeInSp = 14,
+                            color = Theme.getWhiteColor(requireContext())
+                        ),
+                        color = Theme.getSubtitleColor(requireContext())
+                    )
+                )
+            ),
             unreadIndicatorStyle = CourierStyles.Inbox.UnreadIndicatorStyle(
                 indicator = CourierStyles.Inbox.UnreadIndicator.DOT,
                 color = Theme.getPrimaryColor(requireContext())

@@ -3,9 +3,12 @@ package com.courier.android.ui.inbox
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.courier.android.Courier
@@ -16,8 +19,10 @@ import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.refreshInbox
+import com.courier.android.ui.CourierStyles.Inbox.TabItemStyle
 import com.courier.android.ui.bar.CourierBar
 import com.courier.android.utils.isDarkMode
+import com.courier.android.utils.setCourierFont
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.Dispatchers
@@ -25,7 +30,11 @@ import kotlinx.coroutines.launch
 
 open class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
-    internal data class Page(val title: String, val list: InboxListView)
+    internal data class Page(
+        val title: String,
+        var tab: View? = null,
+        val list: InboxListView
+    )
 
     var lightTheme: CourierInboxTheme = CourierInboxTheme.DEFAULT_LIGHT
         set(value) {
@@ -107,15 +116,49 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         setup()
     }
 
-    private fun setupViewPager(viewPager: ViewPager2) {
+    private fun setupViewPager() {
+
         viewPager.adapter = ViewPagerAdapter(pages)
         viewPager.isUserInputEnabled = canSwipePages
+
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+
+            pages[position].tab = LayoutInflater.from(context).inflate(R.layout.courier_inbox_tab_item, null)
+
+            updateTabStyleAt(
+                index = position,
+                style = if (position == 0) theme.tabStyle.selected else theme.tabStyle.unselected
+            )
+
+            tab.customView = pages[position].tab
+
+        }.attach()
+
+        theme.tabIndicatorColor?.let {
+            tabLayout.setSelectedTabIndicatorColor(it)
+        }
+
     }
 
-    private fun setupTabs() {
-        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = pages[position].title
-        }.attach()
+    private fun updateTabStyleAt(index: Int, style: TabItemStyle) {
+        pages[index].tab?.let { tabView ->
+
+            val titleTextView = tabView.findViewById<TextView>(R.id.tab_title)
+            titleTextView.text = pages[index].title
+            titleTextView.setCourierFont(style.font)
+
+            val titleBadgeView = tabView.findViewById<BadgeTextView>(R.id.tab_badge)
+            titleBadgeView.setStyle(style.indicator)
+
+        }
+    }
+
+    private fun updateTabBadgeAt(index: Int, count: Int) {
+        pages[index].tab?.let { tabView ->
+            val titleBadgeView = tabView.findViewById<BadgeTextView>(R.id.tab_badge)
+            titleBadgeView.text = count.toString()
+            titleBadgeView.isVisible = count > 0
+        }
     }
 
     private fun refreshTheme() {
@@ -125,13 +168,28 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
     private fun reloadViews() {
         courierBar.setBrand(theme.brand)
         pages.forEach { it.list.theme = theme }
+        setupViewPager()
     }
 
     private fun setup() = coroutineScope.launch(Dispatchers.Main) {
 
         // Setup UI
-        setupViewPager(viewPager)
-        setupTabs()
+        setupViewPager()
+
+        // Add a TabSelectedListener to change the color when the tab is selected/unselected
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                val position = tab?.position ?: 0
+                updateTabStyleAt(position, theme.tabStyle.selected)
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                val position = tab?.position ?: 0
+                updateTabStyleAt(position, theme.tabStyle.unselected)
+            }
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                // Optional: Handle reselection if needed
+            }
+        })
 
         // Grab the brand
         pages.forEach { it.list.setLoading(false) }
@@ -146,7 +204,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
                 pages.forEach { it.list.setError(e) }
             },
             onUnreadCountChanged = { count ->
-                println("Unread count: $count")  // Example print for unread count
+                updateTabBadgeAt(index = 0, count)
             },
             onFeedChanged = { messageSet ->
                 pages[0].list.setMessageSet(messageSet)
