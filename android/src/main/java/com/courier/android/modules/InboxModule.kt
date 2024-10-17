@@ -15,7 +15,6 @@ import com.courier.android.socket.InboxSocket
 import com.courier.android.socket.InboxSocketManager
 import com.courier.android.ui.inbox.InboxMessageFeed
 import com.courier.android.utils.Logger
-import com.courier.android.utils.error
 import com.courier.android.utils.log
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Deferred
@@ -413,24 +412,12 @@ internal suspend fun Courier.clickMessage(messageId: String) {
         throw CourierException.userNotFound
     }
 
-    // Unwrap message
-    courierInboxData?.allMessages?.firstOrNull { it.messageId == messageId }?.let { message ->
-
-        // Unwrap tracking id
-        message.clickTrackingId?.let { trackingId ->
-
-            try {
-                client?.inbox?.click(
-                    messageId = messageId,
-                    trackingId = trackingId
-                )
-            } catch (e: Exception) {
-                client?.error(e.toString())
-            }
-
-        }
-
-    }
+    courierInboxData?.updateMessage(
+        messageId = messageId,
+        event = InboxSocket.EventType.CLICK,
+        client = client,
+        handler = inboxMutationHandler
+    )
 
 }
 
