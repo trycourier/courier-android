@@ -71,7 +71,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     companion object {
 
         // Core
-        private const val VERSION = "4.5.1"
+        private const val VERSION = "4.5.2"
         var agent: CourierAgent = CourierAgent.NativeAndroid(VERSION)
 
         // Push
