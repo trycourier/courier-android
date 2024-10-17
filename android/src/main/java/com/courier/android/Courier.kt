@@ -10,15 +10,36 @@ import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierAuthenticationListener
 import com.courier.android.models.CourierException
+import com.courier.android.models.CourierInboxData
 import com.courier.android.models.CourierInboxListener
-import com.courier.android.models.Inbox
+import com.courier.android.models.InboxMessage
+import com.courier.android.models.InboxMessageSet
+import com.courier.android.modules.InboxMutationHandler
+import com.courier.android.modules.archiveMessage
+import com.courier.android.modules.clickMessage
 import com.courier.android.modules.linkInbox
+import com.courier.android.modules.notifyError
+import com.courier.android.modules.notifyInboxUpdated
+import com.courier.android.modules.notifyLoading
+import com.courier.android.modules.notifyMessageAdded
+import com.courier.android.modules.notifyMessageRemoved
+import com.courier.android.modules.notifyMessageUpdated
+import com.courier.android.modules.notifyPageAdded
+import com.courier.android.modules.notifyUnreadCountChange
+import com.courier.android.modules.openMessage
+import com.courier.android.modules.readAllInboxMessages
+import com.courier.android.modules.readMessage
 import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.unlinkInbox
+import com.courier.android.modules.unreadMessage
+import com.courier.android.socket.InboxSocket
+import com.courier.android.ui.inbox.InboxMessageFeed
 import com.courier.android.utils.NotificationEventBus
+import com.courier.android.utils.log
 import com.courier.android.utils.warn
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -45,12 +66,12 @@ Android Documentation: https://github.com/trycourier/courier-android
 
  */
 
-class Courier private constructor(val context: Context) : Application.ActivityLifecycleCallbacks {
+class Courier private constructor(val context: Context) : Application.ActivityLifecycleCallbacks, InboxMutationHandler {
 
     companion object {
 
         // Core
-        private const val VERSION = "4.4.1"
+        private const val VERSION = "4.5.0"
         var agent: CourierAgent = CourierAgent.NativeAndroid(VERSION)
 
         // Push
@@ -135,12 +156,12 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
         private set
 
     // Inbox
-    internal var isPaging = false
+    internal var isPagingInbox = false
     internal var paginationLimit = DEFAULT_PAGINATION_LIMIT
-    internal var inbox: Inbox? = null
+    internal var courierInboxData: CourierInboxData? = null
     internal var inboxListeners: MutableList<CourierInboxListener> = mutableListOf()
-    val inboxMessages get() = inbox?.messages
-    internal var dataPipe: Job? = null
+    internal val inboxMutationHandler: InboxMutationHandler by lazy { this }
+    internal var dataPipe: Deferred<CourierInboxData?>? = null
 
     // Firebase
     internal val isFirebaseInitialized get() = FirebaseApp.getApps(context).isNotEmpty()
@@ -169,5 +190,105 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 
     override fun onActivityDestroyed(activity: Activity) {}
+
+    // Inbox Mutations
+    override suspend fun onInboxReload(isRefresh: Boolean) {
+        notifyLoading(isRefresh)
+    }
+
+    override suspend fun onInboxError(error: Exception) {
+        notifyError(error)
+        onUnreadCountChange(0)
+    }
+
+    override suspend fun onInboxUpdated(inbox: CourierInboxData) {
+        this.courierInboxData = inbox
+        notifyInboxUpdated(inbox)
+        onUnreadCountChange(inbox.unreadCount)
+    }
+
+    override suspend fun onInboxReset(inbox: CourierInboxData, error: Throwable) {
+        this.courierInboxData = inbox
+        notifyInboxUpdated(inbox)
+    }
+
+    override suspend fun onUnreadCountChange(count: Int) {
+        notifyUnreadCountChange(count)
+    }
+
+    override suspend fun onInboxKilled() {
+        Courier.shared.client?.log("Inbox killed")
+    }
+
+    override suspend fun onInboxMessageReceived(message: InboxMessage) {
+        val index = 0
+        val feed = if (message.isArchived) InboxMessageFeed.ARCHIVE else InboxMessageFeed.FEED
+        val unreadCount = this.courierInboxData?.addNewMessage(feed, index, message)
+        onInboxItemAdded(index, feed, message)
+        onUnreadCountChange(count = unreadCount ?: 0)
+    }
+
+    override suspend fun onInboxItemAdded(index: Int, feed: InboxMessageFeed, message: InboxMessage) {
+        notifyMessageAdded(feed, index, message)
+    }
+
+    override suspend fun onInboxItemRemove(index: Int, feed: InboxMessageFeed, message: InboxMessage) {
+        notifyMessageRemoved(feed, index, message)
+    }
+
+    override suspend fun onInboxItemUpdated(index: Int, feed: InboxMessageFeed, message: InboxMessage) {
+        notifyMessageUpdated(feed, index, message)
+    }
+
+    override suspend fun onInboxPageFetched(feed: InboxMessageFeed, messageSet: InboxMessageSet) {
+        this.courierInboxData?.addPage(feed, messageSet)
+        notifyPageAdded(feed, messageSet)
+    }
+
+    override suspend fun onInboxEventReceived(event: InboxSocket.MessageEvent) {
+        try {
+            when (event.event) {
+                InboxSocket.EventType.MARK_ALL_READ -> {
+                    Courier.shared.readAllInboxMessages()
+                }
+                InboxSocket.EventType.READ -> {
+                    event.messageId?.let { messageId ->
+                        Courier.shared.readMessage(messageId)
+                    }
+                }
+                InboxSocket.EventType.UNREAD -> {
+                    event.messageId?.let { messageId ->
+                        Courier.shared.unreadMessage(messageId)
+                    }
+                }
+                InboxSocket.EventType.OPENED -> {
+                    event.messageId?.let { messageId ->
+                        Courier.shared.openMessage(messageId)
+                    }
+                }
+                InboxSocket.EventType.UNOPENED -> {
+                    // No action needed for unopened
+                }
+                InboxSocket.EventType.ARCHIVE -> {
+                    event.messageId?.let { messageId ->
+                        Courier.shared.archiveMessage(messageId)
+                    }
+                }
+                InboxSocket.EventType.UNARCHIVE -> {
+                    // No action needed for unarchive
+                }
+                InboxSocket.EventType.CLICK -> {
+                    event.messageId?.let { messageId ->
+                        Courier.shared.clickMessage(messageId)
+                    }
+                }
+                InboxSocket.EventType.UNCLICK -> {
+                    // No action needed for unclick
+                }
+            }
+        } catch (e: Exception) {
+            Courier.shared.client?.log(e.localizedMessage ?: "Error occurred")
+        }
+    }
 
 }

@@ -6,66 +6,100 @@ import com.courier.android.Courier.Companion.DEFAULT_MIN_PAGINATION_LIMIT
 import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierGetInboxMessagesResponse
+import com.courier.android.models.CourierInboxData
 import com.courier.android.models.CourierInboxListener
-import com.courier.android.models.Inbox
 import com.courier.android.models.InboxMessage
-import com.courier.android.models.initialize
+import com.courier.android.models.InboxMessageSet
+import com.courier.android.models.toMessageSet
 import com.courier.android.socket.InboxSocket
 import com.courier.android.socket.InboxSocketManager
+import com.courier.android.ui.inbox.InboxMessageFeed
 import com.courier.android.utils.Logger
-import com.courier.android.utils.error
 import com.courier.android.utils.log
-import com.courier.android.utils.toCourierException
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private val Courier.dataPipeJob
-    get() = coroutineScope.launch(start = CoroutineStart.LAZY, context = Dispatchers.IO) {
+internal interface InboxMutationHandler {
+    suspend fun onInboxReload(isRefresh: Boolean)
+    suspend fun onInboxKilled()
+    suspend fun onInboxReset(inbox: CourierInboxData, error: Throwable)
+    suspend fun onInboxUpdated(inbox: CourierInboxData)
+    suspend fun onInboxItemAdded(index: Int, feed: InboxMessageFeed, message: InboxMessage)
+    suspend fun onInboxItemRemove(index: Int, feed: InboxMessageFeed, message: InboxMessage)
+    suspend fun onInboxItemUpdated(index: Int, feed: InboxMessageFeed, message: InboxMessage)
+    suspend fun onInboxPageFetched(feed: InboxMessageFeed, messageSet: InboxMessageSet)
+    suspend fun onInboxMessageReceived(message: InboxMessage)
+    suspend fun onInboxEventReceived(event: InboxSocket.MessageEvent)
+    suspend fun onInboxError(error: Exception)
+    suspend fun onUnreadCountChange(count: Int)
+}
 
-        try {
-
-            // Get the initial data
-            inbox = loadInbox()
-
-            // Notify Success
-            dataPipe?.invokeOnCompletion {
-                notifyMessagesChanged()
-            }
-
-        } catch (error: Exception) {
-
-            // Disconnect existing socket
-            InboxSocketManager.closeSocket()
-
-            // Notify Error
-            dataPipe?.invokeOnCompletion {
-                notifyError(error)
-            }
-
-        }
-
-    }
-
-private fun Courier.startDataPipe() {
+internal fun Courier.load(isRefresh: Boolean): Deferred<CourierInboxData?> {
     dataPipe?.cancel()
-    dataPipe = dataPipeJob
-    dataPipe?.start()
+    dataPipe = getInboxData(isRefresh)
+    return dataPipe!!
 }
 
-suspend fun Courier.refreshInbox() {
+internal fun Courier.getInboxData(isRefresh: Boolean) = coroutineScope.async(Dispatchers.IO, start = CoroutineStart.LAZY) {
+
     try {
-        inbox = loadInbox(refresh = true)
-        notifyMessagesChanged()
+
+        // Notify the handler that inbox reload is starting
+        inboxMutationHandler.onInboxReload(isRefresh)
+
+        // Fetch initial inbox data (assuming this is a suspend function)
+        val newData = loadInbox(isRefresh)
+
+        // Notify success after data is successfully loaded
+        inboxMutationHandler.onInboxUpdated(newData)
+
+        // Return the fetched data
+        return@async newData
+
     } catch (error: Exception) {
-        notifyError(error)
+
+        // Disconnect existing socket on error
+        InboxSocketManager.closeSocket()
+
+        // Notify the handler about the error
+        inboxMutationHandler.onInboxError(error)
+
+        // Return null in case of an error
+        return@async null
+
     }
+
 }
 
-private suspend fun Courier.loadInbox(refresh: Boolean = false): Inbox = withContext(Dispatchers.IO) {
+suspend fun Courier.refreshInbox(): CourierInboxData? {
+    return load(isRefresh = true).await()
+}
+
+private fun Courier.getFetchParams(isRefresh: Boolean, set: InboxMessageSet?): Pair<Int, String?> {
+
+    // First load
+    if (set == null) {
+        return Pair(paginationLimit, null)
+    }
+
+    // Pull to refresh usually
+    if (isRefresh) {
+        val min = paginationLimit.coerceAtLeast(set.messages.size)
+        val max = min.coerceAtMost(DEFAULT_MAX_PAGINATION_LIMIT)
+        return Pair(max, null)
+    }
+
+    // Pagination from footer
+    return Pair(paginationLimit, set.paginationCursor)
+
+}
+
+private suspend fun Courier.loadInbox(isRefresh: Boolean): CourierInboxData = withContext(Dispatchers.IO) {
 
     // Check if user is signed in
     if (!isUserSignedIn) {
@@ -75,38 +109,37 @@ private suspend fun Courier.loadInbox(refresh: Boolean = false): Inbox = withCon
     // Get all inbox data and start the websocket
     val result = awaitAll(
         async {
-
-            // Determine a safe pagination limit
-            val currentMessageCount = inbox?.messages?.size ?: paginationLimit
-            val minPaginationLimit = currentMessageCount.coerceAtLeast(paginationLimit)
-            val maxRefreshLimit = minPaginationLimit.coerceAtMost(DEFAULT_MAX_PAGINATION_LIMIT)
-            val limit = if (refresh) maxRefreshLimit else paginationLimit
-
-            // Grab the messages
+            val (limit, cursor) = getFetchParams(isRefresh, courierInboxData?.feed)
             return@async client?.inbox?.getMessages(
-                paginationLimit = limit
+                paginationLimit = limit,
+                startCursor = cursor
             )
-
+        },
+        async {
+            val (limit, cursor) = getFetchParams(isRefresh, courierInboxData?.archived)
+            return@async client?.inbox?.getArchivedMessages(
+                paginationLimit = limit,
+                startCursor = cursor
+            )
         },
         async {
             client?.inbox?.getUnreadMessageCount()
-        },
-        async {
-            connectWebSocket()
         }
     )
 
     // Get the values
-    val inboxRes = result[0] as CourierGetInboxMessagesResponse
-    val unreadCount = result[1] as Int
+    val feedRes = result[0] as CourierGetInboxMessagesResponse
+    val archivedRes = result[1] as CourierGetInboxMessagesResponse
+    val unreadCount = result[2] as Int
+
+    // Connect the socket after data is fetched
+    connectWebSocket()
 
     // Return the values
-    return@withContext Inbox(
-        messages = inboxRes.data?.messages?.nodes?.toMutableList(),
-        totalCount = inboxRes.data?.count ?: 0,
+    return@withContext CourierInboxData(
+        feed = feedRes.toMessageSet(),
+        archived = archivedRes.toMessageSet(),
         unreadCount = unreadCount,
-        hasNextPage = inboxRes.data?.messages?.pageInfo?.hasNextPage,
-        startCursor = inboxRes.data?.messages?.pageInfo?.startCursor,
     )
 
 }
@@ -124,33 +157,68 @@ private suspend fun Courier.connectWebSocket() {
 
     // Listen to the events
     socket.receivedMessage = { message ->
-        inbox?.addNewMessage(message)
-        notifyMessagesChanged()
+        coroutineScope.launch(Dispatchers.IO) {
+            inboxMutationHandler.onInboxMessageReceived(message)
+        }
     }
 
     socket.receivedMessageEvent = { messageEvent ->
         when (messageEvent.event) {
             InboxSocket.EventType.MARK_ALL_READ -> {
-                inbox?.readAllMessages()
-                notifyMessagesChanged()
+                coroutineScope.launch(Dispatchers.IO) {
+                    courierInboxData?.readAllLocalMessages(inboxMutationHandler)
+                }
             }
             InboxSocket.EventType.READ -> {
-                messageEvent.messageId?.let { messageId ->
-                    inbox?.readMessage(messageId)
-                    notifyMessagesChanged()
+                coroutineScope.launch(Dispatchers.IO) {
+                    val index = courierInboxData?.feed?.messages?.indexOfFirst { it.messageId == messageEvent.messageId }
+                    if (index != null && index != -1) {
+                        courierInboxData?.read(
+                            index = index,
+                            inboxFeed = InboxMessageFeed.FEED,
+                            handler = inboxMutationHandler
+                        )
+                    }
                 }
             }
             InboxSocket.EventType.UNREAD -> {
-                messageEvent.messageId?.let { messageId ->
-                    inbox?.unreadMessage(messageId)
-                    notifyMessagesChanged()
+                coroutineScope.launch(Dispatchers.IO) {
+                    val index = courierInboxData?.feed?.messages?.indexOfFirst { it.messageId == messageEvent.messageId }
+                    if (index != null && index != -1) {
+                        courierInboxData?.unread(
+                            index = index,
+                            inboxFeed = InboxMessageFeed.FEED,
+                            handler = inboxMutationHandler
+                        )
+                    }
                 }
             }
             InboxSocket.EventType.ARCHIVE -> {
-                client?.log("Message Archived")
+                coroutineScope.launch(Dispatchers.IO) {
+                    val index = courierInboxData?.feed?.messages?.indexOfFirst { it.messageId == messageEvent.messageId }
+                    if (index != null && index != -1) {
+                        courierInboxData?.archive(
+                            index = index,
+                            inboxFeed = InboxMessageFeed.FEED,
+                            handler = inboxMutationHandler
+                        )
+                    }
+                }
             }
             InboxSocket.EventType.OPENED -> {
-                client?.log("Message Opened")
+                coroutineScope.launch(Dispatchers.IO) {
+                    val index = courierInboxData?.feed?.messages?.indexOfFirst { it.messageId == messageEvent.messageId }
+                    if (index != null && index != -1) {
+                        courierInboxData?.open(
+                            index = index,
+                            inboxFeed = InboxMessageFeed.FEED,
+                            handler = inboxMutationHandler
+                        )
+                    }
+                }
+            }
+            else -> {
+                client?.log("Unsupported option")
             }
         }
     }
@@ -173,84 +241,102 @@ internal fun Courier.closeInbox() {
     InboxSocketManager.closeSocket()
 
     // Remove values
-    this.inbox = null
+    this.courierInboxData = null
 
     // Update the listeners
     notifyError(CourierException.userNotFound)
 
 }
 
-suspend fun Courier.fetchNextInboxPage(): List<InboxMessage> {
-
-    if (inbox == null) {
-        throw CourierException.inboxNotInitialized
-    }
-
-    // Determine if we are safe to page
-    if (isPaging || inbox?.hasNextPage == false) {
-        return emptyList()
-    }
-
-    isPaging = true
-
-    var messages = listOf<InboxMessage>()
+suspend fun Courier.fetchNextInboxPage(feed: InboxMessageFeed): InboxMessageSet? {
 
     try {
-        messages = fetchNextPageOfMessages()
-        notifyMessagesChanged()
+
+        fetchNextPageOfMessages(feed)?.let {
+            inboxMutationHandler.onInboxPageFetched(feed, it)
+            return it
+        }
+
     } catch (error: CourierException) {
-        notifyError(error)
+
+        inboxMutationHandler.onInboxError(error)
+
     }
 
-    isPaging = false
-
-    return messages
+    return null
 
 }
 
-private suspend fun Courier.fetchNextPageOfMessages(): List<InboxMessage> {
+private suspend fun Courier.fetchNextPageOfMessages(feed: InboxMessageFeed): InboxMessageSet? {
 
-    // Check for auth
+    val messageSet = if (feed == InboxMessageFeed.FEED) courierInboxData?.feed else courierInboxData?.archived
+
+    // Determine if we are safe to page
+    val canPage = messageSet?.canPaginate == true
+    val paginationCursor = messageSet?.paginationCursor
+    if (isPagingInbox || !canPage || paginationCursor == null) {
+        return null
+    }
+
     if (!Courier.shared.isUserSignedIn) {
         throw CourierException.userNotFound
     }
 
-    if (inbox == null) {
+    if (dataPipe?.isActive == true) {
+        return null
+    }
+
+    if (courierInboxData == null) {
         throw CourierException.inboxNotInitialized
     }
 
+    isPagingInbox = true
+
     // Fetch the next page
-    val inboxData = client?.inbox?.getMessages(
-        paginationLimit = paginationLimit,
-        startCursor = inbox?.startCursor
-    )
+    val res = when (feed) {
+        InboxMessageFeed.FEED -> {
+            client?.inbox?.getMessages(
+                paginationLimit = paginationLimit,
+                startCursor = paginationCursor
+            )
+        }
+        InboxMessageFeed.ARCHIVE -> {
+            client?.inbox?.getArchivedMessages(
+                paginationLimit = paginationLimit,
+                startCursor = paginationCursor
+            )
+        }
+    }
 
-    val messages = inboxData?.data?.messages?.nodes.orEmpty()
-    val startCursor = inboxData?.data?.messages?.pageInfo?.startCursor
-    val hasNextPage = inboxData?.data?.messages?.pageInfo?.hasNextPage
+    isPagingInbox = false
 
-    // Add the page of messages
-    inbox?.addPage(
-        messages = messages,
-        startCursor = startCursor,
-        hasNextPage = hasNextPage,
-    )
-
-    // Tell the listeners
-    notifyMessagesChanged()
-
-    // Return the new messages
-    return messages
+    return res?.toMessageSet()
 
 }
 
-fun Courier.addInboxListener(onInitialLoad: (() -> Unit)? = null, onError: ((Exception) -> Unit)? = null, onMessagesChanged: ((messages: List<InboxMessage>, unreadMessageCount: Int, totalMessageCount: Int, canPaginate: Boolean) -> Unit)? = null): CourierInboxListener {
+fun Courier.addInboxListener(
+    onLoading: ((isRefresh: Boolean) -> Unit)? = null,
+    onError: ((Throwable) -> Unit)? = null,
+    onUnreadCountChanged: ((Int) -> Unit)? = null,
+    onFeedChanged: ((InboxMessageSet) -> Unit)? = null,
+    onArchiveChanged: ((InboxMessageSet) -> Unit)? = null,
+    onPageAdded: ((InboxMessageFeed, InboxMessageSet) -> Unit)? = null,
+    onMessageChanged: ((InboxMessageFeed, Int, InboxMessage) -> Unit)? = null,
+    onMessageAdded: ((InboxMessageFeed, Int, InboxMessage) -> Unit)? = null,
+    onMessageRemoved: ((InboxMessageFeed, Int, InboxMessage) -> Unit)? = null
+): CourierInboxListener {
 
     // Create a new inbox listener
     val listener = CourierInboxListener(
-        onInitialLoad = onInitialLoad,
+        onLoading = onLoading,
         onError = onError,
-        onMessagesChanged = onMessagesChanged
+        onUnreadCountChanged = onUnreadCountChanged,
+        onFeedChanged = onFeedChanged,
+        onArchiveChanged = onArchiveChanged,
+        onPageAdded = onPageAdded,
+        onMessageChanged = onMessageChanged,
+        onMessageAdded = onMessageAdded,
+        onMessageRemoved = onMessageRemoved
     )
 
     // Keep track of listener
@@ -267,18 +353,15 @@ fun Courier.addInboxListener(onInitialLoad: (() -> Unit)? = null, onError: ((Exc
     listener.initialize()
 
     // Start the data pipes
-    if (dataPipe?.isCompleted == true) {
-        listener.notifyMessagesChanged(inbox)
-        return listener
+    courierInboxData?.let { data ->
+        if (dataPipe?.isCompleted == true) {
+            listener.onLoad(data)
+            return listener
+        }
     }
 
-    // Return if the pipe is starting
-    if (dataPipe?.isActive == true) {
-        return listener
-    }
-
-    // Start the data pipes
-    startDataPipe()
+    // Start the data pipe
+    load(isRefresh = false).start()
 
     return listener
 
@@ -317,28 +400,9 @@ suspend fun Courier.readAllInboxMessages() {
         throw CourierException.userNotFound
     }
 
-    if (inbox == null) {
-        return
-    }
-
-    // Read the messages
-    val original = inbox!!.readAllMessages()
-
-    // Notify
-    notifyMessagesChanged()
-
-    // Perform datasource change in background
-    coroutineScope.launch(Dispatchers.IO) {
-
-        try {
-            client?.inbox?.readAll()
-        } catch (e: Exception) {
-            inbox?.resetReadAll(original)
-            notifyMessagesChanged()
-            notifyError(e)
-        }
-
-    }
+    courierInboxData?.readAll(
+        handler = inboxMutationHandler
+    )
 
 }
 
@@ -348,24 +412,12 @@ internal suspend fun Courier.clickMessage(messageId: String) {
         throw CourierException.userNotFound
     }
 
-    // Unwrap message
-    inbox?.messages?.firstOrNull { it.messageId == messageId }?.let { message ->
-
-        // Unwrap tracking id
-        message.clickTrackingId?.let { trackingId ->
-
-            try {
-                client?.inbox?.click(
-                    messageId = messageId,
-                    trackingId = trackingId
-                )
-            } catch (e: Exception) {
-                client?.error(e.toString())
-            }
-
-        }
-
-    }
+    courierInboxData?.updateMessage(
+        messageId = messageId,
+        event = InboxSocket.EventType.CLICK,
+        client = client,
+        handler = inboxMutationHandler
+    )
 
 }
 
@@ -375,28 +427,12 @@ internal suspend fun Courier.readMessage(messageId: String) {
         throw CourierException.userNotFound
     }
 
-    // Mark the message as read instantly
-    val original = inbox?.readMessage(messageId)
-
-    // Notify
-    notifyMessagesChanged()
-
-    try {
-
-        client?.inbox?.read(
-            messageId = messageId,
-        )
-
-    } catch (e: Exception) {
-
-        original?.let {
-            inbox?.resetUpdate(it)
-        }
-
-        notifyMessagesChanged()
-        notifyError(e)
-
-    }
+    courierInboxData?.updateMessage(
+        messageId = messageId,
+        event = InboxSocket.EventType.READ,
+        client = client,
+        handler = inboxMutationHandler
+    )
 
 }
 
@@ -406,39 +442,11 @@ internal suspend fun Courier.unreadMessage(messageId: String) {
         throw CourierException.userNotFound
     }
 
-    // Mark the message as read instantly
-    val original = inbox?.unreadMessage(messageId)
-
-    // Notify
-    notifyMessagesChanged()
-
-    try {
-
-        client?.inbox?.unread(
-            messageId = messageId,
-        )
-
-    } catch (e: Exception) {
-
-        original?.let {
-            inbox?.resetUpdate(it)
-        }
-
-        notifyMessagesChanged()
-        notifyError(e)
-
-    }
-
-}
-
-internal suspend fun Courier.openMessage(messageId: String) {
-
-    if (!isUserSignedIn) {
-        throw CourierException.userNotFound
-    }
-
-    client?.inbox?.open(
+    courierInboxData?.updateMessage(
         messageId = messageId,
+        event = InboxSocket.EventType.UNREAD,
+        client = client,
+        handler = inboxMutationHandler
     )
 
 }
@@ -449,8 +457,26 @@ internal suspend fun Courier.archiveMessage(messageId: String) {
         throw CourierException.userNotFound
     }
 
-    client?.inbox?.archive(
+    courierInboxData?.updateMessage(
         messageId = messageId,
+        event = InboxSocket.EventType.ARCHIVE,
+        client = client,
+        handler = inboxMutationHandler
+    )
+
+}
+
+internal suspend fun Courier.openMessage(messageId: String) {
+
+    if (!isUserSignedIn) {
+        throw CourierException.userNotFound
+    }
+
+    courierInboxData?.updateMessage(
+        messageId = messageId,
+        event = InboxSocket.EventType.OPENED,
+        client = client,
+        handler = inboxMutationHandler
     )
 
 }
@@ -476,33 +502,6 @@ internal fun Courier.unlinkInbox() {
     }
 }
 
-private fun Courier.notifyLoading() = coroutineScope.launch(Dispatchers.Main) {
-    inboxListeners.forEach {
-        it.onInitialLoad?.invoke()
-    }
-}
-
-private fun Courier.notifyMessagesChanged() = coroutineScope.launch(Dispatchers.Main) {
-    inboxListeners.forEach {
-        it.notifyMessagesChanged(inbox)
-    }
-}
-
-private fun Courier.notifyError(error: Exception) = coroutineScope.launch(Dispatchers.Main) {
-    inboxListeners.forEach {
-        it.onError?.invoke(error.toCourierException)
-    }
-}
-
-private fun CourierInboxListener.notifyMessagesChanged(inbox: Inbox?) = coroutineScope.launch(Dispatchers.Main) {
-    onMessagesChanged?.invoke(
-        inbox?.messages ?: emptyList(),
-        inbox?.unreadCount ?: 0,
-        inbox?.totalCount ?: 0,
-        inbox?.hasNextPage ?: false
-    )
-}
-
 /**
  * Getters
  */
@@ -514,14 +513,17 @@ var Courier.inboxPaginationLimit
         paginationLimit = min.coerceAtLeast(DEFAULT_MIN_PAGINATION_LIMIT)
     }
 
+val Courier.inboxData
+    get() = courierInboxData
+
 /**
  * Traditional Callbacks
  */
 
-fun Courier.fetchNextInboxPage(onSuccess: ((List<InboxMessage>) -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = coroutineScope.launch(Dispatchers.Main) {
+fun Courier.fetchNextInboxPage(feed: InboxMessageFeed, onSuccess: ((InboxMessageSet?) -> Unit)? = null, onFailure: ((Exception) -> Unit)? = null) = coroutineScope.launch(Dispatchers.Main) {
     try {
-        val messages = fetchNextInboxPage()
-        onSuccess?.invoke(messages)
+        val set = fetchNextInboxPage(feed)
+        onSuccess?.invoke(set)
     } catch (e: Exception) {
         onFailure?.invoke(e)
     }

@@ -52,8 +52,20 @@ class InboxSocket(private val options: CourierClient.Options) : CourierSocket(ur
         @SerializedName("opened")
         OPENED("opened"),
 
+        @SerializedName("unopened")
+        UNOPENED("unopened"),
+
         @SerializedName("archive")
-        ARCHIVE("archive")
+        ARCHIVE("archive"),
+
+        @SerializedName("unarchive")
+        UNARCHIVE("unarchive"),
+
+        @SerializedName("click")
+        CLICK("click"),
+
+        @SerializedName("unclick")
+        UNCLICK("unclick")
     }
 
     data class SocketPayload(val type: PayloadType, val event: EventType?)

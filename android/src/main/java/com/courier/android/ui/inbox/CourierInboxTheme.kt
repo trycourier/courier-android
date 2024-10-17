@@ -11,6 +11,33 @@ import com.courier.android.utils.error
 
 data class CourierInboxTheme(
     val brandId: String? = null,
+    @ColorInt internal val tabIndicatorColor: Int? = null,
+    internal val tabStyle: CourierStyles.Inbox.TabStyle = CourierStyles.Inbox.TabStyle(
+        selected = CourierStyles.Inbox.TabItemStyle(
+            font = CourierStyles.Font(
+                sizeInSp = 18
+            ),
+            indicator = CourierStyles.Inbox.TabIndicatorStyle(
+                font = CourierStyles.Font(
+                    sizeInSp = 14
+                ),
+                color = null
+            )
+        ),
+        unselected = CourierStyles.Inbox.TabItemStyle(
+            font = CourierStyles.Font(
+                sizeInSp = 18
+            ),
+            indicator = CourierStyles.Inbox.TabIndicatorStyle(
+                font = CourierStyles.Font(
+                    sizeInSp = 14
+                ),
+                color = null
+            )
+        )
+    ),
+    internal val readingSwipeActionStyle: CourierStyles.Inbox.ReadingSwipeActionStyle = CourierStyles.Inbox.ReadingSwipeActionStyle(),
+    internal val archivingSwipeActionStyle: CourierStyles.Inbox.ArchivingSwipeActionStyle = CourierStyles.Inbox.ArchivingSwipeActionStyle(),
     @ColorInt private val loadingIndicatorColor: Int? = null,
     internal val unreadIndicatorStyle: CourierStyles.Inbox.UnreadIndicatorStyle = CourierStyles.Inbox.UnreadIndicatorStyle(),
     internal val titleStyle: CourierStyles.Inbox.TextStyle = CourierStyles.Inbox.TextStyle(

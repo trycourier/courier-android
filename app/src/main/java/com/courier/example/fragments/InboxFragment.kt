@@ -1,6 +1,9 @@
 package com.courier.example.fragments
 
+import android.content.Context
 import android.os.Bundle
+import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
@@ -66,4 +69,23 @@ class InboxFragment: Fragment(R.layout.fragment_inbox) {
 
     }
 
+}
+
+class NoSwipeViewPager @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null
+) : ViewPager(context, attrs) {
+
+    // Flag to enable or disable swiping
+    var isPagingEnabled: Boolean = false
+
+    override fun onTouchEvent(ev: MotionEvent?): Boolean {
+        // Disable swipe if paging is disabled
+        return isPagingEnabled && super.onTouchEvent(ev)
+    }
+
+    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+        // Disable swipe if paging is disabled
+        return isPagingEnabled && super.onInterceptTouchEvent(ev)
+    }
 }

@@ -14,15 +14,16 @@ import com.courier.android.models.markAsClicked
 import com.courier.android.models.markAsOpened
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
-import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.archiveMessage
 import com.courier.android.modules.clickMessage
 import com.courier.android.modules.fetchNextInboxPage
+import com.courier.android.modules.inboxData
 import com.courier.android.modules.inboxPaginationLimit
 import com.courier.android.modules.openMessage
 import com.courier.android.modules.readMessage
 import com.courier.android.modules.unreadMessage
+import com.courier.android.ui.inbox.InboxMessageFeed
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -32,7 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class InboxTests {
+class CourierInboxDataTests {
 
     private val context get() = InstrumentationRegistry.getInstrumentation().targetContext
 
@@ -142,13 +143,17 @@ class InboxTests {
         var hold1 = true
         var hold2 = true
 
-        val listener1 = Courier.shared.addInboxListener { _, _, _, _ ->
-            hold1 = false
-        }
+        val listener1 = Courier.shared.addInboxListener(
+            onFeedChanged = {
+                hold1 = false
+            }
+        )
 
-        val listener2 = Courier.shared.addInboxListener { _, _, _, _ ->
-            hold2 = false
-        }
+        val listener2 = Courier.shared.addInboxListener(
+            onFeedChanged = {
+                hold2 = false
+            }
+        )
 
         while (hold1 && hold2) {
             // Wait for registration
@@ -175,24 +180,24 @@ class InboxTests {
 
         val sendCount = 5
 
-        val listener = Courier.shared.addInboxListener { _, _, _, canPaginate ->
+        val listener = Courier.shared.addInboxListener(
+            onFeedChanged = { set ->
+                Courier.coroutineScope.launch {
 
-            Courier.coroutineScope.launch {
+                    if (set.canPaginate) {
+                        Courier.shared.fetchNextInboxPage(InboxMessageFeed.FEED)
+                    }
 
-                if (canPaginate) {
-                    Courier.shared.fetchNextInboxPage()
                 }
-
             }
-
-        }
+        )
 
         // Send some messages to the user
         for (i in 1..sendCount) {
             sendMessage()
         }
 
-        val messages = Courier.shared.inboxMessages
+        val messages = Courier.shared.inboxData?.feed?.messages
 
         // Hold until the listener paginates to fetch the messages
         while (messages?.size != sendCount) {

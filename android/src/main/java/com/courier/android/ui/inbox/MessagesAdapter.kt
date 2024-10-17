@@ -22,32 +22,27 @@ import com.google.android.flexbox.FlexboxLayout
 
 internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    private val container: ConstraintLayout
-    private val titleTextView: TextView
-    private val timeTextView: TextView
-    private val subtitleTextView: TextView
-    private val indicator: View
-    private val dot: CourierCircleView
-    private val dotContainer: FrameLayout
-    private val buttonContainer: FlexboxLayout
+    private val container: ConstraintLayout = itemView.findViewById(R.id.container)
+    private val titleTextView: TextView = itemView.findViewById(R.id.titleTextView)
+    private val timeTextView: TextView = itemView.findViewById(R.id.timeTextView)
+    private val subtitleTextView: TextView = itemView.findViewById(R.id.subtitleTextView)
+    private val indicator: View = itemView.findViewById(R.id.indicator)
+    private val dot: CourierCircleView = itemView.findViewById(R.id.dot)
+    private val dotContainer: FrameLayout = itemView.findViewById(R.id.dotContainer)
+    private val buttonContainer: FlexboxLayout = itemView.findViewById(R.id.buttonContainer)
 
     private var message: InboxMessage? = null
 
     private var onActionClick: ((InboxAction, InboxMessage) -> Unit)? = null
     private var onMessageClick: ((InboxMessage) -> Unit)? = null
 
-    init {
-        container = itemView.findViewById(R.id.container)
-        titleTextView = itemView.findViewById(R.id.titleTextView)
-        timeTextView = itemView.findViewById(R.id.timeTextView)
-        subtitleTextView = itemView.findViewById(R.id.subtitleTextView)
-        indicator = itemView.findViewById(R.id.indicator)
-        dot = itemView.findViewById(R.id.dot)
-        dotContainer = itemView.findViewById(R.id.dotContainer)
-        buttonContainer = itemView.findViewById(R.id.buttonContainer)
-    }
-
     private fun setIndicator(theme: CourierInboxTheme, message: InboxMessage) {
+
+        if (message.isArchived) {
+            indicator.isVisible = false
+            dot.isVisible = false
+            return
+        }
 
         when (theme.unreadIndicatorStyle.indicator) {
             CourierStyles.Inbox.UnreadIndicator.DOT -> {
@@ -109,7 +104,7 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
             dot.setCircleColor(it)
         }
 
-        if (message.isRead) {
+        if (message.isRead || message.isArchived) {
 
             val fallbackColor = ContextCompat.getColor(itemView.context, android.R.color.darker_gray)
 
@@ -139,7 +134,7 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
 
 internal class MessagesAdapter(
     internal var theme: CourierInboxTheme,
-    internal var messages: List<InboxMessage>,
+    internal var messages: MutableList<InboxMessage>,
     private val onMessageClick: (InboxMessage, Int) -> Unit,
     private val onActionClick: (InboxAction, InboxMessage, Int) -> Unit
 ) : RecyclerView.Adapter<MessageItemViewHolder>() {

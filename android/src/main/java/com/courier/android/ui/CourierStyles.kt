@@ -2,6 +2,7 @@ package com.courier.android.ui
 
 import android.graphics.Typeface
 import androidx.annotation.ColorInt
+import androidx.annotation.DrawableRes
 
 class CourierStyles {
 
@@ -21,6 +22,35 @@ class CourierStyles {
             DOT,
             LINE
         }
+
+        data class TabStyle(
+            val selected: TabItemStyle,
+            val unselected: TabItemStyle
+        )
+
+        data class TabItemStyle(
+            val font: Font,
+            val indicator: TabIndicatorStyle
+        )
+
+        data class TabIndicatorStyle(
+            val font: Font,
+            @ColorInt val color: Int? = null
+        )
+
+        data class ReadingSwipeActionStyle(
+            val read: SwipeActionStyle = SwipeActionStyle(),
+            val unread: SwipeActionStyle = SwipeActionStyle(),
+        )
+
+        data class ArchivingSwipeActionStyle(
+            val archive: SwipeActionStyle = SwipeActionStyle(),
+        )
+
+        data class SwipeActionStyle(
+            @DrawableRes val icon: Int? = null,
+            @ColorInt val color: Int? = null
+        )
 
         data class UnreadIndicatorStyle(
             val indicator: UnreadIndicator = UnreadIndicator.LINE,

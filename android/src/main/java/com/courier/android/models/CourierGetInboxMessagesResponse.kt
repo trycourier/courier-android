@@ -4,6 +4,15 @@ data class CourierGetInboxMessagesResponse(
     val data: GetInboxMessagesData?
 )
 
+fun CourierGetInboxMessagesResponse.toMessageSet(): InboxMessageSet {
+    return InboxMessageSet(
+        messages = data?.messages?.nodes.orEmpty().toMutableList(),
+        totalCount = data?.count ?: 0,
+        canPaginate = data?.messages?.pageInfo?.hasNextPage ?: false,
+        paginationCursor = data?.messages?.pageInfo?.startCursor
+    )
+}
+
 data class GetInboxMessagesData(
     val count: Int? = 0,
     val messages: GetInboxMessagesNodes?

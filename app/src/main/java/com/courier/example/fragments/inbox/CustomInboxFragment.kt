@@ -17,10 +17,11 @@ import com.courier.android.Courier
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
-import com.courier.android.models.remove
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.fetchNextInboxPage
+import com.courier.android.modules.inboxData
 import com.courier.android.modules.refreshInbox
+import com.courier.android.ui.inbox.InboxMessageFeed
 import com.courier.example.R
 import com.courier.example.toJson
 
@@ -57,7 +58,7 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
 
         // Setup the listener
         inboxListener = Courier.shared.addInboxListener(
-            onInitialLoad = {
+            onLoading = {
 
                 stateTextView.isVisible = false
 
@@ -75,14 +76,14 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
                 refreshAdapters()
 
             },
-            onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
+            onFeedChanged = { set ->
 
-                stateTextView.isVisible = messages.isEmpty()
+                stateTextView.isVisible = set.messages.isEmpty()
                 stateTextView.text = "No messages found"
 
                 refreshAdapters(
-                    showMessages = messages.isNotEmpty(),
-                    showLoading = canPaginate
+                    showMessages = set.messages.isNotEmpty(),
+                    showLoading = set.canPaginate
                 )
 
             }
@@ -109,18 +110,12 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
  */
 
 class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-    val textView: TextView
-
-    init {
-        textView = itemView.findViewById(R.id.textView)
-    }
-
+    val textView: TextView = itemView.findViewById(R.id.textView)
 }
 
 class MessagesAdapter : RecyclerView.Adapter<MessageItemViewHolder>() {
 
-    private val messages get() = Courier.shared.inboxMessages.orEmpty()
+    private val messages get() = Courier.shared.inboxData?.feed?.messages.orEmpty()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageItemViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.message_item, parent, false)
@@ -157,6 +152,7 @@ class LoadingAdapter : RecyclerView.Adapter<LoadingItemViewHolder>() {
 
     override fun onBindViewHolder(holder: LoadingItemViewHolder, position: Int) {
         Courier.shared.fetchNextInboxPage(
+            feed = InboxMessageFeed.FEED,
             onSuccess = { newMessages ->
                 print(newMessages)
             },
