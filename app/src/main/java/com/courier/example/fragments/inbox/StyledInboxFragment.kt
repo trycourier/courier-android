@@ -63,6 +63,14 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
                     )
                 )
             ),
+            readingSwipeActionStyle = CourierStyles.Inbox.ReadingSwipeActionStyle(
+                read = CourierStyles.Inbox.SwipeActionStyle(
+                    color = Theme.getPrimaryColor(requireContext())
+                ),
+                unread = CourierStyles.Inbox.SwipeActionStyle(
+                    color = Theme.getPrimaryLightColor(requireContext())
+                )
+            ),
             unreadIndicatorStyle = CourierStyles.Inbox.UnreadIndicatorStyle(
                 indicator = CourierStyles.Inbox.UnreadIndicator.DOT,
                 color = Theme.getPrimaryColor(requireContext())

@@ -20,6 +20,8 @@ class CourierInboxData(
     var unreadCount: Int = unreadCount
         internal set
 
+    val allMessages get() = this.feed.messages + this.archived.messages
+
     private fun copy(): CourierInboxData {
         return CourierInboxData(
             feed = this.feed,

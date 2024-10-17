@@ -18,10 +18,12 @@ import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.archiveMessage
 import com.courier.android.modules.clickMessage
 import com.courier.android.modules.fetchNextInboxPage
+import com.courier.android.modules.inboxData
 import com.courier.android.modules.inboxPaginationLimit
 import com.courier.android.modules.openMessage
 import com.courier.android.modules.readMessage
 import com.courier.android.modules.unreadMessage
+import com.courier.android.ui.inbox.InboxMessageFeed
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -183,7 +185,7 @@ class CourierInboxDataTests {
                 Courier.coroutineScope.launch {
 
                     if (set.canPaginate) {
-                        Courier.shared.fetchNextInboxPage()
+                        Courier.shared.fetchNextInboxPage(InboxMessageFeed.FEED)
                     }
 
                 }
@@ -195,9 +197,7 @@ class CourierInboxDataTests {
             sendMessage()
         }
 
-//        val messages = Courier.shared.inboxMessages // TODO
-
-        val messages = emptyList<InboxMessage>()
+        val messages = Courier.shared.inboxData?.feed?.messages
 
         // Hold until the listener paginates to fetch the messages
         while (messages?.size != sendCount) {
