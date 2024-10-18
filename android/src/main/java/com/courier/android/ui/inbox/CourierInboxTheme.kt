@@ -102,6 +102,32 @@ data class CourierInboxTheme(
     }
 
     @ColorInt
+    internal fun getTabLayoutIndicatorColor(): Int? {
+
+        if (tabIndicatorColor == null) {
+            val value = brand?.settings?.colors?.primary
+            return try { Color.parseColor(value) } catch (e: Exception) { null }
+        }
+
+        return tabIndicatorColor
+
+    }
+
+    @ColorInt
+    internal fun getBadgeColor(isSelected: Boolean): Int? {
+
+        val style = if (isSelected) tabStyle.selected else tabStyle.unselected
+
+        if (style.indicator.color == null) {
+            val value = brand?.settings?.colors?.primary
+            return try { Color.parseColor(value) } catch (e: Exception) { null }
+        }
+
+        return style.indicator.color
+
+    }
+
+    @ColorInt
     internal fun getLoadingColor(): Int? {
 
         if (loadingIndicatorColor == null) {

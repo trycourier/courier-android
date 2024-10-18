@@ -9,8 +9,8 @@ open class CourierApiClient {
     companion object {
         const val BASE_REST = "https://api.courier.com"
         const val BASE_GRAPH_QL = "https://api.courier.com/client/q"
-        const val INBOX_GRAPH_QL = "https://fxw3r7gdm9.execute-api.us-east-1.amazonaws.com/production/q"
-        const val INBOX_WEBSOCKET = "wss://1x60p1o3h8.execute-api.us-east-1.amazonaws.com/production"
+        const val INBOX_GRAPH_QL = "https://inbox.courier.com/q"
+        const val INBOX_WEBSOCKET = "wss://realtime.courier.com"
     }
 
     val gson = Gson()

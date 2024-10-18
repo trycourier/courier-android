@@ -18,7 +18,6 @@ import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
 import com.courier.android.modules.addInboxListener
-import com.courier.android.ui.CourierStyles.Inbox.TabItemStyle
 import com.courier.android.ui.bar.CourierBar
 import com.courier.android.utils.isDarkMode
 import com.courier.android.utils.setCourierFont
@@ -85,7 +84,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     private fun makeListView(feed: InboxMessageFeed, context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0): InboxListView {
-        return InboxListView(context, attrs, defStyleAttr, feed).apply {
+        return InboxListView(context, attrs, defStyleAttr, feed, inbox = this).apply {
             setOnClickMessageListener { message, index ->
                 onClickInboxMessageAtIndex?.invoke(message, index)
             }
@@ -126,28 +125,28 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
             updateTabStyleAt(
                 index = position,
-                style = if (position == 0) theme.tabStyle.selected else theme.tabStyle.unselected
+                isSelected = position == 0
             )
 
             tab.customView = pages[position].tab
 
         }.attach()
 
-        theme.tabIndicatorColor?.let {
+        theme.getTabLayoutIndicatorColor()?.let {
             tabLayout.setSelectedTabIndicatorColor(it)
         }
 
     }
 
-    private fun updateTabStyleAt(index: Int, style: TabItemStyle) {
+    private fun updateTabStyleAt(index: Int, isSelected: Boolean) {
         pages[index].tab?.let { tabView ->
 
             val titleTextView = tabView.findViewById<TextView>(R.id.tab_title)
             titleTextView.text = pages[index].title
-            titleTextView.setCourierFont(style.font)
+            titleTextView.setCourierFont(if (isSelected) theme.tabStyle.selected.font else theme.tabStyle.unselected.font)
 
             val titleBadgeView = tabView.findViewById<BadgeTextView>(R.id.tab_badge)
-            titleBadgeView.setStyle(style.indicator)
+            titleBadgeView.setTheme(theme, isSelected)
 
         }
     }
@@ -179,11 +178,11 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val position = tab?.position ?: 0
-                updateTabStyleAt(position, theme.tabStyle.selected)
+                updateTabStyleAt(position, true)
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {
                 val position = tab?.position ?: 0
-                updateTabStyleAt(position, theme.tabStyle.unselected)
+                updateTabStyleAt(position, false)
             }
             override fun onTabReselected(tab: TabLayout.Tab?) {
                 // Optional: Handle reselection if needed
@@ -192,7 +191,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
         // Grab the brand
         pages.forEach { it.list.setLoading(false) }
-        theme.getBrandIfNeeded()
+        refreshBrand()
 
         // Setup the listener
         inboxListener = Courier.shared.addInboxListener(
@@ -225,6 +224,11 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
             }
         )
 
+    }
+
+    internal suspend fun refreshBrand() {
+        theme.getBrandIfNeeded()
+        pages.forEach { it.list.theme = theme }
     }
 
     private fun getPage(feed: InboxMessageFeed): Page {

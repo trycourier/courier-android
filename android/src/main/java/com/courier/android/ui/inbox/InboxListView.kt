@@ -41,7 +41,8 @@ internal class InboxListView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    private val feed: InboxMessageFeed = InboxMessageFeed.FEED
+    private val feed: InboxMessageFeed = InboxMessageFeed.FEED,
+    private val inbox: CourierInbox
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private enum class State(var title: String? = null) {
@@ -337,7 +338,7 @@ internal class InboxListView @JvmOverloads constructor(
     }
 
     private fun refresh() = coroutineScope.launch(Dispatchers.Main) {
-        theme.getBrandIfNeeded()
+        inbox.refreshBrand()
         Courier.shared.refreshInbox()
         refreshLayout.isRefreshing = false
     }

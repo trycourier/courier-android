@@ -6,7 +6,6 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
-import com.courier.android.ui.CourierStyles
 import com.courier.android.utils.setCourierFont
 
 class BadgeTextView @JvmOverloads constructor(
@@ -35,9 +34,10 @@ class BadgeTextView @JvmOverloads constructor(
         return typedValue.data
     }
 
-    fun setStyle(style: CourierStyles.Inbox.TabIndicatorStyle) {
-        background = getRoundedBackground(style.color ?: getPrimaryColor())
-        setCourierFont(style.font)
+    fun setTheme(theme: CourierInboxTheme, isSelected: Boolean) {
+        background = getRoundedBackground(theme.getBadgeColor(isSelected) ?: getPrimaryColor())
+        val font = if (isSelected) theme.tabStyle.selected.indicator.font else theme.tabStyle.unselected.indicator.font
+        setCourierFont(font)
         invalidate()
     }
 
