@@ -266,15 +266,37 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
 
         // Setup the listener
         inboxListener = Courier.shared.addInboxListener(
-            onInitialLoad = {
-                ..
+            onLoading = { isRefresh ->
+                println("Loading... Refresh: $isRefresh")
             },
             onError = { error ->
-                ..
+                println("Error occurred: ${error.message}")
             },
-            onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
-                messagesAdapter.messages = messages
-                messagesAdapter.notifyDataSetChanged()
+            onUnreadCountChanged = { unreadCount ->
+                println("Unread count changed: $unreadCount")
+            },
+            onFeedChanged = { feed ->
+                messagesAdapter.addMessages(feed.messages)
+                recyclerView.NotifyDataSetChanged()
+            },
+            onArchiveChanged = { archive ->
+                println("Archive changed: $archive")
+            },
+            onPageAdded = { feed, messageSet ->
+                messagesAdapter.addMessages(feed.messages)
+                recyclerView.NotifyDataSetChanged()
+            },
+            onMessageChanged = { feed, index, message ->
+                messagesAdapter.updateMessageAt(index, message)
+                recyclerView.NotifyDataSetChanged()
+            },
+            onMessageAdded = { feed, index, message ->
+                messagesAdapter.addMessageAt(index, message)
+                recyclerView.NotifyDataSetChanged()
+            },
+            onMessageRemoved = { feed, index, message ->
+                messagesAdapter.removeMessageAt(index, message)
+                recyclerView.NotifyDataSetChanged()
             }
         )
 
