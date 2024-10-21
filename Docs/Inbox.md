@@ -75,6 +75,46 @@ val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
 
 val theme = CourierInboxTheme(
     loadingIndicatorColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
+    tabIndicatorColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
+    tabStyle = CourierStyles.Inbox.TabStyle(
+        selected = CourierStyles.Inbox.TabItemStyle(
+            font = CourierStyles.Font(
+                sizeInSp = 18,
+                color = ContextCompat.getColor(requireContext(), R.color.courier_purple)
+            ),
+            indicator = CourierStyles.Inbox.TabIndicatorStyle(
+                font = CourierStyles.Font(
+                    typeface = font,
+                    sizeInSp = 14,
+                    color = ContextCompat.getColor(requireContext(), R.color.white)
+                ),
+                color = ContextCompat.getColor(requireContext(), R.color.courier_purple)
+            )
+        ),
+        unselected = CourierStyles.Inbox.TabItemStyle(
+            font = CourierStyles.Font(
+                typeface = font,
+                sizeInSp = 18,
+                color = ContextCompat.getColor(requireContext(), android.R.color.black),
+            ),
+            indicator = CourierStyles.Inbox.TabIndicatorStyle(
+                font = CourierStyles.Font(
+                    typeface = font,
+                    sizeInSp = 14,
+                    color = Theme.getWhiteColor(requireContext())
+                ),
+                color = ContextCompat.getColor(requireContext(), android.R.color.black),
+            )
+        )
+    ),
+    readingSwipeActionStyle = CourierStyles.Inbox.ReadingSwipeActionStyle(
+        read = CourierStyles.Inbox.SwipeActionStyle(
+            color = ContextCompat.getColor(requireContext(), R.color.courier_purple)
+        ),
+        unread = CourierStyles.Inbox.SwipeActionStyle(
+            color = ContextCompat.getColor(requireContext(), R.color.courier_purple_light)
+        )
+    ),
     unreadIndicatorStyle = CourierInboxUnreadIndicatorStyle(
         indicator = CourierInboxUnreadIndicator.LINE,
         color = ContextCompat.getColor(requireContext(), R.color.courier_red)
