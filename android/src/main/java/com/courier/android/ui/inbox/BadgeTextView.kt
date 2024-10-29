@@ -19,6 +19,7 @@ class BadgeTextView @JvmOverloads constructor(
         setTextColor(ContextCompat.getColor(context, android.R.color.white))
         setPadding(12, 4, 12, 4)
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+        textAlignment = TEXT_ALIGNMENT_CENTER
 
         // Set minimum width to 20dp
         val minWidthPx = TypedValue.applyDimension(
