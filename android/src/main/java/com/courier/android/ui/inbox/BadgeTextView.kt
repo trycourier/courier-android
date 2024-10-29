@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.Gravity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import com.courier.android.utils.setCourierFont
@@ -19,7 +20,10 @@ class BadgeTextView @JvmOverloads constructor(
         setTextColor(ContextCompat.getColor(context, android.R.color.white))
         setPadding(12, 4, 12, 4)
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+
+        // Center text horizontally and vertically
         textAlignment = TEXT_ALIGNMENT_CENTER
+        gravity = Gravity.CENTER
 
         // Set minimum width to 20dp
         val minWidthPx = TypedValue.applyDimension(
