@@ -105,7 +105,7 @@ If the token is expired, you can generate a new one from your endpoint and call 
 
 This will remove any credentials that are stored between app sessions.
 
-```swift
+```kotlin
 lifecycleScope.launch {
     Courier.shared.signOut()
 }
@@ -113,7 +113,7 @@ lifecycleScope.launch {
 
 ## All Available Authentication Values
 
-```swift
+```kotlin
 val userId = Courier.shared.userId
 val isUserSignedIn = Courier.shared.isUserSignedIn
 
@@ -123,7 +123,3 @@ val listener = Courier.shared.addAuthenticationListener { userId ->
 
 listener.remove()
 ```
-
-More Info: [`Courier Issue Token Docs`](https://www.courier.com/docs/reference/auth/issue-token/)
-
-This request should exist in a separate endpoint served by your backend.
