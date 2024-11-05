@@ -49,105 +49,22 @@ Manages user credentials between app sessions.
 
 &emsp;
 
-# Usage
+# Getting Started
 
 Put this code where you normally manage your user's state. The user's access to [`Inbox`](https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md), [`Push Notifications`](https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md) and [`Preferences`](https://github.com/trycourier/courier-android/blob/master/Docs/Preferences.md) will automatically be managed by the SDK and stored in persistent storage. This means that if your user fully closes your app and starts it back up, they will still be "signed in".
 
 ⚠️ Be sure to call `Courier.initialize(context)` before `Courier.shared.signIn(...)`. [`Click here`](https://github.com/trycourier/courier-android#3-initialize-the-sdk) for more details.
 
-```kotlin
-// Example below supports coroutines, but traditional callbacks are also available
-lifecycleScope.launch {
-
-    // Saves credentials locally and accesses the Courier API with them
-    // Uploads push notification devices tokens to Courier if needed
-    Courier.shared.signIn(
-        accessToken = "pk_prod_H12...",
-        clientKey = "YWQxN...",
-        userId = "example_user_id",
-        tenantId = "tenant_id" // Optional: Only needed if you are using Tenants
-    )
-
-    // If you are going to production
-    // You can skip using clientKey and initialize with only JWT
-    // You will need to sign the user out and back in if the JWT changes
-    // Courier.shared.signOut()
-    // Courier.shared.signIn(
-    //    accessToken = "YOUR_JWT",
-    //    userId = "example_user_id"
-    // )
-
-    // Removes the locally saved credentials
-    // Deletes the user's push notification device tokens in Courier if needed
-    Courier.shared.signOut()
-
-}
-
-// Other available properties and functions
-
-val userId = Courier.shared.userId
-val isUserSignedIn = Courier.shared.isUserSignedIn
-
-val listener = Courier.shared.addAuthenticationListener { userId ->
-    print(userId ?: "No userId found")
-}
-
-listener.remove()
-```
-
 &emsp;
 
-<table>
-    <thead>
-        <tr>
-            <th width="150px" align="left">Properties</th>
-            <th width="450px" align="left">Details</th>
-            <th width="400px" align="left">Where is this?</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr width="600px">
-            <td align="left">
-                <code>accessToken</code>
-            </td>
-            <td align="left">
-                The key or token needed to authenticate requests to the Courier API.
-            </td>
-            <td align="left">
-                For development only: <a href="https://app.courier.com/settings/api-keys"><code>authKey</code></a><br>
-                For development or production: <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md#going-to-production"><code>accessToken</code></a>
-            </td>
-        </tr>
-        <tr width="600px">
-            <td align="left">
-                <code>clientKey</code>
-            </td>
-            <td align="left">
-                The key required to get <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Inbox.md"><code>Courier Inbox</code></a> messages for the current user. Can be <code>nil</code> if you do not need Courier Inbox.
-            </td>
-            <td align="left">
-                <a href="https://app.courier.com/channels/courier"><code>Courier Inbox clientKey</code></a>
-            </td>
-        </tr>
-        <tr width="600px">
-            <td align="left">
-                <code>userId</code>
-            </td>
-            <td align="left">
-                The id of the user you want to read and write to. This likely will be the same as the <code>userId</code> you are already using in your authentication system, but it can be different if you'd like.
-            </td>
-            <td align="left">
-                You are responsible for this
-            </td>
-        </tr>
-    </tbody>
-</table>
+## 1. Generate a JWT
 
-&emsp;
+To generate a JWT, you will need to:
+1. Create an endpoint on your backend
+2. Call this function inside that endpoint: [`Generate Auth Tokens`](https://www.courier.com/docs/reference/auth/issue-token/)
+3. Return the JWT
 
-# Going to Production
-
-To create a production ready `accessToken`, call this:
+Here is a curl example with all the scopes needed that the SDK uses. Change the scopes to the scopes you need for your use case.
 
 ```curl
 curl --request POST \
@@ -160,6 +77,51 @@ curl --request POST \
     "scope": "user_id:$YOUR_USER_ID write:user-tokens inbox:read:messages inbox:write:events read:preferences write:preferences read:brands",
     "expires_in": "$YOUR_NUMBER days"
   }'
+```
+
+## 2. Get a JWT in your app
+
+```kotlin
+lifecycleScope.launch {
+    let userId = "your_user_id"
+    let jwt = YourBackend.generateCourierJWT(for: userId)
+}
+```
+
+## 3. Sign your user in
+
+Signed in users will stay signed in between app sessions.
+
+```kotlin
+lifecycleScope.launch {
+    let userId = "your_user_id"
+    Courier.shared.signIn(accessToken = jwt, userId = userId)
+}
+```
+
+If the token is expired, you can generate a new one from your endpoint and call `Courier.shared.signIn(...)` again. You will need to check the token manually for expiration or generate a new one when the user views a specific screen in your app. It is up to you to handle token expiration and refresh based on your security needs.
+
+## 4. Sign your user out
+
+This will remove any credentials that are stored between app sessions.
+
+```swift
+lifecycleScope.launch {
+    Courier.shared.signOut()
+}
+```
+
+## All Available Authentication Values
+
+```swift
+val userId = Courier.shared.userId
+val isUserSignedIn = Courier.shared.isUserSignedIn
+
+val listener = Courier.shared.addAuthenticationListener { userId ->
+    print(userId ?: "No userId found")
+}
+
+listener.remove()
 ```
 
 More Info: [`Courier Issue Token Docs`](https://www.courier.com/docs/reference/auth/issue-token/)
