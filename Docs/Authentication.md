@@ -84,7 +84,7 @@ curl --request POST \
 ```kotlin
 lifecycleScope.launch {
     let userId = "your_user_id"
-    let jwt = YourBackend.generateCourierJWT(for: userId)
+    let jwt = YourBackend.generateCourierJWT(for = userId)
 }
 ```
 
