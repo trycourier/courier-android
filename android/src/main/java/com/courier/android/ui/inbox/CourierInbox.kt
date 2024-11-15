@@ -61,7 +61,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
         }
 
-    var canSwipePages = false
+    var canSwipePages = true
         set(value) {
             field = value
             viewPager.isUserInputEnabled = value
