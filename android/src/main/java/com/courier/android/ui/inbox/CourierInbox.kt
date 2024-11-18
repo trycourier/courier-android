@@ -97,7 +97,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         }
     }
 
-    private val pages: List<Page> = listOf(
+    internal val pages: List<Page> = listOf(
         Page(title = "Notifications", list = makeListView(InboxMessageFeed.FEED, context, attrs, defStyleAttr)),
         Page(title = "Archived", list = makeListView(InboxMessageFeed.ARCHIVE, context, attrs, defStyleAttr))
     )
@@ -274,6 +274,9 @@ enum class InboxMessageFeed { FEED, ARCHIVE }
  * Extensions
  */
 
-fun CourierInbox.scrollToTop() {
-//    recyclerView.smoothScrollToPosition(0)
+fun CourierInbox.scrollToTop(feed: InboxMessageFeed) {
+    when (feed) {
+        InboxMessageFeed.FEED -> pages[0].list.recyclerView.smoothScrollToPosition(0)
+        InboxMessageFeed.ARCHIVE -> pages[1].list.recyclerView.smoothScrollToPosition(0)
+    }
 }

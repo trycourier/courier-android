@@ -516,6 +516,13 @@ var Courier.inboxPaginationLimit
 val Courier.inboxData
     get() = courierInboxData
 
+fun Courier.getInboxMessages(feed: InboxMessageFeed): List<InboxMessage> {
+    return when (feed) {
+        InboxMessageFeed.FEED -> inboxData?.feed?.messages ?: emptyList()
+        InboxMessageFeed.ARCHIVE -> inboxData?.archived?.messages ?: emptyList()
+    }
+}
+
 /**
  * Traditional Callbacks
  */
