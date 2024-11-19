@@ -98,12 +98,16 @@ class CourierInboxData(
         val originalMessage = messages[index].copy()
 
         // Change the local data
-        mutateLocalData(
+        val canUpdateServerData = mutateLocalData(
             event = event,
             inboxFeed = feed,
             index = index,
             handler = handler
         )
+
+        if (!canUpdateServerData) {
+            return
+        }
 
         // Perform server update
         // If fails, reset the change to the original copy
@@ -124,14 +128,14 @@ class CourierInboxData(
         inboxFeed: InboxMessageFeed,
         index: Int,
         handler: InboxMutationHandler
-    ) {
-        when (event) {
+    ): Boolean {
+        return when (event) {
             InboxSocket.EventType.READ -> read(index, inboxFeed, handler)
             InboxSocket.EventType.UNREAD -> unread(index, inboxFeed, handler)
             InboxSocket.EventType.OPENED -> open(index, inboxFeed, handler)
             InboxSocket.EventType.UNOPENED -> unopen(index, inboxFeed, handler)
             InboxSocket.EventType.ARCHIVE -> archive(index, inboxFeed, handler)
-            else -> { /* No action */ }
+            else -> return false
         }
     }
 
@@ -162,13 +166,13 @@ class CourierInboxData(
         index: Int,
         inboxFeed: InboxMessageFeed,
         handler: InboxMutationHandler
-    ) {
+    ): Boolean {
 
         when (inboxFeed) {
             InboxMessageFeed.FEED -> {
 
                 if (feed.messages[index].isArchived) {
-                    return
+                    return false
                 }
 
                 if (!feed.messages[index].isRead) {
@@ -176,6 +180,7 @@ class CourierInboxData(
                     handler.onInboxItemUpdated(index, inboxFeed, feed.messages[index])
                     unreadCount = maxOf(unreadCount - 1, 0)
                     handler.onUnreadCountChange(unreadCount)
+                    return true
                 }
 
             }
@@ -183,6 +188,8 @@ class CourierInboxData(
                 // Empty
             }
         }
+
+        return false
 
     }
 
@@ -190,12 +197,12 @@ class CourierInboxData(
         index: Int,
         inboxFeed: InboxMessageFeed,
         handler: InboxMutationHandler
-    ) {
+    ): Boolean {
         when (inboxFeed) {
             InboxMessageFeed.FEED -> {
 
                 if (feed.messages[index].isArchived) {
-                    return
+                    return false
                 }
 
                 if (feed.messages[index].isRead) {
@@ -203,6 +210,7 @@ class CourierInboxData(
                     handler.onInboxItemUpdated(index, inboxFeed, feed.messages[index])
                     unreadCount += 1
                     handler.onUnreadCountChange(unreadCount)
+                    return true
                 }
 
             }
@@ -210,49 +218,54 @@ class CourierInboxData(
                 // Empty
             }
         }
+        return false
     }
 
     internal suspend fun open(
         index: Int,
         inboxFeed: InboxMessageFeed,
         handler: InboxMutationHandler
-    ) {
+    ): Boolean {
         when (inboxFeed) {
             InboxMessageFeed.FEED -> {
                 if (!feed.messages[index].isOpened) {
                     feed.messages[index].setOpened()
                     handler.onInboxItemUpdated(index, inboxFeed, feed.messages[index])
+                    return true
                 }
             }
             InboxMessageFeed.ARCHIVE -> {
                 // Empty
             }
         }
+        return false
     }
 
     private suspend fun unopen(
         index: Int,
         inboxFeed: InboxMessageFeed,
         handler: InboxMutationHandler
-    ) {
+    ): Boolean {
         when (inboxFeed) {
             InboxMessageFeed.FEED -> {
                 if (feed.messages[index].isOpened) {
                     feed.messages[index].setUnopened()
                     handler.onInboxItemUpdated(index, inboxFeed, feed.messages[index])
+                    return true
                 }
             }
             InboxMessageFeed.ARCHIVE -> {
                 // Empty
             }
         }
+        return true
     }
 
     internal suspend fun archive(
         index: Int,
         inboxFeed: InboxMessageFeed,
         handler: InboxMutationHandler
-    ) {
+    ): Boolean {
         when (inboxFeed) {
             InboxMessageFeed.FEED -> {
                 if (!feed.messages[index].isArchived) {
@@ -276,12 +289,15 @@ class CourierInboxData(
                         archived.messages.add(it, newMessage)
                         handler.onInboxItemAdded(it, InboxMessageFeed.ARCHIVE, newMessage)
                     }
+
+                    return true
                 }
             }
             InboxMessageFeed.ARCHIVE -> {
                 // Empty
             }
         }
+        return false
     }
 
     private fun findInsertIndex(newMessage: InboxMessage, messages: List<InboxMessage>): Int? {
