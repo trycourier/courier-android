@@ -7,6 +7,9 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import com.courier.android.Courier
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
+import com.courier.android.modules.archiveMessage
+import com.courier.android.modules.readMessage
+import com.courier.android.modules.unreadMessage
 import com.courier.android.ui.CourierStyles
 import com.courier.android.ui.inbox.CourierInbox
 import com.courier.android.ui.inbox.CourierInboxTheme
@@ -15,6 +18,7 @@ import com.courier.example.Env
 import com.courier.example.R
 import com.courier.example.Theme
 import com.courier.example.fragments.DetailSheet
+import com.courier.example.fragments.SheetAction
 import com.courier.example.toJson
 
 class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
@@ -122,8 +126,21 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
         }
 
         inbox.setOnLongPressMessageListener { message, index ->
-            val str = message.toJson() ?: "Invalid"
-            DetailSheet(str).show(childFragmentManager, null)
+            val messageId = message.messageId
+
+            val items = listOf(
+                SheetAction(
+                    title = if (message.isRead) "Unread Message" else "Read Message",
+                    onClick = { if (message.isRead) Courier.shared.unreadMessage(messageId) else Courier.shared.readMessage(messageId) }
+                ),
+                SheetAction(
+                    title = "Archive Message",
+                    onClick = { Courier.shared.archiveMessage(messageId) }
+                )
+            )
+
+            DetailSheet(messageId, items).show(childFragmentManager, null)
+
         }
 
         inbox.setOnClickActionListener { action, message, index ->

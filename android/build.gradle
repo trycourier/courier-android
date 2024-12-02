@@ -5,11 +5,11 @@ plugins {
 
 android {
 
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         minSdk 23
-        targetSdk 34
+        targetSdk 35
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -25,12 +25,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '1.8'
     }
 
     namespace 'com.courier.android'
@@ -41,7 +41,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.13.1"
+        kotlinCompilerExtensionVersion '1.5.1'
     }
 
 }
@@ -53,13 +53,10 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 
     // Internal APIs
-    implementation "androidx.compose.ui:ui:1.5.1"
-    implementation "androidx.compose.material:material:1.5.1"
-    implementation "androidx.compose.ui:ui-tooling-preview:1.5.1"
-    debugImplementation "androidx.compose.ui:ui-tooling:1.5.1"
-    implementation "androidx.compose.runtime:runtime:1.5.1"
-    implementation "androidx.compose.runtime:runtime-livedata:1.5.1"
-    implementation 'androidx.core:core-ktx:1.13.1'
+    debugImplementation "androidx.compose.ui:ui-tooling:1.7.5"
+    implementation "androidx.compose.ui:ui:1.7.5"
+    implementation "androidx.compose.runtime:runtime:1.7.5"
+    implementation 'androidx.core:core-ktx:1.15.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'

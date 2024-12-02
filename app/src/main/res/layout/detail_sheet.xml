@@ -17,6 +17,13 @@
             android:text="Hello Bottom Sheet"
             android:typeface="monospace" />
 
+        <ListView
+            android:id="@+id/listView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@android:color/darker_gray"
+            android:dividerHeight="1dp" />
+
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>
