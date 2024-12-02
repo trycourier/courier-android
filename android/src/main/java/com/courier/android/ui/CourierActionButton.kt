@@ -36,9 +36,17 @@ internal class CourierActionButton @JvmOverloads constructor(context: Context, a
 
     init {
         View.inflate(context, R.layout.courier_inbox_button, this)
+        clipChildren = false
+        clipToPadding = false
         button = findViewById(R.id.button)
         button.setOnClickListener { onClick?.invoke() }
         cornerRadius = DEFAULT_CORNER_RADIUS
+        removeShadow()
+    }
+
+    private fun removeShadow() {
+        button.elevation = 0F
+        button.stateListAnimator = null
     }
 
     fun setStyle(style: CourierStyles.Button, @ColorInt fallbackColor: Int? = null) {

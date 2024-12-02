@@ -2,11 +2,9 @@ package com.courier.android.ui.inbox
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.ProgressBar
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -56,27 +54,27 @@ internal class InboxListView @JvmOverloads constructor(
                 State.LOADING -> {
                     recyclerView.isVisible = false
                     infoView.isVisible = false
-                    loadingIndicator.isVisible = true
+                    refreshLayout.isRefreshing = true
                 }
                 State.ERROR -> {
                     recyclerView.isVisible = false
                     infoView.isVisible = true
                     infoView.setTitle(field.title)
                     infoView.showButton(true)
-                    loadingIndicator.isVisible = false
+                    refreshLayout.isRefreshing = false
                 }
                 State.CONTENT -> {
                     recyclerView.isVisible = true
                     infoView.isVisible = false
                     infoView.setTitle(null)
-                    loadingIndicator.isVisible = false
+                    refreshLayout.isRefreshing = false
                 }
                 State.EMPTY -> {
                     recyclerView.isVisible = false
                     infoView.isVisible = true
                     infoView.setTitle(field.title)
                     infoView.showButton(false)
-                    loadingIndicator.isVisible = false
+                    refreshLayout.isRefreshing = false
                 }
             }
         }
@@ -113,23 +111,16 @@ internal class InboxListView @JvmOverloads constructor(
             refreshLayout.setColorSchemeColors(it)
         }
 
-        // Divider line
-        if (recyclerView.itemDecorationCount > 0) {
-            recyclerView.removeItemDecorationAt(0)
-        }
+        // Divider
+        val divider = theme.getDivider(context)
+        recyclerView.removeItemDecoration(divider)
+        recyclerView.addItemDecoration(divider)
 
-        theme.dividerItemDecoration?.let {
-            recyclerView.addItemDecoration(it)
-        }
-
+        // Theme
         infoView.setTheme(theme)
         infoView.onRetry = {
             state = State.LOADING
             refresh()
-        }
-
-        theme.getLoadingColor()?.let {
-            loadingIndicator.indeterminateTintList = ColorStateList.valueOf(it)
         }
 
     }
@@ -137,7 +128,6 @@ internal class InboxListView @JvmOverloads constructor(
     val recyclerView: RecyclerView by lazy { findViewById(R.id.recyclerView) }
     private val refreshLayout: SwipeRefreshLayout by lazy { findViewById(R.id.refreshLayout) }
     private val infoView: CourierInfoView by lazy { findViewById(R.id.infoView) }
-    private val loadingIndicator: ProgressBar by lazy { findViewById(R.id.loadingIndicator) }
     private val layoutManager get() = recyclerView.layoutManager as? LinearLayoutManager
 
     private val swipeHandler by lazy {
@@ -214,7 +204,6 @@ internal class InboxListView @JvmOverloads constructor(
     @SuppressLint("NotifyDataSetChanged")
     internal fun setMessageSet(set: InboxMessageSet) {
 
-        refreshLayout.isRefreshing = false
         loadingAdapter.canPage = set.canPaginate
 
         refreshAdapters(
@@ -234,7 +223,6 @@ internal class InboxListView @JvmOverloads constructor(
 
     internal fun addPage(set: InboxMessageSet) {
 
-        refreshLayout.isRefreshing = false
         loadingAdapter.canPage = set.canPaginate
 
         refreshAdapters(
@@ -260,7 +248,6 @@ internal class InboxListView @JvmOverloads constructor(
 
     internal fun addMessage(index: Int, message: InboxMessage) {
 
-        refreshLayout.isRefreshing = false
         loadingAdapter.canPage = loadingAdapter.canPage
 
         refreshAdapters(
@@ -286,7 +273,6 @@ internal class InboxListView @JvmOverloads constructor(
 
     internal fun removeMessage(index: Int, message: InboxMessage) {
 
-        refreshLayout.isRefreshing = false
         loadingAdapter.canPage = loadingAdapter.canPage
 
         messagesAdapter.messages.removeAt(index)

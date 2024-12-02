@@ -1,9 +1,12 @@
 package com.courier.android.ui.inbox
 
+import android.content.Context
 import android.graphics.Color
 import androidx.annotation.ColorInt
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import com.courier.android.Courier
+import com.courier.android.R
 import com.courier.android.models.CourierBrand
 import com.courier.android.models.CourierException
 import com.courier.android.ui.CourierStyles
@@ -56,7 +59,7 @@ data class CourierInboxTheme(
         unread = CourierStyles.Button(),
         read = CourierStyles.Button(),
     ),
-    internal val dividerItemDecoration: DividerItemDecoration? = null,
+    private val dividerItemDecoration: DividerItemDecoration? = null,
     internal val infoViewStyle: CourierStyles.InfoViewStyle = CourierStyles.InfoViewStyle(
         font = CourierStyles.Font(),
         button = CourierStyles.Button(),
@@ -86,6 +89,22 @@ data class CourierInboxTheme(
                 client?.error(e.message)
             }
         }
+
+    }
+
+    internal fun getDivider(context: Context): DividerItemDecoration {
+
+        dividerItemDecoration?.let {
+            return it
+        }
+
+        val transparentDrawable = ContextCompat.getDrawable(context, R.drawable.transparent_divider)
+        val dividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
+        transparentDrawable?.let {
+            dividerItemDecoration.setDrawable(it)
+        }
+
+        return dividerItemDecoration
 
     }
 

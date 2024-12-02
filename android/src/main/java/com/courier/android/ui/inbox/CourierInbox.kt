@@ -190,7 +190,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         })
 
         // Grab the brand
-        pages.forEach { it.list.setLoading(false) }
+        pages.forEach { it.list.setLoading(true) }
         refreshBrand()
 
         // Setup the listener
