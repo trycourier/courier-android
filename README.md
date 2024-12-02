@@ -39,14 +39,16 @@
 pluginManagement {
     repositories {
         ..
-        maven { url 'https://jitpack.io' }
+        maven { url 'https://jitpack.io' } // Groovy
+        maven("https://jitpack.io") // Gradle.kts
     }
 }
 
 dependencyResolutionManagement {
     repositories {
         ..
-        maven { url 'https://jitpack.io' }
+        maven { url 'https://jitpack.io' } // Groovy
+        maven("https://jitpack.io") // Gradle.kts
     }
 }
 ```
