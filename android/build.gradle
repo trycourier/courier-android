@@ -36,7 +36,12 @@ android {
     namespace 'com.courier.android'
 
     buildFeatures {
+        compose true
         buildConfig true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.13.1"
     }
 
 }
@@ -48,6 +53,12 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 
     // Internal APIs
+    implementation "androidx.compose.ui:ui:1.5.1"
+    implementation "androidx.compose.material:material:1.5.1"
+    implementation "androidx.compose.ui:ui-tooling-preview:1.5.1"
+    debugImplementation "androidx.compose.ui:ui-tooling:1.5.1"
+    implementation "androidx.compose.runtime:runtime:1.5.1"
+    implementation "androidx.compose.runtime:runtime-livedata:1.5.1"
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'

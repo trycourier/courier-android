@@ -8,6 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -25,6 +28,34 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+@Composable
+fun CourierInbox(
+    modifier: Modifier = Modifier,
+    canSwipePages: Boolean = false,
+    lightTheme: CourierInboxTheme = CourierInboxTheme(),
+    darkTheme: CourierInboxTheme = CourierInboxTheme(),
+    onClickMessageListener: ((message: InboxMessage, index: Int) -> Unit)? = null,
+    onLongPressMessageListener: ((message: InboxMessage, index: Int) -> Unit)? = null,
+    onClickActionListener: ((action: InboxAction, message: InboxMessage, index: Int) -> Unit)? = null,
+    onScrollInboxListener: ((offsetInDp: Int) -> Unit)? = null
+) {
+    AndroidView(
+        modifier = modifier,
+        factory = { ctx ->
+            CourierInbox(ctx)
+        },
+        update = { view ->
+            view.canSwipePages = canSwipePages
+            view.lightTheme = lightTheme
+            view.darkTheme = darkTheme
+            view.setOnClickMessageListener(onClickMessageListener)
+            view.setOnLongPressMessageListener(onLongPressMessageListener)
+            view.setOnClickActionListener(onClickActionListener)
+            view.setOnScrollInboxListener(onScrollInboxListener)
+        }
+    )
+}
 
 open class CourierInbox @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 

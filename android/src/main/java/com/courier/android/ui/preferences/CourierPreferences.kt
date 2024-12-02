@@ -5,6 +5,9 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +27,26 @@ import com.courier.android.utils.log
 import com.courier.android.utils.pxToDp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+@Composable
+fun CourierPreferences(
+    modifier: Modifier = Modifier,
+    lightTheme: CourierPreferencesTheme = CourierPreferencesTheme(),
+    darkTheme: CourierPreferencesTheme = CourierPreferencesTheme(),
+    onError: ((CourierException) -> Unit)? = null
+) {
+    AndroidView(
+        modifier = modifier,
+        factory = { ctx ->
+            CourierPreferences(ctx)
+        },
+        update = { view ->
+            view.lightTheme = lightTheme
+            view.darkTheme = darkTheme
+            view.onError = onError
+        }
+    )
+}
 
 open class CourierPreferences @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
