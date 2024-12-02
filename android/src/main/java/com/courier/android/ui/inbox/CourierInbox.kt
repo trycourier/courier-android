@@ -68,11 +68,16 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
     private var onClickInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
+    private var onLongPressInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
     private var onClickInboxActionForMessageAtIndex: ((InboxAction, InboxMessage, Int) -> Unit)? = null
     private var onScrollInbox: ((Int) -> Unit)? = null
 
     fun setOnClickMessageListener(listener: ((message: InboxMessage, index: Int) -> Unit)?) {
         onClickInboxMessageAtIndex = listener
+    }
+
+    fun setOnLongPressMessageListener(listener: ((message: InboxMessage, index: Int) -> Unit)?) {
+        onLongPressInboxMessageAtIndex = listener
     }
 
     fun setOnClickActionListener(listener: ((action: InboxAction, message: InboxMessage, index: Int) -> Unit)?) {
@@ -87,6 +92,9 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         return InboxListView(context, attrs, defStyleAttr, feed, inbox = this).apply {
             setOnClickMessageListener { message, index ->
                 onClickInboxMessageAtIndex?.invoke(message, index)
+            }
+            setOnLongPressMessageListener { message, index ->
+                onLongPressInboxMessageAtIndex?.invoke(message, index)
             }
             setOnClickActionListener { action, message, index ->
                 onClickInboxActionForMessageAtIndex?.invoke(action, message, index)
