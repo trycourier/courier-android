@@ -57,8 +57,8 @@ dependencyResolutionManagement {
 
 ```gradle
 dependencies {
-    implementation 'com.github.trycourier:courier-android:4.6.7' // Groovy
-    implementation("com.github.trycourier:courier-android:4.6.7") // Gradle.kts
+    implementation 'com.github.trycourier:courier-android:4.7.0' // Groovy
+    implementation("com.github.trycourier:courier-android:4.7.0") // Gradle.kts
 }
 ```
 
