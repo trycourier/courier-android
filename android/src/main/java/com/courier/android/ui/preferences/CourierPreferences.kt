@@ -2,11 +2,9 @@ package com.courier.android.ui.preferences
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.ProgressBar
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -42,27 +40,27 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
 
                 when (field) {
                     State.LOADING -> {
-                        refreshLayout.isVisible = false
+                        recyclerView.isVisible = false
                         infoView.isVisible = false
-                        loadingIndicator.isVisible = true
+                        refreshLayout.isRefreshing = true
                     }
                     State.ERROR -> {
-                        refreshLayout.isVisible = false
+                        recyclerView.isVisible = false
                         infoView.isVisible = true
                         infoView.setTitle(field.title)
-                        loadingIndicator.isVisible = false
+                        refreshLayout.isRefreshing = false
                     }
                     State.CONTENT -> {
-                        refreshLayout.isVisible = true
+                        recyclerView.isVisible = true
                         infoView.isVisible = false
                         infoView.setTitle(null)
-                        loadingIndicator.isVisible = false
+                        refreshLayout.isRefreshing = false
                     }
                     State.EMPTY -> {
-                        refreshLayout.isVisible = false
+                        recyclerView.isVisible = false
                         infoView.isVisible = true
                         infoView.setTitle(field.title)
-                        loadingIndicator.isVisible = false
+                        refreshLayout.isRefreshing = false
                     }
                 }
 
@@ -118,12 +116,8 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
     @SuppressLint("NotifyDataSetChanged")
     private fun reloadViews() {
 
-        // Divider line
-        if (recyclerView.itemDecorationCount > 0) {
-            recyclerView.removeItemDecorationAt(0)
-        }
-
         theme.topicDividerItemDecoration?.let {
+            recyclerView.removeItemDecoration(it)
             recyclerView.addItemDecoration(it)
         }
 
@@ -131,7 +125,6 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
 
         // Loading
         theme.getLoadingColor()?.let {
-            loadingIndicator.indeterminateTintList = ColorStateList.valueOf(it)
             refreshLayout.setColorSchemeColors(it)
         }
 
@@ -140,13 +133,10 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
 
     }
 
-    lateinit var recyclerView: RecyclerView
-        private set
-
-    private lateinit var refreshLayout: SwipeRefreshLayout
-    private lateinit var infoView: CourierInfoView
-    private lateinit var courierBar: CourierBar
-    private lateinit var loadingIndicator: ProgressBar
+    val recyclerView: RecyclerView by lazy { findViewById(R.id.recyclerView) }
+    private val refreshLayout: SwipeRefreshLayout by lazy { findViewById(R.id.refreshLayout) }
+    private val infoView: CourierInfoView by lazy { findViewById(R.id.infoView) }
+    private val courierBar: CourierBar by lazy { findViewById(R.id.courierBar) }
 
     private var onScrollPreferences: ((Int) -> Unit)? = null
 
@@ -164,17 +154,9 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
 
     private fun setup() {
 
-        // Loading
-        loadingIndicator = findViewById(R.id.loadingIndicator)
-
-        // Info View
-        infoView = findViewById(R.id.infoView)
-
-        // Courier Bar
-        courierBar = findViewById(R.id.courierBar)
+        state = State.LOADING
 
         // Create the list
-        recyclerView = findViewById(R.id.recyclerView)
         recyclerView.setOnScrollChangeListener { _, _, _, _, _ ->
 
             // Get the current offset if needed
@@ -186,12 +168,15 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
         }
 
         // Handle pull to refresh
-        refreshLayout = findViewById(R.id.refreshLayout)
         refreshLayout.setOnRefreshListener {
             refresh()
         }
 
-        state = State.LOADING
+        // Info View
+        infoView.onRetry = {
+            state = State.LOADING
+            refresh()
+        }
 
         refresh()
 
@@ -206,7 +191,6 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
             val e = CourierException.userNotFound
             onError?.invoke(e)
             state = State.ERROR.apply { title = e.message }
-            refreshLayout.isRefreshing = false
             return@launch
         }
 
@@ -255,14 +239,12 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
             recyclerView.adapter = preferencesAdapter
 
             state = if (preferences.items.isEmpty()) State.EMPTY.apply { title = "No preferences found" } else State.CONTENT
-            refreshLayout.isRefreshing = false
 
         } catch (e: CourierException) {
 
             onError?.invoke(e)
 
             state = State.ERROR.apply { title = e.message }
-            refreshLayout.isRefreshing = false
 
         }
 
