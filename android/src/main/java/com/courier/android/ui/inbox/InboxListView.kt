@@ -145,6 +145,7 @@ internal class InboxListView @JvmOverloads constructor(
     }
 
     private var onClickInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
+    private var onLongPressInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
     private var onClickInboxActionForMessageAtIndex: ((InboxAction, InboxMessage, Int) -> Unit)? = null
     private var onScrollInbox: ((Int) -> Unit)? = null
 
@@ -155,10 +156,13 @@ internal class InboxListView @JvmOverloads constructor(
             message.markAsClicked()
             onClickInboxMessageAtIndex?.invoke(message, index)
         },
+        onMessageLongPress = { message, index ->
+            onLongPressInboxMessageAtIndex?.invoke(message, index)
+        },
         onActionClick = { action, message, index ->
             action.markAsClicked(message.messageId)
             onClickInboxActionForMessageAtIndex?.invoke(action, message, index)
-        }
+        },
     )
 
     private val loadingAdapter = LoadingAdapter(
@@ -404,6 +408,10 @@ internal class InboxListView @JvmOverloads constructor(
         onClickInboxMessageAtIndex = listener
     }
 
+    fun setOnLongPressMessageListener(listener: ((message: InboxMessage, index: Int) -> Unit)?) {
+        onLongPressInboxMessageAtIndex = listener
+    }
+
     fun setOnClickActionListener(listener: ((action: InboxAction, message: InboxMessage, index: Int) -> Unit)?) {
         onClickInboxActionForMessageAtIndex = listener
     }
@@ -411,6 +419,5 @@ internal class InboxListView @JvmOverloads constructor(
     fun setOnScrollInboxListener(listener: ((offsetInDp: Int) -> Unit)?) {
         onScrollInbox = listener
     }
-
 
 }

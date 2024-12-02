@@ -35,6 +35,7 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
 
     private var onActionClick: ((InboxAction, InboxMessage) -> Unit)? = null
     private var onMessageClick: ((InboxMessage) -> Unit)? = null
+    private var onMessageLongPress: ((InboxMessage) -> Unit)? = null
 
     private fun setIndicator(theme: CourierInboxTheme, message: InboxMessage) {
 
@@ -74,6 +75,11 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
         // Container
         container.setOnClickListener {
             onMessageClick?.invoke(message)
+        }
+
+        container.setOnLongClickListener {
+            onMessageLongPress?.invoke(message)
+            return@setOnLongClickListener true
         }
 
         // Add the button actions
@@ -125,9 +131,10 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
 
     }
 
-    fun setInteraction(onActionClick: (InboxAction, InboxMessage) -> Unit, onMessageClick: (InboxMessage) -> Unit) {
+    fun setInteraction(onActionClick: (InboxAction, InboxMessage) -> Unit, onMessageClick: (InboxMessage) -> Unit, onMessageLongPress: (InboxMessage) -> Unit) {
         this.onActionClick = onActionClick
         this.onMessageClick = onMessageClick
+        this.onMessageLongPress = onMessageLongPress
     }
 
 }
@@ -136,6 +143,7 @@ internal class MessagesAdapter(
     internal var theme: CourierInboxTheme,
     internal var messages: MutableList<InboxMessage>,
     private val onMessageClick: (InboxMessage, Int) -> Unit,
+    private val onMessageLongPress: (InboxMessage, Int) -> Unit,
     private val onActionClick: (InboxAction, InboxMessage, Int) -> Unit
 ) : RecyclerView.Adapter<MessageItemViewHolder>() {
 
@@ -157,6 +165,9 @@ internal class MessagesAdapter(
             },
             onMessageClick = { msg ->
                 onMessageClick(msg, position)
+            },
+            onMessageLongPress = { msg ->
+                onMessageLongPress(msg, position)
             }
         )
 

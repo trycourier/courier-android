@@ -121,6 +121,11 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
             if (message.isRead) message.markAsUnread() else message.markAsRead()
         }
 
+        inbox.setOnLongPressMessageListener { message, index ->
+            val str = message.toJson() ?: "Invalid"
+            DetailSheet(str).show(childFragmentManager, null)
+        }
+
         inbox.setOnClickActionListener { action, message, index ->
             val str = action.toJson() ?: "Invalid"
             DetailSheet(str).show(childFragmentManager, null)
