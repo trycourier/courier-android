@@ -60,8 +60,6 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
         inboxListener = Courier.shared.addInboxListener(
             onLoading = {
 
-                stateTextView.isVisible = false
-
                 refreshAdapters(
                     showLoading = true
                 )
@@ -70,15 +68,37 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
             onError = { e ->
 
                 stateTextView.text = e.message
-                stateTextView.isVisible = true
 
                 print(e)
                 refreshAdapters()
 
             },
+            onMessageAdded = { feed, i, message ->
+
+                refreshAdapters(
+                    showMessages = Courier.shared.inboxData?.feed?.messages.orEmpty().isNotEmpty(),
+                    showLoading = false
+                )
+
+            },
+            onMessageChanged = { feed, i, message ->
+
+                refreshAdapters(
+                    showMessages = Courier.shared.inboxData?.feed?.messages.orEmpty().isNotEmpty(),
+                    showLoading = false
+                )
+
+            },
+            onMessageRemoved = { feed, i, message ->
+
+                refreshAdapters(
+                    showMessages = Courier.shared.inboxData?.feed?.messages.orEmpty().isNotEmpty(),
+                    showLoading = false
+                )
+
+            },
             onFeedChanged = { set ->
 
-                stateTextView.isVisible = set.messages.isEmpty()
                 stateTextView.text = "No messages found"
 
                 refreshAdapters(
@@ -93,6 +113,7 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun refreshAdapters(showMessages: Boolean = false, showLoading: Boolean = false) {
+        stateTextView.isVisible = !showMessages
         if (showMessages) adapter.addAdapter(0, messagesAdapter) else adapter.removeAdapter(messagesAdapter)
         if (showLoading) adapter.addAdapter(loadingAdapter) else adapter.removeAdapter(loadingAdapter)
         messagesAdapter.notifyDataSetChanged()
