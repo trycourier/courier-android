@@ -68,7 +68,7 @@ class InboxSocket(private val options: CourierClient.Options) : CourierSocket(ur
         UNCLICK("unclick")
     }
 
-    data class SocketPayload(val type: PayloadType, val event: EventType?)
+    data class SocketPayload(val type: PayloadType)
     data class MessageEvent(val event: EventType, val messageId: String?, val type: String)
 
     var receivedMessage: ((InboxMessage) -> Unit)? = null

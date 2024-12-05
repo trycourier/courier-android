@@ -95,8 +95,13 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
     var canSwipePages = false
         set(value) {
             field = value
-            viewPager.isUserInputEnabled = value
+            enableSwipe(value)
         }
+
+    private fun enableSwipe(enabled: Boolean) {
+        viewPager.isUserInputEnabled = enabled
+        pages.firstOrNull()?.list?.setItemGesturesEnabled(!enabled)
+    }
 
     private var onClickInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
     private var onLongPressInboxMessageAtIndex: ((InboxMessage, Int) -> Unit)? = null
@@ -156,7 +161,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
     private fun setupViewPager() {
 
         viewPager.adapter = ViewPagerAdapter(pages)
-        viewPager.isUserInputEnabled = canSwipePages
+        enableSwipe(canSwipePages)
 
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
 

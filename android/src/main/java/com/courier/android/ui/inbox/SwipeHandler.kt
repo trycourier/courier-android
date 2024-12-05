@@ -166,9 +166,16 @@ internal class SwipeHandler(
 
     }
 
+    private var swipeInteractionHelper: ItemTouchHelper? = null
+
     fun attach(recyclerView: RecyclerView) {
-        val itemTouchHelper = ItemTouchHelper(itemTouchHelper)
-        itemTouchHelper.attachToRecyclerView(recyclerView)
+        swipeInteractionHelper = ItemTouchHelper(itemTouchHelper)
+        swipeInteractionHelper?.attachToRecyclerView(recyclerView)
+    }
+
+    fun remove() {
+        swipeInteractionHelper?.attachToRecyclerView(null)
+        swipeInteractionHelper = null
     }
 
 }

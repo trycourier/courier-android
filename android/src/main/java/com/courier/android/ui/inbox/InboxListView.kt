@@ -320,11 +320,14 @@ internal class InboxListView @JvmOverloads constructor(
             refresh()
         }
 
-        // Attach handler
-        if (feed == InboxMessageFeed.FEED) {
-            swipeHandler.attach(recyclerView)
-        }
+    }
 
+    internal fun setItemGesturesEnabled(enabled: Boolean) {
+        if (enabled) {
+            swipeHandler.attach(recyclerView)
+        } else {
+            swipeHandler.remove()
+        }
     }
 
     private fun refresh() = coroutineScope.launch(Dispatchers.Main) {
