@@ -229,7 +229,10 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
                 updateTabStyleAt(position, false)
             }
             override fun onTabReselected(tab: TabLayout.Tab?) {
-                // Optional: Handle reselection if needed
+                tab?.position?.let {
+                    val feed = if (it == 0) InboxMessageFeed.FEED else InboxMessageFeed.ARCHIVE
+                    scrollToTop(feed)
+                }
             }
         })
 
