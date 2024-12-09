@@ -51,6 +51,35 @@ If you are using JWT authentication, be sure to enable JWT support on the Courie
 
 &emsp;
 
+# Usage
+
+`CourierInbox` works with all native Android UI frameworks.
+
+<table>
+    <thead>
+        <tr>
+            <th width="850px" align="left">UI Framework</th>
+            <th width="200px" align="center">Support</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr width="600px">
+            <td align="left"><code>XML</code></td>
+            <td align="center">✅</td>
+        </tr>
+        <tr width="600px">
+            <td align="left"><code>Programmatic</code></td>
+            <td align="center">✅</td>
+        </tr>
+        <tr width="600px">
+            <td align="left"><code>Jetpack Compose</code></td>
+            <td align="center">✅</td>
+        </tr>
+    </tbody>
+</table>
+
+&emsp;
+
 ## Default Inbox Example
 
 The default `CourierInbox` styles. Colors are using `colorPrimary` located in your `res/values/themes.xml` file.
