@@ -1,6 +1,7 @@
 package com.courier.example.fragments
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -13,6 +14,7 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.courier.android.Courier
 import com.courier.android.modules.readAllInboxMessages
+import com.courier.example.ComposeInboxActivity
 import com.courier.example.R
 import com.courier.example.fragments.inbox.CustomInboxFragment
 import com.courier.example.fragments.inbox.PrebuiltInboxFragment
@@ -26,15 +28,23 @@ class InboxFragment: Fragment(R.layout.fragment_inbox) {
 
         // Get the menu
         val toolbar = view.findViewById<Toolbar>(R.id.toolbar)
-        toolbar.setOnMenuItemClickListener { _ ->
-            Courier.shared.readAllInboxMessages(
-                onSuccess = {
-                    Toast.makeText(context, "All Messages Read", Toast.LENGTH_SHORT).show()
-                },
-                onFailure = { error ->
-                    print(error)
+        toolbar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.readAll -> {
+                    Courier.shared.readAllInboxMessages(
+                        onSuccess = {
+                            Toast.makeText(context, "All Messages Read", Toast.LENGTH_SHORT).show()
+                        },
+                        onFailure = { error ->
+                            print(error)
+                        }
+                    )
                 }
-            )
+                R.id.compose -> {
+                    val intent = Intent(context, ComposeInboxActivity::class.java)
+                    context?.startActivity(intent)
+                }
+            }
             return@setOnMenuItemClickListener true
         }
 
