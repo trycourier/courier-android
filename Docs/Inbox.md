@@ -90,6 +90,8 @@ The default `CourierInbox` styles. Colors are using `colorPrimary` located in yo
 // Jetpack Compose
 CourierInbox(
     modifier = Modifier.padding(innerPadding),
+    lightTheme = ...,
+    darkTheme = ...
     onClickMessageListener = { message, index ->
         Courier.log(message.toString())
         if (message.isRead) message.markAsUnread() else message.markAsRead()
