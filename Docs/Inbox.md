@@ -72,6 +72,7 @@ inbox.setOnClickActionListener { action, message, index ->
 
 // Jetpack Compose
 CourierInbox(
+    modifier = Modifier.padding(innerPadding),
     onClickMessageListener = { message, index ->
         Courier.log(message.toString())
         if (message.isRead) message.markAsUnread() else message.markAsRead()
