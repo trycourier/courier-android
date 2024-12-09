@@ -87,18 +87,6 @@ The default `CourierInbox` styles. Colors are using `colorPrimary` located in yo
 <img width="810" alt="android-default-inbox-styles" src="https://github.com/trycourier/courier-android/assets/6370613/1aca0cd0-a0bb-4e22-9ac6-65a97a06f914">
 
 ```kotlin
-// Android Layouts
-val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
-
-inbox.setOnClickMessageListener { message, index ->
-    Courier.log(message.toString())
-    if (message.isRead) message.markAsUnread() else message.markAsRead()
-}
-
-inbox.setOnClickActionListener { action, message, index ->
-    Courier.log(action.toString())
-}
-
 // Jetpack Compose
 CourierInbox(
     modifier = Modifier.padding(innerPadding),
@@ -110,6 +98,25 @@ CourierInbox(
         Courier.log(action.toString())
     }
 )
+
+// Android Layouts
+val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
+
+inbox.setOnClickMessageListener { message, index ->
+    Courier.log(message.toString())
+    if (message.isRead) message.markAsUnread() else message.markAsRead()
+}
+
+inbox.setOnClickActionListener { action, message, index ->
+    Courier.log(action.toString())
+}
+```
+
+```xml
+<com.courier.android.ui.inbox.CourierInbox xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/courierInbox"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
 ```
 
 &emsp;
