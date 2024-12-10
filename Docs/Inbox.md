@@ -135,138 +135,154 @@ inbox.setOnClickActionListener { action, message, index ->
 
 The styles you can use to quickly customize the `CourierInbox`.
 
-<img width="415" alt="android-styled-inbox-styles" src="https://github.com/trycourier/courier-android/assets/6370613/cfea668d-2a8d-4da6-a128-bf5d747a8e11">
+![Screenshot_20241210-131739](https://github.com/user-attachments/assets/dd878c3f-f24b-456b-be8c-9ea203a89cc1)
 
 ```kotlin
+fun getTheme(context: ComponentActivity): CourierInboxTheme {
+
+    val whiteColor = Color(0xFFFFFFFF).toArgb()
+    val blackColor = Color(0xFF000000).toArgb()
+    val blackLightColor = Color(0x80000000).toArgb()
+    val primaryColor = Color(0xFF6650a4).toArgb()
+    val primaryLightColor = Color(0xFF625b71).toArgb()
+    val font = ResourcesCompat.getFont(context, R.font.poppins)
+
+    return CourierInboxTheme(
+        loadingIndicatorColor = primaryColor,
+        tabIndicatorColor = primaryColor,
+        tabStyle = CourierStyles.Inbox.TabStyle(
+            selected = CourierStyles.Inbox.TabItemStyle(
+                font = CourierStyles.Font(
+                    typeface = font,
+                    sizeInSp = 18,
+                    color = primaryColor
+                ),
+                indicator = CourierStyles.Inbox.TabIndicatorStyle(
+                    font = CourierStyles.Font(
+                        typeface = font,
+                        sizeInSp = 14,
+                        color = whiteColor
+                    ),
+                    color = primaryColor
+                )
+            ),
+            unselected = CourierStyles.Inbox.TabItemStyle(
+                font = CourierStyles.Font(
+                    typeface = font,
+                    sizeInSp = 18,
+                    color = blackLightColor,
+                ),
+                indicator = CourierStyles.Inbox.TabIndicatorStyle(
+                    font = CourierStyles.Font(
+                        typeface = font,
+                        sizeInSp = 14,
+                        color = whiteColor
+                    ),
+                    color = blackLightColor,
+                )
+            )
+        ),
+        readingSwipeActionStyle = CourierStyles.Inbox.ReadingSwipeActionStyle(
+            read = CourierStyles.Inbox.SwipeActionStyle(
+                color = primaryColor
+            ),
+            unread = CourierStyles.Inbox.SwipeActionStyle(
+                color = primaryLightColor
+            )
+        ),
+        unreadIndicatorStyle = CourierStyles.Inbox.UnreadIndicatorStyle(
+            indicator = CourierStyles.Inbox.UnreadIndicator.DOT,
+            color = primaryColor
+        ),
+        titleStyle = CourierStyles.Inbox.TextStyle(
+            unread = CourierStyles.Font(
+                typeface = font,
+                color = blackColor,
+                sizeInSp = 18
+            ),
+            read = CourierStyles.Font(
+                typeface = font,
+                color = blackColor,
+                sizeInSp = 18
+            ),
+        ),
+        bodyStyle = CourierStyles.Inbox.TextStyle(
+            unread = CourierStyles.Font(
+                typeface = font,
+                color = blackLightColor,
+                sizeInSp = 16
+            ),
+            read = CourierStyles.Font(
+                typeface = font,
+                color = blackLightColor,
+                sizeInSp = 16
+            )
+        ),
+        timeStyle = CourierStyles.Inbox.TextStyle(
+            unread = CourierStyles.Font(
+                typeface = font,
+                color = blackColor,
+                sizeInSp = 14
+            ),
+            read = CourierStyles.Font(
+                typeface = font,
+                color = blackColor,
+                sizeInSp = 14
+            )
+        ),
+        infoViewStyle = CourierStyles.InfoViewStyle(
+            font = CourierStyles.Font(
+                typeface = font,
+                color = blackColor,
+                sizeInSp = 18
+            ),
+            button = CourierStyles.Button(
+                font = CourierStyles.Font(
+                    typeface = font,
+                    color = whiteColor,
+                    sizeInSp = 16
+                ),
+                backgroundColor = primaryColor,
+                cornerRadiusInDp = 100
+            )
+        ),
+        buttonStyle = CourierStyles.Inbox.ButtonStyle(
+            unread = CourierStyles.Button(
+                font = CourierStyles.Font(
+                    typeface = font,
+                    color = whiteColor,
+                    sizeInSp = 16
+                ),
+                backgroundColor = primaryColor,
+                cornerRadiusInDp = 100
+            ),
+            read = CourierStyles.Button(
+                font = CourierStyles.Font(
+                    typeface = font,
+                    color = whiteColor,
+                    sizeInSp = 16
+                ),
+                backgroundColor = primaryColor,
+                cornerRadiusInDp = 100
+            )
+        ),
+        dividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
+    )
+}
+
+// Android Layouts
 val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
 
-val theme = CourierInboxTheme(
-    loadingIndicatorColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
-    tabIndicatorColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
-    tabStyle = CourierStyles.Inbox.TabStyle(
-        selected = CourierStyles.Inbox.TabItemStyle(
-            font = CourierStyles.Font(
-                sizeInSp = 18,
-                color = ContextCompat.getColor(requireContext(), R.color.courier_purple)
-            ),
-            indicator = CourierStyles.Inbox.TabIndicatorStyle(
-                font = CourierStyles.Font(
-                    typeface = font,
-                    sizeInSp = 14,
-                    color = ContextCompat.getColor(requireContext(), R.color.white)
-                ),
-                color = ContextCompat.getColor(requireContext(), R.color.courier_purple)
-            )
-        ),
-        unselected = CourierStyles.Inbox.TabItemStyle(
-            font = CourierStyles.Font(
-                typeface = font,
-                sizeInSp = 18,
-                color = ContextCompat.getColor(requireContext(), android.R.color.black),
-            ),
-            indicator = CourierStyles.Inbox.TabIndicatorStyle(
-                font = CourierStyles.Font(
-                    typeface = font,
-                    sizeInSp = 14,
-                    color = Theme.getWhiteColor(requireContext())
-                ),
-                color = ContextCompat.getColor(requireContext(), android.R.color.black),
-            )
-        )
-    ),
-    readingSwipeActionStyle = CourierStyles.Inbox.ReadingSwipeActionStyle(
-        read = CourierStyles.Inbox.SwipeActionStyle(
-            color = ContextCompat.getColor(requireContext(), R.color.courier_purple)
-        ),
-        unread = CourierStyles.Inbox.SwipeActionStyle(
-            color = ContextCompat.getColor(requireContext(), R.color.courier_purple_light)
-        )
-    ),
-    unreadIndicatorStyle = CourierInboxUnreadIndicatorStyle(
-        indicator = CourierInboxUnreadIndicator.LINE,
-        color = ContextCompat.getColor(requireContext(), R.color.courier_red)
-    ),
-    titleStyle = CourierInboxTextStyle(
-        unread = CourierInboxFont(
-            typeface = font,
-            color = ContextCompat.getColor(requireContext(), android.R.color.black),
-            sizeInSp = 18
-        ),
-        read = CourierInboxFont(
-            typeface = font,
-            color = ContextCompat.getColor(requireContext(), android.R.color.black),
-            sizeInSp = 18
-        ),
-    ),
-    bodyStyle = CourierInboxTextStyle(
-        unread = CourierInboxFont(
-            typeface = font,
-            color = ContextCompat.getColor(requireContext(), android.R.color.black),
-            sizeInSp = 16
-        ),
-        read = CourierInboxFont(
-            typeface = font,
-            color = ContextCompat.getColor(requireContext(), android.R.color.black),
-            sizeInSp = 16
-        )
-    ),
-    timeStyle = CourierInboxTextStyle(
-        unread = CourierInboxFont(
-            typeface = font,
-            color = ContextCompat.getColor(requireContext(), android.R.color.black),
-            sizeInSp = 14
-        ),
-        read = CourierInboxFont(
-            typeface = font,
-            color = ContextCompat.getColor(requireContext(), android.R.color.black),
-            sizeInSp = 14
-        )
-    ),
-    infoViewStyle = CourierInboxInfoViewStyle(
-        font = CourierInboxFont(
-            typeface = font,
-            color = ContextCompat.getColor(requireContext(), android.R.color.black),
-            sizeInSp = 18
-        ),
-        button = CourierInboxButton(
-            font = CourierInboxFont(
-                typeface = font,
-                color = ContextCompat.getColor(requireContext(), android.R.color.white),
-                sizeInSp = 16
-            ),
-            backgroundColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
-            cornerRadiusInDp = 100
-        )
-    ),
-    buttonStyle = CourierInboxButtonStyle(
-        unread = CourierInboxButton(
-            font = CourierInboxFont(
-                typeface = font,
-                color = ContextCompat.getColor(requireContext(), android.R.color.white),
-                sizeInSp = 16
-            ),
-            backgroundColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
-            cornerRadiusInDp = 100
-        ),
-        read = CourierInboxButton(
-            font = CourierInboxFont(
-                typeface = font,
-                color = ContextCompat.getColor(requireContext(), android.R.color.white),
-                sizeInSp = 16
-            ),
-            backgroundColor = ContextCompat.getColor(requireContext(), R.color.courier_purple),
-            cornerRadiusInDp = 100
-        )
-    ),
-    dividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
-)
-
-inbox.lightTheme = theme
-inbox.darkTheme = theme
+inbox.lightTheme = getTheme(context)
+inbox.darkTheme = getTheme(context)
 
 inbox.setOnClickMessageListener { message, index ->
     Courier.log(message.toString())
     if (message.isRead) message.markAsUnread() else message.markAsRead()
+}
+
+inbox.setOnLongPressMessageListener { message, index ->
+    Courier.log(message.toString())
 }
 
 inbox.setOnClickActionListener { action, message, index ->
@@ -276,6 +292,26 @@ inbox.setOnClickActionListener { action, message, index ->
 inbox.setOnScrollInboxListener { offsetInDp ->
     Courier.log(offsetInDp.toString())
 }
+
+// Jetpack Compose
+CourierInbox(
+    modifier = Modifier.padding(innerPadding),
+    canSwipePages = true,
+    lightTheme = getTheme(this),
+    darkTheme = getTheme(this),
+    onClickMessageListener = { message, index ->
+        if (message.isRead) message.markAsUnread() else message.markAsRead()
+    },
+    onLongPressMessageListener = { message, index ->
+        message.markAsArchived()
+    },
+    onClickActionListener = { action, message, index ->
+        print(message.toString())
+    },
+    onScrollInboxListener = { offsetInDp ->
+        print(offsetInDp.toString())
+    }
+)
 ```
 
 &emsp;
