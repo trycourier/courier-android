@@ -41,11 +41,7 @@ An in-app notification center list you can use to notify your users. Allows you 
     </tbody>
 </table>
 
-&emsp;
-
-# Requirements
-
-## JWT Authentication
+## Authentication
 
 If you are using JWT authentication, be sure to enable JWT support on the Courier Inbox Provider [`here`](https://app.courier.com/integrations/catalog/courier).
 
@@ -98,22 +94,36 @@ The default `CourierInbox` styles. Colors are using `colorPrimary` located in yo
 
 &emsp;
 
+### Jetpack Compose
+
 ```kotlin
-// Jetpack Compose
 CourierInbox(
     modifier = Modifier.padding(innerPadding),
-    lightTheme = ...,
-    darkTheme = ...
     onClickMessageListener = { message, index ->
-        Courier.log(message.toString())
         if (message.isRead) message.markAsUnread() else message.markAsRead()
     },
-    setOnClickActionListener = { action, message, index ->
-        Courier.log(action.toString())
+    onLongPressMessageListener = { message, index ->
+        message.markAsArchived()
+    },
+    onClickActionListener = { action, message, index ->
+        print(message.toString())
+    },
+    onScrollInboxListener = { offsetInDp ->
+        print(offsetInDp.toString())
     }
 )
+```
 
-// Android Layouts
+### Android Layouts
+
+```xml
+<com.courier.android.ui.inbox.CourierInbox xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/courierInbox"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
+```
+
+```kotlin
 val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
 
 inbox.setOnClickMessageListener { message, index ->
@@ -121,16 +131,17 @@ inbox.setOnClickMessageListener { message, index ->
     if (message.isRead) message.markAsUnread() else message.markAsRead()
 }
 
+inbox.setOnLongPressMessageListener { message, index ->
+    Courier.log(message.toString())
+}
+
 inbox.setOnClickActionListener { action, message, index ->
     Courier.log(action.toString())
 }
-```
 
-```xml
-<com.courier.android.ui.inbox.CourierInbox xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/courierInbox"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+inbox.setOnScrollInboxListener { offsetInDp ->
+    Courier.log(offsetInDp.toString())
+}
 ```
 
 &emsp;
@@ -141,8 +152,10 @@ The styles you can use to quickly customize the `CourierInbox`.
 
 <img width="441" alt="Screenshot 2024-12-09 at 11 19 31 AM" src="https://github.com/user-attachments/assets/dd878c3f-f24b-456b-be8c-9ea203a89cc1">
 
+&emsp;
+
 ```kotlin
-fun getTheme(context: ComponentActivity): CourierInboxTheme {
+fun getTheme(context: Context): CourierInboxTheme {
 
     val whiteColor = Color(0xFFFFFFFF).toArgb()
     val blackColor = Color(0xFF000000).toArgb()
@@ -273,49 +286,26 @@ fun getTheme(context: ComponentActivity): CourierInboxTheme {
         dividerItemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
     )
 }
+```
 
-// Android Layouts
-val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
+### Jetpack Compose
 
-inbox.lightTheme = getTheme(context)
-inbox.darkTheme = getTheme(context)
-
-inbox.setOnClickMessageListener { message, index ->
-    Courier.log(message.toString())
-    if (message.isRead) message.markAsUnread() else message.markAsRead()
-}
-
-inbox.setOnLongPressMessageListener { message, index ->
-    Courier.log(message.toString())
-}
-
-inbox.setOnClickActionListener { action, message, index ->
-    Courier.log(action.toString())
-}
-
-inbox.setOnScrollInboxListener { offsetInDp ->
-    Courier.log(offsetInDp.toString())
-}
-
-// Jetpack Compose
+```kotlin
 CourierInbox(
     modifier = Modifier.padding(innerPadding),
-    canSwipePages = true,
-    lightTheme = getTheme(this),
-    darkTheme = getTheme(this),
-    onClickMessageListener = { message, index ->
-        if (message.isRead) message.markAsUnread() else message.markAsRead()
-    },
-    onLongPressMessageListener = { message, index ->
-        message.markAsArchived()
-    },
-    onClickActionListener = { action, message, index ->
-        print(message.toString())
-    },
-    onScrollInboxListener = { offsetInDp ->
-        print(offsetInDp.toString())
-    }
+    lightTheme = getTheme(context),
+    darkTheme = getTheme(context),
+    ..
 )
+```
+
+### Android Layouts
+
+```kotlin
+val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
+inbox.lightTheme = getTheme(context)
+inbox.darkTheme = getTheme(context)
+inbox..
 ```
 
 &emsp;
@@ -355,55 +345,42 @@ You can control your branding from the [`Courier Studio`](https://app.courier.co
 
 The raw data you can use to build any UI you'd like.
 
-<img width="415" alt="android-custom-inbox" src="https://github.com/trycourier/courier-android/assets/6370613/e89a3b52-08ba-426c-94ac-ee26bcf7cfee">
-
 ```kotlin
 class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
 
-    private lateinit var inboxListener: CourierInboxListener
-    private lateinit var recyclerView: RecyclerView
-    private val messagesAdapter = MessagesAdapter()
+    ..
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        // Create the list
-        recyclerView = view.findViewById(R.id.recyclerView)
-        recyclerView.adapter = messagesAdapter
+        ..
 
         // Setup the listener
         inboxListener = Courier.shared.addInboxListener(
             onLoading = { isRefresh ->
-                println("Loading... Refresh: $isRefresh")
+                // Called when listener is registered, refreshing or restarting
             },
-            onError = { error ->
-                println("Error occurred: ${error.message}")
+            onError = { e ->
+                // Called on error or sign out
             },
-            onUnreadCountChanged = { unreadCount ->
-                println("Unread count changed: $unreadCount")
+            onUnreadCountChanged = { count ->
+                // Will return 0 when a user is signed out
             },
-            onFeedChanged = { feed ->
-                messagesAdapter.addMessages(feed.messages)
-                recyclerView.NotifyDataSetChanged()
+            onFeedChanged = { messageSet ->
+                // Called when the feed initially loads or is restarted from scratch
             },
-            onArchiveChanged = { archive ->
-                println("Archive changed: $archive")
+            onArchiveChanged = { messageSet ->
+                // Called when the feed initially loads or is restarted from scratch
             },
             onPageAdded = { feed, messageSet ->
-                messagesAdapter.addMessages(feed.messages)
-                recyclerView.NotifyDataSetChanged()
+                // Called when pagination happens
             },
             onMessageChanged = { feed, index, message ->
-                messagesAdapter.updateMessageAt(index, message)
-                recyclerView.NotifyDataSetChanged()
+                // Called when a message is change (i.e. read / unread)
             },
             onMessageAdded = { feed, index, message ->
-                messagesAdapter.addMessageAt(index, message)
-                recyclerView.NotifyDataSetChanged()
+                // Called when a message is added (i.e. new message received in realtime)
             },
             onMessageRemoved = { feed, index, message ->
-                messagesAdapter.removeMessageAt(index, message)
-                recyclerView.NotifyDataSetChanged()
+                // Called when a message is removed (i.e. message is archived)
             }
         )
 
@@ -477,14 +454,32 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
 // Listen to all inbox events
 // Only one "pipe" of data is created behind the scenes for network / performance reasons
 val inboxListener = Courier.shared.addInboxListener(
-    onInitialLoad = {
-        // Called when the inbox starts up
+    onLoading = { isRefresh ->
+        // Called when listener is registered, refreshing or restarting
     },
-    onError = { error ->
-        // Called if an error occurs
+    onError = { e ->
+        // Called on error or sign out
     },
-    onMessagesChanged = { messages, unreadMessageCount, totalMessageCount, canPaginate ->
-        // Called when messages update
+    onUnreadCountChanged = { count ->
+        // Will return 0 when a user is signed out
+    },
+    onFeedChanged = { messageSet ->
+        // Called when the feed initially loads or is restarted from scratch
+    },
+    onArchiveChanged = { messageSet ->
+        // Called when the feed initially loads or is restarted from scratch
+    },
+    onPageAdded = { feed, messageSet ->
+        // Called when pagination happens
+    },
+    onMessageChanged = { feed, index, message ->
+        // Called when a message is change (i.e. read / unread)
+    },
+    onMessageAdded = { feed, index, message ->
+        // Called when a message is added (i.e. new message received in realtime)
+    },
+    onMessageRemoved = { feed, index, message ->
+        // Called when a message is removed (i.e. message is archived)
     }
 )
 
