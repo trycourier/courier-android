@@ -154,8 +154,8 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
     init {
         View.inflate(context, R.layout.courier_inbox, this)
-        refreshTheme()
         setup()
+        refreshTheme()
     }
 
     private fun setupViewPager() {
@@ -164,46 +164,32 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         enableSwipe(canSwipePages)
 
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-
             pages[position].tab = LayoutInflater.from(context).inflate(R.layout.courier_inbox_tab_item, null)
-
-            updateTabStyleAt(
-                index = position,
-                isSelected = position == 0
-            )
-
             tab.customView = pages[position].tab
-
         }.attach()
 
         theme.getTabLayoutIndicatorColor()?.let {
             tabLayout.setSelectedTabIndicatorColor(it)
         }
 
-        refreshTabTheme()
+        refreshTabStyles()
 
     }
 
-    private fun refreshTabTheme() {
+    private fun refreshTabStyles() {
+        val selectedIndex = tabLayout.selectedTabPosition
         pages.forEachIndexed { index, page ->
-            updateTabStyleAt(
-                index = index,
-                isSelected = tabLayout.selectedTabPosition == index
-            )
+            page.tab?.setStyles(index, isSelected = (index == selectedIndex))
         }
+        tabLayout.getTabAt(selectedIndex)?.select()
     }
 
-    private fun updateTabStyleAt(index: Int, isSelected: Boolean) {
-        pages[index].tab?.let { tabView ->
-
-            val titleTextView = tabView.findViewById<TextView>(R.id.tab_title)
-            titleTextView.text = pages[index].title
-            titleTextView.setCourierFont(if (isSelected) theme.tabStyle.selected.font else theme.tabStyle.unselected.font)
-
-            val titleBadgeView = tabView.findViewById<BadgeTextView>(R.id.tab_badge)
-            titleBadgeView.setTheme(theme, isSelected)
-
-        }
+    private fun View.setStyles(index: Int, isSelected: Boolean) {
+        val titleTextView = findViewById<TextView>(R.id.tab_title)
+        titleTextView.text = pages[index].title
+        titleTextView.setCourierFont(if (isSelected) theme.tabStyle.selected.font else theme.tabStyle.unselected.font)
+        val titleBadgeView = findViewById<BadgeTextView>(R.id.tab_badge)
+        titleBadgeView.setTheme(theme, isSelected)
     }
 
     private fun updateTabBadgeAt(index: Int, count: Int) {
@@ -233,13 +219,15 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val position = tab?.position ?: 0
-                updateTabStyleAt(position, true)
+                pages[position].tab?.setStyles(position, isSelected = true)
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {
                 val position = tab?.position ?: 0
-                updateTabStyleAt(position, false)
+                pages[position].tab?.setStyles(position, isSelected = false)
             }
             override fun onTabReselected(tab: TabLayout.Tab?) {
+                val position = tab?.position ?: 0
+                pages[position].tab?.setStyles(position, isSelected = true)
                 tab?.position?.let {
                     val feed = if (it == 0) InboxMessageFeed.FEED else InboxMessageFeed.ARCHIVE
                     scrollToTop(feed)
@@ -263,10 +251,10 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
                 updateTabBadgeAt(index = 0, count)
             },
             onFeedChanged = { messageSet ->
-                pages[0].list.setMessageSet(messageSet)
+                getPage(InboxMessageFeed.FEED).list.setMessageSet(messageSet)
             },
             onArchiveChanged = { messageSet ->
-                pages[1].list.setMessageSet(messageSet)
+                getPage(InboxMessageFeed.ARCHIVE).list.setMessageSet(messageSet)
             },
             onPageAdded = { feed, messageSet ->
                 getPage(feed).list.addPage(messageSet)
@@ -278,7 +266,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
                 getPage(feed).list.addMessage(index, message)
             },
             onMessageRemoved = { feed, index, message ->
-                getPage(feed).list.removeMessage(index, message) // Example print for message removed
+                getPage(feed).list.removeMessage(index, message)
             }
         )
 
@@ -289,7 +277,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
         pages.forEach { it.list.theme = theme }
     }
 
-    private fun getPage(feed: InboxMessageFeed): Page {
+    internal fun getPage(feed: InboxMessageFeed): Page {
         return if (feed == InboxMessageFeed.FEED) pages[0] else pages[1]
     }
 
@@ -333,8 +321,5 @@ enum class InboxMessageFeed { FEED, ARCHIVE }
  */
 
 fun CourierInbox.scrollToTop(feed: InboxMessageFeed) {
-    when (feed) {
-        InboxMessageFeed.FEED -> pages[0].list.recyclerView.smoothScrollToPosition(0)
-        InboxMessageFeed.ARCHIVE -> pages[1].list.recyclerView.smoothScrollToPosition(0)
-    }
+    getPage(feed).list.recyclerView.smoothScrollToPosition(0)
 }
