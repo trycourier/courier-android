@@ -293,6 +293,7 @@ fun getTheme(context: Context): CourierInboxTheme {
 ```kotlin
 CourierInbox(
     modifier = Modifier.padding(innerPadding),
+    canSwipePages = true,
     lightTheme = getTheme(context),
     darkTheme = getTheme(context),
     ..
@@ -303,6 +304,7 @@ CourierInbox(
 
 ```kotlin
 val inbox: CourierInbox = view.findViewById(R.id.courierInbox)
+inbox.canSwipePages = true
 inbox.lightTheme = getTheme(context)
 inbox.darkTheme = getTheme(context)
 inbox..
