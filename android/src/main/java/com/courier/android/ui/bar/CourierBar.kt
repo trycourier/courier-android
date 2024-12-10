@@ -1,11 +1,13 @@
 package com.courier.android.ui.bar
 
 import android.content.Context
+import android.graphics.PorterDuff
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.courier.android.R
 import com.courier.android.models.CourierBrand
@@ -23,6 +25,10 @@ class CourierBar @JvmOverloads constructor(context: Context, attrs: AttributeSet
     private fun setup() {
         courierBarButton = findViewById(R.id.courierBarButton)
         courierBarButton.setOnClickListener { openDialog() }
+        courierBarButton.setColorFilter(
+            ContextCompat.getColor(context, R.color.footer_image_tint),
+            PorterDuff.Mode.SRC_IN
+        )
     }
 
     private fun openDialog() {

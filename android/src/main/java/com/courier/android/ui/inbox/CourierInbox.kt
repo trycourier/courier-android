@@ -180,6 +180,17 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
             tabLayout.setSelectedTabIndicatorColor(it)
         }
 
+        refreshTabTheme()
+
+    }
+
+    private fun refreshTabTheme() {
+        pages.forEachIndexed { index, page ->
+            updateTabStyleAt(
+                index = index,
+                isSelected = tabLayout.selectedTabPosition == index
+            )
+        }
     }
 
     private fun updateTabStyleAt(index: Int, isSelected: Boolean) {
@@ -198,7 +209,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
     private fun updateTabBadgeAt(index: Int, count: Int) {
         pages[index].tab?.let { tabView ->
             val titleBadgeView = tabView.findViewById<BadgeTextView>(R.id.tab_badge)
-            titleBadgeView.text = count.toString()
+            titleBadgeView.text = "$count"
             titleBadgeView.isVisible = count > 0
         }
     }
