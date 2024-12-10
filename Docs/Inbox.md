@@ -135,7 +135,7 @@ inbox.setOnClickActionListener { action, message, index ->
 
 The styles you can use to quickly customize the `CourierInbox`.
 
-![Screenshot_20241210-131739](https://github.com/user-attachments/assets/dd878c3f-f24b-456b-be8c-9ea203a89cc1)
+<img width="441" alt="Screenshot 2024-12-09 at 11 19 31 AM" src="https://github.com/user-attachments/assets/dd878c3f-f24b-456b-be8c-9ea203a89cc1">
 
 ```kotlin
 fun getTheme(context: ComponentActivity): CourierInboxTheme {
