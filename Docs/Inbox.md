@@ -51,6 +51,16 @@ If you are using JWT authentication, be sure to enable JWT support on the Courie
 
 &emsp;
 
+# Theme
+
+Your app theme must use the Material Components parent. This is for Material buttons. Set your `themes.xml` like this.
+
+```xml
+<resources>
+    <style name="Your.Theme" parent="Theme.MaterialComponents.DayNight.DarkActionBar" />
+</resources>
+```
+
 # Usage
 
 `CourierInbox` works with all native Android UI frameworks.
