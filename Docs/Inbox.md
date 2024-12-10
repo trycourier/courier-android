@@ -43,13 +43,15 @@ An in-app notification center list you can use to notify your users. Allows you 
 
 &emsp;
 
-# JWT Authentication
+# Requirements
+
+## JWT Authentication
 
 If you are using JWT authentication, be sure to enable JWT support on the Courier Inbox Provider [`here`](https://app.courier.com/integrations/catalog/courier).
 
 <img width="385" alt="Screenshot 2024-12-09 at 11 19 31 AM" src="https://github.com/user-attachments/assets/71c945f3-9fa0-4736-ae0d-a4760cb49220">
 
-# Theme
+## Theme
 
 Your app theme must use the Material Components parent. This is for Material buttons. Set your `themes.xml` like this.
 
@@ -59,7 +61,7 @@ Your app theme must use the Material Components parent. This is for Material but
 </resources>
 ```
 
-# Usage
+## Usage
 
 `CourierInbox` works with all native Android UI frameworks.
 
