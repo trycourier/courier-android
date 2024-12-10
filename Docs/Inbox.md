@@ -207,6 +207,11 @@ fun getTheme(context: Context): CourierInboxTheme {
                 color = primaryLightColor
             )
         ),
+        archivingSwipeActionStyle = CourierStyles.Inbox.ArchivingSwipeActionStyle(
+            CourierStyles.Inbox.SwipeActionStyle(
+                color = primaryColor
+            )
+        ),
         unreadIndicatorStyle = CourierStyles.Inbox.UnreadIndicatorStyle(
             indicator = CourierStyles.Inbox.UnreadIndicator.DOT,
             color = primaryColor
