@@ -150,7 +150,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
     private val viewPager: ViewPager2 by lazy { findViewById(R.id.viewPager) }
     private val courierBar: CourierBar by lazy { findViewById(R.id.courierBar) }
 
-    private lateinit var inboxListener: CourierInboxListener
+    private var inboxListener: CourierInboxListener? = null
 
     init {
         View.inflate(context, R.layout.courier_inbox, this)
@@ -284,7 +284,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        inboxListener.remove()
+        inboxListener?.remove()
     }
 
     private inner class ViewPagerAdapter(private val pages: List<Page>) : RecyclerView.Adapter<ViewPagerAdapter.PageViewHolder>() {
