@@ -90,7 +90,7 @@ Your app theme must use the Material Components parent. This is for Material but
 
 The default `CourierInbox` styles. Colors are using `colorPrimary` located in your `res/values/themes.xml` file.
 
-<img width="441" alt="android-default-inbox-styles" src="https://github.com/user-attachments/assets/7afad8db-6061-49e0-8852-f07eb71c8286">
+<img width="441" alt="android-default-inbox-styles" src="https://github.com/user-attachments/assets/4e9779b9-9d0c-4408-ba12-917eceee7098">
 
 &emsp;
 
@@ -150,7 +150,7 @@ inbox.setOnScrollInboxListener { offsetInDp ->
 
 The styles you can use to quickly customize the `CourierInbox`.
 
-<img width="441" alt="Screenshot 2024-12-09 at 11 19 31 AM" src="https://github.com/user-attachments/assets/dd878c3f-f24b-456b-be8c-9ea203a89cc1">
+<img width="441" alt="Screenshot 2024-12-09 at 11 19 31 AM" src="https://github.com/user-attachments/assets/a203fed8-4f7f-4e63-8f86-887c67338dad">
 
 &emsp;
 
