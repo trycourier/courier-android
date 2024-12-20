@@ -1,8 +1,14 @@
 package com.courier.android.socket
 
+import com.courier.android.Courier
 import com.courier.android.models.CourierException
+import com.courier.android.utils.log
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -26,6 +32,8 @@ open class CourierSocket(internal val url: String) {
     var onMessageReceived: ((String) -> Unit)? = null
     var onClose: ((code: Int, reason: String?) -> Unit)? = null
     var onError: ((error: Exception) -> Unit)? = null
+
+    private var pingJob: Job? = null
 
     suspend fun connect() {
 
@@ -79,12 +87,34 @@ open class CourierSocket(internal val url: String) {
     }
 
     fun disconnect() {
+        stopPing()
         webSocket?.close(NORMAL_CLOSURE_STATUS, null)
     }
 
     suspend fun send(message: Map<String, Any>) = withContext(Dispatchers.IO) {
         val json = Gson().toJson(message)
         return@withContext webSocket?.send(json)
+    }
+
+    fun keepAlive(interval: Long = 300_000L) {
+        stopPing()
+        pingJob = CoroutineScope(Dispatchers.IO).launch {
+            while (true) {
+                delay(interval)
+                try {
+                    send(mapOf(
+                        "action" to "keepAlive"
+                    ))
+                } catch (e: Exception) {
+                    Courier.shared.client?.log(e.localizedMessage ?: "Error occurred on Keep Alive")
+                }
+            }
+        }
+    }
+
+    private fun stopPing() {
+        pingJob?.cancel()
+        pingJob = null
     }
 
 }

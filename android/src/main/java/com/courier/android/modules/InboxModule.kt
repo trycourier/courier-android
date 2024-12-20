@@ -229,6 +229,10 @@ private suspend fun Courier.connectWebSocket() {
     // Subscribe to the events
     socket.sendSubscribe()
 
+    // Keep alive
+    // Will ping every 5 minutes
+    socket.keepAlive()
+
 }
 
 internal fun Courier.closeInbox() {
