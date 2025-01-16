@@ -8,7 +8,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.RemoteMessage
 
-fun RemoteMessage.presentNotification(context: Context, handlingClass: Class<*>?, icon: Int, settingsTitle: String = "Notification settings") {
+fun RemoteMessage.presentNotification(context: Context, handlingClass: Class<*>?, icon: Int = android.R.drawable.ic_dialog_info, settingsTitle: String = "Notification settings") {
 
     try {
 
