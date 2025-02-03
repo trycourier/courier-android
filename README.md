@@ -26,6 +26,12 @@
                 <code>23</code>
             </td>
         </tr>
+        <tr width="600px">
+            <td align="left">Gradle</td>
+            <td align="center">
+               <code>8.4</code>
+            </td>
+        </tr>
     </tbody>
 </table>
 
