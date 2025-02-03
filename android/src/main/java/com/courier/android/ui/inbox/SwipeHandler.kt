@@ -48,29 +48,24 @@ internal class SwipeHandler(
         return typedValue.data
     }
 
+    private var currentSwipeDirection = 0
+    private var pendingLeftToRightSwipeIndex: Int? = null
+
     private val itemTouchHelper = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
 
         override fun onMove(
             recyclerView: RecyclerView,
             viewHolder: RecyclerView.ViewHolder,
             target: RecyclerView.ViewHolder
-        ): Boolean {
-            // We are not supporting drag & drop, so return false
-            return false
-        }
+        ): Boolean = false
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-
-            // Get the index
             val index = viewHolder.layoutPosition
-
-            // Hit the callback
             when (direction) {
-                ItemTouchHelper.LEFT -> {
-                    onRightToLeftSwipe.invoke(index)
-                }
+                ItemTouchHelper.LEFT -> onRightToLeftSwipe.invoke(index)
                 ItemTouchHelper.RIGHT -> {
-                    onLeftToRightSwipe.invoke(index)
+                    pendingLeftToRightSwipeIndex = index
+                    (viewHolder.itemView.parent as? RecyclerView)?.adapter?.notifyItemChanged(index)
                 }
             }
         }
@@ -99,71 +94,79 @@ internal class SwipeHandler(
             actionState: Int,
             isCurrentlyActive: Boolean
         ) {
-            // Draw background and icon during the swipe
             val itemView = viewHolder.itemView
+
+            if (currentSwipeDirection == 0 && dX != 0f) {
+                currentSwipeDirection = if (dX > 0) 1 else -1
+            }
+
+            val adjustedDx = if (dX > 0) {
+                val threshold = itemView.width * 0.25f
+                if (dX <= threshold) dX else threshold + (dX - threshold) * 0.25f
+            } else {
+                dX
+            }
+
             val paint = Paint()
 
-            if (dX > 0) {
-
+            if (adjustedDx > 0) {
                 val position = viewHolder.layoutPosition
                 val assets = getReadAssetForIndex(position)
-
-                // Set the background color for right swipe
                 paint.color = assets["color"]!!
-
-                // Draw the background
                 c.drawRect(
                     itemView.left.toFloat(),
                     itemView.top.toFloat(),
-                    dX,
+                    itemView.left + adjustedDx,
                     itemView.bottom.toFloat(),
                     paint
                 )
-
-                // Set the icon for right swipe
                 val icon: Drawable? = ContextCompat.getDrawable(context, assets["icon"]!!)
                 val iconMargin = (itemView.height - (icon?.intrinsicHeight ?: 0)) / 2
-                val iconTop = itemView.top + (itemView.height - (icon?.intrinsicHeight ?: 0)) / 2
+                val iconTop = itemView.top + iconMargin
                 val iconBottom = iconTop + (icon?.intrinsicHeight ?: 0)
                 val iconLeft = itemView.left + iconMargin
                 val iconRight = iconLeft + (icon?.intrinsicWidth ?: 0)
-
-                // Set the bounds and draw the icon
                 icon?.setBounds(iconLeft, iconTop, iconRight, iconBottom)
                 icon?.draw(c)
-
-            } else if (dX < 0) {
-
-                // Set the background color for left swipe
+            } else if (adjustedDx < 0) {
                 paint.color = archiveBackgroundColor ?: getThemeColors(context)["destructiveColor"]!!
-
-                // Draw the background
                 c.drawRect(
-                    itemView.right + dX,
+                    itemView.right + adjustedDx,
                     itemView.top.toFloat(),
                     itemView.right.toFloat(),
                     itemView.bottom.toFloat(),
                     paint
                 )
-
-                // Set the icon for left swipe
                 val res = archiveIcon ?: R.drawable.archive
                 val icon: Drawable? = ContextCompat.getDrawable(context, res)
                 val iconMargin = (itemView.height - (icon?.intrinsicHeight ?: 0)) / 2
-                val iconTop = itemView.top + (itemView.height - (icon?.intrinsicHeight ?: 0)) / 2
+                val iconTop = itemView.top + iconMargin
                 val iconBottom = iconTop + (icon?.intrinsicHeight ?: 0)
                 val iconRight = itemView.right - iconMargin
                 val iconLeft = iconRight - (icon?.intrinsicWidth ?: 0)
-
-                // Set the bounds and draw the icon
                 icon?.setBounds(iconLeft, iconTop, iconRight, iconBottom)
                 icon?.draw(c)
             }
 
-            // Call the super method last to draw the item on top of the background and icon
-            super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+            super.onChildDraw(c, recyclerView, viewHolder, adjustedDx, dY, actionState, isCurrentlyActive)
         }
 
+        override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder): Float {
+            return if (currentSwipeDirection == 1) 0.25f else 0.5f
+        }
+
+        override fun getSwipeEscapeVelocity(defaultValue: Float): Float {
+            return if (currentSwipeDirection == 1) Float.MAX_VALUE else defaultValue
+        }
+
+        override fun clearView(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder) {
+            super.clearView(recyclerView, viewHolder)
+            if (pendingLeftToRightSwipeIndex == viewHolder.layoutPosition) {
+                onLeftToRightSwipe.invoke(viewHolder.layoutPosition)
+                pendingLeftToRightSwipeIndex = null
+            }
+            currentSwipeDirection = 0
+        }
     }
 
     private var swipeInteractionHelper: ItemTouchHelper? = null
