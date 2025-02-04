@@ -21,8 +21,10 @@ import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
 import com.courier.android.modules.addInboxListener
+import com.courier.android.modules.clickMessage
 import com.courier.android.ui.bar.CourierBar
 import com.courier.android.utils.isDarkMode
+import com.courier.android.utils.log
 import com.courier.android.utils.setCourierFont
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -127,7 +129,15 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
     private fun makeListView(feed: InboxMessageFeed, context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0): InboxListView {
         return InboxListView(context, attrs, defStyleAttr, feed, inbox = this).apply {
             setOnClickMessageListener { message, index ->
+
+                // Click the message
+                Courier.shared.clickMessage(messageId = message.messageId) {
+                    Courier.shared.client?.log("Clicked message: ${message.messageId}")
+                }
+
+                // Perform the callback
                 onClickInboxMessageAtIndex?.invoke(message, index)
+
             }
             setOnLongPressMessageListener { message, index ->
                 onLongPressInboxMessageAtIndex?.invoke(message, index)

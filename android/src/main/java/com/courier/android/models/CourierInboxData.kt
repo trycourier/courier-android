@@ -135,6 +135,7 @@ class CourierInboxData(
             InboxSocket.EventType.OPENED -> open(index, inboxFeed, handler)
             InboxSocket.EventType.UNOPENED -> unopen(index, inboxFeed, handler)
             InboxSocket.EventType.ARCHIVE -> archive(index, inboxFeed, handler)
+            InboxSocket.EventType.CLICK -> click(index, inboxFeed, handler)
             else -> return false
         }
     }
@@ -152,7 +153,7 @@ class CourierInboxData(
             InboxSocket.EventType.ARCHIVE -> client.inbox.archive(messageId = message.messageId)
             InboxSocket.EventType.UNARCHIVE -> { /* No action for unarchive */ }
             InboxSocket.EventType.CLICK -> {
-                message.trackingIds?.clickTrackingId?.let { trackingId ->
+                message.clickTrackingId?.let { trackingId ->
                     client.inbox.click(messageId = message.messageId, trackingId = trackingId)
                 }
             }
@@ -298,6 +299,14 @@ class CourierInboxData(
             }
         }
         return false
+    }
+
+    private fun click(
+        index: Int,
+        inboxFeed: InboxMessageFeed,
+        handler: InboxMutationHandler
+    ): Boolean {
+        return true
     }
 
     private fun findInsertIndex(newMessage: InboxMessage, messages: List<InboxMessage>): Int? {

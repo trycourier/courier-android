@@ -22,10 +22,9 @@ import com.courier.android.models.markAsClicked
 import com.courier.android.models.markAsOpened
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
-import com.courier.android.modules.clientKey
 import com.courier.android.modules.fetchNextInboxPage
+import com.courier.android.modules.isUserSignedIn
 import com.courier.android.modules.refreshInbox
-import com.courier.android.modules.userId
 import com.courier.android.ui.infoview.CourierInfoView
 import com.courier.android.utils.error
 import com.courier.android.utils.forceReactNativeLayoutFix
@@ -348,7 +347,7 @@ internal class InboxListView @JvmOverloads constructor(
     private fun openVisibleMessages() = coroutineScope.launch(Dispatchers.IO) {
 
         // Ensure we have a user
-        if (Courier.shared.clientKey == null || Courier.shared.userId == null) {
+        if (!Courier.shared.isUserSignedIn) {
             return@launch
         }
 
@@ -375,7 +374,6 @@ internal class InboxListView @JvmOverloads constructor(
 
                     // Mark the message as opened
                     return@map async {
-                        message.setOpened()
                         message.markAsOpened()
                     }
 

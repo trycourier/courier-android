@@ -34,7 +34,6 @@ internal interface InboxMutationHandler {
     suspend fun onInboxItemUpdated(index: Int, feed: InboxMessageFeed, message: InboxMessage)
     suspend fun onInboxPageFetched(feed: InboxMessageFeed, messageSet: InboxMessageSet)
     suspend fun onInboxMessageReceived(message: InboxMessage)
-    suspend fun onInboxEventReceived(event: InboxSocket.MessageEvent)
     suspend fun onInboxError(error: Exception)
     suspend fun onUnreadCountChange(count: Int)
 }

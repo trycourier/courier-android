@@ -6,18 +6,25 @@ import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.TypedValue
+import android.view.HapticFeedbackConstants
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.Courier
 import com.courier.android.R
 import com.courier.android.modules.inboxData
+import kotlin.math.abs
 
 internal class SwipeHandler(
     private val context: Context,
     private val onLeftToRightSwipe: (Int) -> Unit,
     private val onRightToLeftSwipe: (Int) -> Unit,
 ) {
+
+    companion object {
+        private const val READING_THRESHOLD = 0.25f
+        private const val ARCHIVING_THRESHOLD = 0.5f
+    }
 
     var readIcon: Int? = null
     var unreadIcon: Int? = null
@@ -85,6 +92,8 @@ internal class SwipeHandler(
             }
         }
 
+        private var hasVibrated = false
+
         override fun onChildDraw(
             c: Canvas,
             recyclerView: RecyclerView,
@@ -100,11 +109,30 @@ internal class SwipeHandler(
                 currentSwipeDirection = if (dX > 0) 1 else -1
             }
 
+            val didReachThreshold: Boolean
+
             val adjustedDx = if (dX > 0) {
-                val threshold = itemView.width * 0.25f
-                if (dX <= threshold) dX else threshold + (dX - threshold) * 0.25f
+                val threshold = itemView.width * READING_THRESHOLD
+                didReachThreshold = dX >= threshold
+                if (didReachThreshold) threshold + (dX - threshold) * READING_THRESHOLD else dX
             } else {
+                val threshold = itemView.width * ARCHIVING_THRESHOLD
+                didReachThreshold = abs(dX) >= threshold
                 dX
+            }
+
+            // Reset the haptic vibration
+            if (!didReachThreshold && hasVibrated) {
+                hasVibrated = false
+            }
+
+            // Perform the haptic vibration here
+            if (!hasVibrated && didReachThreshold) {
+                hasVibrated = true
+                itemView.performHapticFeedback(
+                    HapticFeedbackConstants.VIRTUAL_KEY,
+                    HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+                )
             }
 
             val paint = Paint()
@@ -148,11 +176,15 @@ internal class SwipeHandler(
                 icon?.draw(c)
             }
 
+            if (dX == 0f) {
+                hasVibrated = false
+            }
+
             super.onChildDraw(c, recyclerView, viewHolder, adjustedDx, dY, actionState, isCurrentlyActive)
         }
 
         override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder): Float {
-            return if (currentSwipeDirection == 1) 0.25f else 0.5f
+            return if (currentSwipeDirection == 1) READING_THRESHOLD else ARCHIVING_THRESHOLD
         }
 
         override fun getSwipeEscapeVelocity(defaultValue: Float): Float {
