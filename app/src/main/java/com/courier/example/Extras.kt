@@ -30,6 +30,7 @@ suspend fun showAlert(context: Context, title: String, subtitle: String? = null,
         val editText = EditText(context)
         editText.setSingleLine()
         editText.hint = item.key
+        editText.setText(item.value)
         layout.addView(editText)
         return@map editText
     }

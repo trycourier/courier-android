@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.activity.CourierActivity
+import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.modules.addInboxListener
@@ -47,8 +48,9 @@ class MainActivity : CourierActivity() {
             Courier.shared.userId?.let { userId ->
 
                 val jwt = ExampleServer().generateJWT(
-                    authKey = Env.COURIER_AUTH_KEY,
+                    authKey = Env.COURIER_AUTH_KEY, // TODO: Handle this
                     userId = userId,
+                    baseUrl = CourierClient.ApiUrls().rest // TODO: Make this use the shared preference
                 )
 
                 val tenantId = Courier.shared.tenantId

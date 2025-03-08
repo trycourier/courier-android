@@ -47,7 +47,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(INBOX_GRAPH_QL)
+            .url(options.apiUrls.inboxGraphql)
             .addHeader("x-courier-user-id", options.userId)
             .apply {
                 options.jwt?.let { addHeader("Authorization", "Bearer $it") } ?: options.clientKey?.let { addHeader("x-courier-client-key", it) }
@@ -101,7 +101,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(INBOX_GRAPH_QL)
+            .url(options.apiUrls.inboxGraphql)
             .addHeader("x-courier-user-id", options.userId)
             .apply {
                 options.jwt?.let { addHeader("Authorization", "Bearer $it") } ?: options.clientKey?.let { addHeader("x-courier-client-key", it) }
@@ -155,7 +155,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(INBOX_GRAPH_QL)
+            .url(options.apiUrls.inboxGraphql)
             .addHeader("x-courier-user-id", options.userId)
             .apply {
                 options.jwt?.let { addHeader("Authorization", "Bearer $it") } ?: options.clientKey?.let { addHeader("x-courier-client-key", it) }
@@ -180,7 +180,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(INBOX_GRAPH_QL)
+            .url(options.apiUrls.inboxGraphql)
             .addHeader("x-courier-user-id", options.userId)
             .apply {
                 options.jwt?.let { addHeader("Authorization", "Bearer $it") } ?: options.clientKey?.let { addHeader("x-courier-client-key", it) }
@@ -205,7 +205,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(INBOX_GRAPH_QL)
+            .url(options.apiUrls.inboxGraphql)
             .addHeader("x-courier-user-id", options.userId)
             .apply {
                 options.connectionId?.let { addHeader("x-courier-client-source-id", options.connectionId) }
@@ -229,7 +229,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(INBOX_GRAPH_QL)
+            .url(options.apiUrls.inboxGraphql)
             .addHeader("x-courier-user-id", options.userId)
             .apply {
                 options.connectionId?.let { addHeader("x-courier-client-source-id", options.connectionId) }
@@ -253,7 +253,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(INBOX_GRAPH_QL)
+            .url(options.apiUrls.inboxGraphql)
             .addHeader("x-courier-user-id", options.userId)
             .apply {
                 options.connectionId?.let { addHeader("x-courier-client-source-id", options.connectionId) }
@@ -277,7 +277,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(INBOX_GRAPH_QL)
+            .url(options.apiUrls.inboxGraphql)
             .addHeader("x-courier-user-id", options.userId)
             .apply {
                 options.connectionId?.let { addHeader("x-courier-client-source-id", options.connectionId) }
@@ -301,7 +301,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(INBOX_GRAPH_QL)
+            .url(options.apiUrls.inboxGraphql)
             .addHeader("x-courier-user-id", options.userId)
             .apply {
                 options.connectionId?.let { addHeader("x-courier-client-source-id", options.connectionId) }
@@ -325,7 +325,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(INBOX_GRAPH_QL)
+            .url(options.apiUrls.inboxGraphql)
             .addHeader("x-courier-user-id", options.userId)
             .apply {
                 options.connectionId?.let { addHeader("x-courier-client-source-id", options.connectionId) }

@@ -10,7 +10,7 @@ class TokenClient(private val options: CourierClient.Options) : CourierApiClient
 
     suspend fun putUserToken(token: String, provider: String, device: CourierDevice) {
 
-        val url = "${BASE_REST}/users/${options.userId}/tokens/$token"
+        val url = "${options.apiUrls.rest}/users/${options.userId}/tokens/$token"
 
         val json = gson.toJson(
             CourierToken(
@@ -34,7 +34,7 @@ class TokenClient(private val options: CourierClient.Options) : CourierApiClient
 
     suspend fun deleteUserToken(token: String) {
 
-        val url = "${BASE_REST}/users/${options.userId}/tokens/$token"
+        val url = "${options.apiUrls.rest}/users/${options.userId}/tokens/$token"
 
         val request = Request.Builder()
             .url(url)

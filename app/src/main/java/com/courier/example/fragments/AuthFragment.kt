@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
+import com.courier.android.client.CourierClient
 import com.courier.android.modules.isUserSignedIn
 import com.courier.android.modules.signIn
 import com.courier.android.modules.signOut
@@ -39,7 +40,17 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
         authButton.isEnabled = true
 
         if (Courier.shared.isUserSignedIn) {
-            authTextView.text = "Courier User Id: ${Courier.shared.userId}\n\nTenant Id: ${Courier.shared.tenantId ?: "None"}"
+
+            val values = mapOf(
+                "userId" to Courier.shared.userId,
+                "tenantId" to Courier.shared.tenantId,
+                "restUrl" to Courier.shared.client?.options?.apiUrls?.rest,
+                "graphqlUrl" to Courier.shared.client?.options?.apiUrls?.graphql,
+                "inboxGraphqlUrl" to Courier.shared.client?.options?.apiUrls?.inboxGraphql,
+                "inboxWebSocketUrl" to Courier.shared.client?.options?.apiUrls?.inboxWebSocket,
+            )
+
+            authTextView.text = values.map { "${it.key}: ${it.value}" }.joinToString("\n")
             authButton.text = "Sign Out"
             authButton.setOnClickListener {
                 signOut()
@@ -60,12 +71,19 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
 
         try {
 
+            val fallbackUrls = CourierClient.ApiUrls()
+
             val values = showAlert(
                 context = requireContext(),
-                title = "Enter a User Id & Tenant Id",
+                title = "Enter Sign In Credentials",
                 items = mapOf(
                     "userId" to "",
-                    "tenantId" to ""
+                    "tenantId" to "",
+                    "apiKey" to Env.COURIER_AUTH_KEY,
+                    "restUrl" to fallbackUrls.rest,
+                    "graphqlUrl" to fallbackUrls.graphql,
+                    "inboxGraphqlUrl" to fallbackUrls.inboxGraphql,
+                    "inboxWebSocketUrl" to fallbackUrls.inboxWebSocket,
                 )
             )
 
@@ -73,14 +91,21 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
             val tenantId = values["tenantId"]!!.ifEmpty { null }
 
             val jwt = ExampleServer().generateJWT(
-                authKey = Env.COURIER_AUTH_KEY,
-                userId = userId
+                authKey = values["apiKey"]!!.ifEmpty { Env.COURIER_AUTH_KEY },
+                userId = userId,
+                baseUrl = values["restUrl"]!!.ifEmpty { fallbackUrls.rest }
             )
 
             Courier.shared.signIn(
                 userId = userId,
                 accessToken = jwt,
                 tenantId = tenantId,
+                apiUrls = CourierClient.ApiUrls(
+                    rest = values["restUrl"]!!.ifEmpty { fallbackUrls.rest },
+                    graphql = values["graphqlUrl"]!!.ifEmpty { fallbackUrls.graphql },
+                    inboxGraphql = values["inboxGraphqlUrl"]!!.ifEmpty { fallbackUrls.inboxGraphql },
+                    inboxWebSocket = values["inboxWebSocketUrl"]!!.ifEmpty { fallbackUrls.inboxWebSocket },
+                )
             )
 
         } catch (e: Exception) {

@@ -13,7 +13,7 @@ class PreferenceClient(private val options: CourierClient.Options): CourierApiCl
 
     suspend fun getUserPreferences(paginationCursor: String? = null): CourierUserPreferences {
 
-        var url = "${BASE_REST}/users/${options.userId}/preferences"
+        var url = "${options.apiUrls.rest}/users/${options.userId}/preferences"
 
         paginationCursor?.let { cursor ->
             url += "?cursor=$cursor"
@@ -33,7 +33,7 @@ class PreferenceClient(private val options: CourierClient.Options): CourierApiCl
 
     suspend fun getUserPreferenceTopic(topicId: String): CourierPreferenceTopic {
 
-        val url = "${BASE_REST}/users/${options.userId}/preferences/$topicId"
+        val url = "${options.apiUrls.rest}/users/${options.userId}/preferences/$topicId"
 
         val request = Request.Builder()
             .url(url)
@@ -51,7 +51,7 @@ class PreferenceClient(private val options: CourierClient.Options): CourierApiCl
 
     suspend fun putUserPreferenceTopic(topicId: String, status: CourierPreferenceStatus, hasCustomRouting: Boolean, customRouting: List<CourierPreferenceChannel>) {
 
-        val url = "${BASE_REST}/users/${options.userId}/preferences/$topicId"
+        val url = "${options.apiUrls.rest}/users/${options.userId}/preferences/$topicId"
 
         val json = gson.toJson(mapOf(
             "topic" to mapOf(

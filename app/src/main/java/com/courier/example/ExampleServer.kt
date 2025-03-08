@@ -13,7 +13,7 @@ internal class ExampleServer {
 
     data class Response(val token: String)
 
-    internal suspend fun generateJWT(authKey: String, userId: String): String {
+    internal suspend fun generateJWT(authKey: String, userId: String, baseUrl: String): String {
 
         val json = JSONObject(
             mapOf(
@@ -23,7 +23,7 @@ internal class ExampleServer {
         ).toString()
 
         val request = Request.Builder()
-            .url("https://api.courier.com/auth/issue-token")
+            .url("${baseUrl}/auth/issue-token")
             .addHeader("Authorization", "Bearer $authKey")
             .addHeader("Content-Type", "application/json")
             .post(json.toRequestBody())

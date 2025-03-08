@@ -1,7 +1,6 @@
 package com.courier.android.socket
 
 import com.courier.android.Courier
-import com.courier.android.client.CourierApiClient
 import com.courier.android.client.CourierClient
 import com.courier.android.models.InboxMessage
 import com.google.gson.Gson
@@ -29,7 +28,7 @@ internal object InboxSocketManager {
 
 }
 
-class InboxSocket(private val options: CourierClient.Options) : CourierSocket(url = buildUrl(options.clientKey, options.jwt)) {
+class InboxSocket(private val options: CourierClient.Options) : CourierSocket(url = buildUrl(options)) {
 
     enum class PayloadType(val value: String) {
         @SerializedName("event")
@@ -118,11 +117,11 @@ class InboxSocket(private val options: CourierClient.Options) : CourierSocket(ur
 
     companion object {
 
-        private fun buildUrl(clientKey: String?, jwt: String?): String {
-            var url = CourierApiClient.INBOX_WEBSOCKET
+        private fun buildUrl(options: CourierClient.Options): String {
+            var url = options.apiUrls.inboxWebSocket
             url += when {
-                jwt != null -> "/?auth=$jwt"
-                clientKey != null -> "/?clientKey=$clientKey"
+                options.jwt != null -> "/?auth=${options.jwt}"
+                options.clientKey != null -> "/?clientKey=${options.clientKey}"
                 else -> ""
             }
             return url

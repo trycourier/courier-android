@@ -8,6 +8,7 @@ class CourierClient(
     userId: String,
     connectionId: String? = null,
     tenantId: String? = null,
+    apiUrls: ApiUrls = ApiUrls(),
     showLogs: Boolean = BuildConfig.DEBUG
 ) {
 
@@ -16,13 +17,21 @@ class CourierClient(
         val default = CourierClient(userId = "default")
     }
 
+    data class ApiUrls(
+        val rest: String = "https://api.courier.com",
+        val graphql: String = "https://api.courier.com/client/q",
+        val inboxGraphql: String = "https://inbox.courier.com/q",
+        val inboxWebSocket: String = "wss://realtime.courier.com"
+    )
+
     data class Options(
         val jwt: String?,
         val clientKey: String?,
         val userId: String,
         val connectionId: String?,
         val tenantId: String?,
-        val showLogs: Boolean
+        val apiUrls: ApiUrls,
+        val showLogs: Boolean,
     )
 
     val options = Options(
@@ -31,6 +40,7 @@ class CourierClient(
         userId = userId,
         connectionId = connectionId,
         tenantId = tenantId,
+        apiUrls = apiUrls,
         showLogs = showLogs,
     )
 

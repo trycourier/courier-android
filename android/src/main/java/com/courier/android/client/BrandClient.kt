@@ -29,7 +29,7 @@ class BrandClient(private val options: CourierClient.Options): CourierApiClient(
         """.toGraphQuery()
 
         val request = Request.Builder()
-            .url(BASE_GRAPH_QL)
+            .url(options.apiUrls.graphql)
             .addHeader("x-courier-user-id", options.userId)
             .apply {
                 options.jwt?.let { addHeader("Authorization", "Bearer $it") } ?: options.clientKey?.let { addHeader("x-courier-client-key", it) }

@@ -15,7 +15,7 @@ import java.util.UUID
  * Function to set the current credentials for the user and their access token
  * You should consider using this in areas where you update your local user's state
  */
-suspend fun Courier.signIn(userId: String, tenantId: String? = null, accessToken: String, clientKey: String? = null, showLogs: Boolean = BuildConfig.DEBUG) = withContext(Dispatchers.IO) {
+suspend fun Courier.signIn(userId: String, tenantId: String? = null, accessToken: String, clientKey: String? = null, apiUrls: CourierClient.ApiUrls = CourierClient.ApiUrls(), showLogs: Boolean = BuildConfig.DEBUG) = withContext(Dispatchers.IO) {
 
     // Sign user out if needed
     if (Courier.shared.isUserSignedIn) {
@@ -33,6 +33,7 @@ suspend fun Courier.signIn(userId: String, tenantId: String? = null, accessToken
         userId = userId,
         connectionId = connectionId,
         tenantId = tenantId,
+        apiUrls = apiUrls,
         showLogs = showLogs,
     )
 
@@ -140,9 +141,9 @@ val Courier.isUserSignedIn get() = userId != null && accessToken != null
  * Traditional Callbacks
  */
 
-fun Courier.signIn(userId: String, tenantId: String?, accessToken: String, clientKey: String?, showLogs: Boolean = BuildConfig.DEBUG, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
+fun Courier.signIn(userId: String, tenantId: String?, accessToken: String, clientKey: String?, apiUrls: CourierClient.ApiUrls = CourierClient.ApiUrls(), showLogs: Boolean = BuildConfig.DEBUG, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
     try {
-        signIn(userId, tenantId, accessToken, clientKey, showLogs)
+        signIn(userId, tenantId, accessToken, clientKey, apiUrls, showLogs)
         onSuccess()
     } catch (e: Exception) {
         onFailure(e)
