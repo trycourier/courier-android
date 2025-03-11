@@ -14,7 +14,7 @@ import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-suspend fun showAlert(context: Context, title: String, subtitle: String? = null, items: Map<String, String> = emptyMap()) = suspendCoroutine { continuation ->
+suspend fun showAlert(context: Context, title: String, subtitle: String? = null, items: Map<String, String> = emptyMap(), action: String = "OK") = suspendCoroutine { continuation ->
 
     val alert = AlertDialog.Builder(context)
     alert.setTitle(title)
@@ -39,7 +39,7 @@ suspend fun showAlert(context: Context, title: String, subtitle: String? = null,
 
     alert.setView(layout)
 
-    alert.setPositiveButton("OK") { _, _ ->
+    alert.setPositiveButton(action) { _, _ ->
 
         val values = editTexts.mapIndexed { index, editText ->
             items.keys.elementAt(index) to editText.text.toString()

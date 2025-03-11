@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -156,7 +157,7 @@ class ComposeInboxActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         Courier.initialize(this)
         setContent {
-            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            Scaffold(modifier = Modifier.fillMaxSize().systemBarsPadding()) { innerPadding ->
                 CourierInbox(
                     canSwipePages = true,
                     lightTheme = getTheme(this),
