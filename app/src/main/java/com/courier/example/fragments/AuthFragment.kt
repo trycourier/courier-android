@@ -21,6 +21,7 @@ import com.courier.example.ExampleServer
 import com.courier.example.KeyValueListItem
 import com.courier.example.R
 import com.courier.example.showAlert
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
 class AuthFragment : Fragment(R.layout.fragment_auth) {
@@ -37,7 +38,30 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
         resetButton = view.findViewById(R.id.resetButton)
         authValues = view.findViewById(R.id.authValues)
         authPreferences = AuthPreferences(requireContext())
+        setupResetButton()
+        refresh()
+    }
 
+    private fun setupResetButton() {
+        resetButton.setOnClickListener {
+            showResetConfirmationDialog()
+        }
+    }
+
+    private fun showResetConfirmationDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Reset Settings")
+            .setMessage("Are you sure you want to reset all settings to default values? This action cannot be undone.")
+            .setPositiveButton("Reset") { _, _ ->
+                resetSettings()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun resetSettings() {
+        authPreferences.reset()
+        Toast.makeText(requireContext(), "Settings reset to defaults", Toast.LENGTH_SHORT).show()
         refresh()
     }
 
