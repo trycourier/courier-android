@@ -52,7 +52,7 @@ suspend fun Courier.signIn(userId: String, tenantId: String? = null, accessToken
     )
 
     putPushTokens()
-    refreshInbox()
+    restartInbox()
     notifyListeners()
 
 }

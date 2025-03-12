@@ -35,16 +35,17 @@ open class CourierSocket(internal val url: String) {
 
     private var pingJob: Job? = null
 
-    suspend fun connect() {
+    /** Dynamically checks if the WebSocket is connected */
+    val isConnected: Boolean
+        get() = webSocket != null
 
+    suspend fun connect() {
         // Disconnect if already connected
         disconnect()
 
-        // Validate URL
         val request = Request.Builder().url(url).build()
 
         return suspendCancellableCoroutine { continuation ->
-
             val listener = object : WebSocketListener() {
 
                 override fun onOpen(webSocket: WebSocket, response: Response) {
@@ -63,16 +64,17 @@ open class CourierSocket(internal val url: String) {
 
                 override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
                     webSocket.close(NORMAL_CLOSURE_STATUS, null)
+                    this@CourierSocket.webSocket = null
                     onClose?.invoke(code, reason)
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                    this@CourierSocket.webSocket = null
                     onError?.invoke(CourierException.inboxWebSocketFail)
                     if (continuation.isActive) {
                         continuation.resumeWith(Result.failure(t))
                     }
                 }
-
             }
 
             webSocket = client.newWebSocket(request, listener)
@@ -81,14 +83,13 @@ open class CourierSocket(internal val url: String) {
             return@suspendCancellableCoroutine continuation.invokeOnCancellation {
                 disconnect()
             }
-
         }
-
     }
 
     fun disconnect() {
         stopPing()
         webSocket?.close(NORMAL_CLOSURE_STATUS, null)
+        webSocket = null
     }
 
     suspend fun send(message: Map<String, Any>) = withContext(Dispatchers.IO) {
@@ -102,9 +103,7 @@ open class CourierSocket(internal val url: String) {
             while (true) {
                 delay(interval)
                 try {
-                    send(mapOf(
-                        "action" to "keepAlive"
-                    ))
+                    send(mapOf("action" to "keepAlive"))
                 } catch (e: Exception) {
                     Courier.shared.client?.log(e.localizedMessage ?: "Error occurred on Keep Alive")
                 }
@@ -116,5 +115,4 @@ open class CourierSocket(internal val url: String) {
         pingJob?.cancel()
         pingJob = null
     }
-
 }

@@ -16,7 +16,6 @@ import com.courier.android.R
 import com.courier.android.models.CourierException
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
-import com.courier.android.models.InboxMessageSet
 import com.courier.android.models.markAsArchived
 import com.courier.android.models.markAsClicked
 import com.courier.android.models.markAsOpened
@@ -205,16 +204,16 @@ internal class InboxListView @JvmOverloads constructor(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    internal fun setMessageSet(set: InboxMessageSet) {
+    internal fun setInbox(messages: List<InboxMessage>, canPaginate: Boolean) {
 
-        loadingAdapter.canPage = set.canPaginate
+        loadingAdapter.canPage = canPaginate
 
         refreshAdapters(
-            showMessages = set.messages.isNotEmpty(),
-            showLoading = set.canPaginate
+            showMessages = messages.isNotEmpty(),
+            showLoading = canPaginate
         )
 
-        messagesAdapter.messages = set.messages.toMutableList()
+        messagesAdapter.messages = messages.toMutableList()
 
         state = if (messagesAdapter.messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT
         messagesAdapter.notifyDataSetChanged()
@@ -224,20 +223,20 @@ internal class InboxListView @JvmOverloads constructor(
 
     }
 
-    internal fun addPage(set: InboxMessageSet) {
+    internal fun addPage(messages: List<InboxMessage>, canPaginate: Boolean) {
 
-        loadingAdapter.canPage = set.canPaginate
+        loadingAdapter.canPage = canPaginate
 
         refreshAdapters(
-            showMessages = set.messages.isNotEmpty(),
-            showLoading = set.canPaginate
+            showMessages = messages.isNotEmpty(),
+            showLoading = canPaginate
         )
 
         // Get the current size of the existing messages
         val currentMessageCount = messagesAdapter.messages.size
 
         // Add new messages to the end of the list
-        val newMessages = set.messages.toMutableList()
+        val newMessages = messages.toMutableList()
         if (newMessages.isNotEmpty()) {
             messagesAdapter.messages.addAll(newMessages)
             state = if (messagesAdapter.messages.isEmpty()) State.EMPTY.apply { title = "No messages found" } else State.CONTENT

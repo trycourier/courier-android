@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
@@ -18,12 +19,13 @@ import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
 import com.courier.android.modules.addInboxListener
+import com.courier.android.modules.feedMessages
 import com.courier.android.modules.fetchNextInboxPage
-import com.courier.android.modules.inboxData
 import com.courier.android.modules.refreshInbox
 import com.courier.android.ui.inbox.InboxMessageFeed
 import com.courier.example.R
 import com.courier.example.toJson
+import kotlinx.coroutines.launch
 
 
 class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
@@ -36,6 +38,7 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
     private val loadingAdapter = LoadingAdapter()
     private val adapter = ConcatAdapter(messagesAdapter)
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -56,58 +59,42 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
 
         }
 
-        // Setup the listener
-        inboxListener = Courier.shared.addInboxListener(
-            onLoading = {
+        lifecycleScope.launch {
 
-                refreshAdapters(
-                    showLoading = true
-                )
+            // Setup the listener
+            inboxListener = Courier.shared.addInboxListener(
+                onLoading = {
+                    refreshAdapters(
+                        showLoading = true
+                    )
+                },
+                onError = { e ->
+                    stateTextView.text = e.message
+                    print(e)
+                    refreshAdapters()
+                },
+                onMessagesChanged = { messages, canPaginate, feed ->
+                    if (feed == InboxMessageFeed.FEED) {
+                        refreshAdapters(
+                            showMessages = Courier.shared.feedMessages.isNotEmpty(),
+                            showLoading = canPaginate
+                        )
+                    }
+                },
+                onPageAdded = { messages, canPaginate, isFirstPage, feed ->
+                    if (feed == InboxMessageFeed.FEED) {
+                        refreshAdapters(
+                            showMessages = Courier.shared.feedMessages.isNotEmpty(),
+                            showLoading = canPaginate
+                        )
+                    }
+                },
+                onMessageEvent = { message, index, feed, event ->
+                    messagesAdapter.notifyDataSetChanged()
+                },
+            )
 
-            },
-            onError = { e ->
-
-                stateTextView.text = e.message
-
-                print(e)
-                refreshAdapters()
-
-            },
-            onMessageAdded = { feed, i, message ->
-
-                refreshAdapters(
-                    showMessages = Courier.shared.inboxData?.feed?.messages.orEmpty().isNotEmpty(),
-                    showLoading = false
-                )
-
-            },
-            onMessageChanged = { feed, i, message ->
-
-                refreshAdapters(
-                    showMessages = Courier.shared.inboxData?.feed?.messages.orEmpty().isNotEmpty(),
-                    showLoading = false
-                )
-
-            },
-            onMessageRemoved = { feed, i, message ->
-
-                refreshAdapters(
-                    showMessages = Courier.shared.inboxData?.feed?.messages.orEmpty().isNotEmpty(),
-                    showLoading = false
-                )
-
-            },
-            onFeedChanged = { set ->
-
-                stateTextView.text = "No messages found"
-
-                refreshAdapters(
-                    showMessages = set.messages.isNotEmpty(),
-                    showLoading = set.canPaginate
-                )
-
-            }
-        )
+        }
 
     }
 
@@ -136,7 +123,7 @@ class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) 
 
 class MessagesAdapter : RecyclerView.Adapter<MessageItemViewHolder>() {
 
-    private val messages get() = Courier.shared.inboxData?.feed?.messages.orEmpty()
+    private val messages get() = Courier.shared.feedMessages
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageItemViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.message_item, parent, false)
@@ -147,7 +134,7 @@ class MessagesAdapter : RecyclerView.Adapter<MessageItemViewHolder>() {
         val inboxMessage = messages[position]
         val isRead = inboxMessage.isRead
         holder.textView.text = inboxMessage.toJson()
-        holder.textView.setBackgroundColor(if (isRead) Color.TRANSPARENT else Color.GREEN)
+        holder.textView.setBackgroundColor(if (isRead) Color.TRANSPARENT else Color.argb(64, 0, 0, 255))
         holder.textView.setOnClickListener {
             if (isRead) inboxMessage.markAsUnread() else inboxMessage.markAsRead()
         }

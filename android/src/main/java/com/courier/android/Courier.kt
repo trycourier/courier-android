@@ -10,29 +10,14 @@ import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierAuthenticationListener
 import com.courier.android.models.CourierException
-import com.courier.android.models.CourierInboxData
-import com.courier.android.models.CourierInboxListener
-import com.courier.android.models.InboxMessage
-import com.courier.android.models.InboxMessageSet
-import com.courier.android.modules.InboxMutationHandler
+import com.courier.android.modules.InboxModule
 import com.courier.android.modules.linkInbox
-import com.courier.android.modules.notifyError
-import com.courier.android.modules.notifyInboxUpdated
-import com.courier.android.modules.notifyLoading
-import com.courier.android.modules.notifyMessageAdded
-import com.courier.android.modules.notifyMessageRemoved
-import com.courier.android.modules.notifyMessageUpdated
-import com.courier.android.modules.notifyPageAdded
-import com.courier.android.modules.notifyUnreadCountChange
 import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.unlinkInbox
-import com.courier.android.ui.inbox.InboxMessageFeed
 import com.courier.android.utils.NotificationEventBus
-import com.courier.android.utils.log
 import com.courier.android.utils.warn
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -59,7 +44,7 @@ Android Documentation: https://github.com/trycourier/courier-android
 
  */
 
-class Courier private constructor(val context: Context) : Application.ActivityLifecycleCallbacks, InboxMutationHandler {
+class Courier private constructor(val context: Context) : Application.ActivityLifecycleCallbacks {
 
     companion object {
 
@@ -76,11 +61,6 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
         // Async
         private val COURIER_COROUTINE_CONTEXT by lazy { Job() }
         internal val coroutineScope = CoroutineScope(COURIER_COROUTINE_CONTEXT)
-
-        // Inbox
-        const val DEFAULT_PAGINATION_LIMIT = 32
-        const val DEFAULT_MAX_PAGINATION_LIMIT = 100
-        const val DEFAULT_MIN_PAGINATION_LIMIT = 1
 
         // This will not create a memory leak
         // Please call Courier.initialize(context) before using Courier.shared
@@ -140,6 +120,9 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
 
     }
 
+    // Inbox
+    internal val inboxModule = InboxModule(this)
+
     // Client API
     var client: CourierClient? = null
         internal set
@@ -147,14 +130,6 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     // Authentication
     var authListeners: MutableList<CourierAuthenticationListener> = mutableListOf()
         private set
-
-    // Inbox
-    internal var isPagingInbox = false
-    internal var paginationLimit = DEFAULT_PAGINATION_LIMIT
-    internal var courierInboxData: CourierInboxData? = null
-    internal var inboxListeners: MutableList<CourierInboxListener> = mutableListOf()
-    internal val inboxMutationHandler: InboxMutationHandler by lazy { this }
-    internal var dataPipe: Deferred<CourierInboxData?>? = null
 
     // Firebase
     internal val isFirebaseInitialized get() = FirebaseApp.getApps(context).isNotEmpty()
@@ -167,11 +142,15 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
 
     // Lifecycle
     override fun onActivityStarted(activity: Activity) {
-        linkInbox()
+        coroutineScope.launch {
+            linkInbox()
+        }
     }
 
     override fun onActivityStopped(activity: Activity) {
-        unlinkInbox()
+        coroutineScope.launch {
+            unlinkInbox()
+        }
     }
 
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
@@ -183,59 +162,5 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 
     override fun onActivityDestroyed(activity: Activity) {}
-
-    // Inbox Mutations
-    override suspend fun onInboxReload(isRefresh: Boolean) {
-        notifyLoading(isRefresh)
-    }
-
-    override suspend fun onInboxError(error: Exception) {
-        notifyError(error)
-        onUnreadCountChange(0)
-    }
-
-    override suspend fun onInboxUpdated(inbox: CourierInboxData) {
-        this.courierInboxData = inbox
-        notifyInboxUpdated(inbox)
-        onUnreadCountChange(inbox.unreadCount)
-    }
-
-    override suspend fun onInboxReset(inbox: CourierInboxData, error: Throwable) {
-        this.courierInboxData = inbox
-        notifyInboxUpdated(inbox)
-    }
-
-    override suspend fun onUnreadCountChange(count: Int) {
-        notifyUnreadCountChange(count)
-    }
-
-    override suspend fun onInboxKilled() {
-        Courier.shared.client?.log("Inbox killed")
-    }
-
-    override suspend fun onInboxMessageReceived(message: InboxMessage) {
-        val index = 0
-        val feed = if (message.isArchived) InboxMessageFeed.ARCHIVE else InboxMessageFeed.FEED
-        val unreadCount = this.courierInboxData?.addNewMessage(feed, index, message)
-        onInboxItemAdded(index, feed, message)
-        onUnreadCountChange(count = unreadCount ?: 0)
-    }
-
-    override suspend fun onInboxItemAdded(index: Int, feed: InboxMessageFeed, message: InboxMessage) {
-        notifyMessageAdded(feed, index, message)
-    }
-
-    override suspend fun onInboxItemRemove(index: Int, feed: InboxMessageFeed, message: InboxMessage) {
-        notifyMessageRemoved(feed, index, message)
-    }
-
-    override suspend fun onInboxItemUpdated(index: Int, feed: InboxMessageFeed, message: InboxMessage) {
-        notifyMessageUpdated(feed, index, message)
-    }
-
-    override suspend fun onInboxPageFetched(feed: InboxMessageFeed, messageSet: InboxMessageSet) {
-        this.courierInboxData?.addPage(feed, messageSet)
-        notifyPageAdded(feed, messageSet)
-    }
 
 }

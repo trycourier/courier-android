@@ -62,6 +62,9 @@ data class InboxMessage(
 
     val time: String get() = createdAt.timeSince()
 
+    /** Returns a timestamp in milliseconds */
+    val timestamp: Long get() = createdAt.time
+
 }
 
 /**

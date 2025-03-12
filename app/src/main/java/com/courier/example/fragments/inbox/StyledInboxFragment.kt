@@ -131,11 +131,11 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
             val items = listOf(
                 SheetAction(
                     title = if (message.isRead) "Unread Message" else "Read Message",
-                    onClick = { if (message.isRead) Courier.shared.unreadMessage(messageId) else Courier.shared.readMessage(messageId) }
+                    onClick = { if (message.isRead) Courier.shared.unreadMessage(messageId, onSuccess = null) else Courier.shared.readMessage(messageId, onSuccess = null) }
                 ),
                 SheetAction(
                     title = "Archive Message",
-                    onClick = { Courier.shared.archiveMessage(messageId) }
+                    onClick = { Courier.shared.archiveMessage(messageId, onSuccess = null) }
                 )
             )
 

@@ -6,26 +6,29 @@ import com.courier.android.models.InboxMessage
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 
-internal object InboxSocketManager {
+internal class InboxSocketManager {
 
-    private var socketInstance: InboxSocket? = null
+    var socket: InboxSocket? = null
 
-    fun getSocketInstance(options: CourierClient.Options): InboxSocket {
-        synchronized(this) {
-            if (socketInstance == null) {
-                socketInstance = InboxSocket(options)
-            }
-            return socketInstance!!
-        }
+    /**
+     * Updates the socket instance with new options.
+     * Closes the existing socket before creating a new one.
+     */
+    suspend fun updateInstance(options: CourierClient.Options): InboxSocket {
+        closeSocket()
+        socket = InboxSocket(options)
+        return socket!!
     }
 
-    fun closeSocket() {
-        synchronized(this) {
-            socketInstance?.disconnect()
-            socketInstance = null
-        }
+    /**
+     * Closes the current socket connection and cleans up resources.
+     */
+    suspend fun closeSocket() {
+        socket?.disconnect()
+        socket?.receivedMessage = null
+        socket?.receivedMessageEvent = null
+        socket = null
     }
-
 }
 
 class InboxSocket(private val options: CourierClient.Options) : CourierSocket(url = buildUrl(options)) {

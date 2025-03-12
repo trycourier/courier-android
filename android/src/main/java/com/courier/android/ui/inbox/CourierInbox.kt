@@ -260,24 +260,26 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
             onUnreadCountChanged = { count ->
                 updateTabBadgeAt(index = 0, count)
             },
-            onFeedChanged = { messageSet ->
-                getPage(InboxMessageFeed.FEED).list.setMessageSet(messageSet)
+            onMessagesChanged = { messages, canPaginate, feed ->
+                getPage(feed).list.setInbox(messages, canPaginate)
             },
-            onArchiveChanged = { messageSet ->
-                getPage(InboxMessageFeed.ARCHIVE).list.setMessageSet(messageSet)
+            onPageAdded = { messages, canPaginate, isFirstPage, feed ->
+                if (isFirstPage) {
+                    getPage(feed).list.setInbox(messages, canPaginate)
+                } else {
+                    getPage(feed).list.addPage(messages, canPaginate)
+                }
             },
-            onPageAdded = { feed, messageSet ->
-                getPage(feed).list.addPage(messageSet)
+            onMessageEvent = { message, index, feed, event ->
+                when (event) {
+                    InboxMessageEvent.ADDED -> getPage(feed).list.addMessage(index, message)
+                    InboxMessageEvent.READ,
+                    InboxMessageEvent.UNREAD -> getPage(feed).list.updateMessage(index, message)
+                    InboxMessageEvent.ARCHIVED -> getPage(feed).list.removeMessage(index, message)
+                    InboxMessageEvent.OPENED,
+                    InboxMessageEvent.CLICKED -> {} // No operation needed
+                }
             },
-            onMessageChanged = { feed, index, message ->
-                getPage(feed).list.updateMessage(index, message)
-            },
-            onMessageAdded = { feed, index, message ->
-                getPage(feed).list.addMessage(index, message)
-            },
-            onMessageRemoved = { feed, index, message ->
-                getPage(feed).list.removeMessage(index, message)
-            }
         )
 
     }
@@ -325,6 +327,15 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 }
 
 enum class InboxMessageFeed { FEED, ARCHIVE }
+
+enum class InboxMessageEvent(val value: String) {
+    ADDED("added"),
+    READ("read"),
+    UNREAD("unread"),
+    OPENED("opened"),
+    ARCHIVED("archived"),
+    CLICKED("clicked");
+}
 
 /**
  * Extensions

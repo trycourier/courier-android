@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.Courier
 import com.courier.android.R
-import com.courier.android.modules.inboxData
+import com.courier.android.modules.feedMessages
 import kotlin.math.abs
 
 internal class SwipeHandler(
@@ -78,8 +78,8 @@ internal class SwipeHandler(
         }
 
         private fun getReadAssetForIndex(index: Int): Map<String, Int> {
-            val isRead = Courier.shared.inboxData?.feed?.messages?.get(index)?.isRead
-            return if (isRead == true) {
+            val isRead = Courier.shared.feedMessages[index].isRead
+            return if (isRead) {
                 mapOf(
                     "icon" to (unreadIcon ?: R.drawable.mark_email_unread),
                     "color" to (unreadBackgroundColor ?: getThemeColors(context)["greyColor"]!!)
