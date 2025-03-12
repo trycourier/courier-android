@@ -50,8 +50,7 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
 
     private fun showResetConfirmationDialog() {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Reset Settings")
-            .setMessage("Are you sure you want to reset all settings to default values? This action cannot be undone.")
+            .setTitle("Reset Credentials")
             .setPositiveButton("Reset") { _, _ ->
                 resetSettings()
             }
