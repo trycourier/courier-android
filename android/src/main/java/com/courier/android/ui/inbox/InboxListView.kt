@@ -127,6 +127,7 @@ internal class InboxListView @JvmOverloads constructor(
     private val refreshLayout: SwipeRefreshLayout by lazy { findViewById(R.id.refreshLayout) }
     private val infoView: CourierInfoView by lazy { findViewById(R.id.infoView) }
     private val layoutManager get() = recyclerView.layoutManager as? LinearLayoutManager
+    private var mutatedMessageId: String? = null
 
     private val swipeHandler by lazy {
         SwipeHandler(
@@ -206,6 +207,11 @@ internal class InboxListView @JvmOverloads constructor(
     @SuppressLint("NotifyDataSetChanged")
     internal fun setInbox(messages: List<InboxMessage>, canPaginate: Boolean) {
 
+        // Remove the inserted message
+        if (mutatedMessageId != null) {
+            return
+        }
+
         loadingAdapter.canPage = canPaginate
 
         refreshAdapters(
@@ -250,6 +256,8 @@ internal class InboxListView @JvmOverloads constructor(
 
     internal fun addMessage(index: Int, message: InboxMessage) {
 
+        mutatedMessageId = message.messageId
+
         loadingAdapter.canPage = loadingAdapter.canPage
 
         refreshAdapters(
@@ -266,14 +274,36 @@ internal class InboxListView @JvmOverloads constructor(
         openVisibleMessages()
         recyclerView.forceReactNativeLayoutFix()
 
+        recyclerView.post {
+            recyclerView.itemAnimator?.isRunning {
+                mutatedMessageId = null
+            } ?: run {
+                mutatedMessageId = null // Fallback in case no animation is running
+            }
+        }
+
     }
 
     internal fun updateMessage(index: Int, message: InboxMessage) {
+
+        mutatedMessageId = message.messageId
+
         messagesAdapter.messages[index] = message.copy()
         messagesAdapter.notifyItemChanged(index)
+
+        recyclerView.post {
+            recyclerView.itemAnimator?.isRunning {
+                mutatedMessageId = null
+            } ?: run {
+                mutatedMessageId = null // Fallback in case no animation is running
+            }
+        }
+
     }
 
     internal fun removeMessage(index: Int, message: InboxMessage) {
+
+        mutatedMessageId = message.messageId
 
         loadingAdapter.canPage = loadingAdapter.canPage
 
@@ -291,6 +321,14 @@ internal class InboxListView @JvmOverloads constructor(
 
         openVisibleMessages()
         recyclerView.forceReactNativeLayoutFix()
+
+        recyclerView.post {
+            recyclerView.itemAnimator?.isRunning {
+                mutatedMessageId = null
+            } ?: run {
+                mutatedMessageId = null // Fallback in case no animation is running
+            }
+        }
 
     }
 
