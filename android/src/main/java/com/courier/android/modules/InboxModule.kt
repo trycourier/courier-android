@@ -34,10 +34,14 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
     internal val dataService = InboxDataService()
     internal var state: State = State.UNINITIALIZED
     var paginationLimit: Int = Pagination.DEFAULT.value
-        private set
+        internal set
 
     init {
         dataStore.delegate = this
+    }
+
+    internal fun getTrimmedPaginationLimit(limit: Int): Int {
+        return limit.coerceIn(Pagination.MIN.value, Pagination.MAX.value)
     }
 
     /** Fetching */
@@ -116,16 +120,19 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
     }
 
     suspend fun getNextPage(feedType: InboxMessageFeed): InboxMessageSet? {
-        if (inboxListeners.isEmpty() || !courier.isUserSignedIn) return null
+        val isFeed = feedType == InboxMessageFeed.FEED
+        val isPaginating = if (isFeed) dataService.isPagingFeed else dataService.isPagingArchived
+
+        if (inboxListeners.isEmpty() || !courier.isUserSignedIn || isPaginating) return null
         val client = courier.client ?: return null
 
         val limit = paginationLimit
-        val messageSet = if (feedType == InboxMessageFeed.FEED) dataStore.feed else dataStore.archive
+        val messageSet = if (isFeed) dataStore.feed else dataStore.archive
 
         if (!messageSet.canPaginate) return null
         val cursor = messageSet.paginationCursor ?: return null
 
-        val data = dataService.getNextFeedPage(client, limit, cursor)
+        val data = if (isFeed) dataService.getNextFeedPage(client, limit, cursor) else dataService.getNextArchivePage(client, limit, cursor)
         dataStore.addPage(data, feedType)
 
         return data
@@ -358,8 +365,11 @@ suspend fun Courier.closeInbox() {
  * Getters
  */
 
-val Courier.inboxPaginationLimit
+var Courier.inboxPaginationLimit
     get() = inboxModule.paginationLimit
+    set(value) {
+        inboxModule.paginationLimit = inboxModule.getTrimmedPaginationLimit(value)
+    }
 
 val Courier.feedMessages: List<InboxMessage> get() = inboxModule.dataStore.feed.messages
 val Courier.archivedMessages: List<InboxMessage> get() = inboxModule.dataStore.archive.messages

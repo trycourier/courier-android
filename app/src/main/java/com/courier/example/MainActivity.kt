@@ -16,6 +16,7 @@ import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.modules.addInboxListener
+import com.courier.android.modules.inboxPaginationLimit
 import com.courier.android.modules.signIn
 import com.courier.android.modules.tenantId
 import com.courier.android.modules.userId

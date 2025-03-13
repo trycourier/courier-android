@@ -18,8 +18,8 @@ import kotlinx.coroutines.launch
 internal class InboxDataService {
 
     internal val inboxSocketManager = InboxSocketManager()
-    private var isPagingFeed = false
-    private var isPagingArchived = false
+    internal var isPagingFeed = false
+    internal var isPagingArchived = false
 
     /** Ends any ongoing pagination processes */
     fun endPaging() {

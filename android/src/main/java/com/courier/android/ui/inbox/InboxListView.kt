@@ -31,6 +31,7 @@ import com.courier.android.utils.pxToDp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 internal class InboxListView @JvmOverloads constructor(
@@ -167,11 +168,13 @@ internal class InboxListView @JvmOverloads constructor(
     private val loadingAdapter = LoadingAdapter(
         theme = theme,
         onShown = {
-            Courier.shared.fetchNextInboxPage(
-                feed = feed,
-                onSuccess = null,
-                onFailure = null
-            )
+            coroutineScope.launch {
+                try {
+                    Courier.shared.fetchNextInboxPage(feed)
+                } catch (e: Exception) {
+                    print(e.message)
+                }
+            }
         }
     )
 
@@ -384,7 +387,7 @@ internal class InboxListView @JvmOverloads constructor(
     private fun openVisibleMessages() = coroutineScope.launch(Dispatchers.IO) {
 
         // Ensure we have a user
-        if (!Courier.shared.isUserSignedIn) {
+        if (!Courier.shared.isUserSignedIn || mutatedMessageId != null) {
             return@launch
         }
 
