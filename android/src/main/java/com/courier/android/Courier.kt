@@ -20,6 +20,7 @@ import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -51,6 +52,9 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
         // Core
         private const val VERSION = "5.1.11"
         var agent: CourierAgent = CourierAgent.NativeAndroid(VERSION)
+
+        // Inbox
+        private const val SOCKET_CLEANUP_DURATION = 60_000L * 10 // 10 minutes
 
         // Push
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
@@ -140,16 +144,30 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     // Stores a local copy of the fcmToken
     internal var fcmToken: String? = null
 
+    // We'll store the Job here, so we can cancel/renew it as needed
+    private var inactivityTimerJob: Job? = null
+
+    // Closes the inbox websocket
+    private fun dispose() {
+        unlinkInbox()
+    }
+
     // Lifecycle
     override fun onActivityStarted(activity: Activity) {
+        // Cancel the inactivity timer if the user comes back
+        inactivityTimerJob?.cancel()
+        inactivityTimerJob = null
+
+        // Link inbox if possible
         coroutineScope.launch {
             linkInbox()
         }
     }
 
     override fun onActivityStopped(activity: Activity) {
-        coroutineScope.launch {
-            unlinkInbox()
+        inactivityTimerJob = coroutineScope.launch {
+            delay(SOCKET_CLEANUP_DURATION)
+            dispose()
         }
     }
 

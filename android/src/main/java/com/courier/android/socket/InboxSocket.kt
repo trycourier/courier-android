@@ -14,7 +14,7 @@ internal class InboxSocketManager {
      * Updates the socket instance with new options.
      * Closes the existing socket before creating a new one.
      */
-    suspend fun updateInstance(options: CourierClient.Options): InboxSocket {
+    fun updateInstance(options: CourierClient.Options): InboxSocket {
         closeSocket()
         socket = InboxSocket(options)
         return socket!!
@@ -23,7 +23,7 @@ internal class InboxSocketManager {
     /**
      * Closes the current socket connection and cleans up resources.
      */
-    suspend fun closeSocket() {
+    fun closeSocket() {
         socket?.disconnect()
         socket?.receivedMessage = null
         socket?.receivedMessageEvent = null

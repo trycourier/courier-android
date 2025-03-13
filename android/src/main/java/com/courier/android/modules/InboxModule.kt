@@ -349,7 +349,7 @@ internal suspend fun Courier.linkInbox() {
 
 // Disconnects the websocket
 // Helps keep battery usage lower
-internal suspend fun Courier.unlinkInbox() {
+internal fun Courier.unlinkInbox() {
     inboxModule.dataService.stop()
 }
 

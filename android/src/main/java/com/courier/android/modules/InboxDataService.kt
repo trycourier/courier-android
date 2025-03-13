@@ -28,7 +28,7 @@ internal class InboxDataService {
     }
 
     /** Stops any ongoing operations and disconnects the WebSocket */
-    suspend fun stop() {
+    fun stop() {
         endPaging()
         inboxSocketManager.closeSocket()
     }
