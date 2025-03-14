@@ -343,7 +343,7 @@ internal suspend fun Courier.linkInbox() {
 
     // Only restart if the socket is not connected
     if (!isSocketConnected) {
-        inboxModule.getInbox(isRefresh = true)
+        refreshInbox()
     }
 }
 
@@ -354,7 +354,20 @@ internal fun Courier.unlinkInbox() {
 }
 
 suspend fun Courier.restartInbox() {
-    inboxModule.getInbox(false)
+    if (inboxModule.inboxListeners.isNotEmpty()) {
+        inboxModule.getInbox(false)
+    }
+}
+
+suspend fun Courier.refreshInbox() {
+    if (inboxModule.inboxListeners.isNotEmpty()) {
+        inboxModule.getInbox(true)
+    }
+}
+
+fun Courier.refreshInbox(onComplete: () -> Unit) = coroutineScope.launch(Dispatchers.Main) {
+    Courier.shared.refreshInbox()
+    onComplete.invoke()
 }
 
 suspend fun Courier.closeInbox() {
@@ -385,15 +398,6 @@ fun Courier.fetchNextInboxPage(feed: InboxMessageFeed, onSuccess: ((InboxMessage
     } catch (e: Exception) {
         onFailure?.invoke(e)
     }
-}
-
-suspend fun Courier.refreshInbox() {
-    inboxModule.getInbox(true)
-}
-
-fun Courier.refreshInbox(onComplete: () -> Unit) = coroutineScope.launch(Dispatchers.Main) {
-    inboxModule.getInbox(true)
-    onComplete.invoke()
 }
 
 fun Courier.readAllInboxMessages(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
