@@ -6,6 +6,7 @@ import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.InboxMessage
 import com.courier.android.models.InboxMessageSet
+import com.courier.android.service.InboxSocketService
 import com.courier.android.socket.InboxSocket
 import com.courier.android.ui.inbox.InboxMessageEvent
 import com.courier.android.ui.inbox.InboxMessageFeed
@@ -31,7 +32,15 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
     }
 
     internal val dataStore = InboxDataStore()
-    internal val dataService = InboxDataService()
+    internal val dataService = InboxDataService(
+        courier = courier,
+        onReceivedMessage = { message ->
+            coroutineScope.launch {
+                dataStore.addMessage(message, 0, InboxMessageFeed.FEED)
+            }
+        }
+    )
+
     internal var state: State = State.UNINITIALIZED
     var paginationLimit: Int = Pagination.DEFAULT.value
         internal set
@@ -139,6 +148,10 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
     }
 
     suspend fun kill() {
+
+        // TODO: Remove me?
+        dataService.disconnectWebSocket()
+
         dataStore.dispose()
         dataService.stop()
         dataStore.delegate?.onError(CourierException.userNotFound)
@@ -343,7 +356,7 @@ internal suspend fun Courier.linkInbox() {
 
     // Only restart if the socket is not connected
     if (!isSocketConnected) {
-        inboxModule.getInbox(isRefresh = true)
+        refreshInbox()
     }
 }
 
@@ -354,7 +367,20 @@ internal fun Courier.unlinkInbox() {
 }
 
 suspend fun Courier.restartInbox() {
-    inboxModule.getInbox(false)
+    if (inboxModule.inboxListeners.isNotEmpty()) {
+        inboxModule.getInbox(false)
+    }
+}
+
+suspend fun Courier.refreshInbox() {
+    if (inboxModule.inboxListeners.isNotEmpty()) {
+        inboxModule.getInbox(true)
+    }
+}
+
+fun Courier.refreshInbox(onComplete: () -> Unit) = coroutineScope.launch(Dispatchers.Main) {
+    Courier.shared.refreshInbox()
+    onComplete.invoke()
 }
 
 suspend fun Courier.closeInbox() {
@@ -385,15 +411,6 @@ fun Courier.fetchNextInboxPage(feed: InboxMessageFeed, onSuccess: ((InboxMessage
     } catch (e: Exception) {
         onFailure?.invoke(e)
     }
-}
-
-suspend fun Courier.refreshInbox() {
-    inboxModule.getInbox(true)
-}
-
-fun Courier.refreshInbox(onComplete: () -> Unit) = coroutineScope.launch(Dispatchers.Main) {
-    inboxModule.getInbox(true)
-    onComplete.invoke()
 }
 
 fun Courier.readAllInboxMessages(onSuccess: () -> Unit, onFailure: (Exception) -> Unit) = coroutineScope.launch(Dispatchers.Main) {

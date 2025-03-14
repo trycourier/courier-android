@@ -13,7 +13,7 @@ import androidx.annotation.ColorInt
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
-import com.courier.android.Courier.Companion.eventBus
+import com.courier.android.Courier.Companion.pushEventBus
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierTrackingEvent
@@ -63,7 +63,7 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
 
 internal fun Courier.broadcastMessage(message: RemoteMessage) = Courier.coroutineScope.launch(Dispatchers.IO) {
     try {
-        eventBus.emitEvent(message)
+        pushEventBus.emitEvent(message)
     } catch (e: Exception) {
         Courier.shared.client?.error(e.toString())
     }
@@ -97,7 +97,7 @@ val RemoteMessage.pushNotification: Map<String, Any?>
 
 // Returns the last message that was delivered via the event bus
 fun Courier.getLastDeliveredMessage(onMessageFound: (message: RemoteMessage) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
-    eventBus.events.collectLatest { message ->
+    pushEventBus.events.collectLatest { message ->
         onMessageFound(message)
     }
 }

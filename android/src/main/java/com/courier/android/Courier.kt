@@ -14,7 +14,8 @@ import com.courier.android.modules.InboxModule
 import com.courier.android.modules.linkInbox
 import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.unlinkInbox
-import com.courier.android.utils.NotificationEventBus
+import com.courier.android.utils.InboxSocketEventBus
+import com.courier.android.utils.PushNotificationEventBus
 import com.courier.android.utils.warn
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
@@ -60,7 +61,8 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
 
         // Eventing
-        internal val eventBus by lazy { NotificationEventBus() }
+        internal val pushEventBus by lazy { PushNotificationEventBus() }
+        internal val inboxEventBus by lazy { InboxSocketEventBus() }
 
         // Async
         private val COURIER_COROUTINE_CONTEXT by lazy { Job() }
