@@ -15,12 +15,13 @@ internal class ExampleServer {
     companion object {
 
         private val mockOptions = CourierClient.Options(
-            null,
-            null,
-            Env.COURIER_USER_ID,
-            null,
-            null,
-            true,
+            jwt = null,
+            clientKey = null,
+            userId = Env.COURIER_USER_ID,
+            connectionId = null,
+            tenantId = null,
+            apiUrls = CourierClient.ApiUrls(),
+            showLogs = true,
         )
 
         private val http = OkHttpClient.Builder().addNetworkInterceptor { chain ->

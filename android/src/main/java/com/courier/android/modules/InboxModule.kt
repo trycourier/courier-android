@@ -56,6 +56,7 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
 
     suspend fun getInbox(isRefresh: Boolean) {
         try {
+            state = State.UNINITIALIZED
             dataService.stop()
 
             if (inboxListeners.isEmpty()) throw CourierException.inboxNotInitialized
@@ -139,9 +140,15 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
     }
 
     suspend fun kill() {
+        state = State.UNINITIALIZED
         dataStore.dispose()
         dataService.stop()
         dataStore.delegate?.onError(CourierException.userNotFound)
+    }
+
+    suspend fun dispose() {
+        removeAllListeners()
+        kill()
     }
 
     /** Listeners */
@@ -157,7 +164,7 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
         courier.client?.log("Courier Inbox Listener Unregistered. Total Listeners: ${inboxListeners.size}")
     }
 
-    suspend fun removeAllListeners() {
+    fun removeAllListeners() {
         inboxListeners.clear()
         courier.client?.log("Courier Inbox Listeners Removed. Total Listeners: ${inboxListeners.size}")
         dataService.stop()

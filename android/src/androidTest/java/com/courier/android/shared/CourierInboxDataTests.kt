@@ -3,8 +3,6 @@ package com.courier.android.shared
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.courier.android.Courier
-import com.courier.android.Courier.Companion.DEFAULT_MAX_PAGINATION_LIMIT
-import com.courier.android.Courier.Companion.DEFAULT_MIN_PAGINATION_LIMIT
 import com.courier.android.Env
 import com.courier.android.ExampleServer
 import com.courier.android.UserBuilder
@@ -14,11 +12,11 @@ import com.courier.android.models.markAsClicked
 import com.courier.android.models.markAsOpened
 import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
+import com.courier.android.modules.InboxModule
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.archiveMessage
 import com.courier.android.modules.clickMessage
 import com.courier.android.modules.fetchNextInboxPage
-import com.courier.android.modules.inboxData
 import com.courier.android.modules.inboxPaginationLimit
 import com.courier.android.modules.openMessage
 import com.courier.android.modules.readMessage
@@ -144,13 +142,13 @@ class CourierInboxDataTests {
         var hold2 = true
 
         val listener1 = Courier.shared.addInboxListener(
-            onFeedChanged = {
+            onMessagesChanged = { messages, canPaginate, feed ->
                 hold1 = false
             }
         )
 
         val listener2 = Courier.shared.addInboxListener(
-            onFeedChanged = {
+            onMessagesChanged = { messages, canPaginate, feed ->
                 hold2 = false
             }
         )
@@ -170,10 +168,10 @@ class CourierInboxDataTests {
         UserBuilder.authenticate()
 
         Courier.shared.inboxPaginationLimit = 10000
-        assertEquals(Courier.shared.inboxPaginationLimit, DEFAULT_MAX_PAGINATION_LIMIT)
+        assertEquals(Courier.shared.inboxPaginationLimit, InboxModule.Pagination.MAX)
 
         Courier.shared.inboxPaginationLimit = -10000
-        assertEquals(Courier.shared.inboxPaginationLimit, DEFAULT_MIN_PAGINATION_LIMIT)
+        assertEquals(Courier.shared.inboxPaginationLimit, InboxModule.Pagination.MIN)
 
         Courier.shared.inboxPaginationLimit = 1
         assertEquals(Courier.shared.inboxPaginationLimit, 1)
@@ -181,13 +179,11 @@ class CourierInboxDataTests {
         val sendCount = 5
 
         val listener = Courier.shared.addInboxListener(
-            onFeedChanged = { set ->
+            onMessagesChanged = { messages, canPaginate, feed ->
                 Courier.coroutineScope.launch {
-
-                    if (set.canPaginate) {
+                    if (canPaginate) {
                         Courier.shared.fetchNextInboxPage(InboxMessageFeed.FEED)
                     }
-
                 }
             }
         )
@@ -197,10 +193,10 @@ class CourierInboxDataTests {
             sendMessage()
         }
 
-        val messages = Courier.shared.inboxData?.feed?.messages
+        val messages = Courier.shared.inboxModule.dataStore.feed.messages
 
         // Hold until the listener paginates to fetch the messages
-        while (messages?.size != sendCount) {
+        while (messages.size != sendCount) {
             // Wait for count
         }
 
