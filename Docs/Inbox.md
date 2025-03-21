@@ -355,47 +355,46 @@ The raw data you can use to build any UI you'd like.
 ```kotlin
 class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
 
-    ..
+    private var inboxListener: CourierInboxListener? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         ..
 
-        // Setup the listener
-        inboxListener = Courier.shared.addInboxListener(
-            onLoading = { isRefresh ->
-                // Called when listener is registered, refreshing or restarting
-            },
-            onError = { e ->
-                // Called on error or sign out
-            },
-            onUnreadCountChanged = { count ->
-                // Will return 0 when a user is signed out
-            },
-            onFeedChanged = { messageSet ->
-                // Called when the feed initially loads or is restarted from scratch
-            },
-            onArchiveChanged = { messageSet ->
-                // Called when the feed initially loads or is restarted from scratch
-            },
-            onPageAdded = { feed, messageSet ->
-                // Called when pagination happens
-            },
-            onMessageChanged = { feed, index, message ->
-                // Called when a message is change (i.e. read / unread)
-            },
-            onMessageAdded = { feed, index, message ->
-                // Called when a message is added (i.e. new message received in realtime)
-            },
-            onMessageRemoved = { feed, index, message ->
-                // Called when a message is removed (i.e. message is archived)
-            }
-        )
+        lifecycleScope.launch {
 
+            // Allows you to listen to all inbox changes and show a fully custom UI
+            inboxListener = Courier.shared.addInboxListener(
+                onLoading = {
+                    // Called when inbox data is reloaded or refreshed
+                },
+                onError = { e ->
+                    // Called when some error happens
+                },
+                onUnreadCountChanged = { count ->
+                    // Called when the unread inbox message count changes
+                },
+                onTotalCountChanged = { count, feed ->
+                   // Called when the total inbox message count changes for a specific feed
+                },
+                onMessagesChanged = { messages, canPaginate, feed ->
+                    // Called when the inbox messages change for a specific feed
+                },
+                onPageAdded = { messages, canPaginate, isFirstPage, feed ->
+                    // Called when a new inbox messages page is added to a specific feed
+                    // This will get called on initial load. Use isFirstPage to handle this case
+                },
+                onMessageEvent = { message, index, feed, event ->
+                    // Called when a message event happens
+                    // Message events are: InboxMessageEvent.ADDED, InboxMessageEvent.READ, InboxMessageEvent.UNREAD, InboxMessageEvent.OPENED, InboxMessageEvent.ARCHIVED, InboxMessageEvent.CLICKED
+                }
+            )
+        }
+        
     }
     
     override fun onDestroyView() {
         super.onDestroyView()
-        inboxListener.remove()
+        inboxListener?.remove()
     }
 
 }
@@ -460,35 +459,35 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
 
 // Listen to all inbox events
 // Only one "pipe" of data is created behind the scenes for network / performance reasons
-val inboxListener = Courier.shared.addInboxListener(
-    onLoading = { isRefresh ->
-        // Called when listener is registered, refreshing or restarting
-    },
-    onError = { e ->
-        // Called on error or sign out
-    },
-    onUnreadCountChanged = { count ->
-        // Will return 0 when a user is signed out
-    },
-    onFeedChanged = { messageSet ->
-        // Called when the feed initially loads or is restarted from scratch
-    },
-    onArchiveChanged = { messageSet ->
-        // Called when the feed initially loads or is restarted from scratch
-    },
-    onPageAdded = { feed, messageSet ->
-        // Called when pagination happens
-    },
-    onMessageChanged = { feed, index, message ->
-        // Called when a message is change (i.e. read / unread)
-    },
-    onMessageAdded = { feed, index, message ->
-        // Called when a message is added (i.e. new message received in realtime)
-    },
-    onMessageRemoved = { feed, index, message ->
-        // Called when a message is removed (i.e. message is archived)
-    }
-)
+lifecycle.coroutineScope.launch.launch {
+
+    // Allows you to listen to all inbox changes and show a fully custom UI
+    val inboxListener = Courier.shared.addInboxListener(
+        onLoading = {
+            // Called when inbox data is reloaded or refreshed
+        },
+        onError = { e ->
+            // Called when some error happens
+        },
+        onUnreadCountChanged = { count ->
+            // Called when the unread inbox message count changes
+        },
+        onTotalCountChanged = { count, feed ->
+           // Called when the total inbox message count changes for a specific feed
+        },
+        onMessagesChanged = { messages, canPaginate, feed ->
+            // Called when the inbox messages change for a specific feed
+        },
+        onPageAdded = { messages, canPaginate, isFirstPage, feed ->
+            // Called when a new inbox messages page is added to a specific feed
+            // This will get called on initial load. Use isFirstPage to handle this case
+        },
+        onMessageEvent = { message, index, feed, event ->
+            // Called when a message event happens
+            // Message events are: InboxMessageEvent.ADDED, InboxMessageEvent.READ, InboxMessageEvent.UNREAD, InboxMessageEvent.OPENED, InboxMessageEvent.ARCHIVED, InboxMessageEvent.CLICKED
+        }
+    )
+}
 
 // Stop the current listener
 inboxListener.remove()
