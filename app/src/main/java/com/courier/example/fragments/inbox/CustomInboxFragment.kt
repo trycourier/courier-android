@@ -73,6 +73,12 @@ class CustomInboxFragment: Fragment(R.layout.fragment_custom_inbox) {
                     print(e)
                     refreshAdapters()
                 },
+                onUnreadCountChanged = { count ->
+                    print(count)
+                },
+                onTotalCountChanged = { count, feed ->
+                    print(count)
+                },
                 onMessagesChanged = { messages, canPaginate, feed ->
                     if (feed == InboxMessageFeed.FEED) {
                         refreshAdapters(
