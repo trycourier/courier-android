@@ -54,14 +54,18 @@ internal class ExampleServer {
 
         }
 
-        internal suspend fun sendTest(authKey: String, userId: String, channel: String): String {
+        internal suspend fun sendTest(authKey: String, userId: String, tenantId: String? = null, channel: String): String {
+
+            val toField: Map<String, String> = if (tenantId != null) {
+                mapOf("tenant_id" to tenantId)
+            } else {
+                mapOf("user_id" to userId)
+            }
 
             val json = JSONObject(
                 mapOf(
                     "message" to mapOf(
-                        "to" to mapOf(
-                            "user_id" to userId
-                        ),
+                        "to" to toField,
                         "content" to mapOf(
                             "title" to "Test",
                             "body" to "Body"
