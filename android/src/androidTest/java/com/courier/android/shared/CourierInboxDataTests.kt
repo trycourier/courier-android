@@ -35,6 +35,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -275,7 +276,8 @@ class CourierInboxDataTests {
     @Test
     fun pagination() = runBlocking {
 
-        UserBuilder.authenticate()
+        val userId = UUID.randomUUID().toString()
+        UserBuilder.authenticate(userId)
 
         Courier.shared.inboxPaginationLimit = 10000
         assertEquals(Courier.shared.inboxPaginationLimit, InboxModule.Pagination.MAX.value)
@@ -289,7 +291,7 @@ class CourierInboxDataTests {
         val sendCount = 5
 
         val listener = Courier.shared.addInboxListener(
-            onMessagesChanged = { messages, canPaginate, feed ->
+            onPageAdded = { messages, canPaginate, isFirstPage, feed ->
                 Courier.coroutineScope.launch {
                     if (canPaginate) {
                         Courier.shared.fetchNextInboxPage(InboxMessageFeed.FEED)
@@ -300,7 +302,7 @@ class CourierInboxDataTests {
 
         // Send some messages to the user
         for (i in 1..sendCount) {
-            sendMessage()
+            sendMessage(userId = userId)
         }
 
         val messages = Courier.shared.inboxModule.dataStore.feed.messages
