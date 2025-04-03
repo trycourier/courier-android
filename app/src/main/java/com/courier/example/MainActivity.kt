@@ -4,10 +4,6 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
@@ -16,10 +12,10 @@ import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.modules.addInboxListener
-import com.courier.android.modules.inboxPaginationLimit
 import com.courier.android.modules.signIn
 import com.courier.android.modules.tenantId
 import com.courier.android.modules.userId
+import com.courier.android.utils.onPushNotificationEvent
 import com.courier.example.databinding.ActivityMainBinding
 import com.courier.example.fragments.AuthFragment
 import com.courier.example.fragments.InboxFragment

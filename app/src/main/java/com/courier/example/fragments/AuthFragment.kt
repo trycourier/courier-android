@@ -173,7 +173,7 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
             )
 
         } catch (e: Exception) {
-            Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show()
+            print(e.message)
         }
 
         refresh()

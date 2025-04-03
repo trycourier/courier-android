@@ -4,7 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.courier.android.Courier
-import com.courier.android.utils.getLastDeliveredMessage
+import com.courier.android.models.CourierTrackingEvent
+import com.courier.android.utils.onPushNotificationEvent
 import com.courier.android.utils.trackPushNotificationClick
 import com.google.firebase.messaging.RemoteMessage
 
@@ -20,8 +21,10 @@ open class CourierActivity : AppCompatActivity() {
         checkIntentForPushNotificationClick(intent)
 
         // Handle delivered messages on the main thread
-        Courier.shared.getLastDeliveredMessage { message ->
-            onPushNotificationDelivered(message)
+        Courier.shared.onPushNotificationEvent { event ->
+            if (event.trackingEvent == CourierTrackingEvent.DELIVERED) {
+                onPushNotificationDelivered(event.remoteMessage)
+            }
         }
 
     }

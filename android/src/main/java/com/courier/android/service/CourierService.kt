@@ -4,7 +4,7 @@ import com.courier.android.Courier
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.modules.setFcmToken
-import com.courier.android.utils.broadcastMessage
+import com.courier.android.utils.trackAndBroadcastTheEvent
 import com.courier.android.utils.error
 import com.courier.android.utils.log
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -27,23 +27,12 @@ open class CourierService: FirebaseMessagingService() {
 
         try {
 
-            // Track the event in Courier
-            // The payload being sent to the device must contain only data
-            // If the payload contains title and body, there will be
-            // issues tracking the event
-            // More info: https://stackoverflow.com/a/71253912/2415921
-            message.data["trackingUrl"]?.let { trackingUrl ->
-                Courier.coroutineScope.launch(Dispatchers.IO) {
-                    CourierClient.default.tracking.postTrackingUrl(
-                        url = trackingUrl,
-                        event = CourierTrackingEvent.DELIVERED,
-                    )
-                }
-            }
-
             // Broadcast the message to the app
             // This will allow us to handle when it's delivered
-            Courier.shared.broadcastMessage(message)
+            Courier.shared.trackAndBroadcastTheEvent(
+                trackingEvent = CourierTrackingEvent.DELIVERED,
+                message = message
+            )
 
         } catch (e: Exception) {
 

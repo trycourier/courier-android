@@ -17,6 +17,7 @@ import com.courier.android.Courier.Companion.eventBus
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierTrackingEvent
+import com.courier.android.models.CourierPushNotificationEvent
 import com.courier.android.ui.CourierStyles
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.Dispatchers
@@ -39,15 +40,11 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
             // Clear the intent extra
             extras?.remove(key)
 
-            // Track when the notification was clicked
-            message.data["trackingUrl"]?.let { trackingUrl ->
-                coroutineScope.launch(Dispatchers.IO) {
-                    CourierClient.default.tracking.postTrackingUrl(
-                        url = trackingUrl,
-                        event = CourierTrackingEvent.CLICKED,
-                    )
-                }
-            }
+            // Broadcast and track the event
+            Courier.shared.trackAndBroadcastTheEvent(
+                trackingEvent = CourierTrackingEvent.CLICKED,
+                message = message
+            )
 
             onClick(message)
 
@@ -61,9 +58,22 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
 
 }
 
-internal fun Courier.broadcastMessage(message: RemoteMessage) = Courier.coroutineScope.launch(Dispatchers.IO) {
+internal fun Courier.trackAndBroadcastTheEvent(trackingEvent: CourierTrackingEvent, message: RemoteMessage) = Courier.coroutineScope.launch(Dispatchers.IO) {
     try {
-        eventBus.emitEvent(message)
+
+        // Track the notification
+        message.data["trackingUrl"]?.let { trackingUrl ->
+            coroutineScope.launch(Dispatchers.IO) {
+                CourierClient.default.tracking.postTrackingUrl(
+                    url = trackingUrl,
+                    event = trackingEvent,
+                )
+            }
+        }
+
+        // Broadcast the event
+        eventBus.onPushNotificationEvent(trackingEvent, message)
+
     } catch (e: Exception) {
         Courier.shared.client?.error(e.toString())
     }
@@ -96,9 +106,9 @@ val RemoteMessage.pushNotification: Map<String, Any?>
     }
 
 // Returns the last message that was delivered via the event bus
-fun Courier.getLastDeliveredMessage(onMessageFound: (message: RemoteMessage) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
-    eventBus.events.collectLatest { message ->
-        onMessageFound(message)
+fun Courier.onPushNotificationEvent(onEvent: (event: CourierPushNotificationEvent) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
+    eventBus.events.collectLatest {
+        onEvent(it)
     }
 }
 
