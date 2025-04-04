@@ -50,7 +50,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     companion object {
 
         // Core
-        private const val VERSION = "5.2.1"
+        private const val VERSION = "5.2.2"
         var agent: CourierAgent = CourierAgent.NativeAndroid(VERSION)
 
         // Inbox
@@ -60,7 +60,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
         internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
 
         // Eventing
-        internal val eventBus by lazy { NotificationEventBus() }
+        val eventBus by lazy { NotificationEventBus() }
 
         // Async
         private val COURIER_COROUTINE_CONTEXT by lazy { Job() }
