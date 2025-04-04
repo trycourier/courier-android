@@ -93,6 +93,16 @@ The easiest way to support push notifications in your app.
         </tr>
         <tr width="600px">
             <td align="left">
+                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md">
+                    <code>Authentication</code>
+                </a>
+            </td>
+            <td align="left">
+                Needs Authentication to sync push notification device tokens to the current user and Courier.
+            </td>
+        </tr>
+        <tr width="600px">
+            <td align="left">
                 A phyical Android device
             </td>
             <td align="left">
@@ -101,12 +111,10 @@ The easiest way to support push notifications in your app.
         </tr>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md">
-                    <code>Authentication</code>
-                </a>
+                Release Mode Enabled
             </td>
             <td align="left">
-                Needs Authentication to sync push notification device tokens to the current user and Courier.
+                To confirm notifications are working, run your app in release mode. You can use debug mode for testing, but release mode is recommended.
             </td>
         </tr>
     </tbody>
