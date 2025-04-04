@@ -9,8 +9,6 @@ import com.courier.android.utils.error
 import com.courier.android.utils.log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 open class CourierService: FirebaseMessagingService() {
 
