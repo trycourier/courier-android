@@ -22,6 +22,7 @@ import com.courier.android.ui.CourierStyles
 import com.courier.android.utils.isDarkModeOn
 import com.courier.android.utils.setCourierFont
 import com.google.android.flexbox.FlexboxLayout
+import okhttp3.internal.toHexString
 
 
 internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -116,7 +117,7 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
 
         if (Courier.shared.isUITestsActive) {
             val indicatorColor = indicator.background as ColorDrawable
-            indicator.tag = "indicator, color: ${indicatorColor.color}"
+            indicator.tag = "indicator, color: ${indicatorColor.color.toHexString()}"
         }
 
         if (message.isRead || message.isArchived) {

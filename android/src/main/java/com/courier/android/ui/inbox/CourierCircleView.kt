@@ -10,6 +10,7 @@ import android.view.View
 import androidx.annotation.ColorInt
 import com.courier.android.Courier
 import com.courier.android.R
+import okhttp3.internal.toHexString
 
 internal class CourierCircleView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
 
@@ -47,7 +48,7 @@ internal class CourierCircleView @JvmOverloads constructor(context: Context, att
         updatePaintColor(context)
 
         if (Courier.shared.isUITestsActive) {
-            tag = "dot, color: ${color}"
+            tag = "dot, color: ${color.toHexString()}"
         }
     }
 
