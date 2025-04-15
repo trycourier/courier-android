@@ -7,6 +7,7 @@ import android.util.TypedValue
 import android.view.Gravity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
+import com.courier.android.Courier
 import com.courier.android.utils.setCourierFont
 
 class BadgeTextView @JvmOverloads constructor(
@@ -52,6 +53,9 @@ class BadgeTextView @JvmOverloads constructor(
             shape = GradientDrawable.RECTANGLE
             setColor(color)
             cornerRadius = 1000f
+        }
+        if (Courier.shared.isUITestsActive) {
+            tag = "background, color: $color"
         }
         return drawable
     }

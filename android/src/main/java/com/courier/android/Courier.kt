@@ -181,4 +181,11 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
 
     override fun onActivityDestroyed(activity: Activity) {}
 
+    // UI debug options
+    /**
+     * This simplifies UI testing by providing
+     * used fonts and colors in UI element tag
+     */
+    var isUITestsActive: Boolean = false
+
 }

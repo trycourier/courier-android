@@ -204,6 +204,10 @@ internal fun TextView.setCourierFont(font: CourierStyles.Font?, @ColorInt fallba
         setTextSize(TypedValue.COMPLEX_UNIT_SP, it.toFloat())
     }
 
+    if (Courier.shared.isUITestsActive) {
+        tag = "TextView, fontTypeface: ${font?.typeface}, fontColor: ${font?.color}, fontSize: ${font?.sizeInSp}"
+    }
+
 }
 
 internal fun Context.launchCourierWebsite() {
