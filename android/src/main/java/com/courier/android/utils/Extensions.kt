@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Resources
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.util.TypedValue
 import android.widget.TextView
@@ -23,6 +24,7 @@ import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import okhttp3.internal.toHexString
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -204,6 +206,10 @@ internal fun TextView.setCourierFont(font: CourierStyles.Font?, @ColorInt fallba
         setTextSize(TypedValue.COMPLEX_UNIT_SP, it.toFloat())
     }
 
+    if (Courier.shared.isUITestsActive) {
+        tag = "TextView, fontTypeface: ${font?.typeface}, fontColor: ${font?.color?.toHexString()}, fontSize: ${font?.sizeInSp}"
+    }
+
 }
 
 internal fun Context.launchCourierWebsite() {
@@ -235,3 +241,5 @@ internal fun RecyclerView.forceReactNativeLayoutFix() {
     }
 
 }
+
+fun ColorDrawable.toHex() = String.format(Locale.getDefault(), "#%06X", color)

@@ -9,6 +9,7 @@ import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.courier.android.Courier
 import com.courier.android.R
 import com.courier.android.utils.isDarkModeOn
 import com.courier.android.utils.setCourierFont
@@ -68,6 +69,10 @@ internal class SheetItemViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
 
             }
 
+        }
+
+        if (Courier.shared.isUITestsActive) {
+            switchView.tag = "SwitchView, thumbTintList: ${switchView.thumbTintList}, trackTintList: ${switchView.trackTintList}"
         }
 
     }

@@ -1,5 +1,7 @@
 package com.courier.android.ui.inbox
 
+import android.R.attr.button
+import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import com.courier.android.Courier
 import com.courier.android.R
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
@@ -19,6 +22,8 @@ import com.courier.android.ui.CourierStyles
 import com.courier.android.utils.isDarkModeOn
 import com.courier.android.utils.setCourierFont
 import com.google.android.flexbox.FlexboxLayout
+import okhttp3.internal.toHexString
+
 
 internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -108,6 +113,11 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
         theme.getUnreadColor()?.let {
             indicator.setBackgroundColor(it)
             dot.setCircleColor(it)
+        }
+
+        if (Courier.shared.isUITestsActive) {
+            val indicatorColor = indicator.background as ColorDrawable
+            indicator.tag = "indicator, color: ${indicatorColor.color.toHexString()}"
         }
 
         if (message.isRead || message.isArchived) {
