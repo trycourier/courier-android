@@ -11,8 +11,8 @@ import com.courier.android.Courier
 import com.courier.android.R
 import com.courier.android.ui.inbox.CourierInboxTheme
 import com.courier.android.utils.dpToPx
+import com.courier.android.utils.toHex
 import com.google.android.material.button.MaterialButton
-import okhttp3.internal.toHexString
 
 internal class CourierActionButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
@@ -76,7 +76,7 @@ internal class CourierActionButton @JvmOverloads constructor(context: Context, a
         }
 
         if (Courier.shared.isUITestsActive) {
-            tag = "CourierActionButton, cornerRadius: ${style.cornerRadiusInDp}, fontTypeface: ${style.font?.typeface}, fontColor: ${style.font?.color?.toHexString()}, fontSize: ${style.font?.sizeInSp}"
+            tag = "CourierActionButton, cornerRadius: ${style.cornerRadiusInDp}, fontTypeface: ${style.font?.typeface}, fontColor: ${style.font?.color?.toHex()}, fontSize: ${style.font?.sizeInSp}"
         }
 
     }
@@ -105,7 +105,7 @@ internal class CourierActionButton @JvmOverloads constructor(context: Context, a
         }
 
         if (Courier.shared.isUITestsActive) {
-            tag = "CourierActionButton, cornerRadius: $cornerRadius, fontTypeface: ${button.typeface}, fontColor: ${button.currentTextColor.toHexString()}, fontSize: ${button.textSize}"
+            tag = "CourierActionButton, cornerRadius: $cornerRadius, fontTypeface: ${button.typeface}, fontColor: ${button.currentTextColor.toHex()}, fontSize: ${button.textSize}"
         }
 
     }

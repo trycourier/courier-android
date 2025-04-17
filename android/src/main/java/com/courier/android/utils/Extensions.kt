@@ -24,7 +24,6 @@ import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import okhttp3.internal.toHexString
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -207,7 +206,7 @@ internal fun TextView.setCourierFont(font: CourierStyles.Font?, @ColorInt fallba
     }
 
     if (Courier.shared.isUITestsActive) {
-        tag = "TextView, fontTypeface: ${font?.typeface}, fontColor: ${font?.color?.toHexString()}, fontSize: ${font?.sizeInSp}"
+        tag = "TextView, fontTypeface: ${font?.typeface}, fontColor: ${font?.color?.toHex()}, fontSize: ${font?.sizeInSp}"
     }
 
 }
@@ -243,3 +242,4 @@ internal fun RecyclerView.forceReactNativeLayoutFix() {
 }
 
 fun ColorDrawable.toHex() = String.format(Locale.getDefault(), "#%06X", color)
+fun Int.toHex() = String.format(Locale.getDefault(), "#%06X", this)
