@@ -9,7 +9,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import com.courier.android.Courier
 import com.courier.android.utils.setCourierFont
-import okhttp3.internal.toHexString
+import com.courier.android.utils.toHex
 
 class BadgeTextView @JvmOverloads constructor(
     context: Context,
@@ -56,7 +56,7 @@ class BadgeTextView @JvmOverloads constructor(
             cornerRadius = 1000f
         }
         if (Courier.shared.isUITestsActive) {
-            tag = "background, color: ${color.toHexString()}"
+            tag = "background, color: ${color.toHex()}"
         }
         return drawable
     }
