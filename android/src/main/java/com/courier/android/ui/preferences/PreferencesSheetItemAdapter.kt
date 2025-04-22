@@ -72,7 +72,7 @@ internal class SheetItemViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
         }
 
         if (Courier.shared.isUITestsActive) {
-            switchView.tag = "SwitchView, thumbTintList: ${switchView.thumbTintList}, trackTintList: ${switchView.trackTintList}"
+            switchView.contentDescription = "SwitchView, thumbTintList: ${switchView.thumbTintList}, trackTintList: ${switchView.trackTintList}"
         }
 
     }

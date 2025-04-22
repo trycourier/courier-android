@@ -117,7 +117,7 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
 
         if (Courier.shared.isUITestsActive) {
             val indicatorColor = indicator.background as ColorDrawable
-            indicator.tag = "indicator, color: ${indicatorColor.color.toHex()}"
+            indicator.contentDescription = "indicator, color: ${indicatorColor.color.toHex()}"
         }
 
         if (message.isRead || message.isArchived) {

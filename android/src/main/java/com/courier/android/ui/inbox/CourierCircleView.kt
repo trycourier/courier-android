@@ -48,7 +48,7 @@ internal class CourierCircleView @JvmOverloads constructor(context: Context, att
         updatePaintColor(context)
 
         if (Courier.shared.isUITestsActive) {
-            tag = "dot, color: ${color.toHex()}"
+            contentDescription = "dot, color: ${color.toHex()}"
         }
     }
 
