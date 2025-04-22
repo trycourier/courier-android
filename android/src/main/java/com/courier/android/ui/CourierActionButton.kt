@@ -76,7 +76,7 @@ internal class CourierActionButton @JvmOverloads constructor(context: Context, a
         }
 
         if (Courier.shared.isUITestsActive) {
-            tag = "CourierActionButton, cornerRadius: ${style.cornerRadiusInDp}, fontTypeface: ${style.font?.typeface}, fontColor: ${style.font?.color?.toHex()}, fontSize: ${style.font?.sizeInSp}"
+            contentDescription = "CourierActionButton, cornerRadius: ${style.cornerRadiusInDp}, fontTypeface: ${style.font?.typeface}, fontColor: ${style.font?.color?.toHex()}, fontSize: ${style.font?.sizeInSp}"
         }
 
     }
@@ -105,7 +105,7 @@ internal class CourierActionButton @JvmOverloads constructor(context: Context, a
         }
 
         if (Courier.shared.isUITestsActive) {
-            tag = "CourierActionButton, cornerRadius: $cornerRadius, fontTypeface: ${button.typeface}, fontColor: ${button.currentTextColor.toHex()}, fontSize: ${button.textSize}"
+            contentDescription = "CourierActionButton, cornerRadius: $cornerRadius, fontTypeface: ${button.typeface}, fontColor: ${button.currentTextColor.toHex()}, fontSize: ${button.textSize}"
         }
 
     }

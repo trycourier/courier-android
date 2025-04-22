@@ -206,7 +206,7 @@ internal fun TextView.setCourierFont(font: CourierStyles.Font?, @ColorInt fallba
     }
 
     if (Courier.shared.isUITestsActive) {
-        tag = "TextView, fontTypeface: ${font?.typeface}, fontColor: ${font?.color?.toHex()}, fontSize: ${font?.sizeInSp}"
+        contentDescription = "TextView, fontTypeface: ${font?.typeface}, fontColor: ${font?.color?.toHex()}, fontSize: ${font?.sizeInSp}"
     }
 
 }

@@ -56,7 +56,7 @@ class BadgeTextView @JvmOverloads constructor(
             cornerRadius = 1000f
         }
         if (Courier.shared.isUITestsActive) {
-            tag = "background, color: ${color.toHex()}"
+            contentDescription = "background, color: ${color.toHex()}"
         }
         return drawable
     }
