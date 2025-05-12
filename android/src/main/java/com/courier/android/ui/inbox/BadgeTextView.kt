@@ -9,6 +9,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import com.courier.android.Courier
 import com.courier.android.utils.setCourierFont
+import com.courier.android.utils.setSemanticsDescription
 import com.courier.android.utils.toHex
 
 class BadgeTextView @JvmOverloads constructor(
@@ -42,9 +43,11 @@ class BadgeTextView @JvmOverloads constructor(
     }
 
     fun setTheme(theme: CourierInboxTheme, isSelected: Boolean) {
-        background = getRoundedBackground(theme.getBadgeColor(isSelected) ?: getPrimaryColor())
+        val color = theme.getBadgeColor(isSelected) ?: getPrimaryColor()
+        background = getRoundedBackground(color)
         val font = if (isSelected) theme.tabStyle.selected.indicator.font else theme.tabStyle.unselected.indicator.font
         setCourierFont(font)
+        setSemanticsDescription(color)
         invalidate()
     }
 
@@ -54,9 +57,6 @@ class BadgeTextView @JvmOverloads constructor(
             shape = GradientDrawable.RECTANGLE
             setColor(color)
             cornerRadius = 1000f
-        }
-        if (Courier.shared.isUITestsActive) {
-            contentDescription = "background, color: ${color.toHex()}"
         }
         return drawable
     }

@@ -11,6 +11,7 @@ import com.courier.android.Courier
 import com.courier.android.R
 import com.courier.android.ui.inbox.CourierInboxTheme
 import com.courier.android.utils.dpToPx
+import com.courier.android.utils.setSemanticsDescription
 import com.courier.android.utils.toHex
 import com.google.android.material.button.MaterialButton
 
@@ -75,9 +76,7 @@ internal class CourierActionButton @JvmOverloads constructor(context: Context, a
             button.setTextSize(TypedValue.COMPLEX_UNIT_SP, it.toFloat())
         }
 
-        if (Courier.shared.isUITestsActive) {
-            contentDescription = "CourierActionButton, cornerRadius: ${style.cornerRadiusInDp}, fontTypeface: ${style.font?.typeface}, fontColor: ${style.font?.color?.toHex()}, fontSize: ${style.font?.sizeInSp}"
-        }
+        button.setSemanticsDescription()
 
     }
 
@@ -104,9 +103,7 @@ internal class CourierActionButton @JvmOverloads constructor(context: Context, a
             }
         }
 
-        if (Courier.shared.isUITestsActive) {
-            contentDescription = "CourierActionButton, cornerRadius: $cornerRadius, fontTypeface: ${button.typeface}, fontColor: ${button.currentTextColor.toHex()}, fontSize: ${button.textSize}"
-        }
+        button.setSemanticsDescription()
 
     }
 

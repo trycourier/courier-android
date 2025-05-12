@@ -21,6 +21,7 @@ import com.courier.android.ui.CourierActionButton
 import com.courier.android.ui.CourierStyles
 import com.courier.android.utils.isDarkModeOn
 import com.courier.android.utils.setCourierFont
+import com.courier.android.utils.setSemanticsDescription
 import com.courier.android.utils.toHex
 import com.google.android.flexbox.FlexboxLayout
 
@@ -115,10 +116,7 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
             dot.setCircleColor(it)
         }
 
-        if (Courier.shared.isUITestsActive) {
-            val indicatorColor = indicator.background as ColorDrawable
-            indicator.contentDescription = "indicator, color: ${indicatorColor.color.toHex()}"
-        }
+        indicator.setSemanticsDescription()
 
         if (message.isRead || message.isArchived) {
 
