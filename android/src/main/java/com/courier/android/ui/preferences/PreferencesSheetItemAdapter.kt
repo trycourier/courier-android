@@ -13,6 +13,7 @@ import com.courier.android.Courier
 import com.courier.android.R
 import com.courier.android.utils.isDarkModeOn
 import com.courier.android.utils.setCourierFont
+import com.courier.android.utils.setSemanticsDescription
 
 internal data class CourierSheetItem(
     val title: String,
@@ -71,9 +72,7 @@ internal class SheetItemViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
 
         }
 
-        if (Courier.shared.isUITestsActive) {
-            switchView.contentDescription = "SwitchView, thumbTintList: ${switchView.thumbTintList}, trackTintList: ${switchView.trackTintList}"
-        }
+        switchView.setSemanticsDescription()
 
     }
 

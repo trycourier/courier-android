@@ -10,6 +10,7 @@ import android.view.View
 import androidx.annotation.ColorInt
 import com.courier.android.Courier
 import com.courier.android.R
+import com.courier.android.utils.setSemanticsDescription
 import com.courier.android.utils.toHex
 
 internal class CourierCircleView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : View(context, attrs, defStyleAttr) {
@@ -46,10 +47,7 @@ internal class CourierCircleView @JvmOverloads constructor(context: Context, att
     fun setCircleColor(@ColorInt color: Int) {
         circleColor = color
         updatePaintColor(context)
-
-        if (Courier.shared.isUITestsActive) {
-            contentDescription = "dot, color: ${color.toHex()}"
-        }
+        setSemanticsDescription()
     }
 
     override fun onDraw(canvas: Canvas) {

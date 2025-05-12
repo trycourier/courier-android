@@ -9,8 +9,11 @@ import android.content.res.Resources
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.util.TypedValue
+import android.view.View
+import android.widget.Button
 import android.widget.TextView
 import androidx.annotation.ColorInt
+import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
@@ -19,7 +22,12 @@ import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.models.CourierPushNotificationEvent
+import com.courier.android.models.SemanticProperties
+import com.courier.android.models.SemanticProperty
+import com.courier.android.models.toJson
+import com.courier.android.ui.CourierActionButton
 import com.courier.android.ui.CourierStyles
+import com.courier.android.ui.inbox.BadgeTextView
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
@@ -205,9 +213,7 @@ internal fun TextView.setCourierFont(font: CourierStyles.Font?, @ColorInt fallba
         setTextSize(TypedValue.COMPLEX_UNIT_SP, it.toFloat())
     }
 
-    if (Courier.shared.isUITestsActive) {
-        contentDescription = "TextView, fontTypeface: ${font?.typeface}, fontColor: ${font?.color?.toHex()}, fontSize: ${font?.sizeInSp}"
-    }
+    setSemanticsDescription(font)
 
 }
 
@@ -243,3 +249,82 @@ internal fun RecyclerView.forceReactNativeLayoutFix() {
 
 fun ColorDrawable.toHex() = String.format(Locale.getDefault(), "#%06X", color)
 fun Int.toHex() = String.format(Locale.getDefault(), "#%06X", this)
+
+fun TextView.setSemanticsDescription(font: CourierStyles.Font?) {
+    if (!Courier.shared.isUITestsActive) {
+        this.contentDescription = "TextView"
+        return
+    }
+
+    val properties = listOf(
+        SemanticProperty("component", "TextView"),
+        SemanticProperty("fontTypeface", font?.typeface.toString()),
+        SemanticProperty("fontColor", font?.color?.toHex() ?: "null"),
+        SemanticProperty("fontSize", font?.sizeInSp.toString())
+    )
+
+    this.contentDescription = SemanticProperties(properties).toJson().toString()
+}
+
+fun Button.setSemanticsDescription() {
+    if (!Courier.shared.isUITestsActive) {
+        this.contentDescription = "CourierActionButton"
+        return
+    }
+
+    val properties = listOf(
+        SemanticProperty("component", "CourierActionButton"),
+        SemanticProperty("fontTypeface", this.typeface.toString() ?: "null"),
+        SemanticProperty("fontColor", this.currentTextColor.toHex()),
+        SemanticProperty("fontSize", (this.textSize.toString()))
+    )
+
+    this.contentDescription = SemanticProperties(properties).toJson().toString()
+}
+
+fun BadgeTextView.setSemanticsDescription(color: Int) {
+    if (!Courier.shared.isUITestsActive) {
+        this.contentDescription = "BadgeTextView"
+        return
+    }
+
+    val properties = listOf(
+        SemanticProperty("component", "BadgeTextView"),
+        SemanticProperty("backgroundColor", color.toHex()),
+        SemanticProperty("fontTypeface", this.typeface.toString() ?: "null"),
+        SemanticProperty("fontColor", this.currentTextColor.toHex()),
+        SemanticProperty("fontSize", (this.textSize.toString()))
+    )
+
+    this.contentDescription = SemanticProperties(properties).toJson().toString()
+}
+
+fun View.setSemanticsDescription() {
+    if (!Courier.shared.isUITestsActive) {
+        this.contentDescription = "View"
+        return
+    }
+
+    val backgroundColor = background as ColorDrawable
+    val properties = listOf(
+        SemanticProperty("component", "View"),
+        SemanticProperty("backgroundColor", backgroundColor.color.toHex())
+    )
+
+    this.contentDescription = SemanticProperties(properties).toJson().toString()
+}
+
+fun SwitchCompat.setSemanticsDescription() {
+    if (!Courier.shared.isUITestsActive) {
+        this.contentDescription = "SwitchCompat"
+        return
+    }
+
+    val properties = listOf(
+        SemanticProperty("component", "SwitchCompat"),
+        SemanticProperty("thumbTintList", this.thumbTintList.toString()),
+        SemanticProperty("trackTintList", this.trackTintList.toString())
+    )
+
+    this.contentDescription = SemanticProperties(properties).toJson().toString()
+}
