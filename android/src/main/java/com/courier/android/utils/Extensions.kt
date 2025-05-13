@@ -259,7 +259,6 @@ val Typeface?.readableName: String
         null -> "null"
         else -> "custom or unknown"
     }
-}
 
 fun TextView.setSemanticsDescription(font: CourierStyles.Font?) {
     if (!Courier.shared.isUITestsActive) {
