@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Resources
+import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.util.TypedValue
@@ -25,7 +26,6 @@ import com.courier.android.models.CourierPushNotificationEvent
 import com.courier.android.models.SemanticProperties
 import com.courier.android.models.SemanticProperty
 import com.courier.android.models.toJson
-import com.courier.android.ui.CourierActionButton
 import com.courier.android.ui.CourierStyles
 import com.courier.android.ui.inbox.BadgeTextView
 import com.google.firebase.messaging.RemoteMessage
@@ -250,6 +250,17 @@ internal fun RecyclerView.forceReactNativeLayoutFix() {
 fun ColorDrawable.toHex() = String.format(Locale.getDefault(), "#%06X", color)
 fun Int.toHex() = String.format(Locale.getDefault(), "#%06X", this)
 
+val Typeface?.readableName: String
+    get() = when (this) {
+        Typeface.DEFAULT -> "default"
+        Typeface.SANS_SERIF -> "sans-serif"
+        Typeface.SERIF -> "serif"
+        Typeface.MONOSPACE -> "monospace"
+        null -> "null"
+        else -> "custom or unknown"
+    }
+}
+
 fun TextView.setSemanticsDescription(font: CourierStyles.Font?) {
     if (!Courier.shared.isUITestsActive) {
         this.contentDescription = "TextView"
@@ -258,7 +269,7 @@ fun TextView.setSemanticsDescription(font: CourierStyles.Font?) {
 
     val properties = listOf(
         SemanticProperty("component", "TextView"),
-        SemanticProperty("fontTypeface", font?.typeface.toString()),
+        SemanticProperty("fontTypeface", font?.typeface.readableName),
         SemanticProperty("fontColor", font?.color?.toHex() ?: "null"),
         SemanticProperty("fontSize", font?.sizeInSp.toString())
     )
@@ -274,7 +285,7 @@ fun Button.setSemanticsDescription() {
 
     val properties = listOf(
         SemanticProperty("component", "CourierActionButton"),
-        SemanticProperty("fontTypeface", this.typeface.toString() ?: "null"),
+        SemanticProperty("fontTypeface", this.typeface.readableName),
         SemanticProperty("fontColor", this.currentTextColor.toHex()),
         SemanticProperty("fontSize", (this.textSize.toString()))
     )
@@ -291,7 +302,7 @@ fun BadgeTextView.setSemanticsDescription(color: Int) {
     val properties = listOf(
         SemanticProperty("component", "BadgeTextView"),
         SemanticProperty("backgroundColor", color.toHex()),
-        SemanticProperty("fontTypeface", this.typeface.toString() ?: "null"),
+        SemanticProperty("fontTypeface", this.typeface.readableName),
         SemanticProperty("fontColor", this.currentTextColor.toHex()),
         SemanticProperty("fontSize", (this.textSize.toString()))
     )
@@ -305,10 +316,10 @@ fun View.setSemanticsDescription() {
         return
     }
 
-    val backgroundColor = background as ColorDrawable
+    val backgroundColor = (background as? ColorDrawable)?.color
     val properties = listOf(
         SemanticProperty("component", "View"),
-        SemanticProperty("backgroundColor", backgroundColor.color.toHex())
+        SemanticProperty("backgroundColor", backgroundColor?.toHex() ?: "null")
     )
 
     this.contentDescription = SemanticProperties(properties).toJson().toString()
