@@ -2,6 +2,7 @@ package com.courier.android.modules
 
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.coroutineScope
+import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.models.InboxMessage
@@ -9,6 +10,7 @@ import com.courier.android.models.InboxMessageSet
 import com.courier.android.socket.InboxSocket
 import com.courier.android.ui.inbox.InboxMessageEvent
 import com.courier.android.ui.inbox.InboxMessageFeed
+import com.courier.android.utils.error
 import com.courier.android.utils.log
 import com.courier.android.utils.warn
 import kotlinx.coroutines.CoroutineScope
@@ -71,6 +73,21 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
 
             val snapshot = dataService.getInboxData(client, feedPaginationLimit, archivePaginationLimit, isRefresh)
 
+            // Connect the socket if possible
+            // Graceful fallback if error
+            connectSocketIfPossible(client)
+
+            // Post the data
+            dataStore.reloadSnapshot(snapshot)
+            state = State.INITIALIZED
+        } catch (error: Exception) {
+            dataStore.delegate?.onError(error)
+            state = State.UNINITIALIZED
+        }
+    }
+
+    private suspend fun connectSocketIfPossible(client: CourierClient) {
+        try {
             dataService.connectWebSocket(
                 client = client,
                 onReceivedMessage = { message ->
@@ -84,12 +101,8 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
                     }
                 }
             )
-
-            dataStore.reloadSnapshot(snapshot)
-            state = State.INITIALIZED
         } catch (error: Exception) {
-            dataStore.delegate?.onError(error)
-            state = State.UNINITIALIZED
+            client.error(error.message)
         }
     }
 
