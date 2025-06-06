@@ -36,6 +36,7 @@ enum class CourierPreferenceStatus(val value: String) {
 enum class CourierPreferenceChannel(val value: String) {
 
     DIRECT_MESSAGE("direct_message"),
+    INBOX("inbox"),
     EMAIL("email"),
     PUSH("push"),
     SMS("sms"),
@@ -49,7 +50,7 @@ enum class CourierPreferenceChannel(val value: String) {
         }
 
         val allCases: List<CourierPreferenceChannel>
-            get() = listOf(PUSH, SMS, EMAIL, DIRECT_MESSAGE, WEBHOOK)
+            get() = listOf(INBOX, PUSH, SMS, EMAIL, DIRECT_MESSAGE, WEBHOOK)
 
     }
 
@@ -57,6 +58,7 @@ enum class CourierPreferenceChannel(val value: String) {
         get() {
             return when (this) {
                 DIRECT_MESSAGE -> "In App Messages"
+                INBOX -> "Inbox"
                 EMAIL -> "Emails"
                 PUSH -> "Push Notifications"
                 SMS -> "Text Messages"
