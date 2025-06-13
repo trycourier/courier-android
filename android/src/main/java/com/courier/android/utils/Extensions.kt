@@ -261,7 +261,7 @@ val Typeface?.readableName: String
     }
 
 fun TextView.setSemanticsDescription(font: CourierStyles.Font?) {
-    if (!Courier.shared.isUITestsActive) {
+    if (!Courier.isUITestsActive) {
         this.contentDescription = "TextView"
         return
     }
@@ -277,7 +277,7 @@ fun TextView.setSemanticsDescription(font: CourierStyles.Font?) {
 }
 
 fun Button.setSemanticsDescription() {
-    if (!Courier.shared.isUITestsActive) {
+    if (!Courier.isUITestsActive) {
         this.contentDescription = "CourierActionButton"
         return
     }
@@ -293,7 +293,7 @@ fun Button.setSemanticsDescription() {
 }
 
 fun BadgeTextView.setSemanticsDescription(color: Int) {
-    if (!Courier.shared.isUITestsActive) {
+    if (!Courier.isUITestsActive) {
         this.contentDescription = "BadgeTextView"
         return
     }
@@ -310,7 +310,7 @@ fun BadgeTextView.setSemanticsDescription(color: Int) {
 }
 
 fun View.setSemanticsDescription() {
-    if (!Courier.shared.isUITestsActive) {
+    if (!Courier.isUITestsActive) {
         this.contentDescription = "View"
         return
     }
@@ -325,7 +325,7 @@ fun View.setSemanticsDescription() {
 }
 
 fun SwitchCompat.setSemanticsDescription() {
-    if (!Courier.shared.isUITestsActive) {
+    if (!Courier.isUITestsActive) {
         this.contentDescription = "SwitchCompat"
         return
     }

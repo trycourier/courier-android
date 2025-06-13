@@ -50,7 +50,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     companion object {
 
         // Core
-        private const val VERSION = "5.2.9"
+        private const val VERSION = "5.2.10"
         var agent: CourierAgent = CourierAgent.NativeAndroid(VERSION)
 
         // Inbox
@@ -75,6 +75,9 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
                 mInstance?.let { return it }
                 throw CourierException.initializationError
             }
+
+        // UI debug options
+        var isUITestsActive: Boolean = false
 
         /**
          * Initializes the SDK with a static reference to a Courier singleton
@@ -180,12 +183,5 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
 
     override fun onActivityDestroyed(activity: Activity) {}
-
-    // UI debug options
-    /**
-     * This simplifies UI testing by providing
-     * used fonts and colors in UI element tag
-     */
-    var isUITestsActive: Boolean = false
 
 }
