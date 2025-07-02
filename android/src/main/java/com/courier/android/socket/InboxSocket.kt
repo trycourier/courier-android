@@ -4,7 +4,12 @@ import com.courier.android.Courier
 import com.courier.android.client.CourierClient
 import com.courier.android.models.InboxMessage
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
 import com.google.gson.annotations.SerializedName
+import java.lang.reflect.Type
 
 internal class InboxSocketManager {
 
@@ -63,12 +68,27 @@ class InboxSocket(private val options: CourierClient.Options) : CourierSocket(ur
         @SerializedName("unarchive")
         UNARCHIVE("unarchive"),
 
-        @SerializedName("click")
-        CLICK("click"),
+        UNKNOWN("unknown");
 
-        @SerializedName("unclick")
-        UNCLICK("unclick")
+        // TODO: Support more events in the future (archive_all, archive_read, clicked, etc)
+
+        companion object {
+            fun fromValue(value: String): EventType {
+                return values().find { it.value == value } ?: UNKNOWN
+            }
+        }
+
     }
+
+    private class EventTypeDeserializer: JsonDeserializer<EventType> {
+        override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): EventType {
+            return EventType.fromValue(json.asString)
+        }
+    }
+
+    private val gson = GsonBuilder()
+        .registerTypeAdapter(EventType::class.java, EventTypeDeserializer())
+        .create()
 
     data class SocketPayload(val type: PayloadType)
     data class MessageEvent(val event: EventType, val messageId: String?, val type: String)
@@ -84,7 +104,6 @@ class InboxSocket(private val options: CourierClient.Options) : CourierSocket(ur
 
     private fun convertToType(data: String) {
         try {
-            val gson = Gson()
             val payload = gson.fromJson(data, SocketPayload::class.java)
             when (payload.type) {
                 PayloadType.EVENT -> {
