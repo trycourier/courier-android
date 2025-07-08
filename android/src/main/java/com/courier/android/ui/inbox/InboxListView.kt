@@ -386,8 +386,8 @@ internal class InboxListView @JvmOverloads constructor(
     // Fails silently
     private fun openVisibleMessages() = coroutineScope.launch(Dispatchers.IO) {
 
-        // Ensure we have a user
-        if (!Courier.shared.isUserSignedIn || mutatedMessageId != null) {
+        // Ensure we have a user and messages to look through
+        if (!Courier.shared.isUserSignedIn || mutatedMessageId != null || messagesAdapter.messages.isEmpty()) {
             return@launch
         }
 
