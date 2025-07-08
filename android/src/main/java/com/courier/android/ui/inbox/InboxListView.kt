@@ -422,7 +422,7 @@ internal class InboxListView @JvmOverloads constructor(
                 // Perform all the changes together
                 messagesToOpen.filterNotNull().awaitAll()
 
-            } catch (e: CourierException) {
+            } catch (e: Exception) {
 
                 Courier.shared.client?.error(e.message)
 
