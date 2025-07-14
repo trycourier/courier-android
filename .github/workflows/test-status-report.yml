@@ -1,3 +1,5 @@
+name: Test Status Report
+
 on:
   repository_dispatch:
     types: [test-status]
