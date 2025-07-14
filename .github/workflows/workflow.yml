@@ -2,7 +2,7 @@ name: Test Trigger
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   workflow_dispatch:
 
 jobs:
