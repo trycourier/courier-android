@@ -213,8 +213,8 @@ Starter projects using this SDK.
 
 &emsp;
 
-## **Share feedback with Courier**
+# **Share feedback with Courier**
 
-We want to make this the best SDK for managing notifications! Have an idea or feedback about our SDKs? Here are some links to contact us:
+We want to make this the best SDK for managing notifications! Have an idea or feedback about our SDKs? Let us know!
 
-- [Courier Android Issues](https://github.com/trycourier/courier-android/issues)
+[Courier Android Issues](https://github.com/trycourier/courier-android/issues)
