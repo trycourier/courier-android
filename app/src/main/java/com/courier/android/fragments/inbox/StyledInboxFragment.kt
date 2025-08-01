@@ -1,4 +1,4 @@
-package com.courier.example.fragments.inbox
+package com.courier.android.fragments.inbox
 
 import android.os.Bundle
 import android.view.View
@@ -14,12 +14,12 @@ import com.courier.android.ui.CourierStyles
 import com.courier.android.ui.inbox.CourierInbox
 import com.courier.android.ui.inbox.CourierInboxTheme
 import com.courier.android.utils.log
-import com.courier.example.Env
-import com.courier.example.R
-import com.courier.example.Theme
-import com.courier.example.fragments.DetailSheet
-import com.courier.example.fragments.SheetAction
-import com.courier.example.toJson
+import com.courier.android.Env
+import com.courier.android.R
+import com.courier.android.Theme
+import com.courier.android.fragments.DetailSheet
+import com.courier.android.fragments.SheetAction
+import com.courier.android.toJson
 
 class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
 

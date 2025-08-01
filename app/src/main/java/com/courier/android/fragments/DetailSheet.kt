@@ -1,4 +1,4 @@
-package com.courier.example.fragments
+package com.courier.android.fragments
 
 import android.content.Context
 import android.os.Bundle
@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ListView
 import android.widget.TextView
-import com.courier.example.R
+import com.courier.android.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 data class SheetAction(

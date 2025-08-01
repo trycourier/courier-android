@@ -15,10 +15,10 @@ android {
     compileSdk 35
 
     defaultConfig {
-        applicationId "com.courier.example"
+        applicationId "com.courier.android"
         minSdk 23
         targetSdk 35
-        versionCode 62
+        versionCode 63
         versionName "1.0"
         signingConfig signingConfigs.debug
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -59,7 +59,7 @@ android {
         viewBinding true
     }
 
-    namespace 'com.courier.example'
+    namespace 'com.courier.android'
 
     lint {
         checkReleaseBuilds false

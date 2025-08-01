@@ -1,4 +1,4 @@
-package com.courier.example.fragments
+package com.courier.android.fragments
 
 import android.content.Context
 import android.content.Intent
@@ -14,11 +14,11 @@ import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
 import com.courier.android.Courier
 import com.courier.android.modules.readAllInboxMessages
-import com.courier.example.ComposeInboxActivity
-import com.courier.example.R
-import com.courier.example.fragments.inbox.CustomInboxFragment
-import com.courier.example.fragments.inbox.PrebuiltInboxFragment
-import com.courier.example.fragments.inbox.StyledInboxFragment
+import com.courier.android.ComposeInboxActivity
+import com.courier.android.R
+import com.courier.android.fragments.inbox.CustomInboxFragment
+import com.courier.android.fragments.inbox.PrebuiltInboxFragment
+import com.courier.android.fragments.inbox.StyledInboxFragment
 import com.google.android.material.tabs.TabLayout
 
 class InboxFragment: Fragment(R.layout.fragment_inbox) {

@@ -12,7 +12,7 @@ then
   # Replace the package name
   cat $APP_FILE | while read LINE; do
     if [[ $LINE == *"PACKAGE_NAME"* ]]; then
-      sed -i '' "s/PACKAGE_NAME/com.courier.example/g" $APP_FILE
+      sed -i '' "s/PACKAGE_NAME/com.courier.android/g" $APP_FILE
     fi
   done
 

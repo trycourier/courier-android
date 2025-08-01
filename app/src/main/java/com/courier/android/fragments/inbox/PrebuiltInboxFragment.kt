@@ -1,4 +1,4 @@
-package com.courier.example.fragments.inbox
+package com.courier.android.fragments.inbox
 
 import android.os.Bundle
 import android.view.View
@@ -9,8 +9,8 @@ import com.courier.android.models.markAsRead
 import com.courier.android.models.markAsUnread
 import com.courier.android.ui.inbox.CourierInbox
 import com.courier.android.utils.log
-import com.courier.example.R
-import com.courier.example.toJson
+import com.courier.android.R
+import com.courier.android.toJson
 
 class PrebuiltInboxFragment: Fragment(R.layout.fragment_prebuilt_inbox) {
 

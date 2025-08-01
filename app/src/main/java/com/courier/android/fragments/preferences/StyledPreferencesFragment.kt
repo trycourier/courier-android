@@ -1,4 +1,4 @@
-package com.courier.example.fragments.preferences
+package com.courier.android.fragments.preferences
 
 import android.os.Bundle
 import android.view.View
@@ -11,9 +11,9 @@ import com.courier.android.ui.CourierStyles
 import com.courier.android.ui.preferences.CourierPreferences
 import com.courier.android.ui.preferences.CourierPreferencesTheme
 import com.courier.android.utils.log
-import com.courier.example.Env
-import com.courier.example.R
-import com.courier.example.Theme
+import com.courier.android.Env
+import com.courier.android.R
+import com.courier.android.Theme
 
 class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences) {
 

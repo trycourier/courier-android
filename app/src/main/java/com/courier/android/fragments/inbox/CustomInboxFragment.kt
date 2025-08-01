@@ -1,4 +1,4 @@
-package com.courier.example.fragments.inbox
+package com.courier.android.fragments.inbox
 
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -23,8 +23,8 @@ import com.courier.android.modules.feedMessages
 import com.courier.android.modules.fetchNextInboxPage
 import com.courier.android.modules.refreshInbox
 import com.courier.android.ui.inbox.InboxMessageFeed
-import com.courier.example.R
-import com.courier.example.toJson
+import com.courier.android.R
+import com.courier.android.toJson
 import kotlinx.coroutines.launch
 
 

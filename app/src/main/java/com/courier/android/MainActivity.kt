@@ -1,4 +1,4 @@
-package com.courier.example
+package com.courier.android
 
 import android.os.Bundle
 import android.util.Log
@@ -16,11 +16,11 @@ import com.courier.android.modules.signIn
 import com.courier.android.modules.tenantId
 import com.courier.android.modules.userId
 import com.courier.android.utils.onPushNotificationEvent
-import com.courier.example.databinding.ActivityMainBinding
-import com.courier.example.fragments.AuthFragment
-import com.courier.example.fragments.InboxFragment
-import com.courier.example.fragments.PreferencesFragment
-import com.courier.example.fragments.PushFragment
+import com.courier.android.databinding.ActivityMainBinding
+import com.courier.android.fragments.AuthFragment
+import com.courier.android.fragments.InboxFragment
+import com.courier.android.fragments.PreferencesFragment
+import com.courier.android.fragments.PushFragment
 import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.launch
 

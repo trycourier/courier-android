@@ -1,4 +1,4 @@
-package com.courier.example.fragments.preferences
+package com.courier.android.fragments.preferences
 
 import android.os.Bundle
 import android.view.View
@@ -13,7 +13,7 @@ import com.courier.android.Courier
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.models.CourierPreferenceStatus
-import com.courier.example.R
+import com.courier.android.R
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.Dispatchers

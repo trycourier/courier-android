@@ -1,10 +1,10 @@
-package com.courier.example.fragments.preferences
+package com.courier.android.fragments.preferences
 
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.courier.android.ui.preferences.CourierPreferences
-import com.courier.example.R
+import com.courier.android.R
 
 class PrebuiltPreferencesFragment: Fragment(R.layout.fragment_prebuilt_preferences) {
 

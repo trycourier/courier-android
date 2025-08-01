@@ -1,4 +1,4 @@
-package com.courier.example
+package com.courier.android
 
 import android.annotation.SuppressLint
 import com.courier.android.notifications.presentNotification

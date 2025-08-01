@@ -1,4 +1,4 @@
-package com.courier.example.fragments
+package com.courier.android.fragments
 
 import android.os.Bundle
 import android.view.View
@@ -15,12 +15,12 @@ import com.courier.android.modules.signIn
 import com.courier.android.modules.signOut
 import com.courier.android.modules.tenantId
 import com.courier.android.modules.userId
-import com.courier.example.AuthPreferences
-import com.courier.example.Env
-import com.courier.example.ExampleServer
-import com.courier.example.KeyValueListItem
-import com.courier.example.R
-import com.courier.example.showAlert
+import com.courier.android.AuthPreferences
+import com.courier.android.Env
+import com.courier.android.ExampleServer
+import com.courier.android.KeyValueListItem
+import com.courier.android.R
+import com.courier.android.showAlert
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

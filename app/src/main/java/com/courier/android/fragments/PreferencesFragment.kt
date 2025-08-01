@@ -1,4 +1,4 @@
-package com.courier.example.fragments
+package com.courier.android.fragments
 
 import android.os.Bundle
 import android.view.View
@@ -6,10 +6,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.viewpager.widget.ViewPager
-import com.courier.example.R
-import com.courier.example.fragments.preferences.CustomPreferencesFragment
-import com.courier.example.fragments.preferences.PrebuiltPreferencesFragment
-import com.courier.example.fragments.preferences.StyledPreferencesFragment
+import com.courier.android.R
+import com.courier.android.fragments.preferences.CustomPreferencesFragment
+import com.courier.android.fragments.preferences.PrebuiltPreferencesFragment
+import com.courier.android.fragments.preferences.StyledPreferencesFragment
 import com.google.android.material.tabs.TabLayout
 
 class PreferencesFragment: Fragment(R.layout.fragment_preferences) {

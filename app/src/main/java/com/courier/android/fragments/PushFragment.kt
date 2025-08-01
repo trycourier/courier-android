@@ -1,4 +1,4 @@
-package com.courier.example.fragments
+package com.courier.android.fragments
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -16,7 +16,7 @@ import com.courier.android.modules.fcmToken
 import com.courier.android.modules.isPushPermissionGranted
 import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.requestNotificationPermission
-import com.courier.example.R
+import com.courier.android.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

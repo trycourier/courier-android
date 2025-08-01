@@ -1,4 +1,4 @@
-package com.courier.example
+package com.courier.android
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

@@ -1,4 +1,4 @@
-package com.courier.example.fragments.preferences
+package com.courier.android.fragments.preferences
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -15,10 +15,10 @@ import com.courier.android.Courier
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPreferenceTopic
 import com.courier.android.modules.refreshInbox
-import com.courier.example.MainActivity
-import com.courier.example.R
-import com.courier.example.fragments.inbox.MessageItemViewHolder
-import com.courier.example.toJson
+import com.courier.android.MainActivity
+import com.courier.android.R
+import com.courier.android.fragments.inbox.MessageItemViewHolder
+import com.courier.android.toJson
 import kotlinx.coroutines.launch
 
 class CustomPreferencesFragment : Fragment(R.layout.fragment_custom_preferences) {

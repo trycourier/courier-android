@@ -1,4 +1,4 @@
-package com.courier.example
+package com.courier.android
 
 import android.content.Context
 import android.widget.EditText
