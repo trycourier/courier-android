@@ -10,6 +10,7 @@ import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierAuthenticationListener
 import com.courier.android.models.CourierException
+import com.courier.android.models.CourierPushHandler
 import com.courier.android.modules.InboxModule
 import com.courier.android.modules.linkInbox
 import com.courier.android.modules.refreshFcmToken
@@ -48,6 +49,12 @@ Android Documentation: https://github.com/trycourier/courier-android
 class Courier private constructor(val context: Context) : Application.ActivityLifecycleCallbacks {
 
     companion object {
+
+        internal var internalHandler: CourierPushHandler? = null
+
+        fun setPushHandler(handler: CourierPushHandler) {
+            internalHandler = handler
+        }
 
         // Core
         private const val VERSION = "5.2.12"

@@ -7,7 +7,7 @@ import androidx.appcompat.app.AlertDialog
 import com.courier.android.models.CourierPreferenceTopic
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
-import com.google.firebase.messaging.RemoteMessage
+//import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.GsonBuilder
 import org.json.JSONArray
 import org.json.JSONObject
@@ -54,40 +54,40 @@ suspend fun showAlert(context: Context, title: String, subtitle: String? = null,
 
 }
 
-fun RemoteMessage.toJson(): JSONObject {
-    val json = JSONObject()
-    javaClass.declaredFields.forEach { field ->
-        field.isAccessible = true
-        val value = field.get(this)
-        json.put(field.name, value.toJsonValue())
-    }
-    return json
-}
-
-fun RemoteMessage.toJsonString(indentation: Int = 2): String {
-    return this.toJson().toString(indentation)
-}
+//fun RemoteMessage.toJson(): JSONObject {
+//    val json = JSONObject()
+//    javaClass.declaredFields.forEach { field ->
+//        field.isAccessible = true
+//        val value = field.get(this)
+//        json.put(field.name, value.toJsonValue())
+//    }
+//    return json
+//}
+//
+//fun RemoteMessage.toJsonString(indentation: Int = 2): String {
+//    return this.toJson().toString(indentation)
+//}
 
 private fun Any?.toJsonValue(): Any? {
     return when (this) {
-        is RemoteMessage -> toJson()
-        is RemoteMessage.Notification -> toJsonObject()
-        is Map<*, *> -> toJsonObject()
+//        is RemoteMessage -> toJson()
+//        is RemoteMessage.Notification -> toJsonObject()
+//        is Map<*, *> -> toJsonObject()
         is List<*> -> toJsonArray()
         is Array<*> -> toJsonArray()
         else -> this
     }
 }
 
-fun RemoteMessage.Notification.toJsonObject(): JSONObject {
-    val json = JSONObject()
-    javaClass.declaredFields.forEach { field ->
-        field.isAccessible = true
-        val value = field.get(this)
-        json.put(field.name, value.toJsonValue())
-    }
-    return json
-}
+//fun RemoteMessage.Notification.toJsonObject(): JSONObject {
+//    val json = JSONObject()
+//    javaClass.declaredFields.forEach { field ->
+//        field.isAccessible = true
+//        val value = field.get(this)
+//        json.put(field.name, value.toJsonValue())
+//    }
+//    return json
+//}
 
 fun Map<*, *>.toJsonObject(): JSONObject {
     val json = JSONObject()
