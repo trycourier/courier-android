@@ -8,7 +8,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/purple_500"
+        android:background="@color/blue_500"
         android:elevation="4dp">
 
         <com.google.android.material.appbar.MaterialToolbar
@@ -57,9 +57,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:tabGravity="fill"
-                    app:tabIndicatorColor="@color/purple_500"
+                    app:tabIndicatorColor="@color/blue_500"
                     app:tabMode="fixed"
-                    app:tabSelectedTextColor="@color/purple_500" />
+                    app:tabSelectedTextColor="@color/blue_500" />
 
             </LinearLayout>
 

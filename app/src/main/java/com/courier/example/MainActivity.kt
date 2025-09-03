@@ -15,7 +15,6 @@ import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.signIn
 import com.courier.android.modules.tenantId
 import com.courier.android.modules.userId
-import com.courier.android.utils.onPushNotificationEvent
 import com.courier.example.databinding.ActivityMainBinding
 import com.courier.example.fragments.AuthFragment
 import com.courier.example.fragments.InboxFragment
@@ -107,7 +106,7 @@ class MainActivity : CourierActivity() {
 
     private fun setBadge(value: Int) {
         val badge = binding.bottomNavigationView.getOrCreateBadge(R.id.inbox)
-        badge.backgroundColor = ContextCompat.getColor(this, R.color.purple_700)
+        badge.backgroundColor = ContextCompat.getColor(this, R.color.blue_700)
         badge.badgeTextColor = ContextCompat.getColor(this, R.color.white)
         badge.maxCharacterCount = 3
         badge.verticalOffset = 2

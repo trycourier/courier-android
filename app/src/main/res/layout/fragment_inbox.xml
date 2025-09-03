@@ -9,7 +9,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/purple_500"
+        android:background="@color/blue_500"
         android:fitsSystemWindows="true"
         android:elevation="4dp">
 
@@ -23,10 +23,11 @@
             app:title="Inbox" />
 
         <com.google.android.material.tabs.TabLayout
+            android:visibility="gone"
             android:id="@+id/tabLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/purple_500"
+            android:background="@color/blue_500"
             app:tabGravity="fill"
             app:tabIndicatorColor="@color/white"
             app:tabMode="fixed"
