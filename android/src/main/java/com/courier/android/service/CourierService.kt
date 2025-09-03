@@ -3,10 +3,12 @@ package com.courier.android.service
 import com.courier.android.Courier
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierTrackingEvent
+import com.courier.android.models.PushNotification
 import com.courier.android.modules.setFcmToken
 import com.courier.android.utils.trackAndBroadcastTheEvent
 import com.courier.android.utils.error
 import com.courier.android.utils.log
+import com.courier.android.utils.toPushNotification
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -20,16 +22,18 @@ open class CourierService: FirebaseMessagingService() {
 
     }
 
-    override fun onMessageReceived(message: RemoteMessage) {
-        super.onMessageReceived(message)
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        super.onMessageReceived(remoteMessage)
 
         try {
+
+            val pushNotification = remoteMessage.toPushNotification()
 
             // Broadcast the message to the app
             // This will allow us to handle when it's delivered
             Courier.shared.trackAndBroadcastTheEvent(
                 trackingEvent = CourierTrackingEvent.DELIVERED,
-                message = message
+                pushNotification = pushNotification
             )
 
         } catch (e: Exception) {
@@ -39,7 +43,8 @@ open class CourierService: FirebaseMessagingService() {
         }
 
         // Try and show the notification
-        showNotification(message)
+        val pushNotification = remoteMessage.toPushNotification()
+        showNotification(pushNotification)
 
     }
 
@@ -62,7 +67,7 @@ open class CourierService: FirebaseMessagingService() {
 
     }
 
-    open fun showNotification(message: RemoteMessage) {
+    open fun showNotification(pushNotification: PushNotification) {
         // Empty
     }
 

@@ -5,9 +5,9 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.courier.android.Courier
 import com.courier.android.models.CourierTrackingEvent
+import com.courier.android.models.PushNotification
 import com.courier.android.utils.onPushNotificationEvent
 import com.courier.android.utils.trackPushNotificationClick
-import com.google.firebase.messaging.RemoteMessage
 
 open class CourierActivity : AppCompatActivity() {
 
@@ -23,7 +23,7 @@ open class CourierActivity : AppCompatActivity() {
         // Handle delivered messages on the main thread
         Courier.shared.onPushNotificationEvent { event ->
             if (event.trackingEvent == CourierTrackingEvent.DELIVERED) {
-                onPushNotificationDelivered(event.remoteMessage)
+                onPushNotificationDelivered(event.pushNotification)
             }
         }
 
@@ -35,13 +35,13 @@ open class CourierActivity : AppCompatActivity() {
     }
 
     private fun checkIntentForPushNotificationClick(intent: Intent?) {
-        intent?.trackPushNotificationClick { message ->
-            onPushNotificationClicked(message)
+        intent?.trackPushNotificationClick { pushNotification ->
+            onPushNotificationClicked(pushNotification)
         }
     }
 
-    open fun onPushNotificationClicked(message: RemoteMessage) {}
+    open fun onPushNotificationClicked(pushNotification: PushNotification) {}
 
-    open fun onPushNotificationDelivered(message: RemoteMessage) {}
+    open fun onPushNotificationDelivered(pushNotification: PushNotification) {}
 
 }

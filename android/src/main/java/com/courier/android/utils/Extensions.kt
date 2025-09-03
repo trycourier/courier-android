@@ -23,6 +23,7 @@ import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.models.CourierPushNotificationEvent
+import com.courier.android.models.PushNotification
 import com.courier.android.models.SemanticProperties
 import com.courier.android.models.SemanticProperty
 import com.courier.android.models.toJson
@@ -37,7 +38,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit) {
+fun Intent.trackPushNotificationClick(onClick: (pushNotification: PushNotification) -> Unit) {
 
     try {
 
@@ -49,13 +50,16 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
             // Clear the intent extra
             extras?.remove(key)
 
+            // Convert the remote message to a public safe type
+            val pushNotification = message.toPushNotification()
+
             // Broadcast and track the event
             Courier.shared.trackAndBroadcastTheEvent(
                 trackingEvent = CourierTrackingEvent.CLICKED,
-                message = message
+                pushNotification = pushNotification
             )
 
-            onClick(message)
+            onClick(pushNotification)
 
         }
 
@@ -67,11 +71,11 @@ fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit)
 
 }
 
-internal fun Courier.trackAndBroadcastTheEvent(trackingEvent: CourierTrackingEvent, message: RemoteMessage) = Courier.coroutineScope.launch(Dispatchers.IO) {
+internal fun Courier.trackAndBroadcastTheEvent(trackingEvent: CourierTrackingEvent, pushNotification: PushNotification) = Courier.coroutineScope.launch(Dispatchers.IO) {
     try {
 
         // Track the notification
-        message.data["trackingUrl"]?.let { trackingUrl ->
+        pushNotification.data["trackingUrl"]?.let { trackingUrl ->
             coroutineScope.launch(Dispatchers.IO) {
                 CourierClient.default.tracking.postTrackingUrl(
                     url = trackingUrl,
@@ -81,11 +85,57 @@ internal fun Courier.trackAndBroadcastTheEvent(trackingEvent: CourierTrackingEve
         }
 
         // Broadcast the event
-        eventBus.onPushNotificationEvent(trackingEvent, message)
+        eventBus.onPushNotificationEvent(trackingEvent, pushNotification)
 
     } catch (e: Exception) {
         Courier.shared.client?.error(e.toString())
     }
+}
+
+internal fun RemoteMessage.toPushNotification(): PushNotification {
+    val n = this.notification
+    return PushNotification(
+        // Message-level
+        data = this.data,
+        senderId = this.senderId,
+        from = this.from,
+        collapseKey = this.collapseKey,
+        messageId = this.messageId,
+        messageType = this.messageType,
+        sentTime = this.sentTime,
+        ttl = this.ttl,
+        originalPriority = this.originalPriority,
+        deliveredPriority = this.priority,
+        rawData = this.rawData?.toList(),   // ByteArray -> List<Byte>
+
+        // Notification-level
+        notificationTitle = n?.title,
+        notificationBody = n?.body,
+        titleLocalizationKey = n?.titleLocalizationKey,
+        titleLocalizationArgs = n?.titleLocalizationArgs?.toList(),
+        bodyLocalizationKey = n?.bodyLocalizationKey,
+        bodyLocalizationArgs = n?.bodyLocalizationArgs?.toList(),
+        icon = n?.icon,
+        imageUrl = n?.imageUrl?.toString(),
+        sound = n?.sound,
+        tag = n?.tag,
+        color = n?.color,
+        clickAction = n?.clickAction,
+        channelId = n?.channelId,
+        link = n?.link?.toString(),
+        ticker = n?.ticker,
+        notificationPriority = n?.notificationPriority,
+        visibility = n?.visibility,
+        notificationCount = n?.notificationCount,
+        lightSettings = n?.lightSettings?.toList(),     // IntArray -> List<Int>
+        eventTime = n?.eventTime,
+        sticky = n?.sticky == true,
+        localOnly = n?.localOnly == true,
+        defaultSound = n?.defaultSound == true,
+        defaultVibrateTimings = n?.defaultVibrateSettings == true,
+        defaultLightSettings = n?.defaultLightSettings == true,
+        vibrateTimings = n?.vibrateTimings?.toList()    // LongArray -> List<Long>
+    )
 }
 
 val RemoteMessage.pushNotification: Map<String, Any?>
