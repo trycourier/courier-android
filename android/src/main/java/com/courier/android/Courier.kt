@@ -50,12 +50,6 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
 
     companion object {
 
-        internal var internalHandler: CourierPushHandler? = null
-
-        fun setPushHandler(handler: CourierPushHandler) {
-            internalHandler = handler
-        }
-
         // Core
         private const val VERSION = "5.2.12"
         var agent: CourierAgent = CourierAgent.NativeAndroid(VERSION)
@@ -150,6 +144,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
 
     // Push
     internal var tokens: MutableMap<String, String> = mutableMapOf()
+    internal var pushHandlerActivity: Class<out Activity>? = null
 
     // Stores a local copy of the fcmToken
     internal var fcmToken: String? = null

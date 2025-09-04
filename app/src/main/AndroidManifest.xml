@@ -39,6 +39,15 @@
             </intent-filter>
         </activity>
 
+        <!-- Explicit receiver; no intent-filter needed because SDK uses explicit component -->
+        <meta-data
+            android:name="com.courier.EVENT_RECEIVER"
+            android:value="com.courier.example.MyCourierReceiver" />
+
+        <receiver
+            android:name=".MyCourierReceiver"
+            android:exported="false" />
+
     </application>
 
 </manifest>

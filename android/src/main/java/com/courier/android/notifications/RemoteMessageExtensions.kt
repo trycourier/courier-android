@@ -1,11 +1,16 @@
 package com.courier.android.notifications
 
+import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.courier.android.activity.CourierActivity
+import com.courier.android.models.CourierMessage
 import com.google.firebase.messaging.RemoteMessage
 
 fun RemoteMessage.presentNotification(context: Context, handlingClass: Class<*>?, icon: Int = android.R.drawable.ic_dialog_info, settingsTitle: String = "Notification settings") {
@@ -18,6 +23,41 @@ fun RemoteMessage.presentNotification(context: Context, handlingClass: Class<*>?
 
         val title = data["title"] ?: notification?.title ?: "Empty Title"
         val body = data["body"] ?: notification?.body ?: "Empty Body"
+
+        val notificationBuilder = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(icon)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setAutoCancel(true)
+            .setSound(defaultSoundUri)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setContentIntent(pendingIntent)
+
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, settingsTitle, NotificationManager.IMPORTANCE_HIGH)
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        val uuid = System.currentTimeMillis().toInt()
+        notificationManager.notify(uuid, notificationBuilder.build())
+
+    } catch (e: Exception) {
+
+        print(e)
+
+    }
+
+}
+
+fun CourierMessage.present(context: Context, target: Class<*>?, icon: Int = android.R.drawable.ic_dialog_info, settingsTitle: String = "Notification settings") {
+
+    try {
+
+        val channelId = "default"
+        val pendingIntent = CourierPushNotificationIntent(context, target, this).pendingIntent
+        val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val notificationBuilder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(icon)

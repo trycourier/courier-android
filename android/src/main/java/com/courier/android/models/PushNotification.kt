@@ -7,7 +7,5 @@ data class CourierMessage(
 )
 
 interface CourierPushHandler {
-    fun onDelivered(msg: CourierMessage) {}
-    fun onToken(token: String) {}
     fun showNotification(msg: CourierMessage) {}
 }

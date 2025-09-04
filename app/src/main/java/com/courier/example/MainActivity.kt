@@ -11,6 +11,7 @@ import com.courier.android.activity.CourierActivity
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
+import com.courier.android.models.CourierMessage
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.signIn
 import com.courier.android.modules.tenantId
@@ -20,7 +21,6 @@ import com.courier.example.fragments.AuthFragment
 import com.courier.example.fragments.InboxFragment
 import com.courier.example.fragments.PreferencesFragment
 import com.courier.example.fragments.PushFragment
-//import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.launch
 
 
@@ -119,14 +119,14 @@ class MainActivity : CourierActivity() {
         inboxListener.remove()
     }
 
-//    override fun onPushNotificationClicked(message: RemoteMessage) {
+    override fun onPushNotificationClicked(message: CourierMessage) {
 //        Log.d("Courier", message.toJsonString())
-//        Toast.makeText(this, "Message clicked:\n${message.data}", Toast.LENGTH_LONG).show()
-//    }
-//
-//    override fun onPushNotificationDelivered(message: RemoteMessage) {
+        Toast.makeText(this, "Message clicked:\n${message.data}", Toast.LENGTH_LONG).show()
+    }
+
+    override fun onPushNotificationDelivered(message: CourierMessage) {
 //        Log.d("Courier", message.toJsonString())
-//        Toast.makeText(this, "Message delivered:\n${message.data}", Toast.LENGTH_LONG).show()
-//    }
+        Toast.makeText(this, "Message delivered:\n${message.data}", Toast.LENGTH_LONG).show()
+    }
 
 }

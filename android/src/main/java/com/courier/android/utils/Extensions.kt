@@ -21,6 +21,7 @@ import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.Courier.Companion.eventBus
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
+import com.courier.android.models.CourierMessage
 import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.models.CourierPushNotificationEvent
 import com.courier.android.models.SemanticProperties
@@ -36,6 +37,16 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+
+internal fun RemoteMessage.toPushNotification(): CourierMessage {
+    val title = data["title"] ?: notification?.title ?: "Empty Title"
+    val body = data["body"] ?: notification?.body ?: "Empty Body"
+    return CourierMessage(
+        title = title,
+        body  = body,
+        data  = data
+    )
+}
 
 fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit) {
 
