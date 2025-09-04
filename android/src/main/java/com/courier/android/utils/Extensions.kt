@@ -44,7 +44,7 @@ internal fun RemoteMessage.toPushNotification(): CourierMessage {
     return CourierMessage(
         title = title,
         body  = body,
-        data  = data
+//        data  = data
     )
 }
 

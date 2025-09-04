@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+    <queries>
+        <intent>
+            <action android:name="com.trycourier.MESSAGE_RECEIVED" />
+        </intent>
+    </queries>
     <application>
         <service
-            android:name=".service.CourierFcmService"
-            android:exported="true"
-            tools:ignore="ExportedService">
+            android:name=".service.CourierFirebaseProxy"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>

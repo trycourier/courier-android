@@ -121,12 +121,12 @@ class MainActivity : CourierActivity() {
 
     override fun onPushNotificationClicked(message: CourierMessage) {
 //        Log.d("Courier", message.toJsonString())
-        Toast.makeText(this, "Message clicked:\n${message.data}", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Message clicked:\n${message.title}", Toast.LENGTH_LONG).show()
     }
 
     override fun onPushNotificationDelivered(message: CourierMessage) {
 //        Log.d("Courier", message.toJsonString())
-        Toast.makeText(this, "Message delivered:\n${message.data}", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Message delivered:\n${message.title}", Toast.LENGTH_LONG).show()
     }
 
 }

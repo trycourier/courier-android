@@ -4,18 +4,20 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierAuthenticationListener
 import com.courier.android.models.CourierException
-import com.courier.android.models.CourierPushHandler
 import com.courier.android.modules.InboxModule
 import com.courier.android.modules.linkInbox
 import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.unlinkInbox
+import com.courier.android.service.CourierActions
 import com.courier.android.utils.NotificationEventBus
+import com.courier.android.utils.log
 import com.courier.android.utils.warn
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
@@ -100,6 +102,19 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
                 mInstance?.refreshFcmToken()
             }
 
+            verifyManifestReceivers(context)
+
+        }
+
+        private fun verifyManifestReceivers(context: Context) {
+            val intent = Intent(CourierActions.MESSAGE_RECEIVED)
+            val receivers = context.packageManager.queryBroadcastReceivers(intent, 0)
+
+            if (receivers.isNotEmpty()) {
+                shared.client?.log("Found ${receivers.size} Courier receivers in manifest")
+            } else {
+                shared.client?.log("No Courier receivers found - add receiver to AndroidManifest.xml")
+            }
         }
 
         private fun Courier.registerLifecycleCallbacks() {
