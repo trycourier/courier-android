@@ -1,41 +1,37 @@
 package com.courier.android.service
 
+import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.os.Bundle
 import com.courier.android.Courier
-import com.courier.android.activity.CourierActivity
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.modules.setFcmToken
-import com.courier.android.notifications.present
 import com.courier.android.utils.error
 import com.courier.android.utils.log
-import com.courier.android.utils.toPushNotification
 import com.courier.android.utils.trackAndBroadcastTheEvent
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
-object CourierActions {
-    const val MESSAGE_RECEIVED = "com.trycourier.MESSAGE_RECEIVED"
-    const val TOKEN_UPDATED = "com.trycourier.TOKEN_UPDATED"
-}
+internal class CourierFirebaseProxy : FirebaseMessagingService() {
 
-// Your auto-generated Firebase service (created at runtime)
-class CourierFirebaseProxy : FirebaseMessagingService() {
+    object Events {
+        const val MESSAGE_RECEIVED = "com.trycourier.MESSAGE_RECEIVED"
+        const val TOKEN_UPDATED = "com.trycourier.TOKEN_UPDATED"
+    }
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         try {
-
-            // Broadcast to ALL manifest-declared receivers listening for this action
-            broadcastToManifestReceivers(message)
-
-            // This will allow us to handle when it's delivered
+            // Track + internal listeners
             Courier.shared.trackAndBroadcastTheEvent(
                 trackingEvent = CourierTrackingEvent.DELIVERED,
                 message = message
             )
-
+            // Broadcast to the hosting app explicitly
+            broadcastToHostApp(message)
         } catch (e: Exception) {
             CourierClient.default.error(e.toString())
         }
@@ -54,41 +50,94 @@ class CourierFirebaseProxy : FirebaseMessagingService() {
         }
     }
 
-    private fun broadcastToManifestReceivers(message: RemoteMessage) {
-        val intent = Intent(CourierActions.MESSAGE_RECEIVED).apply {
-
-            // Add message data
-            putExtra("title", message.data["title"] ?: message.notification?.title)
-            putExtra("body", message.data["body"] ?: message.notification?.body)
-            putExtra("from", message.from)
-
-            val dataBundle = Bundle().apply {
-                message.data.forEach { (key, value) -> putString(key, value) }
-            }
-            putExtra("data", dataBundle)
-
-            // CRITICAL: This flag makes it work in killed state
-            addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+    /**
+     * Dynamically discovers and starts CourierService implementations in the host app.
+     * This approach works in all app states including killed state by using explicit intents
+     * with component names, avoiding the implicit intent limitations of modern Android.
+     */
+    private fun broadcastToHostApp(message: RemoteMessage) {
+        val payload = Bundle().apply {
+            message.data.forEach { (k, v) -> putString(k, v) }
         }
 
-        // Send explicit broadcasts to all receivers that declared this action
-        sendBroadcastToManifestReceivers(intent)
+        // Find all services in the app that can handle our action
+        val courierServices = findCourierServices()
+        
+        if (courierServices.isEmpty()) {
+            CourierClient.default.error("No CourierService found in app manifest. Please ensure your service extends CourierService and has the correct intent filter.")
+            return
+        }
+
+        // Create explicit intents for each discovered service
+        courierServices.forEach { serviceInfo ->
+            try {
+                val explicitIntent = Intent().apply {
+                    // Explicit component targeting - this is the key for killed state support
+                    component = ComponentName(serviceInfo.serviceInfo.packageName, serviceInfo.serviceInfo.name)
+                    action = Events.MESSAGE_RECEIVED
+                    putExtra("title", message.data["title"] ?: message.notification?.title)
+                    putExtra("body", message.data["body"] ?: message.notification?.body)
+                    putExtra("from", message.from)
+                    putExtra("data", payload)
+                    // Critical for killed state delivery (not force-stopped)
+                    addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                }
+
+                // Use explicit component name - this works in killed state
+                applicationContext.startService(explicitIntent)
+                
+            } catch (e: SecurityException) {
+                CourierClient.default.error("Failed to start service ${serviceInfo.serviceInfo.name}: ${e.message}")
+            } catch (e: Exception) {
+                CourierClient.default.error("Error starting service ${serviceInfo.serviceInfo.name}: ${e.message}")
+            }
+        }
     }
 
-    private fun sendBroadcastToManifestReceivers(intent: Intent) {
-        // Get all receivers that can handle this intent from the manifest
-        val packageManager = packageManager
-        val receivers = packageManager.queryBroadcastReceivers(intent, 0)
-
-        // Send explicit intent to each receiver (works better for killed apps)
-        receivers.forEach { resolveInfo ->
-            val explicitIntent = Intent(intent).apply {
-                setClassName(resolveInfo.activityInfo.packageName, resolveInfo.activityInfo.name)
+    /**
+     * Dynamically discovers services in the host app that can handle MESSAGE_RECEIVED intents.
+     * This uses PackageManager to query services with the appropriate intent filter,
+     * ensuring we don't need the developer to provide package names manually.
+     */
+    private fun findCourierServices(): List<ResolveInfo> {
+        return try {
+            val queryIntent = Intent(Events.MESSAGE_RECEIVED)
+            val packageManager = applicationContext.packageManager
+            
+            // Debug info
+            CourierClient.default.log("Searching for action: ${Events.MESSAGE_RECEIVED}")
+            CourierClient.default.log("Our package name: ${applicationContext.packageName}")
+            
+            // Query services that can handle our action - use 0 flags to find all matching services
+            val allServices = packageManager.queryIntentServices(queryIntent, 0)
+            
+            CourierClient.default.log("Total services found for action: ${allServices.size}")
+            allServices.forEach { resolveInfo ->
+                CourierClient.default.log("Service: ${resolveInfo.serviceInfo.name} in package: ${resolveInfo.serviceInfo.packageName}")
             }
-            sendBroadcast(explicitIntent)
+            
+            // Also try with different flags to see if that makes a difference
+            val servicesWithDefault = packageManager.queryIntentServices(queryIntent, PackageManager.MATCH_DEFAULT_ONLY)
+            CourierClient.default.log("Services with MATCH_DEFAULT_ONLY: ${servicesWithDefault.size}")
+            
+            val servicesWithAll = packageManager.queryIntentServices(queryIntent, PackageManager.MATCH_ALL)
+            CourierClient.default.log("Services with MATCH_ALL: ${servicesWithAll.size}")
+            
+            // Filter to only include services from our own package
+            val services = allServices.filter { resolveInfo ->
+                val isOurPackage = resolveInfo.serviceInfo.packageName == applicationContext.packageName
+                val isEnabled = resolveInfo.serviceInfo.enabled
+                
+                CourierClient.default.log("Service ${resolveInfo.serviceInfo.name}: ourPackage=$isOurPackage, enabled=$isEnabled")
+                
+                isOurPackage && isEnabled
+            }
+            
+            CourierClient.default.log("Found ${services.size} CourierService(s) in our app package")
+            services
+        } catch (e: Exception) {
+            CourierClient.default.error("Failed to query CourierServices: ${e.message}")
+            emptyList()
         }
-
-        // Also send the implicit broadcast as backup
-        sendBroadcast(intent)
     }
 }

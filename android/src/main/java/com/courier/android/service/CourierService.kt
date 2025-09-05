@@ -1,37 +1,42 @@
 package com.courier.android.service
 
-import android.content.BroadcastReceiver
-import android.content.Context
+import android.app.Service
 import android.content.Intent
-import android.os.Bundle
-import com.courier.android.Courier
-import com.courier.android.client.CourierClient
+import android.os.IBinder
+import androidx.annotation.CallSuper
 import com.courier.android.models.CourierMessage
-import com.courier.android.models.CourierTrackingEvent
-import com.courier.android.modules.setFcmToken
-import com.courier.android.utils.trackAndBroadcastTheEvent
-import com.courier.android.utils.error
-import com.courier.android.utils.log
-import com.courier.android.utils.toPushNotification
-import com.google.firebase.messaging.FirebaseMessagingService
-import com.google.firebase.messaging.RemoteMessage
 
-abstract class CourierReceiver : BroadcastReceiver() {
+abstract class CourierService : Service() {
 
-    final override fun onReceive(context: Context, intent: Intent) {
-        when (intent.action) {
-            CourierActions.MESSAGE_RECEIVED -> {
-                val courierMessage = CourierMessage(
-                    title = intent.getStringExtra("title"),
-                    body = intent.getStringExtra("body"),
-//                    data = intent.getStringExtra("data")
-                )
+    /** Override this to handle the parsed message */
+    abstract fun onCourierMessage(message: CourierMessage)
 
-                onCourierMessage(context, courierMessage)
-            }
+    @CallSuper
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action != CourierFirebaseProxy.Events.MESSAGE_RECEIVED) {
+            stopSelfResult(startId)
+            return START_NOT_STICKY
         }
+
+        // Parse extras → CourierMessage (same logic you had)
+        val dataBundle = intent.getBundleExtra("data")
+        val dataMap = dataBundle?.keySet()?.associateWith { key ->
+            dataBundle.getString(key).orEmpty()
+        }
+
+        val message = CourierMessage(
+            title = intent.getStringExtra("title"),
+            body  = intent.getStringExtra("body"),
+            data  = dataMap
+        )
+
+        // Do work off the main thread; stop service when done
+        onCourierMessage(message)
+
+        // We don’t need to be restarted if killed
+        return START_NOT_STICKY
     }
 
-    // Developer just implements this
-    abstract fun onCourierMessage(context: Context, message: CourierMessage)
+    override fun onBind(intent: Intent?): IBinder? = null
+
 }

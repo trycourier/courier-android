@@ -39,12 +39,10 @@ import java.util.Locale
 import java.util.TimeZone
 
 internal fun RemoteMessage.toPushNotification(): CourierMessage {
-    val title = data["title"] ?: notification?.title ?: "Empty Title"
-    val body = data["body"] ?: notification?.body ?: "Empty Body"
     return CourierMessage(
-        title = title,
-        body  = body,
-//        data  = data
+        title = data["title"] ?: notification?.title,
+        body  = data["body"] ?: notification?.body,
+        data  = data
     )
 }
 

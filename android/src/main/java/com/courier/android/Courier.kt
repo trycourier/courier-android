@@ -15,7 +15,7 @@ import com.courier.android.modules.InboxModule
 import com.courier.android.modules.linkInbox
 import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.unlinkInbox
-import com.courier.android.service.CourierActions
+import com.courier.android.service.CourierFirebaseProxy
 import com.courier.android.utils.NotificationEventBus
 import com.courier.android.utils.log
 import com.courier.android.utils.warn
@@ -100,20 +100,6 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
             // Get the current fcmToken if possible
             coroutineScope.launch(Dispatchers.IO) {
                 mInstance?.refreshFcmToken()
-            }
-
-            verifyManifestReceivers(context)
-
-        }
-
-        private fun verifyManifestReceivers(context: Context) {
-            val intent = Intent(CourierActions.MESSAGE_RECEIVED)
-            val receivers = context.packageManager.queryBroadcastReceivers(intent, 0)
-
-            if (receivers.isNotEmpty()) {
-                shared.client?.log("Found ${receivers.size} Courier receivers in manifest")
-            } else {
-                shared.client?.log("No Courier receivers found - add receiver to AndroidManifest.xml")
             }
         }
 
