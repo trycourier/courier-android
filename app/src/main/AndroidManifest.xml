@@ -39,13 +39,13 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".CustomCourierPushNotificationService"
+        <receiver
+            android:name=".CustomCourierPushNotificationReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.courier.android.PUSH_RECEIVED" />
             </intent-filter>
-        </service>
+        </receiver>
 
     </application>
 

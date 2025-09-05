@@ -6,9 +6,11 @@ import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.os.Bundle
 import com.courier.android.Courier
+import com.courier.android.activity.CourierActivity
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.modules.setFcmToken
+import com.courier.android.notifications.presentNotification
 import com.courier.android.utils.error
 import com.courier.android.utils.log
 import com.courier.android.utils.trackAndBroadcastTheEvent
@@ -51,29 +53,29 @@ internal class CourierFirebaseMessagingProxy : FirebaseMessagingService() {
     }
 
     /**
-     * Dynamically discovers and starts CourierService implementations in the host app.
-     * This approach works in all app states including killed state by using explicit intents
-     * with component names, avoiding the implicit intent limitations of modern Android.
+     * Dynamically discovers and sends broadcasts to CourierPushNotificationReceiver implementations in the host app.
+     * This approach works in all app states including killed state by using broadcast receivers
+     * instead of services, which are not restricted by Android's background execution limits.
      */
     private fun broadcastToHostApp(message: RemoteMessage) {
         val payload = Bundle().apply {
             message.data.forEach { (k, v) -> putString(k, v) }
         }
 
-        // Find all services in the app that can handle our action
-        val courierServices = findCourierServices()
+        // Find all receivers in the app that can handle our action
+        val courierReceivers = findCourierReceivers()
         
-        if (courierServices.isEmpty()) {
-            CourierClient.default.error("No CourierService found in app manifest. Please ensure your service extends CourierService and has the correct intent filter.")
+        if (courierReceivers.isEmpty()) {
+            CourierClient.default.error("No CourierPushNotificationReceiver found in app manifest. Please ensure your receiver extends CourierPushNotificationReceiver and has the correct intent filter.")
             return
         }
 
-        // Create explicit intents for each discovered service
-        courierServices.forEach { serviceInfo ->
+        // Create explicit intents for each discovered receiver
+        courierReceivers.forEach { receiverInfo ->
             try {
                 val explicitIntent = Intent().apply {
-                    // Explicit component targeting - this is the key for killed state support
-                    component = ComponentName(serviceInfo.serviceInfo.packageName, serviceInfo.serviceInfo.name)
+                    // Explicit component targeting - this works for broadcast receivers in killed state
+                    component = ComponentName(receiverInfo.activityInfo.packageName, receiverInfo.activityInfo.name)
                     action = Events.PUSH_RECEIVED
                     putExtra("title", message.data["title"] ?: message.notification?.title)
                     putExtra("body", message.data["body"] ?: message.notification?.body)
@@ -83,60 +85,60 @@ internal class CourierFirebaseMessagingProxy : FirebaseMessagingService() {
                     addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
                 }
 
-                // Use explicit component name - this works in killed state
-                applicationContext.startService(explicitIntent)
+                // Use explicit broadcast - this works in killed state
+                applicationContext.sendBroadcast(explicitIntent)
                 
             } catch (e: SecurityException) {
-                CourierClient.default.error("Failed to start service ${serviceInfo.serviceInfo.name}: ${e.message}")
+                CourierClient.default.error("Failed to send broadcast to ${receiverInfo.activityInfo.name}: ${e.message}")
             } catch (e: Exception) {
-                CourierClient.default.error("Error starting service ${serviceInfo.serviceInfo.name}: ${e.message}")
+                CourierClient.default.error("Error sending broadcast to ${receiverInfo.activityInfo.name}: ${e.message}")
             }
         }
     }
 
     /**
-     * Dynamically discovers services in the host app that can handle MESSAGE_RECEIVED intents.
-     * This uses PackageManager to query services with the appropriate intent filter,
+     * Dynamically discovers broadcast receivers in the host app that can handle PUSH_RECEIVED intents.
+     * This uses PackageManager to query receivers with the appropriate intent filter,
      * ensuring we don't need the developer to provide package names manually.
      */
-    private fun findCourierServices(): List<ResolveInfo> {
+    private fun findCourierReceivers(): List<ResolveInfo> {
         return try {
             val queryIntent = Intent(Events.PUSH_RECEIVED)
             val packageManager = applicationContext.packageManager
             
             // Debug info
-            CourierClient.default.log("Searching for action: ${Events.PUSH_RECEIVED}")
+            CourierClient.default.log("Searching for broadcast receivers with action: ${Events.PUSH_RECEIVED}")
             CourierClient.default.log("Our package name: ${applicationContext.packageName}")
             
-            // Query services that can handle our action - use 0 flags to find all matching services
-            val allServices = packageManager.queryIntentServices(queryIntent, 0)
+            // Query broadcast receivers that can handle our action - use 0 flags to find all matching receivers
+            val allReceivers = packageManager.queryBroadcastReceivers(queryIntent, 0)
             
-            CourierClient.default.log("Total services found for action: ${allServices.size}")
-            allServices.forEach { resolveInfo ->
-                CourierClient.default.log("Service: ${resolveInfo.serviceInfo.name} in package: ${resolveInfo.serviceInfo.packageName}")
+            CourierClient.default.log("Total receivers found for action: ${allReceivers.size}")
+            allReceivers.forEach { resolveInfo ->
+                CourierClient.default.log("Receiver: ${resolveInfo.activityInfo.name} in package: ${resolveInfo.activityInfo.packageName}")
             }
             
             // Also try with different flags to see if that makes a difference
-            val servicesWithDefault = packageManager.queryIntentServices(queryIntent, PackageManager.MATCH_DEFAULT_ONLY)
-            CourierClient.default.log("Services with MATCH_DEFAULT_ONLY: ${servicesWithDefault.size}")
+            val receiversWithDefault = packageManager.queryBroadcastReceivers(queryIntent, PackageManager.MATCH_DEFAULT_ONLY)
+            CourierClient.default.log("Receivers with MATCH_DEFAULT_ONLY: ${receiversWithDefault.size}")
             
-            val servicesWithAll = packageManager.queryIntentServices(queryIntent, PackageManager.MATCH_ALL)
-            CourierClient.default.log("Services with MATCH_ALL: ${servicesWithAll.size}")
+            val receiversWithAll = packageManager.queryBroadcastReceivers(queryIntent, PackageManager.MATCH_ALL)
+            CourierClient.default.log("Receivers with MATCH_ALL: ${receiversWithAll.size}")
             
-            // Filter to only include services from our own package
-            val services = allServices.filter { resolveInfo ->
-                val isOurPackage = resolveInfo.serviceInfo.packageName == applicationContext.packageName
-                val isEnabled = resolveInfo.serviceInfo.enabled
+            // Filter to only include receivers from our own package
+            val receivers = allReceivers.filter { resolveInfo ->
+                val isOurPackage = resolveInfo.activityInfo.packageName == applicationContext.packageName
+                val isEnabled = resolveInfo.activityInfo.enabled
                 
-                CourierClient.default.log("Service ${resolveInfo.serviceInfo.name}: ourPackage=$isOurPackage, enabled=$isEnabled")
+                CourierClient.default.log("Receiver ${resolveInfo.activityInfo.name}: ourPackage=$isOurPackage, enabled=$isEnabled")
                 
                 isOurPackage && isEnabled
             }
             
-            CourierClient.default.log("Found ${services.size} CourierService(s) in our app package")
-            services
+            CourierClient.default.log("Found ${receivers.size} CourierPushNotificationReceiver(s) in our app package")
+            receivers
         } catch (e: Exception) {
-            CourierClient.default.error("Failed to query CourierServices: ${e.message}")
+            CourierClient.default.error("Failed to query CourierPushNotificationReceivers: ${e.message}")
             emptyList()
         }
     }
