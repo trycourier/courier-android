@@ -6,14 +6,14 @@ import android.os.IBinder
 import androidx.annotation.CallSuper
 import com.courier.android.models.CourierMessage
 
-abstract class CourierService : Service() {
+abstract class CourierPushNotificationService : Service() {
 
     /** Override this to handle the parsed message */
     abstract fun onCourierMessage(message: CourierMessage)
 
     @CallSuper
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action != CourierFirebaseProxy.Events.MESSAGE_RECEIVED) {
+        if (intent?.action != CourierFirebaseMessagingProxy.Events.PUSH_RECEIVED) {
             stopSelfResult(startId)
             return START_NOT_STICKY
         }

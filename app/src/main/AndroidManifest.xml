@@ -40,10 +40,10 @@
         </activity>
 
         <service
-            android:name=".MyNotificationReceiver"
+            android:name=".CustomCourierPushNotificationService"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.trycourier.MESSAGE_RECEIVED" />
+                <action android:name="com.courier.android.PUSH_RECEIVED" />
             </intent-filter>
         </service>
 

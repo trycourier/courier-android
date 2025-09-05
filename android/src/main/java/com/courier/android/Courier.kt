@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import com.courier.android.client.CourierClient
@@ -15,9 +14,7 @@ import com.courier.android.modules.InboxModule
 import com.courier.android.modules.linkInbox
 import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.unlinkInbox
-import com.courier.android.service.CourierFirebaseProxy
 import com.courier.android.utils.NotificationEventBus
-import com.courier.android.utils.log
 import com.courier.android.utils.warn
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
