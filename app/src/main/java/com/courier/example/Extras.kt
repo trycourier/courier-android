@@ -2,6 +2,7 @@ package com.courier.example
 
 import android.content.Context
 import android.graphics.Typeface
+import android.text.InputType
 import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -71,11 +72,18 @@ fun showPushNotificationPopup(
         setText(code)
         typeface = Typeface.MONOSPACE
         isSingleLine = false
-        isFocusable = false            // make it read-only
-        isClickable = false
-        setTextIsSelectable(true)      // allow copy/select
+
+        // Make non-editable but allow selection/copy
+        keyListener = null                 // disables typing/paste edits
+        inputType = InputType.TYPE_NULL    // no IME
+        isCursorVisible = false
+        isFocusable = false
+        isFocusableInTouchMode = false
+        isLongClickable = true
+        setTextIsSelectable(true)          // allow copy/select
+
         setHorizontallyScrolling(false)
-        maxLines = 20                  // limit height
+        maxLines = 20
         scrollBarStyle = View.SCROLLBARS_INSIDE_INSET
     }
 

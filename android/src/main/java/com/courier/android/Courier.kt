@@ -134,7 +134,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
             }
         }
 
-        // Push Notification Handlers
+        // Broadcasts and tracks the message in Courier
         fun onMessageReceived(remoteMessage: RemoteMessage) = coroutineScope.launch(Dispatchers.IO) {
             try {
 
@@ -159,6 +159,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
             }
         }
 
+        // Saves the notification token to Courier token management
         fun onNewToken(token: String) {
             try {
                 shared.setFcmToken(
