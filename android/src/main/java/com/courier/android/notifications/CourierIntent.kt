@@ -4,7 +4,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.courier.android.Courier
-import com.courier.android.models.CourierMessage
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 
@@ -26,10 +25,10 @@ internal class CourierIntent(private val context: Context, cls: Class<*>?, messa
 
 }
 
-internal class CourierPushNotificationIntent(private val context: Context, cls: Class<*>?, message: CourierMessage) : Intent(context, cls) {
+internal class CourierPushNotificationIntent(private val context: Context, cls: Class<*>?, remoteMessage: RemoteMessage) : Intent(context, cls) {
 
     init {
-        putExtra(Courier.COURIER_PENDING_NOTIFICATION_KEY, Gson().toJson(message))
+        putExtra(Courier.COURIER_PENDING_NOTIFICATION_KEY, remoteMessage)
         addCategory(CATEGORY_LAUNCHER)
         addFlags(FLAG_ACTIVITY_SINGLE_TOP)
         action = ACTION_MAIN

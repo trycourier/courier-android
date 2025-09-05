@@ -39,15 +39,13 @@
             </intent-filter>
         </activity>
 
-        <!-- Explicit receiver; no intent-filter needed because SDK uses explicit component -->
-        <receiver
-            android:name=".MyNotificationReceiver"
-            android:enabled="true"
+        <service
+            android:name=".ExampleService"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.trycourier.MESSAGE_RECEIVED" />
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
-        </receiver>
+        </service>
 
     </application>
 

@@ -11,15 +11,22 @@ import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierAuthenticationListener
 import com.courier.android.models.CourierException
+import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.modules.InboxModule
 import com.courier.android.modules.linkInbox
 import com.courier.android.modules.refreshFcmToken
+import com.courier.android.modules.setFcmToken
 import com.courier.android.modules.unlinkInbox
-import com.courier.android.service.CourierActions
+import com.courier.android.notifications.presentNotification
 import com.courier.android.utils.NotificationEventBus
+import com.courier.android.utils.broadcastPushNotification
+import com.courier.android.utils.error
 import com.courier.android.utils.log
+import com.courier.android.utils.trackPushNotification
+import com.courier.android.utils.trackingUrl
 import com.courier.android.utils.warn
 import com.google.firebase.FirebaseApp
+import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -102,19 +109,6 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
                 mInstance?.refreshFcmToken()
             }
 
-            verifyManifestReceivers(context)
-
-        }
-
-        private fun verifyManifestReceivers(context: Context) {
-            val intent = Intent(CourierActions.MESSAGE_RECEIVED)
-            val receivers = context.packageManager.queryBroadcastReceivers(intent, 0)
-
-            if (receivers.isNotEmpty()) {
-                shared.client?.log("Found ${receivers.size} Courier receivers in manifest")
-            } else {
-                shared.client?.log("No Courier receivers found - add receiver to AndroidManifest.xml")
-            }
         }
 
         private fun Courier.registerLifecycleCallbacks() {
@@ -138,6 +132,47 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
                 else -> {
                     client?.warn("Initialization context does not support lifecycle callbacks. Please call Courier.initialize(context) with an Activity or Application context.")
                 }
+            }
+        }
+
+        // Push Notification Handlers
+        fun onMessageReceived(remoteMessage: RemoteMessage) = coroutineScope.launch(Dispatchers.IO) {
+            try {
+
+                val trackingEvent = CourierTrackingEvent.DELIVERED
+
+                // Broadcast the message to the app
+                shared.broadcastPushNotification(
+                    trackingEvent = trackingEvent,
+                    remoteMessage = remoteMessage
+                )
+
+                // Track the push notification delivery
+                remoteMessage.trackingUrl?.let { trackingUrl ->
+                    shared.trackPushNotification(
+                        trackingEvent = trackingEvent,
+                        trackingUrl = trackingUrl
+                    )
+                }
+
+            } catch (e: Exception) {
+                CourierClient.default.error(e.toString())
+            }
+        }
+
+        fun presentNotification(remoteMessage: RemoteMessage, context: Context, handlingClass: Class<*>?, icon: Int = android.R.drawable.ic_dialog_info, settingsTitle: String = "Notification settings") {
+            remoteMessage.presentNotification(context, handlingClass, icon, settingsTitle)
+        }
+
+        fun onNewToken(token: String) {
+            try {
+                shared.setFcmToken(
+                    token = token,
+                    onSuccess = { shared.client?.log("Courier FCM token updated") },
+                    onFailure = { shared.client?.error(it.toString()) }
+                )
+            } catch (e: Exception) {
+                CourierClient.default.error(e.toString())
             }
         }
 
