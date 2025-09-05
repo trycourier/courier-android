@@ -17,7 +17,6 @@ import com.courier.android.modules.linkInbox
 import com.courier.android.modules.refreshFcmToken
 import com.courier.android.modules.setFcmToken
 import com.courier.android.modules.unlinkInbox
-import com.courier.android.notifications.presentNotification
 import com.courier.android.utils.NotificationEventBus
 import com.courier.android.utils.broadcastPushNotification
 import com.courier.android.utils.error
@@ -160,10 +159,6 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
             }
         }
 
-        fun presentNotification(remoteMessage: RemoteMessage, context: Context, handlingClass: Class<*>?, icon: Int = android.R.drawable.ic_dialog_info, settingsTitle: String = "Notification settings") {
-            remoteMessage.presentNotification(context, handlingClass, icon, settingsTitle)
-        }
-
         fun onNewToken(token: String) {
             try {
                 shared.setFcmToken(
@@ -194,7 +189,6 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
 
     // Push
     internal var tokens: MutableMap<String, String> = mutableMapOf()
-    internal var pushHandlerActivity: Class<out Activity>? = null
 
     // Stores a local copy of the fcmToken
     internal var fcmToken: String? = null

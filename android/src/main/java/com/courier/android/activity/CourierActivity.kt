@@ -14,6 +14,7 @@ import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 
 open class CourierActivity : AppCompatActivity() {
 
@@ -43,11 +44,6 @@ open class CourierActivity : AppCompatActivity() {
             }
         }
 
-        // Set the current push handler activity
-        // This is used by the default notification presentation to handle clicks
-        // Developers can override this if needed
-        Courier.shared.pushHandlerActivity = this::class.java
-
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -60,6 +56,8 @@ open class CourierActivity : AppCompatActivity() {
             CoroutineScope(Dispatchers.IO).launch {
 
                 val trackingEvent = CourierTrackingEvent.CLICKED
+
+                delay(3000) // 3000 ms
 
                 // Broadcast the message
                 Courier.shared.broadcastPushNotification(
