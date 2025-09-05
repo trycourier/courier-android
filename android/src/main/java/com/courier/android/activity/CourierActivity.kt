@@ -6,11 +6,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.models.CourierTrackingEvent
-import com.courier.android.utils.getRemoteMessage
+import com.courier.android.utils.getPushNotificationData
 import com.courier.android.utils.onPushNotificationEvent
 import com.courier.android.utils.trackPushNotification
 import com.courier.android.utils.trackingUrl
-import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.launch
 
 open class CourierActivity : AppCompatActivity() {
@@ -28,7 +27,7 @@ open class CourierActivity : AppCompatActivity() {
         Courier.shared.onPushNotificationEvent { event ->
             when (event.trackingEvent) {
                 CourierTrackingEvent.DELIVERED -> {
-                    onPushNotificationDelivered(event.remoteMessage)
+                    onPushNotificationDelivered(event.data)
                 }
                 else -> Unit
             }
@@ -44,7 +43,7 @@ open class CourierActivity : AppCompatActivity() {
     private fun checkIntentForPushNotificationClick(intent: Intent?) = lifecycleScope.launch {
 
         // Get the notification and tracking event
-        val remoteMessage = intent?.getRemoteMessage() ?: return@launch
+        val remoteMessage = intent?.getPushNotificationData() ?: return@launch
         val trackingEvent = CourierTrackingEvent.CLICKED
 
         // Broadcast the message
@@ -60,8 +59,8 @@ open class CourierActivity : AppCompatActivity() {
 
     }
 
-    open fun onPushNotificationClicked(remoteMessage: RemoteMessage) {}
+    open fun onPushNotificationClicked(pushNotification: Map<String, String>) {}
 
-    open fun onPushNotificationDelivered(remoteMessage: RemoteMessage) {}
+    open fun onPushNotificationDelivered(pushNotification: Map<String, String>) {}
 
 }

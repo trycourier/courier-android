@@ -12,8 +12,8 @@ import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPushProvider
 import com.courier.android.utils.error
 import com.courier.android.utils.log
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.ktx.messaging
+import com.google.firebase.Firebase
+import com.google.firebase.messaging.messaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await

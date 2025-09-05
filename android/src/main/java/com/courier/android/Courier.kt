@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Application
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import com.courier.android.client.CourierClient
@@ -25,7 +24,6 @@ import com.courier.android.utils.trackPushNotification
 import com.courier.android.utils.trackingUrl
 import com.courier.android.utils.warn
 import com.google.firebase.FirebaseApp
-import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -135,7 +133,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
         }
 
         // Broadcasts and tracks the message in Courier
-        fun onMessageReceived(remoteMessage: RemoteMessage) = coroutineScope.launch(Dispatchers.IO) {
+        fun onMessageReceived(data: Map<String, String>) = coroutineScope.launch(Dispatchers.IO) {
             try {
 
                 val trackingEvent = CourierTrackingEvent.DELIVERED
@@ -143,11 +141,11 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
                 // Broadcast the message to the app
                 shared.broadcastPushNotification(
                     trackingEvent = trackingEvent,
-                    remoteMessage = remoteMessage
+                    data = data
                 )
 
                 // Track the push notification delivery
-                remoteMessage.trackingUrl?.let { trackingUrl ->
+                data.trackingUrl?.let { trackingUrl ->
                     shared.trackPushNotification(
                         trackingEvent = trackingEvent,
                         trackingUrl = trackingUrl

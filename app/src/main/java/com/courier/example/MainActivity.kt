@@ -119,19 +119,19 @@ class MainActivity : CourierActivity() {
         inboxListener.remove()
     }
 
-    override fun onPushNotificationClicked(remoteMessage: RemoteMessage) {
+    override fun onPushNotificationClicked(pushNotification: Map<String, String>) {
         showPushNotificationPopup(
             context = this,
             title = "Message clicked",
-            code = remoteMessage.toJsonString(),
+            code = pushNotification.toJsonString(),
         )
     }
 
-    override fun onPushNotificationDelivered(remoteMessage: RemoteMessage) {
+    override fun onPushNotificationDelivered(pushNotification: Map<String, String>) {
         showPushNotificationPopup(
             context = this,
             title = "Message delivered",
-            code = remoteMessage.toJsonString(),
+            code = pushNotification.toJsonString(),
         )
     }
 

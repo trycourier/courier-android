@@ -112,18 +112,8 @@ fun RemoteMessage.toJson(): JSONObject {
     return json
 }
 
-fun RemoteMessage.toJsonString(indentation: Int = 2): String {
-    // Build JSON from the RemoteMessage data map
-    val json = JSONObject(this.data as Map<*, *>)
-
-    // Add optional top-level fields if you want more than just "data"
-    json.put("from", this.from)
-    json.put("messageId", this.messageId)
-    this.messageType?.let { json.put("messageType", it) }
-    this.sentTime.takeIf { it > 0 }?.let { json.put("sentTime", it) }
-    this.ttl.takeIf { it > 0 }?.let { json.put("ttl", it) }
-
-    // Pretty-print with indentation
+fun Map<String, String>.toJsonString(indentation: Int = 2): String {
+    val json = JSONObject(this)
     return json.toString(indentation)
 }
 

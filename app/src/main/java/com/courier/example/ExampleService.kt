@@ -12,7 +12,7 @@ class ExampleService: FirebaseMessagingService() {
         super.onMessageReceived(message)
 
         // Notify the Courier SDK that a push was delivered
-        Courier.onMessageReceived(message)
+        Courier.onMessageReceived(message.data)
 
         // Create the PendingIntent that runs when the user taps the notification
         // This intent targets your Activity and carries the original message payload

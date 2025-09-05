@@ -9,6 +9,7 @@ import android.content.res.Resources
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.os.Parcelable
 import android.util.TypedValue
 import android.view.View
 import android.widget.Button
@@ -36,7 +37,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-internal fun Intent.getRemoteMessage(): RemoteMessage? {
+internal fun Intent.getPushNotificationData(): Map<String, String>? {
 
     try {
 
@@ -45,7 +46,7 @@ internal fun Intent.getRemoteMessage(): RemoteMessage? {
         @Suppress("DEPRECATION")
         (extras?.get(key) as? RemoteMessage)?.let { message ->
             extras?.remove(key)
-            return message
+            return message.data
         }
 
     } catch (e: Exception) {
@@ -56,8 +57,8 @@ internal fun Intent.getRemoteMessage(): RemoteMessage? {
 
 }
 
-internal val RemoteMessage.trackingUrl: String?
-    get() = data["trackingUrl"]
+internal val Map<String, String>.trackingUrl: String?
+    get() = this["trackingUrl"]
 
 internal suspend fun Courier.trackPushNotification(trackingEvent: CourierTrackingEvent, trackingUrl: String) {
     try {
@@ -70,35 +71,9 @@ internal suspend fun Courier.trackPushNotification(trackingEvent: CourierTrackin
     }
 }
 
-val RemoteMessage.pushNotification: Map<String, Any?>
-    get() {
-
-        val rawData = data.toMutableMap()
-        val payload = mutableMapOf<String, Any?>()
-
-        // Add existing values to base map
-        // then remove the unneeded keys
-        val baseKeys = listOf("title", "subtitle", "body", "badge", "sound")
-        baseKeys.forEach { key ->
-            payload[key] = data[key]
-            rawData.remove(key)
-        }
-
-        // Add extras
-        for ((key, value) in rawData) {
-            payload[key] = value
-        }
-
-        // Add the raw data
-        payload["raw"] = data
-
-        return payload
-
-    }
-
-internal suspend fun Courier.broadcastPushNotification(trackingEvent: CourierTrackingEvent, remoteMessage: RemoteMessage) {
+internal suspend fun Courier.broadcastPushNotification(trackingEvent: CourierTrackingEvent, data: Map<String, String>) {
     try {
-        eventBus.onPushNotificationEvent(trackingEvent, remoteMessage)
+        eventBus.onPushNotificationEvent(trackingEvent, data)
     } catch (e: Exception) {
         Courier.shared.client?.error(e.toString())
     }
