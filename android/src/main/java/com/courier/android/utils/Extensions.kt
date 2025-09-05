@@ -70,14 +70,6 @@ internal suspend fun Courier.trackPushNotification(trackingEvent: CourierTrackin
     }
 }
 
-internal suspend fun Courier.broadcastPushNotification(trackingEvent: CourierTrackingEvent, remoteMessage: RemoteMessage) {
-    try {
-        eventBus.onPushNotificationEvent(trackingEvent, remoteMessage)
-    } catch (e: Exception) {
-        Courier.shared.client?.error(e.toString())
-    }
-}
-
 val RemoteMessage.pushNotification: Map<String, Any?>
     get() {
 
@@ -103,6 +95,14 @@ val RemoteMessage.pushNotification: Map<String, Any?>
         return payload
 
     }
+
+internal suspend fun Courier.broadcastPushNotification(trackingEvent: CourierTrackingEvent, remoteMessage: RemoteMessage) {
+    try {
+        eventBus.onPushNotificationEvent(trackingEvent, remoteMessage)
+    } catch (e: Exception) {
+        Courier.shared.client?.error(e.toString())
+    }
+}
 
 // Returns the last message that was delivered via the event bus
 fun Courier.onPushNotificationEvent(onEvent: (event: CourierPushNotificationEvent) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {

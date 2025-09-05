@@ -120,13 +120,19 @@ class MainActivity : CourierActivity() {
     }
 
     override fun onPushNotificationClicked(remoteMessage: RemoteMessage) {
-//        Log.d("Courier", message.toJsonString())
-        Toast.makeText(this, "Message clicked:\n${remoteMessage.data}", Toast.LENGTH_LONG).show()
+        showPushNotificationPopup(
+            context = this,
+            title = "Message clicked",
+            code = remoteMessage.toJsonString(),
+        )
     }
 
     override fun onPushNotificationDelivered(remoteMessage: RemoteMessage) {
-//        Log.d("Courier", message.toJsonString())
-        Toast.makeText(this, "Message delivered:\n${remoteMessage.data}", Toast.LENGTH_LONG).show()
+        showPushNotificationPopup(
+            context = this,
+            title = "Message delivered",
+            code = remoteMessage.toJsonString(),
+        )
     }
 
 }

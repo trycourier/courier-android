@@ -1,12 +1,15 @@
 package com.courier.example
 
 import android.content.Context
+import android.graphics.Typeface
+import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
 import com.courier.android.models.CourierPreferenceTopic
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
+import com.google.firebase.messaging.RemoteMessage
 //import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.GsonBuilder
 import org.json.JSONArray
@@ -54,40 +57,88 @@ suspend fun showAlert(context: Context, title: String, subtitle: String? = null,
 
 }
 
-//fun RemoteMessage.toJson(): JSONObject {
-//    val json = JSONObject()
-//    javaClass.declaredFields.forEach { field ->
-//        field.isAccessible = true
-//        val value = field.get(this)
-//        json.put(field.name, value.toJsonValue())
-//    }
-//    return json
-//}
-//
-//fun RemoteMessage.toJsonString(indentation: Int = 2): String {
-//    return this.toJson().toString(indentation)
-//}
+fun showPushNotificationPopup(
+    context: Context,
+    title: String,
+    code: String,
+    action: String = "OK"
+) {
+
+    val alert = AlertDialog.Builder(context)
+    alert.setTitle(title)
+
+    val editText = EditText(context).apply {
+        setText(code)
+        typeface = Typeface.MONOSPACE
+        isSingleLine = false
+        isFocusable = false            // make it read-only
+        isClickable = false
+        setTextIsSelectable(true)      // allow copy/select
+        setHorizontallyScrolling(false)
+        maxLines = 20                  // limit height
+        scrollBarStyle = View.SCROLLBARS_INSIDE_INSET
+    }
+
+    val layout = LinearLayout(context).apply {
+        orientation = LinearLayout.VERTICAL
+        setPadding(50, 40, 50, 10)
+        addView(editText)
+    }
+
+    alert.setView(layout)
+
+    alert.setPositiveButton(action) { _, _ ->
+
+    }
+
+    alert.show()
+}
+
+fun RemoteMessage.toJson(): JSONObject {
+    val json = JSONObject()
+    javaClass.declaredFields.forEach { field ->
+        field.isAccessible = true
+        val value = field.get(this)
+        json.put(field.name, value.toJsonValue())
+    }
+    return json
+}
+
+fun RemoteMessage.toJsonString(indentation: Int = 2): String {
+    // Build JSON from the RemoteMessage data map
+    val json = JSONObject(this.data as Map<*, *>)
+
+    // Add optional top-level fields if you want more than just "data"
+    json.put("from", this.from)
+    json.put("messageId", this.messageId)
+    this.messageType?.let { json.put("messageType", it) }
+    this.sentTime.takeIf { it > 0 }?.let { json.put("sentTime", it) }
+    this.ttl.takeIf { it > 0 }?.let { json.put("ttl", it) }
+
+    // Pretty-print with indentation
+    return json.toString(indentation)
+}
 
 private fun Any?.toJsonValue(): Any? {
     return when (this) {
-//        is RemoteMessage -> toJson()
-//        is RemoteMessage.Notification -> toJsonObject()
-//        is Map<*, *> -> toJsonObject()
+        is RemoteMessage -> toJson()
+        is RemoteMessage.Notification -> toJsonObject()
+        is Map<*, *> -> toJsonObject()
         is List<*> -> toJsonArray()
         is Array<*> -> toJsonArray()
         else -> this
     }
 }
 
-//fun RemoteMessage.Notification.toJsonObject(): JSONObject {
-//    val json = JSONObject()
-//    javaClass.declaredFields.forEach { field ->
-//        field.isAccessible = true
-//        val value = field.get(this)
-//        json.put(field.name, value.toJsonValue())
-//    }
-//    return json
-//}
+fun RemoteMessage.Notification.toJsonObject(): JSONObject {
+    val json = JSONObject()
+    javaClass.declaredFields.forEach { field ->
+        field.isAccessible = true
+        val value = field.get(this)
+        json.put(field.name, value.toJsonValue())
+    }
+    return json
+}
 
 fun Map<*, *>.toJsonObject(): JSONObject {
     val json = JSONObject()
