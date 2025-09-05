@@ -65,15 +65,8 @@ internal class CourierFcmService : FirebaseMessagingService() {
         }
 
         // Try and show the notification
-//        val pushNotification = message.toPushNotification()
-
-        val dataBundle = Bundle().apply {
-            message.data.forEach { (k, v) ->
-                putString(k, v)
-            }
-        }
-
-        val test = dataBundle
+        val pushNotification = message.toPushNotification()
+        pushNotification.present(this, CourierActivity::class.java)
 
     }
 
