@@ -7,7 +7,6 @@ import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.utils.getPushNotificationData
-import com.courier.android.utils.onPushNotificationEvent
 import com.courier.android.utils.trackPushNotification
 import com.courier.android.utils.trackingUrl
 import kotlinx.coroutines.launch
@@ -24,7 +23,7 @@ open class CourierActivity : AppCompatActivity() {
         checkIntentForPushNotificationClick(intent)
 
         // Handle delivered messages on the main thread
-        onPushNotificationEvent { event ->
+        Courier.onPushNotificationEvent { event ->
             when (event.trackingEvent) {
                 CourierTrackingEvent.DELIVERED -> {
                     onPushNotificationDelivered(event.data)

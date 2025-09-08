@@ -8,7 +8,6 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Resources
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
-import android.net.Uri
 import android.util.TypedValue
 import android.view.View
 import android.widget.Button
@@ -21,28 +20,25 @@ import com.courier.android.Courier.Companion.eventBus
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierTrackingEvent
-import com.courier.android.models.CourierPushNotificationEvent
 import com.courier.android.models.SemanticProperties
 import com.courier.android.models.SemanticProperty
 import com.courier.android.models.toJson
 import com.courier.android.ui.CourierStyles
 import com.courier.android.ui.inbox.BadgeTextView
 import com.google.firebase.messaging.RemoteMessage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import androidx.core.net.toUri
+import com.courier.android.notifications.CourierPushNotificationIntent
 
 internal fun Intent.getPushNotificationData(): Map<String, String>? {
 
     try {
 
         // Check to see if we have an intent to work
-        val key = Courier.COURIER_PENDING_NOTIFICATION_KEY
+        val key = CourierPushNotificationIntent.COURIER_PENDING_NOTIFICATION_KEY
         @Suppress("DEPRECATION")
         (extras?.get(key) as? RemoteMessage)?.let { message ->
             extras?.remove(key)
@@ -79,13 +75,6 @@ internal suspend fun broadcastPushNotification(
         eventBus.onPushNotificationEvent(trackingEvent, data)
     } catch (e: Exception) {
         Courier.shared.client?.error(e.toString())
-    }
-}
-
-// Returns the last message that was delivered via the event bus
-fun onPushNotificationEvent(onEvent: (event: CourierPushNotificationEvent) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
-    eventBus.events.collectLatest {
-        onEvent(it)
     }
 }
 

@@ -1,7 +1,6 @@
 package com.courier.example
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -11,6 +10,7 @@ import com.courier.android.activity.CourierActivity
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
+import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.signIn
 import com.courier.android.modules.tenantId
@@ -20,7 +20,6 @@ import com.courier.example.fragments.AuthFragment
 import com.courier.example.fragments.InboxFragment
 import com.courier.example.fragments.PreferencesFragment
 import com.courier.example.fragments.PushFragment
-import com.google.firebase.messaging.RemoteMessage
 import kotlinx.coroutines.launch
 
 

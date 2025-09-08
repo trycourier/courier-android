@@ -4,7 +4,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
-import com.courier.android.Courier
 
 /**
  * Convenience intent for launching an Activity from a push notification tap.
@@ -18,7 +17,7 @@ import com.courier.android.Courier
  * - Adds `FLAG_ACTIVITY_SINGLE_TOP` so taps route to the existing Activity
  *   instance (and trigger `onNewIntent`) instead of creating a new one.
  * - Puts the provided `message` into the extras under
- *   [Courier.COURIER_PENDING_NOTIFICATION_KEY] for later retrieval.
+ *   [CourierPushNotificationIntent.COURIER_PENDING_NOTIFICATION_KEY] for later retrieval.
  * - Exposes a `pendingIntent` suitable for use in a notification.
  *
  * Notes:
@@ -47,16 +46,20 @@ import com.courier.android.Courier
  *
  * @param context Android context used to create the underlying [Intent] and [PendingIntent].
  * @param target  The Activity class to open when the user taps the notification.
- * @param payload Parcelable payload attached under [Courier.COURIER_PENDING_NOTIFICATION_KEY].
+ * @param payload Parcelable payload attached under [CourierPushNotificationIntent.COURIER_PENDING_NOTIFICATION_KEY].
  *
  * @see android.content.Intent.ACTION_MAIN
  * @see android.content.Intent.CATEGORY_LAUNCHER
  * @see android.app.PendingIntent
  */
-class CourierPushNotificationIntent(val context: Context, target: Class<*>?, payload: Parcelable) : Intent(context, target) {
+class CourierPushNotificationIntent(val context: Context, private val requestCode: Int = 0, target: Class<*>?, payload: Parcelable) : Intent(context, target) {
+
+    internal companion object {
+         const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_push_notification"
+    }
 
     init {
-        putExtra(Courier.COURIER_PENDING_NOTIFICATION_KEY, payload)
+        putExtra(COURIER_PENDING_NOTIFICATION_KEY, payload)
         addCategory(CATEGORY_LAUNCHER)
         addFlags(FLAG_ACTIVITY_SINGLE_TOP)
         action = ACTION_MAIN
@@ -65,7 +68,7 @@ class CourierPushNotificationIntent(val context: Context, target: Class<*>?, pay
     val pendingIntent: PendingIntent
         get() = PendingIntent.getActivity(
             context,
-            0,
+            requestCode,
             this,
             PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_MUTABLE
         )

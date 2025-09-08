@@ -10,6 +10,7 @@ import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierAuthenticationListener
 import com.courier.android.models.CourierException
+import com.courier.android.models.CourierPushNotificationEvent
 import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.modules.InboxModule
 import com.courier.android.modules.linkInbox
@@ -28,6 +29,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -62,9 +64,6 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
 
         // Inbox
         private const val SOCKET_CLEANUP_DURATION = 60_000L * 10 // 10 minutes
-
-        // Push
-        internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
 
         // Eventing
         val eventBus by lazy { NotificationEventBus() }
@@ -167,6 +166,13 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
                 )
             } catch (e: Exception) {
                 CourierClient.default.error(e.toString())
+            }
+        }
+
+        // Returns the last message that was delivered via the event bus
+        fun onPushNotificationEvent(onEvent: (event: CourierPushNotificationEvent) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
+            eventBus.events.collectLatest {
+                onEvent(it)
             }
         }
 

@@ -254,6 +254,10 @@ fun Courier.setToken(provider: CourierPushProvider, token: String, onSuccess: ()
     }
 }
 
+/**
+ * Permission Handlers
+ */
+
 fun Courier.requestNotificationPermission(activity: Activity, requestCode: Int = 1) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.POST_NOTIFICATIONS), requestCode)
