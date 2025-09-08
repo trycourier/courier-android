@@ -265,7 +265,7 @@ class CourierPushNotificationService: FirebaseMessagingService() {
 }
 ```
 
-### 3. Register the `CourierService` in your `AndroidManifest.xml` file
+### 3. Register the `Service` in your `AndroidManifest.xml` file
 
 ```xml
 <manifest>
