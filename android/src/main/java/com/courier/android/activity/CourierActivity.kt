@@ -3,11 +3,13 @@ package com.courier.android.activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.models.CourierTrackingEvent
-import com.courier.android.utils.onPushNotificationEvent
-import com.courier.android.utils.trackPushNotificationClick
-import com.google.firebase.messaging.RemoteMessage
+import com.courier.android.utils.getPushNotificationData
+import com.courier.android.utils.trackPushNotification
+import com.courier.android.utils.trackingUrl
+import kotlinx.coroutines.launch
 
 open class CourierActivity : AppCompatActivity() {
 
@@ -17,13 +19,16 @@ open class CourierActivity : AppCompatActivity() {
         // Init Courier if needed
         Courier.initialize(context = this)
 
-        // See if there is a pending click event
+        // Handle initial push
         checkIntentForPushNotificationClick(intent)
 
         // Handle delivered messages on the main thread
-        Courier.shared.onPushNotificationEvent { event ->
-            if (event.trackingEvent == CourierTrackingEvent.DELIVERED) {
-                onPushNotificationDelivered(event.remoteMessage)
+        Courier.onPushNotificationEvent { event ->
+            when (event.trackingEvent) {
+                CourierTrackingEvent.DELIVERED -> {
+                    onPushNotificationDelivered(event.data)
+                }
+                else -> Unit
             }
         }
 
@@ -34,14 +39,27 @@ open class CourierActivity : AppCompatActivity() {
         checkIntentForPushNotificationClick(intent)
     }
 
-    private fun checkIntentForPushNotificationClick(intent: Intent?) {
-        intent?.trackPushNotificationClick { message ->
-            onPushNotificationClicked(message)
+    private fun checkIntentForPushNotificationClick(intent: Intent?) = lifecycleScope.launch {
+
+        // Get the notification and tracking event
+        val remoteMessage = intent?.getPushNotificationData() ?: return@launch
+        val trackingEvent = CourierTrackingEvent.CLICKED
+
+        // Broadcast the message
+        onPushNotificationClicked(remoteMessage)
+
+        // Track the message
+        remoteMessage.trackingUrl?.let { trackingUrl ->
+            trackPushNotification(
+                trackingEvent = trackingEvent,
+                trackingUrl = trackingUrl
+            )
         }
+
     }
 
-    open fun onPushNotificationClicked(message: RemoteMessage) {}
+    open fun onPushNotificationClicked(pushNotification: Map<String, String>) {}
 
-    open fun onPushNotificationDelivered(message: RemoteMessage) {}
+    open fun onPushNotificationDelivered(pushNotification: Map<String, String>) {}
 
 }

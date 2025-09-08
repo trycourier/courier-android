@@ -12,8 +12,8 @@ import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPushProvider
 import com.courier.android.utils.error
 import com.courier.android.utils.log
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.ktx.messaging
+import com.google.firebase.Firebase
+import com.google.firebase.messaging.messaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -253,6 +253,10 @@ fun Courier.setToken(provider: CourierPushProvider, token: String, onSuccess: ()
         onFailure(e)
     }
 }
+
+/**
+ * Permission Handlers
+ */
 
 fun Courier.requestNotificationPermission(activity: Activity, requestCode: Int = 1) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

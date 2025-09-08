@@ -1,37 +1,43 @@
 package com.courier.example
 
-import android.annotation.SuppressLint
+import com.courier.android.Courier
+import com.courier.android.notifications.CourierPushNotificationIntent
 import com.courier.android.notifications.presentNotification
-import com.courier.android.service.CourierService
+import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
-// Warning is suppressed
-// You do not need to worry about this warning
-// The CourierService will handle the function automatically
-@SuppressLint("MissingFirebaseInstanceTokenRefresh")
-class ExampleService: CourierService() {
+class ExampleService: FirebaseMessagingService() {
 
-    override fun showNotification(message: RemoteMessage) {
-        super.showNotification(message)
+    override fun onMessageReceived(message: RemoteMessage) {
+        super.onMessageReceived(message)
 
-        // This is a simple function you can use, however,
-        // it is recommended that you create your own
-        // notification and handle it's intent properly
-        message.presentNotification(
+        // Notify the Courier SDK that a push was delivered
+        Courier.onMessageReceived(message.data)
+
+        // Create the PendingIntent that runs when the user taps the notification
+        // This intent targets your Activity and carries the original message payload
+        val notificationIntent = CourierPushNotificationIntent(
             context = this,
-            handlingClass = MainActivity::class.java,
+            target = MainActivity::class.java,
+            payload = message
         )
 
-        // Courier will handle delivery tracking of notifications automatically if you extend your service class with `CourierService()`
-        // If you do present a custom notification, you should use this function when the notification is clicked to ensure the status is updated properly
-        /**
-        Courier.trackNotification(
-            message = message,
-            event = CourierPushEvent.DELIVERED,
-            onSuccess = { Courier.log("Event tracked") },
-            onFailure = { Courier.log(it.toString()) }
+        // Show the notification to the user.
+        // Prefer data-only FCM so this service runs even in background/killed state.
+        // Fall back to notification fields if data keys are missing.
+        notificationIntent.presentNotification(
+            title = message.data["title"] ?: message.notification?.title,
+            body = message.data["body"] ?: message.notification?.body,
         )
-        **/
+
+    }
+
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
+
+        // Register/refresh this device’s FCM token with Courier.
+        // The SDK caches and updates the token automatically and links it to the current user.
+        Courier.onNewToken(token)
 
     }
 

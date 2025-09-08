@@ -8,7 +8,6 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Resources
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
-import android.net.Uri
 import android.util.TypedValue
 import android.view.View
 import android.widget.Button
@@ -17,107 +16,65 @@ import androidx.annotation.ColorInt
 import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.Courier
-import com.courier.android.Courier.Companion.coroutineScope
 import com.courier.android.Courier.Companion.eventBus
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierTrackingEvent
-import com.courier.android.models.CourierPushNotificationEvent
 import com.courier.android.models.SemanticProperties
 import com.courier.android.models.SemanticProperty
 import com.courier.android.models.toJson
 import com.courier.android.ui.CourierStyles
 import com.courier.android.ui.inbox.BadgeTextView
 import com.google.firebase.messaging.RemoteMessage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import androidx.core.net.toUri
+import com.courier.android.notifications.CourierPushNotificationIntent
 
-fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit) {
+internal fun Intent.getPushNotificationData(): Map<String, String>? {
 
     try {
 
         // Check to see if we have an intent to work
-        val key = Courier.COURIER_PENDING_NOTIFICATION_KEY
+        val key = CourierPushNotificationIntent.COURIER_PENDING_NOTIFICATION_KEY
         @Suppress("DEPRECATION")
         (extras?.get(key) as? RemoteMessage)?.let { message ->
-
-            // Clear the intent extra
             extras?.remove(key)
-
-            // Broadcast and track the event
-            Courier.shared.trackAndBroadcastTheEvent(
-                trackingEvent = CourierTrackingEvent.CLICKED,
-                message = message
-            )
-
-            onClick(message)
-
+            return message.data
         }
 
     } catch (e: Exception) {
-
         CourierClient.default.error(e.toString())
-
     }
+
+    return null
 
 }
 
-internal fun Courier.trackAndBroadcastTheEvent(trackingEvent: CourierTrackingEvent, message: RemoteMessage) = Courier.coroutineScope.launch(Dispatchers.IO) {
+internal val Map<String, String>.trackingUrl: String?
+    get() = this["trackingUrl"]
+
+internal suspend fun trackPushNotification(trackingEvent: CourierTrackingEvent, trackingUrl: String) {
     try {
-
-        // Track the notification
-        message.data["trackingUrl"]?.let { trackingUrl ->
-            coroutineScope.launch(Dispatchers.IO) {
-                CourierClient.default.tracking.postTrackingUrl(
-                    url = trackingUrl,
-                    event = trackingEvent,
-                )
-            }
-        }
-
-        // Broadcast the event
-        eventBus.onPushNotificationEvent(trackingEvent, message)
-
+        CourierClient.default.tracking.postTrackingUrl(
+            url = trackingUrl,
+            event = trackingEvent,
+        )
     } catch (e: Exception) {
         Courier.shared.client?.error(e.toString())
     }
 }
 
-val RemoteMessage.pushNotification: Map<String, Any?>
-    get() {
-
-        val rawData = data.toMutableMap()
-        val payload = mutableMapOf<String, Any?>()
-
-        // Add existing values to base map
-        // then remove the unneeded keys
-        val baseKeys = listOf("title", "subtitle", "body", "badge", "sound")
-        baseKeys.forEach { key ->
-            payload[key] = data[key]
-            rawData.remove(key)
-        }
-
-        // Add extras
-        for ((key, value) in rawData) {
-            payload[key] = value
-        }
-
-        // Add the raw data
-        payload["raw"] = data
-
-        return payload
-
-    }
-
-// Returns the last message that was delivered via the event bus
-fun Courier.onPushNotificationEvent(onEvent: (event: CourierPushNotificationEvent) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
-    eventBus.events.collectLatest {
-        onEvent(it)
+internal suspend fun broadcastPushNotification(
+    trackingEvent: CourierTrackingEvent,
+    data: Map<String, String>
+) {
+    try {
+        eventBus.onPushNotificationEvent(trackingEvent, data)
+    } catch (e: Exception) {
+        Courier.shared.client?.error(e.toString())
     }
 }
 
@@ -218,7 +175,7 @@ internal fun TextView.setCourierFont(font: CourierStyles.Font?, @ColorInt fallba
 }
 
 internal fun Context.launchCourierWebsite() {
-    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.courier.com/"))
+    val browserIntent = Intent(Intent.ACTION_VIEW, "https://www.courier.com/".toUri())
     startActivity(browserIntent)
 }
 

@@ -10,17 +10,26 @@ import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierAgent
 import com.courier.android.models.CourierAuthenticationListener
 import com.courier.android.models.CourierException
+import com.courier.android.models.CourierPushNotificationEvent
+import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.modules.InboxModule
 import com.courier.android.modules.linkInbox
 import com.courier.android.modules.refreshFcmToken
+import com.courier.android.modules.setFcmToken
 import com.courier.android.modules.unlinkInbox
 import com.courier.android.utils.NotificationEventBus
+import com.courier.android.utils.broadcastPushNotification
+import com.courier.android.utils.error
+import com.courier.android.utils.log
+import com.courier.android.utils.trackPushNotification
+import com.courier.android.utils.trackingUrl
 import com.courier.android.utils.warn
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -55,9 +64,6 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
 
         // Inbox
         private const val SOCKET_CLEANUP_DURATION = 60_000L * 10 // 10 minutes
-
-        // Push
-        internal const val COURIER_PENDING_NOTIFICATION_KEY = "courier_pending_notification_key"
 
         // Eventing
         val eventBus by lazy { NotificationEventBus() }
@@ -122,6 +128,51 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
                 else -> {
                     client?.warn("Initialization context does not support lifecycle callbacks. Please call Courier.initialize(context) with an Activity or Application context.")
                 }
+            }
+        }
+
+        // Broadcasts and tracks the message in Courier
+        fun onMessageReceived(data: Map<String, String>) = coroutineScope.launch(Dispatchers.IO) {
+            try {
+
+                val trackingEvent = CourierTrackingEvent.DELIVERED
+
+                // Broadcast the message to the app
+                broadcastPushNotification(
+                    trackingEvent = trackingEvent,
+                    data = data
+                )
+
+                // Track the push notification delivery
+                data.trackingUrl?.let { trackingUrl ->
+                    trackPushNotification(
+                        trackingEvent = trackingEvent,
+                        trackingUrl = trackingUrl
+                    )
+                }
+
+            } catch (e: Exception) {
+                CourierClient.default.error(e.toString())
+            }
+        }
+
+        // Saves the notification token to Courier token management
+        fun onNewToken(token: String) {
+            try {
+                shared.setFcmToken(
+                    token = token,
+                    onSuccess = { shared.client?.log("Courier FCM token updated") },
+                    onFailure = { shared.client?.error(it.toString()) }
+                )
+            } catch (e: Exception) {
+                CourierClient.default.error(e.toString())
+            }
+        }
+
+        // Returns the last message that was delivered via the event bus
+        fun onPushNotificationEvent(onEvent: (event: CourierPushNotificationEvent) -> Unit) = coroutineScope.launch(Dispatchers.Main) {
+            eventBus.events.collectLatest {
+                onEvent(it)
             }
         }
 
