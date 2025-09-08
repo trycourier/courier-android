@@ -300,12 +300,12 @@ class MainActivity : CourierActivity() {
 
     ..
 
-    override fun onPushNotificationClicked(message: RemoteMessage) {
-        Toast.makeText(this, "Message clicked:\n${message.data}", Toast.LENGTH_LONG).show()
+    override fun onPushNotificationDelivered(pushNotification: Map<String, String>) {
+        Toast.makeText(this, "Message delivered:\n${pushNotification}", Toast.LENGTH_LONG).show()
     }
-
-    override fun onPushNotificationDelivered(message: RemoteMessage) {
-        Toast.makeText(this, "Message delivered:\n${message.data}", Toast.LENGTH_LONG).show()
+    
+    override fun onPushNotificationClicked(pushNotification: Map<String, String>) {
+        Toast.makeText(this, "Message clicked:\n${pushNotification}", Toast.LENGTH_LONG).show()
     }
 
 }
