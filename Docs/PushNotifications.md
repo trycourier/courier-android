@@ -193,7 +193,7 @@ Select which push notification provider you would like Courier to route push not
 
 ## 2. Sync Push Notification Tokens
 
-### Automatic Token Syncing (FCM Only)
+## Automatic Token Syncing (FCM Only)
 
 To track new push notifications when they arrive and to automatically sync push notification tokens, create a new file, name it what you'd like and paste the following code in it. (Kotlin example shown below)
 
@@ -311,7 +311,7 @@ class MainActivity : CourierActivity() {
 }
 ```
 
-### Manual Token Syncing
+## Manual Token Syncing
 
 If you do not want to use `CourierService` and `CourierActivity`, you can manually sync push notification tokens with the following code.
 
@@ -340,7 +340,7 @@ lifecycleScope.launch {
 }
 ```
 
-### Manual Notification Tracking
+## Manual Notification Tracking
 
 This is how you can tell Courier when a notification has been delivered or clicked in your app. If you are using `CourierService` and `CourierActivity`, this is done automatically.
 
