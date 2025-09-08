@@ -29,7 +29,7 @@ The easiest way to support push notifications in your app.
         <tr width="600px">
             <td align="left">
                 <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#manual-token-syncing">
-                    <code>Manual Token Managment</code>
+                    <code>Manual Token Management</code>
                 </a>
             </td>
             <td align="left">
@@ -197,36 +197,75 @@ Select which push notification provider you would like Courier to route push not
 
 To track new push notifications when they arrive and to automatically sync push notification tokens, create a new file, name it what you'd like and paste the following code in it. (Kotlin example shown below)
 
+### 1. Add the Firebase Messaging Dependency to your `app/build.gradle`
+
+```gradle
+..
+dependencies {
+
+    ..
+
+    // Firebase
+    implementation platform('com.google.firebase:firebase-bom:XXXX')
+    implementation "com.google.firebase:firebase-messaging"
+
+}
+```
+
+You can find more details in the official Firebase documentation:
+
+🔗 [Set up Firebase for Android](https://firebase.google.com/docs/android/setup)
+
+### 2. Create a new Service File to handle push notification delivery and tokens
+
 ```kotlin
-import android.annotation.SuppressLint
+package your.app.package
+
+import com.courier.android.Courier
+import com.courier.android.notifications.CourierPushNotificationIntent
 import com.courier.android.notifications.presentNotification
-import com.courier.android.service.CourierService
+import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
-// This is safe. `CourierService` will automatically handle token refreshes.
-@SuppressLint("MissingFirebaseInstanceTokenRefresh")
-class YourNotificationService: CourierService() {
+class CourierPushNotificationService: FirebaseMessagingService() {
 
-    override fun showNotification(message: RemoteMessage) {
-        super.showNotification(message)
+    override fun onMessageReceived(message: RemoteMessage) {
+        super.onMessageReceived(message)
 
-        // TODO: This is where you will customize the notification that is shown to your users
-        // `message.presentNotification(...)` is used to get started quickly and not for production use.
-        // More information on how to customize an Android notification here:
-        // https://developer.android.com/develop/ui/views/notifications/build-notification
+        // Notify the Courier SDK that a push was delivered
+        Courier.onMessageReceived(message.data)
 
-        message.presentNotification(
+        // Create the PendingIntent that runs when the user taps the notification
+        // This intent targets your Activity and carries the original message payload
+        val notificationIntent = CourierPushNotificationIntent(
             context = this,
-            handlingClass = MainActivity::class.java,
-            icon = android.R.drawable.ic_dialog_info
+            target = MainActivity::class.java,
+            payload = message
         )
+
+        // Show the notification to the user.
+        // Prefer data-only FCM so this service runs even in background/killed state.
+        // Fall back to notification fields if data keys are missing.
+        notificationIntent.presentNotification(
+            title = message.data["title"] ?: message.notification?.title,
+            body = message.data["body"] ?: message.notification?.body,
+        )
+
+    }
+
+    override fun onNewToken(token: String) {
+        super.onNewToken(token)
+
+        // Register/refresh this device’s FCM token with Courier.
+        // The SDK caches and updates the token automatically and links it to the current user.
+        Courier.onNewToken(token)
 
     }
 
 }
 ```
 
-Next, add the `CourierService` entry in your `AndroidManifest.xml` file
+### 3. Register the `CourierService` in your `AndroidManifest.xml` file
 
 ```xml
 <manifest>
@@ -238,7 +277,7 @@ Next, add the `CourierService` entry in your `AndroidManifest.xml` file
 
         // Add this 👇
         <service
-            android:name=".YourNotificationService"
+            android:name=".CourierPushNotificationService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -252,7 +291,9 @@ Next, add the `CourierService` entry in your `AndroidManifest.xml` file
 </manifest>
 ```
 
-Finally, add the `CourierActivity`. This will allow you to handle when users get push notifications delivered and when they click on the push notifications. You will likely want to extend your `MainActivity` but your use case may be slightly different.
+### 4. Add the `CourierActivity`
+
+This will allow you to handle when users get push notifications delivered and when they click on the push notifications. You will likely want to extend your `MainActivity` but your use case may be slightly different.
     
 ```kotlin
 class MainActivity : CourierActivity() {
