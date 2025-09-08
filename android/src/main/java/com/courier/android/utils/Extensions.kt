@@ -9,7 +9,6 @@ import android.content.res.Resources
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
-import android.os.Parcelable
 import android.util.TypedValue
 import android.view.View
 import android.widget.Button
@@ -36,6 +35,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import androidx.core.net.toUri
 
 internal fun Intent.getPushNotificationData(): Map<String, String>? {
 
@@ -60,7 +60,7 @@ internal fun Intent.getPushNotificationData(): Map<String, String>? {
 internal val Map<String, String>.trackingUrl: String?
     get() = this["trackingUrl"]
 
-internal suspend fun Courier.trackPushNotification(trackingEvent: CourierTrackingEvent, trackingUrl: String) {
+internal suspend fun trackPushNotification(trackingEvent: CourierTrackingEvent, trackingUrl: String) {
     try {
         CourierClient.default.tracking.postTrackingUrl(
             url = trackingUrl,
@@ -71,7 +71,10 @@ internal suspend fun Courier.trackPushNotification(trackingEvent: CourierTrackin
     }
 }
 
-internal suspend fun Courier.broadcastPushNotification(trackingEvent: CourierTrackingEvent, data: Map<String, String>) {
+internal suspend fun broadcastPushNotification(
+    trackingEvent: CourierTrackingEvent,
+    data: Map<String, String>
+) {
     try {
         eventBus.onPushNotificationEvent(trackingEvent, data)
     } catch (e: Exception) {
@@ -80,7 +83,7 @@ internal suspend fun Courier.broadcastPushNotification(trackingEvent: CourierTra
 }
 
 // Returns the last message that was delivered via the event bus
-fun Courier.onPushNotificationEvent(onEvent: (event: CourierPushNotificationEvent) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
+fun onPushNotificationEvent(onEvent: (event: CourierPushNotificationEvent) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
     eventBus.events.collectLatest {
         onEvent(it)
     }
@@ -183,7 +186,7 @@ internal fun TextView.setCourierFont(font: CourierStyles.Font?, @ColorInt fallba
 }
 
 internal fun Context.launchCourierWebsite() {
-    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.courier.com/"))
+    val browserIntent = Intent(Intent.ACTION_VIEW, "https://www.courier.com/".toUri())
     startActivity(browserIntent)
 }
 

@@ -139,14 +139,14 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
                 val trackingEvent = CourierTrackingEvent.DELIVERED
 
                 // Broadcast the message to the app
-                shared.broadcastPushNotification(
+                broadcastPushNotification(
                     trackingEvent = trackingEvent,
                     data = data
                 )
 
                 // Track the push notification delivery
                 data.trackingUrl?.let { trackingUrl ->
-                    shared.trackPushNotification(
+                    trackPushNotification(
                         trackingEvent = trackingEvent,
                         trackingUrl = trackingUrl
                     )

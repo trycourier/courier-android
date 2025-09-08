@@ -24,7 +24,7 @@ open class CourierActivity : AppCompatActivity() {
         checkIntentForPushNotificationClick(intent)
 
         // Handle delivered messages on the main thread
-        Courier.shared.onPushNotificationEvent { event ->
+        onPushNotificationEvent { event ->
             when (event.trackingEvent) {
                 CourierTrackingEvent.DELIVERED -> {
                     onPushNotificationDelivered(event.data)
@@ -51,7 +51,7 @@ open class CourierActivity : AppCompatActivity() {
 
         // Track the message
         remoteMessage.trackingUrl?.let { trackingUrl ->
-            Courier.shared.trackPushNotification(
+            trackPushNotification(
                 trackingEvent = trackingEvent,
                 trackingUrl = trackingUrl
             )
