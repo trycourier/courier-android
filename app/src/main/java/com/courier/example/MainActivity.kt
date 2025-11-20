@@ -40,8 +40,7 @@ class MainActivity : CourierActivity() {
         setup()
     }
 
-    private fun setup() = lifecycleScope.launch {
-
+    private suspend fun authenticate() {
         try {
 
             // Fetch new jwt if needed
@@ -68,6 +67,9 @@ class MainActivity : CourierActivity() {
             Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
 
         }
+    }
+
+    private fun setup() {
 
         binding = ActivityMainBinding.inflate(layoutInflater).apply {
             setContentView(root)
@@ -85,11 +87,18 @@ class MainActivity : CourierActivity() {
             }
         }
 
-        inboxListener = Courier.shared.addInboxListener(
-            onUnreadCountChanged = { count ->
-                setBadge(count)
-            }
-        )
+        // Authenticate the user
+        lifecycleScope.launch {
+
+            authenticate()
+
+            inboxListener = Courier.shared.addInboxListener(
+                onUnreadCountChanged = { count ->
+                    setBadge(count)
+                }
+            )
+
+        }
 
     }
 

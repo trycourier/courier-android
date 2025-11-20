@@ -36,7 +36,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
-fun Intent.trackPushNotificationClick() {
+fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
 
     try {
 
@@ -53,6 +53,8 @@ fun Intent.trackPushNotificationClick() {
                 trackingEvent = CourierTrackingEvent.CLICKED,
                 message = message
             )
+
+            onClick(message)
 
         }
 
