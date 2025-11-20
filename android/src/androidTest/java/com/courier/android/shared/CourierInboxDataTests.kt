@@ -3,7 +3,7 @@ package com.courier.android.shared
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.courier.android.Courier
-import com.courier.android.Env
+import com.courier.app.Env
 import com.courier.android.ExampleServer
 import com.courier.android.UserBuilder
 import com.courier.android.models.CourierException

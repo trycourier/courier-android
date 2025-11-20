@@ -1,6 +1,7 @@
 package com.courier.android
 
 import com.courier.android.client.CourierClient
+import com.courier.app.Env
 
 internal class ClientBuilder {
 

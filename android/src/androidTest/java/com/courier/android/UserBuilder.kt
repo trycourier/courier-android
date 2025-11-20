@@ -7,6 +7,7 @@ import com.courier.android.modules.clientKey
 import com.courier.android.modules.signIn
 import com.courier.android.modules.signOut
 import com.courier.android.modules.userId
+import com.courier.app.Env
 import junit.framework.TestCase.assertEquals
 
 internal class UserBuilder {

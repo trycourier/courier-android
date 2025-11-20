@@ -2,6 +2,7 @@ package com.courier.android
 
 import com.courier.android.client.CourierClient
 import com.courier.android.utils.dispatch
+import com.courier.app.Env
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody

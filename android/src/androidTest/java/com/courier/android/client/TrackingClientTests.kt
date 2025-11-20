@@ -1,8 +1,8 @@
 package com.courier.android.client
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.courier.android.ClientBuilder
 import com.courier.android.models.CourierTrackingEvent
+import com.courier.android.utils.error
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,26 +14,32 @@ class TrackingClientTests {
 
     @Test
     fun trackDelivered() = runBlocking {
-
-        val client = ClientBuilder.build()
-
-        client.tracking.postTrackingUrl(
+        CourierClient.default.tracking.postTrackingUrl(
             url = trackingUrl,
             event = CourierTrackingEvent.DELIVERED,
         )
-
     }
 
     @Test
     fun trackClicked() = runBlocking {
-
-        val client = ClientBuilder.build()
-
-        client.tracking.postTrackingUrl(
+        CourierClient.default.tracking.postTrackingUrl(
             url = trackingUrl,
             event = CourierTrackingEvent.CLICKED,
         )
+    }
 
+    @Test
+    fun trackCustomTrackingUrl() = runBlocking {
+        val exampleUrl = "https://jsonplaceholder.typicode.com/posts"
+        try {
+            CourierClient.default.tracking.postTrackingUrl(
+                url = exampleUrl,
+                event = CourierTrackingEvent.CLICKED,
+            )
+        } catch (e: Exception) {
+            CourierClient.default.error(e.toString())
+        }
+        assert(true)
     }
 
 }

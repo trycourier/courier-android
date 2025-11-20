@@ -2,8 +2,8 @@ package com.courier.android.client
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.courier.android.ClientBuilder
-import com.courier.android.Env
 import com.courier.android.ExampleServer
+import com.courier.app.Env
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
