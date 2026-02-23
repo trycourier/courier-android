@@ -1,5 +1,7 @@
 <img width="1000" alt="android-banner" src="https://github.com/user-attachments/assets/e40f7db0-3b6c-4b5e-a2de-bf6d42b6751d">
 
+<!-- AUTO-GENERATED-OVERVIEW:START — Do not edit this section. It is synced from mintlify-docs. -->
+
 &emsp;
 
 # Requirements & Support
@@ -92,6 +94,8 @@ class YourApplication: Application() {
 
 }
 ```
+
+<!-- AUTO-GENERATED-OVERVIEW:END -->
 
 &emsp;
 
