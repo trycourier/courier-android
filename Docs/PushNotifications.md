@@ -1,5 +1,7 @@
 <img width="1000" alt="android-push-banner" src="https://github.com/trycourier/courier-android/assets/6370613/72159318-47d8-4d2c-ab21-30d8e8b78dea">
 
+> **Note**: These docs have moved to [courier.com/docs/sdk-libraries/android](https://www.courier.com/docs/sdk-libraries/android/). The content below may be outdated.
+
 &emsp;
 
 # Push Notifications
