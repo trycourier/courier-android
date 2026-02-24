@@ -1,5 +1,7 @@
 <img width="1000" alt="android-inbox-banner" src="https://github.com/trycourier/courier-android/assets/6370613/ccbe19de-5b08-4778-8f1f-c0c16f1c26e2">
 
+> **Note**: These docs have moved to [courier.com/docs/sdk-libraries/android](https://www.courier.com/docs/sdk-libraries/android/). The content below may be outdated.
+
 &emsp;
 
 &emsp;

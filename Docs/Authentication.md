@@ -1,3 +1,5 @@
+> **Note**: These docs have moved to [courier.com/docs/sdk-libraries/android](https://www.courier.com/docs/sdk-libraries/android/). The content below may be outdated.
+
 # Authentication
 
 Manages user credentials between app sessions.

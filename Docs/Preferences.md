@@ -1,5 +1,7 @@
 <img width="1000" alt="android-preferences-banner" src="https://github.com/trycourier/courier-android/assets/6370613/686cd3e8-d180-4cbb-9ecb-d847526626ea">
 
+> **Note**: These docs have moved to [courier.com/docs/sdk-libraries/android](https://www.courier.com/docs/sdk-libraries/android/). The content below may be outdated.
+
 # Courier Preferences
 
 In-app notification settings that allow your users to customize which of your notifications they receive. Allows you to build high quality, flexible preference settings very quickly.
