@@ -14,6 +14,7 @@ val client = CourierClient(
     userId       = "your_user_id",
     connectionId = "...",          // Optional. Used for inbox websocket
     tenantId     = "...",          // Optional. Used for scoping a client to a specific tenant
+    apiUrls      = CourierClient.ApiUrls.eu(), // Optional. Use for EU-hosted workspaces
     showLogs     = ..,             // Optional. Defaults to your current BuildConfig
 )
 
