@@ -1,0 +1,174 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    name: Deploy to JitPack
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      deployed: ${{ steps.check.outputs.deployed }}
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check version
+        id: check
+        run: |
+          VERSION=$(grep 'private const val VERSION =' android/src/main/java/com/courier/android/Courier.kt | awk -F '"' '{print $2}')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version: $VERSION"
+
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version format: $VERSION"
+            exit 1
+          fi
+
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "Tag $VERSION already exists. Skipping deploy."
+            echo "deployed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Tag $VERSION does not exist. Deploying."
+            echo "deployed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create git tag
+        if: steps.check.outputs.deployed == 'true'
+        run: |
+          VERSION="${{ steps.check.outputs.version }}"
+          git tag "$VERSION"
+          git push origin "$VERSION"
+
+      - name: Generate release notes
+        if: steps.check.outputs.deployed == 'true'
+        id: notes
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || git rev-list --max-parents=0 HEAD)
+          NOTES=$(git log "$PREVIOUS_TAG"..HEAD --pretty=format:"- %s" --no-merges)
+          echo "notes<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$NOTES" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        if: steps.check.outputs.deployed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.check.outputs.version }}"
+          gh release create "$VERSION" --notes "${{ steps.notes.outputs.notes }}"
+
+  bump-downstream:
+    name: Bump Downstream Dependencies
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: trycourier
+          repositories: courier-flutter,courier-react-native
+
+      - name: Configure git for HTTPS with app token
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: gh auth setup-git
+
+      - name: Bump courier-flutter
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          VERSION: ${{ needs.deploy.outputs.version }}
+        run: |
+          set -euo pipefail
+          git config --global user.name "courier-android-automation[bot]"
+          git config --global user.email "courier-android-automation[bot]@users.noreply.github.com"
+
+          gh repo clone trycourier/courier-flutter
+          cd courier-flutter
+          git fetch origin main
+          git checkout main
+
+          CURRENT=$(grep -oP "courier-android:\K[^']+" android/build.gradle | head -1)
+          if [ -z "$CURRENT" ]; then
+            echo "::error::Could not read courier-android version from android/build.gradle"
+            exit 1
+          fi
+          if [ "$CURRENT" = "$VERSION" ]; then
+            echo "courier-flutter already pins courier-android $VERSION; skipping."
+            exit 0
+          fi
+          echo "courier-flutter: bumping courier-android $CURRENT -> $VERSION"
+
+          git checkout -b "bump-courier-android-$VERSION"
+          sed -i "s/courier-android:$CURRENT/courier-android:$VERSION/g" android/build.gradle
+
+          git add -A
+          git commit -m "Bump courier-android to $VERSION"
+          git push -u origin "bump-courier-android-$VERSION" --force
+          BUMP_BRANCH="bump-courier-android-$VERSION"
+          if [ "$(gh pr list --repo trycourier/courier-flutter --state open --head "$BUMP_BRANCH" --json number --jq 'length')" -eq 0 ]; then
+            echo "Creating PR: base=main head=$BUMP_BRANCH"
+            gh pr create \
+              --repo trycourier/courier-flutter \
+              --base main \
+              --head "$BUMP_BRANCH" \
+              --title "Bump courier-android to $VERSION" \
+              --body "Auto-generated PR to update courier-android dependency to $VERSION (published to JitPack)."
+          else
+            echo "PR already open for $BUMP_BRANCH; branch updated."
+          fi
+
+      - name: Bump courier-react-native
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          VERSION: ${{ needs.deploy.outputs.version }}
+        run: |
+          set -euo pipefail
+          cd "${{ runner.temp }}"
+
+          gh repo clone trycourier/courier-react-native
+          cd courier-react-native
+          git fetch origin main
+          git checkout main
+
+          CURRENT=$(grep -oP "courier-android:\K[^']+" android/build.gradle | head -1)
+          if [ -z "$CURRENT" ]; then
+            echo "::error::Could not read courier-android version from android/build.gradle"
+            exit 1
+          fi
+          if [ "$CURRENT" = "$VERSION" ]; then
+            echo "courier-react-native already pins courier-android $VERSION; skipping."
+            exit 0
+          fi
+          echo "courier-react-native: bumping courier-android $CURRENT -> $VERSION"
+
+          git config --global user.name "courier-android-automation[bot]"
+          git config --global user.email "courier-android-automation[bot]@users.noreply.github.com"
+
+          git checkout -b "bump-courier-android-$VERSION"
+          sed -i "s/courier-android:$CURRENT/courier-android:$VERSION/g" android/build.gradle
+
+          git add -A
+          git commit -m "Bump courier-android to $VERSION"
+          git push -u origin "bump-courier-android-$VERSION" --force
+          BUMP_BRANCH="bump-courier-android-$VERSION"
+          if [ "$(gh pr list --repo trycourier/courier-react-native --state open --head "$BUMP_BRANCH" --json number --jq 'length')" -eq 0 ]; then
+            echo "Creating PR: base=main head=$BUMP_BRANCH"
+            gh pr create \
+              --repo trycourier/courier-react-native \
+              --base main \
+              --head "$BUMP_BRANCH" \
+              --title "Bump courier-android to $VERSION" \
+              --body "Auto-generated PR to update courier-android dependency to $VERSION (published to JitPack)."
+          else
+            echo "PR already open for $BUMP_BRANCH; branch updated."
+          fi

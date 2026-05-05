@@ -5,7 +5,7 @@ class Env {
         const val COURIER_AUTH_KEY = "XXXXXX"
         const val COURIER_CLIENT_KEY = "XXXXXX"
         const val COURIER_BRAND_ID = "XXXXXX"
-        const val COURIER_PREFERENCE_ID = "XXXXXX"
+        const val COURIER_PREFERENCE_TOPIC_ID = "XXXXXX"
         const val COURIER_USER_ID = "XXXXXX"
         const val FIREBASE_API_KEY = "XXXXXX"
         const val FIREBASE_APP_ID = "XXXXXX"

@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.courier.android.Courier
 import com.courier.android.activity.CourierActivity
-import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierInboxListener
 import com.courier.android.modules.addInboxListener
@@ -42,14 +41,15 @@ class MainActivity : CourierActivity() {
 
     private suspend fun authenticate() {
         try {
-
-            // Fetch new jwt if needed
             Courier.shared.userId?.let { userId ->
+                val prefs = AuthPreferences(this@MainActivity)
+                val apiKey = prefs.apiKey ?: Env.COURIER_AUTH_KEY
+                val apiUrls = prefs.getApiUrls()
 
                 val jwt = ExampleServer().generateJWT(
-                    authKey = Env.COURIER_AUTH_KEY, // TODO: Handle this
+                    authKey = apiKey,
                     userId = userId,
-                    baseUrl = CourierClient.ApiUrls().rest // TODO: Make this use the shared preference
+                    baseUrl = apiUrls.rest
                 )
 
                 val tenantId = Courier.shared.tenantId
@@ -58,14 +58,11 @@ class MainActivity : CourierActivity() {
                     userId = userId,
                     tenantId = tenantId,
                     accessToken = jwt,
+                    apiUrls = apiUrls
                 )
-
             }
-
         } catch (e: CourierException) {
-
             Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
-
         }
     }
 

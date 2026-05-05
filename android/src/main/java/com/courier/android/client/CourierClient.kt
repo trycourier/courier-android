@@ -21,8 +21,19 @@ class CourierClient(
         val rest: String = "https://api.courier.com",
         val graphql: String = "https://api.courier.com/client/q",
         val inboxGraphql: String = "https://inbox.courier.com/q",
-        val inboxWebSocket: String = "wss://realtime.courier.com"
-    )
+        val inboxWebSocket: String = "wss://realtime.courier.io"
+    ) {
+        companion object {
+            fun us() = ApiUrls()
+
+            fun eu() = ApiUrls(
+                rest = "https://api.eu.courier.com",
+                graphql = "https://api.eu.courier.com/client/q",
+                inboxGraphql = "https://inbox.eu.courier.io/q",
+                inboxWebSocket = "wss://realtime.eu.courier.io"
+            )
+        }
+    }
 
     data class Options(
         val jwt: String?,

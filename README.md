@@ -23,7 +23,8 @@ Add the dependency to your app's `build.gradle`:
 
 ```gradle
 dependencies {
-    implementation 'com.github.trycourier:courier-android:LATEST_VERSION'
+    implementation 'com.github.trycourier:courier-android:5.3.0' // Groovy
+    implementation("com.github.trycourier:courier-android:5.3.0") // Gradle.kts
 }
 ```
 
@@ -188,3 +189,17 @@ Starter projects using this SDK.
 We want to make this the best SDK for managing notifications! Have an idea or feedback about our SDKs? Let us know!
 
 [Courier Android Issues](https://github.com/trycourier/courier-android/issues)
+
+## EU endpoints
+
+If your workspace uses EU-hosted Courier endpoints, pass the built-in EU preset through `apiUrls`.
+
+```kotlin
+lifecycleScope.launch {
+    Courier.shared.signIn(
+        accessToken = jwt,
+        userId = "your_user_id",
+        apiUrls = CourierClient.ApiUrls.eu(),
+    )
+}
+```
