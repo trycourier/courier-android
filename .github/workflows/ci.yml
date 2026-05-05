@@ -5,11 +5,12 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Env generation is duplicated in both jobs — keep in sync (com.courier.app for androidTest).
+
 jobs:
-  test:
-    name: Test
+  jvm-unit-tests:
+    name: JVM unit tests (src/test)
     runs-on: ubuntu-latest
-    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -20,7 +21,6 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      # Must match package com.courier.app — androidTest sources import com.courier.app.Env
       - name: Generate Env.kt from secrets
         env:
           COURIER_AUTH_KEY: ${{ secrets.COURIER_AUTH_KEY }}
@@ -58,7 +58,7 @@ jobs:
               open(path, "w").write(src)
           PY
 
-      - name: Run JVM unit tests (src/test)
+      - name: Run JVM unit tests
         run: |
           ./gradlew :android:testDebugUnitTest \
             --console=plain \
@@ -76,15 +76,74 @@ jobs:
             android/build/test-results/testDebugUnitTest/
           if-no-files-found: warn
 
-      # Instrumentation tests live under android/src/androidTest — need a device/emulator
-      - name: Run instrumentation tests (src/androidTest)
+  instrumentation-tests:
+    name: Instrumentation tests (src/androidTest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Generate Env.kt from secrets
+        env:
+          COURIER_AUTH_KEY: ${{ secrets.COURIER_AUTH_KEY }}
+          COURIER_CLIENT_KEY: ${{ secrets.COURIER_CLIENT_KEY }}
+          COURIER_BRAND_ID: ${{ secrets.COURIER_BRAND_ID }}
+          COURIER_PREFERENCE_ID: ${{ secrets.COURIER_PREFERENCE_ID }}
+          COURIER_USER_ID: ${{ secrets.COURIER_USER_ID }}
+        run: |
+          python3 << 'PY'
+          import os
+          def q(k):
+              return os.environ.get(k, "").replace("\\", "\\\\").replace('"', '\\"')
+
+          for pkg, path in [
+              ("com.courier.example", "app/src/main/java/com/courier/example/Env.kt"),
+              ("com.courier.app", "android/src/androidTest/java/com/courier/app/Env.kt"),
+          ]:
+              src = f'''package {pkg}
+
+          class Env {{
+              companion object {{
+                  const val COURIER_AUTH_KEY = "{q('COURIER_AUTH_KEY')}"
+                  const val COURIER_CLIENT_KEY = "{q('COURIER_CLIENT_KEY')}"
+                  const val COURIER_BRAND_ID = "{q('COURIER_BRAND_ID')}"
+                  const val COURIER_PREFERENCE_ID = "{q('COURIER_PREFERENCE_ID')}"
+                  const val COURIER_USER_ID = "{q('COURIER_USER_ID')}"
+                  const val FIREBASE_API_KEY = ""
+                  const val FIREBASE_APP_ID = ""
+                  const val FIREBASE_PROJECT_ID = ""
+                  const val FIREBASE_GCM_SENDER_ID = ""
+              }}
+          }}
+          '''
+              os.makedirs(os.path.dirname(path), exist_ok=True)
+              open(path, "w").write(src)
+          PY
+
+      # Hardware acceleration — without this the x86_64 AVD often fails or times out on ubuntu-latest
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run instrumentation tests on emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 33
           arch: x86_64
           target: google_apis
           disable-animations: true
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           script: |
+            adb devices
             ./gradlew :android:connectedDebugAndroidTest \
               --console=plain \
               --no-daemon \
