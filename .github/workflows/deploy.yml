@@ -68,24 +68,11 @@ jobs:
     name: Bump Downstream Dependencies
     runs-on: ubuntu-latest
     needs: deploy
+    if: needs.deploy.outputs.deployed == 'true'
     steps:
-      - name: Generate GitHub App token
-        id: app-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.GH_APP_ID }}
-          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
-          owner: trycourier
-          repositories: courier-flutter,courier-react-native
-
-      - name: Configure git for HTTPS with app token
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        run: gh auth setup-git
-
       - name: Bump courier-flutter
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.AUTOMATION_ACCESS_TOKEN }}
           VERSION: ${{ needs.deploy.outputs.version }}
         run: |
           set -euo pipefail
@@ -129,7 +116,7 @@ jobs:
 
       - name: Bump courier-react-native
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.AUTOMATION_ACCESS_TOKEN }}
           VERSION: ${{ needs.deploy.outputs.version }}
         run: |
           set -euo pipefail
