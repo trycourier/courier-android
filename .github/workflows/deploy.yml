@@ -68,7 +68,6 @@ jobs:
     name: Bump Downstream Dependencies
     runs-on: ubuntu-latest
     needs: deploy
-    if: needs.deploy.outputs.deployed == 'true'
     steps:
       - name: Bump courier-flutter
         env:
