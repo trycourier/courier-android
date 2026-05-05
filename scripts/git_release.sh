@@ -30,9 +30,9 @@ gum style \
     "🚀 Courier Android — Git Release" \
     "" \
     "Version: $VERSION" \
-    "Branch:  $BRANCH → main"
+    "Branch:  $BRANCH → master"
 
-if ! gum confirm "Commit, merge into main, tag, and create GitHub release?"; then
+if ! gum confirm "Commit, merge into master, tag, and create GitHub release?"; then
     echo "Cancelled."
     exit 0
 fi
@@ -41,10 +41,10 @@ git status
 git add -A
 git commit -m "🚀 $VERSION"
 
-git checkout main
-git pull origin main
+git checkout master
+git pull origin master
 git merge --no-ff "$BRANCH" -m "Merge $BRANCH for release $VERSION"
-git push origin main
+git push origin master
 
 git tag "$VERSION"
 git push origin "$VERSION"
