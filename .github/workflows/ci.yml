@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Generate Env.kt from secrets
+        env:
+          COURIER_AUTH_KEY: ${{ secrets.COURIER_AUTH_KEY }}
+          COURIER_CLIENT_KEY: ${{ secrets.COURIER_CLIENT_KEY }}
+          COURIER_BRAND_ID: ${{ secrets.COURIER_BRAND_ID }}
+          COURIER_PREFERENCE_ID: ${{ secrets.COURIER_PREFERENCE_ID }}
+          COURIER_USER_ID: ${{ secrets.COURIER_USER_ID }}
+        run: |
+          python3 << 'PY'
+          import os
+          def q(k):
+              return os.environ.get(k, "").replace("\\", "\\\\").replace('"', '\\"')
+
+          for pkg, path in [
+              ("com.courier.example", "app/src/main/java/com/courier/example/Env.kt"),
+              ("com.courier.android", "android/src/androidTest/java/com/courier/android/Env.kt"),
+          ]:
+              src = f'''package {pkg}
+
+          class Env {{
+              companion object {{
+                  const val COURIER_AUTH_KEY = "{q('COURIER_AUTH_KEY')}"
+                  const val COURIER_CLIENT_KEY = "{q('COURIER_CLIENT_KEY')}"
+                  const val COURIER_BRAND_ID = "{q('COURIER_BRAND_ID')}"
+                  const val COURIER_PREFERENCE_ID = "{q('COURIER_PREFERENCE_ID')}"
+                  const val COURIER_USER_ID = "{q('COURIER_USER_ID')}"
+                  const val FIREBASE_API_KEY = ""
+                  const val FIREBASE_APP_ID = ""
+                  const val FIREBASE_PROJECT_ID = ""
+                  const val FIREBASE_GCM_SENDER_ID = ""
+              }}
+          }}
+          '''
+              os.makedirs(os.path.dirname(path), exist_ok=True)
+              open(path, "w").write(src)
+          PY
+
+      - name: Run unit tests
+        run: ./gradlew :android:testDebugUnitTest
+
+  version-check:
+    name: Version Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check version format
+        run: |
+          VERSION=$(grep 'private const val VERSION =' android/src/main/java/com/courier/android/Courier.kt | awk -F '"' '{print $2}')
+          echo "Courier.kt version: $VERSION"
+
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid version format: $VERSION (expected semver x.y.z)"
+            exit 1
+          fi
+
+          echo "Version format valid: $VERSION"

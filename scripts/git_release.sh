@@ -1,86 +1,64 @@
 #!/bin/bash
+set -euo pipefail
 
-# Change to the root directory
-cd "$(dirname "$0")/.." || { echo "Failed to change to root directory"; exit 1; }
+cd "$(dirname "$0")/.."
 
-# Define ANSI color codes
-ORANGE='\033[0;33m'
-NC='\033[0m' # No Color
-
-# Function to handle errors and exit
-error_exit() {
-    echo "❌ Error: $1" >&2
+if ! command -v gum &> /dev/null; then
+    echo "gum is required but not installed."
+    echo "Install it with: brew install gum"
     exit 1
-}
-
-# Function to get the current version from Courier.kt
-get_current_version() {
-    local version=$(grep 'private const val VERSION =' android/src/main/java/com/courier/android/Courier.kt | awk -F '"' '{print $2}')
-    echo "$version"
-}
-
-# Function to get the current Git branch
-get_current_branch() {
-    git rev-parse --abbrev-ref HEAD
-}
-
-# Function to run git status
-run_git_status() {
-    git status
-}
-
-# Function to add all changes and commit with message including version
-add_commit_merge() {
-    local version=$(get_current_version)
-    git add -A
-    git commit -m "🚀 $version"
-}
-
-# Function to merge the current branch into master
-merge_into_master() {
-    local branch=$(get_current_branch)
-    git checkout master
-    git merge --no-ff "$branch"
-    git push origin master
-    git checkout "$branch"
-}
-
-# Function to install GitHub CLI if not already installed
-install_gh_cli() {
-    if ! which gh >/dev/null 2>&1; then
-        echo "${ORANGE}⚠️ Installing GitHub CLI...${NC}"
-        brew install gh || error_exit "Failed to install GitHub CLI. Please install it manually and retry."
-    fi
-}
-
-# Function to create GitHub release
-create_github_release() {
-    local version=$(get_current_version)
-    echo "${ORANGE}⚠️ Creating GitHub release for version $version...${NC}\n"
-    gh release create "$version" --notes "Release for version $version"
-    echo "✅ GitHub release $version created\n"
-}
-
-# Main script execution
-# Get the current version and prepare for merge
-current_version=$(get_current_version)
-
-# Check if GitHub CLI is installed
-install_gh_cli
-
-# Ask for confirmation to merge into master with versioned commit
-read -p "Merge into master and create release with commit: '🚀 $current_version'? (y/n): " confirmation
-
-if [[ $confirmation == "y" || $confirmation == "Y" ]]; then
-    # Perform the Git operations
-    run_git_status
-    add_commit_merge
-    merge_into_master
-
-    # Optionally, perform release steps
-    create_github_release
-else
-    echo "Merge and release process canceled."
 fi
 
-echo "🚀 View release here: https://jitpack.io/#trycourier/courier-android"
+if ! command -v gh &> /dev/null; then
+    echo "GitHub CLI (gh) is required but not installed."
+    echo "Install it with: brew install gh"
+    exit 1
+fi
+
+get_current_version() {
+    grep 'private const val VERSION =' android/src/main/java/com/courier/android/Courier.kt | awk -F '"' '{print $2}'
+}
+
+VERSION=$(get_current_version)
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+gum style \
+    --border rounded \
+    --border-foreground 212 \
+    --padding "0 2" \
+    --margin "1 0" \
+    "🚀 Courier Android — Git Release" \
+    "" \
+    "Version: $VERSION" \
+    "Branch:  $BRANCH → main"
+
+if ! gum confirm "Commit, merge into main, tag, and create GitHub release?"; then
+    echo "Cancelled."
+    exit 0
+fi
+
+git status
+git add -A
+git commit -m "🚀 $VERSION"
+
+git checkout main
+git pull origin main
+git merge --no-ff "$BRANCH" -m "Merge $BRANCH for release $VERSION"
+git push origin main
+
+git tag "$VERSION"
+git push origin "$VERSION"
+
+gh release create "$VERSION" --notes "Release $VERSION"
+
+git checkout "$BRANCH"
+
+gum style \
+    --border rounded \
+    --border-foreground 46 \
+    --padding "0 2" \
+    --margin "1 0" \
+    "✅ Released $VERSION" \
+    "" \
+    "  GitHub release created" \
+    "  JitPack: https://jitpack.io/#trycourier/courier-android"
