@@ -26,7 +26,7 @@ jobs:
           COURIER_AUTH_KEY: ${{ secrets.COURIER_AUTH_KEY }}
           COURIER_CLIENT_KEY: ${{ secrets.COURIER_CLIENT_KEY }}
           COURIER_BRAND_ID: ${{ secrets.COURIER_BRAND_ID }}
-          COURIER_PREFERENCE_ID: ${{ secrets.COURIER_PREFERENCE_ID }}
+          COURIER_PREFERENCE_TOPIC_ID: ${{ secrets.COURIER_PREFERENCE_TOPIC_ID }}
           COURIER_USER_ID: ${{ secrets.COURIER_USER_ID }}
         run: |
           python3 << 'PY'
@@ -45,7 +45,7 @@ jobs:
                   const val COURIER_AUTH_KEY = "{q('COURIER_AUTH_KEY')}"
                   const val COURIER_CLIENT_KEY = "{q('COURIER_CLIENT_KEY')}"
                   const val COURIER_BRAND_ID = "{q('COURIER_BRAND_ID')}"
-                  const val COURIER_PREFERENCE_ID = "{q('COURIER_PREFERENCE_ID')}"
+                  const val COURIER_PREFERENCE_TOPIC_ID = "{q('COURIER_PREFERENCE_TOPIC_ID')}"
                   const val COURIER_USER_ID = "{q('COURIER_USER_ID')}"
                   const val FIREBASE_API_KEY = ""
                   const val FIREBASE_APP_ID = ""
@@ -95,7 +95,7 @@ jobs:
           COURIER_AUTH_KEY: ${{ secrets.COURIER_AUTH_KEY }}
           COURIER_CLIENT_KEY: ${{ secrets.COURIER_CLIENT_KEY }}
           COURIER_BRAND_ID: ${{ secrets.COURIER_BRAND_ID }}
-          COURIER_PREFERENCE_ID: ${{ secrets.COURIER_PREFERENCE_ID }}
+          COURIER_PREFERENCE_TOPIC_ID: ${{ secrets.COURIER_PREFERENCE_TOPIC_ID }}
           COURIER_USER_ID: ${{ secrets.COURIER_USER_ID }}
         run: |
           python3 << 'PY'
@@ -114,7 +114,7 @@ jobs:
                   const val COURIER_AUTH_KEY = "{q('COURIER_AUTH_KEY')}"
                   const val COURIER_CLIENT_KEY = "{q('COURIER_CLIENT_KEY')}"
                   const val COURIER_BRAND_ID = "{q('COURIER_BRAND_ID')}"
-                  const val COURIER_PREFERENCE_ID = "{q('COURIER_PREFERENCE_ID')}"
+                  const val COURIER_PREFERENCE_TOPIC_ID = "{q('COURIER_PREFERENCE_TOPIC_ID')}"
                   const val COURIER_USER_ID = "{q('COURIER_USER_ID')}"
                   const val FIREBASE_API_KEY = ""
                   const val FIREBASE_APP_ID = ""
