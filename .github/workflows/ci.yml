@@ -147,10 +147,7 @@ jobs:
           script: |
             adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
             adb devices
-            ./gradlew :android:connectedDebugAndroidTest \
-              --console=plain \
-              --no-daemon \
-              --stacktrace
+            ./gradlew :android:connectedDebugAndroidTest --console=plain --no-daemon --stacktrace
 
       - name: Upload instrumentation test reports
         if: always()
