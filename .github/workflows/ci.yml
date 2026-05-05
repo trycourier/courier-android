@@ -9,6 +9,7 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -19,6 +20,7 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      # Must match package com.courier.app — androidTest sources import com.courier.app.Env
       - name: Generate Env.kt from secrets
         env:
           COURIER_AUTH_KEY: ${{ secrets.COURIER_AUTH_KEY }}
@@ -34,7 +36,7 @@ jobs:
 
           for pkg, path in [
               ("com.courier.example", "app/src/main/java/com/courier/example/Env.kt"),
-              ("com.courier.android", "android/src/androidTest/java/com/courier/android/Env.kt"),
+              ("com.courier.app", "android/src/androidTest/java/com/courier/app/Env.kt"),
           ]:
               src = f'''package {pkg}
 
@@ -56,7 +58,7 @@ jobs:
               open(path, "w").write(src)
           PY
 
-      - name: Run unit tests
+      - name: Run JVM unit tests (src/test)
         run: |
           ./gradlew :android:testDebugUnitTest \
             --console=plain \
@@ -72,4 +74,28 @@ jobs:
           path: |
             android/build/reports/tests/testDebugUnitTest/
             android/build/test-results/testDebugUnitTest/
+          if-no-files-found: warn
+
+      # Instrumentation tests live under android/src/androidTest — need a device/emulator
+      - name: Run instrumentation tests (src/androidTest)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: |
+            ./gradlew :android:connectedDebugAndroidTest \
+              --console=plain \
+              --no-daemon \
+              --stacktrace
+
+      - name: Upload instrumentation test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-instrumentation-reports
+          path: |
+            android/build/reports/androidTests/
+            android/build/outputs/androidTest-results/
           if-no-files-found: warn
