@@ -1,6 +1,7 @@
 package com.courier.android.utils
 
 import com.courier.android.client.CourierClient
+import com.courier.android.models.CourierException
 import com.courier.android.models.CourierServerError
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -73,11 +74,15 @@ internal suspend inline fun <reified T>Call.dispatch(options: CourierClient.Opti
 
             if (!validCodes.contains(response.code)) {
 
+                val errorBody = response.body?.string()
+                options.log("Response (${response.code}): ${errorBody?.toPrettyJson() ?: errorBody ?: "Empty"}")
+
                 try {
-                    val error = gson.fromJson(response.body?.string(), CourierServerError::class.java).toException
+                    val error = gson.fromJson(errorBody, CourierServerError::class.java).toException
                     continuation.resumeWithException(error)
                 } catch (e: Exception) {
-                    continuation.resumeWithException(e)
+                    val message = errorBody ?: "Request failed with status code ${response.code}"
+                    continuation.resumeWithException(CourierException(message))
                 }
 
             } else {

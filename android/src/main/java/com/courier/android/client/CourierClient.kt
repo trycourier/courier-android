@@ -20,7 +20,7 @@ class CourierClient(
     data class ApiUrls(
         val rest: String = "https://api.courier.com",
         val graphql: String = "https://api.courier.com/client/q",
-        val inboxGraphql: String = "https://inbox.courier.io/q",
+        val inboxGraphql: String = "https://inbox.courier.com/q",
         val inboxWebSocket: String = "wss://realtime.courier.io"
     ) {
         companion object {

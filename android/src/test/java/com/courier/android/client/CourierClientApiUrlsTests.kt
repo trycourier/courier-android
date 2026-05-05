@@ -11,7 +11,7 @@ class CourierClientApiUrlsTests {
 
         assertEquals("https://api.courier.com", urls.rest)
         assertEquals("https://api.courier.com/client/q", urls.graphql)
-        assertEquals("https://inbox.courier.io/q", urls.inboxGraphql)
+        assertEquals("https://inbox.courier.com/q", urls.inboxGraphql)
         assertEquals("wss://realtime.courier.io", urls.inboxWebSocket)
     }
 
