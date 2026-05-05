@@ -137,12 +137,15 @@ jobs:
       - name: Run instrumentation tests on emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 33
+          api-level: 30
           arch: x86_64
-          target: google_apis
+          target: default
+          force-avd-creation: false
+          emulator-boot-timeout: 300
           disable-animations: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           script: |
+            adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
             adb devices
             ./gradlew :android:connectedDebugAndroidTest \
               --console=plain \
