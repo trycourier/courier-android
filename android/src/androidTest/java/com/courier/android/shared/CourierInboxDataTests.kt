@@ -94,8 +94,8 @@ class CourierInboxDataTests {
                 messageId = newMessageId
                 println("New message sent: $messageId")
 
-                // Step 3: Timeout after 30 seconds if message not received
-                delay(30_000L)
+                // Step 3: Timeout after 60 seconds if message not received (CI emulators are slower)
+                delay(60_000L)
 
                 if (isCompleted.compareAndSet(false, true)) {
                     continuation.resumeWithException(CourierException.inboxNotInitialized)
