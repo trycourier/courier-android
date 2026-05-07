@@ -19,7 +19,6 @@ import com.courier.android.models.CourierException
 import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.models.CourierPreferenceStatus
 import com.courier.android.models.CourierPreferenceTopic
-import com.courier.android.ui.bar.CourierBar
 import com.courier.android.ui.infoview.CourierInfoView
 import com.courier.android.utils.error
 import com.courier.android.utils.isDarkMode
@@ -139,6 +138,8 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
     @SuppressLint("NotifyDataSetChanged")
     private fun reloadViews() {
 
+        theme.backgroundColor?.let { setBackgroundColor(it) }
+
         theme.topicDividerItemDecoration?.let {
             recyclerView.removeItemDecoration(it)
             recyclerView.addItemDecoration(it)
@@ -151,15 +152,11 @@ open class CourierPreferences @JvmOverloads constructor(context: Context, attrs:
             refreshLayout.setColorSchemeColors(it)
         }
 
-        // Handle bar visibility
-        courierBar.setBrand(theme.brand)
-
     }
 
     val recyclerView: RecyclerView by lazy { findViewById(R.id.recyclerView) }
     private val refreshLayout: SwipeRefreshLayout by lazy { findViewById(R.id.refreshLayout) }
     private val infoView: CourierInfoView by lazy { findViewById(R.id.infoView) }
-    private val courierBar: CourierBar by lazy { findViewById(R.id.courierBar) }
 
     private var onScrollPreferences: ((Int) -> Unit)? = null
 

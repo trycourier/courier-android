@@ -20,7 +20,7 @@ android {
         applicationId "com.courier.example_app"
         minSdk 23
         targetSdk 35
-        versionCode 67
+        versionCode 68
         versionName "1.0"
         signingConfig signingConfigs.debug
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
