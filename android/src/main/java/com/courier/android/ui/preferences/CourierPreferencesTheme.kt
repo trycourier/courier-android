@@ -12,6 +12,7 @@ import com.courier.android.utils.error
 data class CourierPreferencesTheme(
     val brandId: String? = null,
     @ColorInt val backgroundColor: Int? = null,
+    @ColorInt val sheetBackgroundColor: Int? = null,
     @ColorInt private val loadingIndicatorColor: Int? = null,
     val sectionTitleFont: CourierStyles.Font = CourierStyles.Font(),
     val topicDividerItemDecoration: DividerItemDecoration? = null,

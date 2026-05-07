@@ -34,6 +34,8 @@ class StyledInboxFragment : Fragment(R.layout.fragment_styled_inbox) {
 
         val theme = CourierInboxTheme(
             brandId = Env.COURIER_BRAND_ID,
+            backgroundColor = Theme.getWhiteColor(requireContext()),
+            cellBackgroundColor = Theme.getWhiteColor(requireContext()),
             tabIndicatorColor = Theme.getPrimaryColor(requireContext()),
             tabStyle = CourierStyles.Inbox.TabStyle(
                 selected = CourierStyles.Inbox.TabItemStyle(

@@ -30,6 +30,8 @@ fun getTheme(context: ComponentActivity): CourierInboxTheme {
     val font = ResourcesCompat.getFont(context, R.font.poppins)
 
     return CourierInboxTheme(
+        backgroundColor = whiteColor,
+        cellBackgroundColor = whiteColor,
         loadingIndicatorColor = primaryColor,
         tabIndicatorColor = primaryColor,
         tabStyle = CourierStyles.Inbox.TabStyle(

@@ -15,6 +15,7 @@ import com.courier.android.utils.error
 data class CourierInboxTheme(
     val brandId: String? = null,
     @ColorInt val backgroundColor: Int? = null,
+    @ColorInt val cellBackgroundColor: Int? = null,
     @ColorInt internal val tabIndicatorColor: Int? = null,
     internal val tabStyle: CourierStyles.Inbox.TabStyle = CourierStyles.Inbox.TabStyle(
         selected = CourierStyles.Inbox.TabItemStyle(

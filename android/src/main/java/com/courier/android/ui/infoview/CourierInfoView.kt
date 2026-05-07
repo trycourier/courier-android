@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.core.view.isVisible
 import com.courier.android.R
 import com.courier.android.ui.CourierActionButton
+import com.courier.android.ui.CourierStyles
 import com.courier.android.ui.inbox.CourierInboxTheme
 import com.courier.android.ui.preferences.CourierPreferencesTheme
 import com.courier.android.utils.setCourierFont
@@ -37,16 +38,18 @@ class CourierInfoView @JvmOverloads constructor(context: Context, attrs: Attribu
         retryButton.isVisible = show
     }
 
-    fun setTheme(theme: CourierInboxTheme) {
+    private fun applyInfoViewStyle(style: CourierStyles.InfoViewStyle) {
+
+        style.backgroundColor?.let { setBackgroundColor(it) }
 
         titleTextView.setCourierFont(
-            font = theme.infoViewStyle.font
+            font = style.font
         )
 
         retryButton.apply {
 
             setStyle(
-                style = theme.infoViewStyle.button
+                style = style.button
             )
 
             text = "Retry"
@@ -56,23 +59,12 @@ class CourierInfoView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     }
 
+    fun setTheme(theme: CourierInboxTheme) {
+        applyInfoViewStyle(theme.infoViewStyle)
+    }
+
     fun setTheme(theme: CourierPreferencesTheme) {
-
-        titleTextView.setCourierFont(
-            font = theme.infoViewStyle.font
-        )
-
-        retryButton.apply {
-
-            setStyle(
-                style = theme.infoViewStyle.button
-            )
-
-            text = "Retry"
-            onClick = onRetry
-
-        }
-
+        applyInfoViewStyle(theme.infoViewStyle)
     }
 
 }

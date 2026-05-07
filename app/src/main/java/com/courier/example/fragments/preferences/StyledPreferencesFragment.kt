@@ -40,6 +40,8 @@ class StyledPreferencesFragment : Fragment(R.layout.fragment_styled_preferences)
 
         val theme = CourierPreferencesTheme(
             brandId = Env.COURIER_BRAND_ID,
+            backgroundColor = Theme.getWhiteColor(requireContext()),
+            sheetBackgroundColor = Theme.getWhiteColor(requireContext()),
             sectionTitleFont = CourierStyles.Font(
                 typeface = Theme.getFont(requireContext()),
                 color = Theme.getPrimaryColor(requireContext()),

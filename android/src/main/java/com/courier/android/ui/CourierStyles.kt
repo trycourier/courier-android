@@ -84,6 +84,7 @@ class CourierStyles {
     data class InfoViewStyle(
         val font: Font,
         val button: Button,
+        @ColorInt val backgroundColor: Int? = null,
     )
 
 }

@@ -72,6 +72,9 @@ internal class MessageItemViewHolder(itemView: View) : RecyclerView.ViewHolder(i
         timeTextView.text = message.time
         subtitleTextView.text = message.subtitle
 
+        // Cell background
+        theme.cellBackgroundColor?.let { container.setBackgroundColor(it) }
+
         // Indicator
         setIndicator(theme, message)
 

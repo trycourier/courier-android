@@ -37,6 +37,8 @@ internal class PreferenceTopicBottomSheet(private val theme: CourierPreferencesT
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        theme.sheetBackgroundColor?.let { view.setBackgroundColor(it) }
+
         val title = view.findViewById<TextView>(R.id.titleTextView)
         title.text = topic.topicName
 
