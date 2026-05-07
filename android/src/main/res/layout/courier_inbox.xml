@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- TabLayout at the top -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"
         android:layout_width="match_parent"
@@ -18,19 +17,10 @@
         app:tabMode="fixed"
         app:tabSelectedTextColor="?attr/colorPrimary" />
 
-    <!-- ViewPager2 filling the space between TabLayout and CourierBar -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
-
-    <!-- CourierBar at the bottom -->
-    <com.courier.android.ui.bar.CourierBar
-        android:id="@+id/courierBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?android:colorBackground"
-        android:elevation="4dp" />
 
 </LinearLayout>
