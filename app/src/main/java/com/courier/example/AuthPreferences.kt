@@ -36,6 +36,10 @@ class AuthPreferences(context: Context) {
         get() = prefs.getString(KEY_INBOX_WEBSOCKET_URL, null)
         set(value) = prefs.edit { putString(KEY_INBOX_WEBSOCKET_URL, value).apply() }
 
+    var environment: String?
+        get() = prefs.getString(KEY_ENVIRONMENT, null)
+        set(value) = prefs.edit { putString(KEY_ENVIRONMENT, value).apply() }
+
     fun saveApiUrls(apiUrls: CourierClient.ApiUrls) {
         prefs.edit {
             putString(KEY_REST_URL, apiUrls.rest)
@@ -60,12 +64,12 @@ class AuthPreferences(context: Context) {
             putString(KEY_USER_ID, null).apply()
             putString(KEY_TENANT_ID, null).apply()
             putString(KEY_API_KEY, Env.COURIER_AUTH_KEY).apply()
+            putString(KEY_ENVIRONMENT, "Production").apply()
             putString(KEY_REST_URL, defaultUrls.rest).apply()
             putString(KEY_GRAPHQL_URL, defaultUrls.graphql).apply()
             putString(KEY_INBOX_GRAPHQL_URL, defaultUrls.inboxGraphql).apply()
             putString(KEY_INBOX_WEBSOCKET_URL, defaultUrls.inboxWebSocket).apply()
         }
-
     }
 
     companion object {
@@ -77,5 +81,6 @@ class AuthPreferences(context: Context) {
         private const val KEY_GRAPHQL_URL = "graphql_url"
         private const val KEY_INBOX_GRAPHQL_URL = "inbox_graphql_url"
         private const val KEY_INBOX_WEBSOCKET_URL = "inbox_websocket_url"
+        private const val KEY_ENVIRONMENT = "environment"
     }
 }

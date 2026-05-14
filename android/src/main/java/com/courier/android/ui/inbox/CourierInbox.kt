@@ -22,7 +22,6 @@ import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
 import com.courier.android.modules.addInboxListener
 import com.courier.android.modules.clickMessage
-import com.courier.android.ui.bar.CourierBar
 import com.courier.android.utils.isDarkMode
 import com.courier.android.utils.log
 import com.courier.android.utils.setCourierFont
@@ -158,7 +157,6 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
     private val tabLayout: TabLayout by lazy { findViewById(R.id.tabLayout) }
     private val viewPager: ViewPager2 by lazy { findViewById(R.id.viewPager) }
-    private val courierBar: CourierBar by lazy { findViewById(R.id.courierBar) }
 
     private var inboxListener: CourierInboxListener? = null
 
@@ -215,7 +213,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     private fun reloadViews() {
-        courierBar.setBrand(theme.brand)
+        theme.backgroundColor?.let { setBackgroundColor(it) }
         pages.forEach { it.list.theme = theme }
         setupViewPager()
     }

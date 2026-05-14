@@ -14,6 +14,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.appcompat.widget.SwitchCompat
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.Courier
 import com.courier.android.Courier.Companion.eventBus
@@ -23,35 +24,77 @@ import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.models.SemanticProperties
 import com.courier.android.models.SemanticProperty
 import com.courier.android.models.toJson
+import com.courier.android.notifications.CourierPushNotificationIntent
 import com.courier.android.ui.CourierStyles
 import com.courier.android.ui.inbox.BadgeTextView
 import com.google.firebase.messaging.RemoteMessage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
-import androidx.core.net.toUri
-import com.courier.android.notifications.CourierPushNotificationIntent
 
 internal fun Intent.getPushNotificationData(): Map<String, String>? {
-
     try {
-
-        // Check to see if we have an intent to work
         val key = CourierPushNotificationIntent.COURIER_PENDING_NOTIFICATION_KEY
         @Suppress("DEPRECATION")
         (extras?.get(key) as? RemoteMessage)?.let { message ->
             extras?.remove(key)
             return message.data
         }
-
     } catch (e: Exception) {
         CourierClient.default.error(e.toString())
     }
-
     return null
-
 }
+
+fun Intent.trackPushNotificationClick(onClick: (message: RemoteMessage) -> Unit) = Courier.coroutineScope.launch(Dispatchers.Main) {
+    try {
+        val key = CourierPushNotificationIntent.COURIER_PENDING_NOTIFICATION_KEY
+        @Suppress("DEPRECATION")
+        (extras?.get(key) as? RemoteMessage)?.let { message ->
+            extras?.remove(key)
+            Courier.shared.trackAndBroadcastTheEvent(
+                trackingEvent = CourierTrackingEvent.CLICKED,
+                message = message,
+            )
+            onClick(message)
+        }
+    } catch (e: Exception) {
+        CourierClient.default.error(e.toString())
+    }
+}
+
+internal fun Courier.trackAndBroadcastTheEvent(trackingEvent: CourierTrackingEvent, message: RemoteMessage) = Courier.coroutineScope.launch(Dispatchers.IO) {
+    message.data["trackingUrl"]?.let { trackingUrl ->
+        try {
+            CourierClient.default.tracking.postTrackingUrl(
+                url = trackingUrl,
+                event = trackingEvent,
+            )
+        } catch (e: Exception) {
+            Courier.shared.client?.error(e.toString())
+        }
+    }
+    eventBus.onPushNotificationEvent(trackingEvent, message.data)
+}
+
+val RemoteMessage.pushNotification: Map<String, Any?>
+    get() {
+        val rawData = data.toMutableMap()
+        val payload = mutableMapOf<String, Any?>()
+        val baseKeys = listOf("title", "subtitle", "body", "badge", "sound")
+        baseKeys.forEach { key ->
+            payload[key] = data[key]
+            rawData.remove(key)
+        }
+        for ((key, value) in rawData) {
+            payload[key] = value
+        }
+        payload["raw"] = data
+        return payload
+    }
 
 internal val Map<String, String>.trackingUrl: String?
     get() = this["trackingUrl"]
@@ -69,7 +112,7 @@ internal suspend fun trackPushNotification(trackingEvent: CourierTrackingEvent, 
 
 internal suspend fun broadcastPushNotification(
     trackingEvent: CourierTrackingEvent,
-    data: Map<String, String>
+    data: Map<String, String>,
 ) {
     try {
         eventBus.onPushNotificationEvent(trackingEvent, data)
