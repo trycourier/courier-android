@@ -302,32 +302,34 @@ class MainActivity : CourierActivity() {
 }
 ```
 
-## Manual Token Syncing
+## Token Management
 
-If you do not want to use a `FirebaseMessagingService` subclass and `CourierActivity`, you can manually sync push notification tokens with the following code.
+The SDK automatically manages FCM tokens when Firebase is initialized and the user is signed in. You can also read and manage tokens directly:
 
 ```kotlin
 lifecycleScope.launch {
-            
-    val fcm = CourierPushProvider.FIREBASE_FCM
 
-    // Save a token into Courier
-    // If your user is signed in, this will succeed.
-    // If your user is not signed in, this will be stored locally
-    // and uploaded when you sign your user in.
+    // Read the current FCM token (locally cached)
+    val fcmToken = Courier.shared.fcmToken
+    print(fcmToken)
+
+    // Force-refresh the FCM token from Firebase
+    Courier.shared.refreshFcmToken()
+
+    // Manually set a token for any provider
+    // Useful for non-FCM push providers (Expo, OneSignal, etc.)
     Courier.shared.setToken(
-        provider = fcm,
+        provider = "your-provider-key",
         token = "your_messaging_token",
     )
 
-    // Get a token
-    // Looks up the locally stored token
-    val fcmToken = Courier.shared.getToken(
-        provider = fcm
+    // Look up a locally stored token by provider
+    val token = Courier.shared.getToken(
+        provider = "your-provider-key"
     )
-    
-    print(fcmToken)
-    
+
+    print(token)
+
 }
 ```
 
