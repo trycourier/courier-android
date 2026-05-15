@@ -9,11 +9,11 @@
 sh env_setup.sh
 ```
 
-3. Navigate to `app/src/main/java/com/courier/example/Env.kt` (and `android/src/androidTest/java/com/courier/app/Env.kt` for instrumentation tests)
-4. Provide your FCM (Firebase Cloud Messaging) and Courier credentials
-	- [Firebase Setup](https://firebase.google.com/docs/android/setup#console)
+3. Navigate to `app/src/main/java/com/courier/example/Env.kt` (and `android/src/androidTest/java/com/courier/android/Env.kt` for instrumentation tests)
+4. Provide your Courier credentials (and optionally Firebase values)
 	- [Courier API Keys](https://app.courier.com/settings/api-keys)
 	- [Courier JWT](https://www.courier.com/docs/reference/auth/issue-token/)
+	- [Firebase Setup](https://firebase.google.com/docs/android/setup#console) (only needed if testing push notifications)
 
 From here, you are all set to start working on the package! 🙌
 
@@ -29,7 +29,7 @@ To test the package changes in the example app:
 
 To run automated tests:
 1. JVM unit tests: `./gradlew :android:testDebugUnitTest` (sources under `android/src/test/`)
-2. Instrumentation tests: run on a device/emulator — `./gradlew :android:connectedDebugAndroidTest` (sources under `android/src/androidTest/`). Requires `Env.kt` under `android/src/androidTest/java/com/courier/app/`.
+2. Instrumentation tests: run on a device/emulator — `./gradlew :android:connectedDebugAndroidTest` (sources under `android/src/androidTest/`). Requires `Env.kt` under `android/src/androidTest/java/com/courier/android/`.
 
 To release a new build of the SDK:
 1. Change the `VERSION` in `android/src/main/java/com/courier/android/Courier.kt` to the SDK value you'd like to use

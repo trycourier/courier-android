@@ -126,7 +126,7 @@ The easiest way to support push notifications in your app.
 
 ## 1. Setup a Push Notification Provider
 
-Select which push notification provider you would like Courier to route push notifications to. Choose APNS - Apple Push Notification Service if you are not sure which provider to use.
+Select which push notification provider you would like Courier to route push notifications to.
 
 <table>
     <thead>
@@ -187,7 +187,17 @@ Select which push notification provider you would like Courier to route push not
     </tbody>
 </table>
 
-⚠️ If you are using Firebase Cloud Messaging, please make sure you initialize the Firebase SDK before continuing. Follow this [`Setup Guide`](https://firebase.google.com/docs/android/setup) for Firebase on Android.
+⚠️ The Courier SDK bundles Firebase Messaging internally. Your **app** still needs its own Firebase dependency so you can subclass `FirebaseMessagingService`. Add the following to your `app/build.gradle`:
+
+```gradle
+dependencies {
+    // Firebase (required for your FirebaseMessagingService subclass)
+    implementation platform('com.google.firebase:firebase-bom:33.1.2')
+    implementation "com.google.firebase:firebase-messaging"
+}
+```
+
+Make sure Firebase is initialized in your project. Follow the [`Setup Guide`](https://firebase.google.com/docs/android/setup) for Firebase on Android if you haven't already.
 
 &emsp;
 
@@ -195,28 +205,9 @@ Select which push notification provider you would like Courier to route push not
 
 ## Automatic Token Syncing (FCM Only)
 
-To track new push notifications when they arrive and to automatically sync push notification tokens, create a new file, name it what you'd like and paste the following code in it. (Kotlin example shown below)
+To track new push notifications when they arrive and to automatically sync push notification tokens, create a new `FirebaseMessagingService` subclass in your app.
 
-### 1. Add the Firebase Messaging Dependency to your `app/build.gradle`
-
-```gradle
-..
-dependencies {
-
-    ..
-
-    // Firebase
-    implementation platform('com.google.firebase:firebase-bom:XXXX')
-    implementation "com.google.firebase:firebase-messaging"
-
-}
-```
-
-You can find more details in the official Firebase documentation:
-
-🔗 [Set up Firebase for Android](https://firebase.google.com/docs/android/setup)
-
-### 2. Create a new Service File to handle push notification delivery and tokens
+### 1. Create a Service File to handle push notification delivery and tokens
 
 ```kotlin
 package your.app.package
@@ -265,7 +256,7 @@ class CourierPushNotificationService: FirebaseMessagingService() {
 }
 ```
 
-### 3. Register the `Service` in your `AndroidManifest.xml` file
+### 2. Register the `Service` in your `AndroidManifest.xml` file
 
 ```xml
 <manifest>
@@ -291,7 +282,7 @@ class CourierPushNotificationService: FirebaseMessagingService() {
 </manifest>
 ```
 
-### 4. Add the `CourierActivity`
+### 3. Add the `CourierActivity`
 
 This will allow you to handle when users get push notifications delivered and when they click on the push notifications. You will likely want to extend your `MainActivity` but your use case may be slightly different.
     
@@ -313,7 +304,7 @@ class MainActivity : CourierActivity() {
 
 ## Manual Token Syncing
 
-If you do not want to use `CourierService` and `CourierActivity`, you can manually sync push notification tokens with the following code.
+If you do not want to use a `FirebaseMessagingService` subclass and `CourierActivity`, you can manually sync push notification tokens with the following code.
 
 ```kotlin
 lifecycleScope.launch {
@@ -342,7 +333,7 @@ lifecycleScope.launch {
 
 ## Manual Notification Tracking
 
-This is how you can tell Courier when a notification has been delivered or clicked in your app. If you are using `CourierService` and `CourierActivity`, this is done automatically.
+This is how you can tell Courier when a notification has been delivered or clicked in your app. If you are using the `FirebaseMessagingService` setup above and `CourierActivity`, this is done automatically.
 
 ```kotlin
 lifecycleScope.launch {
