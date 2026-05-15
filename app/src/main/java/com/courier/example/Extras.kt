@@ -1,6 +1,9 @@
 package com.courier.example
 
 import android.content.Context
+import android.graphics.Typeface
+import android.text.InputType
+import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.appcompat.app.AlertDialog
@@ -8,6 +11,7 @@ import com.courier.android.models.CourierPreferenceTopic
 import com.courier.android.models.InboxAction
 import com.courier.android.models.InboxMessage
 import com.google.firebase.messaging.RemoteMessage
+//import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.GsonBuilder
 import org.json.JSONArray
 import org.json.JSONObject
@@ -54,6 +58,50 @@ suspend fun showAlert(context: Context, title: String, subtitle: String? = null,
 
 }
 
+fun showPushNotificationPopup(
+    context: Context,
+    title: String,
+    code: String,
+    action: String = "OK"
+) {
+
+    val alert = AlertDialog.Builder(context)
+    alert.setTitle(title)
+
+    val editText = EditText(context).apply {
+        setText(code)
+        typeface = Typeface.MONOSPACE
+        isSingleLine = false
+
+        // Make non-editable but allow selection/copy
+        keyListener = null                 // disables typing/paste edits
+        inputType = InputType.TYPE_NULL    // no IME
+        isCursorVisible = false
+        isFocusable = false
+        isFocusableInTouchMode = false
+        isLongClickable = true
+        setTextIsSelectable(true)          // allow copy/select
+
+        setHorizontallyScrolling(false)
+        maxLines = 20
+        scrollBarStyle = View.SCROLLBARS_INSIDE_INSET
+    }
+
+    val layout = LinearLayout(context).apply {
+        orientation = LinearLayout.VERTICAL
+        setPadding(50, 40, 50, 10)
+        addView(editText)
+    }
+
+    alert.setView(layout)
+
+    alert.setPositiveButton(action) { _, _ ->
+
+    }
+
+    alert.show()
+}
+
 fun RemoteMessage.toJson(): JSONObject {
     val json = JSONObject()
     javaClass.declaredFields.forEach { field ->
@@ -64,8 +112,9 @@ fun RemoteMessage.toJson(): JSONObject {
     return json
 }
 
-fun RemoteMessage.toJsonString(indentation: Int = 2): String {
-    return this.toJson().toString(indentation)
+fun Map<String, String>.toJsonString(indentation: Int = 2): String {
+    val json = JSONObject(this)
+    return json.toString(indentation)
 }
 
 private fun Any?.toJsonValue(): Any? {

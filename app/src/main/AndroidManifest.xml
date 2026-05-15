@@ -39,7 +39,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Needed to receive notifications from Firebase -->
         <service
             android:name=".ExampleService"
             android:exported="false">

@@ -20,7 +20,7 @@ android {
         applicationId "com.courier.example_app"
         minSdk 23
         targetSdk 35
-        versionCode 68
+        versionCode 69
         versionName "1.0"
         signingConfig signingConfigs.debug
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -100,5 +100,6 @@ dependencies {
 
     // Firebase
     implementation platform('com.google.firebase:firebase-bom:33.1.2')
+    implementation "com.google.firebase:firebase-messaging"
 
 }
