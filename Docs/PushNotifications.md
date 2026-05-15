@@ -304,20 +304,43 @@ class MainActivity : CourierActivity() {
 
 ## Token Management
 
-The SDK automatically manages FCM tokens when Firebase is initialized and the user is signed in. You can also read and manage tokens directly:
+Token syncing is required for push notifications to work. Your `FirebaseMessagingService` subclass must call two SDK functions:
+
+| Callback | SDK Call | Purpose |
+|---|---|---|
+| `onNewToken(token)` | `Courier.onNewToken(token)` | Caches the FCM token locally and uploads it to Courier for the current user |
+| `onMessageReceived(message)` | `Courier.onMessageReceived(message.data)` | Tracks the delivery event and broadcasts it through the SDK event bus |
+
+See the working example: [`ExampleService.kt`](https://github.com/trycourier/courier-android/blob/master/app/src/main/java/com/courier/example/ExampleService.kt)
+
+### Reading and Refreshing Tokens
+
+The SDK caches the FCM token locally after it is received. You can read or force-refresh it at any time:
+
+```kotlin
+// Read the current FCM token (locally cached)
+val fcmToken = Courier.shared.fcmToken
+
+// Force-refresh the FCM token from Firebase
+lifecycleScope.launch {
+    Courier.shared.refreshFcmToken()
+    val updatedToken = Courier.shared.fcmToken
+    print(updatedToken)
+}
+```
+
+See the working example: [`PushFragment.kt`](https://github.com/trycourier/courier-android/blob/master/app/src/main/java/com/courier/example/fragments/PushFragment.kt)
+
+### Non-FCM Providers
+
+For push providers other than FCM (Expo, OneSignal, Pusher Beams, etc.), use `setToken` and `getToken` with the provider key:
 
 ```kotlin
 lifecycleScope.launch {
 
-    // Read the current FCM token (locally cached)
-    val fcmToken = Courier.shared.fcmToken
-    print(fcmToken)
-
-    // Force-refresh the FCM token from Firebase
-    Courier.shared.refreshFcmToken()
-
-    // Manually set a token for any provider
-    // Useful for non-FCM push providers (Expo, OneSignal, etc.)
+    // Save a token for a non-FCM provider
+    // If the user is signed in, it uploads immediately.
+    // If not, it is stored locally and uploaded on sign-in.
     Courier.shared.setToken(
         provider = "your-provider-key",
         token = "your_messaging_token",
