@@ -84,12 +84,12 @@ These are all the available features of the SDK.
                 1
             </td>
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/docs/Authentication.md">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/Authentication.md">
                     <code>Authentication</code>
                 </a>
             </td>
             <td align="left">
-                Manages user credentials between app sessions. Required if you would like to use <a href="https://github.com/trycourier/courier-android/blob/master/docs/Inbox.md"><code>Inbox</code></a>, <a href="https://github.com/trycourier/courier-android/blob/master/docs/PushNotifications.md"><code>Push Notifications</code></a> and <a href="https://github.com/trycourier/courier-android/blob/master/docs/Preferences.md"><code>Preferences</code></a>.
+                Manages user credentials between app sessions. Required if you would like to use <a href="https://github.com/trycourier/courier-android/blob/main/Docs/Inbox.md"><code>Inbox</code></a>, <a href="https://github.com/trycourier/courier-android/blob/main/Docs/PushNotifications.md"><code>Push Notifications</code></a> and <a href="https://github.com/trycourier/courier-android/blob/main/Docs/Preferences.md"><code>Preferences</code></a>.
             </td>
         </tr>
         <tr width="600px">
@@ -97,7 +97,7 @@ These are all the available features of the SDK.
                 2
             </td>
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/docs/Inbox.md">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/Inbox.md">
                     <code>Inbox</code>
                 </a>
             </td>
@@ -110,7 +110,7 @@ These are all the available features of the SDK.
                 3
             </td>
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/docs/PushNotifications.md">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/PushNotifications.md">
                     <code>Push Notifications</code>
                 </a>
             </td>
@@ -123,7 +123,7 @@ These are all the available features of the SDK.
                 4
             </td>
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/docs/Preferences.md">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/Preferences.md">
                     <code>Preferences</code>
                 </a>
             </td>
@@ -136,7 +136,7 @@ These are all the available features of the SDK.
                 5
             </td>
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/docs/Client.md">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/Client.md">
                     <code>CourierClient</code>
                 </a>
             </td>
@@ -153,7 +153,7 @@ These are all the available features of the SDK.
 
 Here is what the Courier Android SDK automatically handles with Proguard:
 
-<a href="https://github.com/trycourier/courier-android/blob/master/android/consumer-rules.pro">
+<a href="https://github.com/trycourier/courier-android/blob/main/android/consumer-rules.pro">
     <code>Proguard Rules</code>
 </a>
 

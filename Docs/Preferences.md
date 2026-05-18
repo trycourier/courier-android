@@ -16,7 +16,7 @@ In-app notification settings that allow your users to customize which of your no
     <tbody>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/Authentication.md">
                     <code>Authentication</code>
                 </a>
             </td>
@@ -144,6 +144,6 @@ You can control your branding from the [`Courier Studio`](https://app.courier.co
 
 ---
 
-👋 `Branding APIs` can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md#branding-apis"><code>here</code></a>
+👋 `Branding APIs` can be found <a href="https://github.com/trycourier/courier-android/blob/main/Docs/Client.md#branding-apis"><code>here</code></a>
 
-👋 `Preference APIs` can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md#preferences-apis"><code>here</code></a>
+👋 `Preference APIs` can be found <a href="https://github.com/trycourier/courier-android/blob/main/Docs/Client.md#preferences-apis"><code>here</code></a>

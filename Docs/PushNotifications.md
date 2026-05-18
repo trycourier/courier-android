@@ -18,7 +18,7 @@ The easiest way to support push notifications in your app.
     <tbody>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#automatic-token-syncing-fcm-only">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/PushNotifications.md#automatic-token-syncing-fcm-only">
                     <code>Automatic Token Management</code>
                 </a>
             </td>
@@ -28,7 +28,7 @@ The easiest way to support push notifications in your app.
         </tr>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#manual-token-syncing">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/PushNotifications.md#manual-token-syncing">
                     <code>Manual Token Management</code>
                 </a>
             </td>
@@ -38,7 +38,7 @@ The easiest way to support push notifications in your app.
         </tr>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#manual-notification-tracking">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/PushNotifications.md#manual-notification-tracking">
                     <code>Manual Notification Tracking</code>
                 </a>
             </td>
@@ -48,7 +48,7 @@ The easiest way to support push notifications in your app.
         </tr>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#5-register-for-notifications">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/PushNotifications.md#5-register-for-notifications">
                     <code>Permission Requests & Checking</code>
                 </a>
             </td>
@@ -93,7 +93,7 @@ The easiest way to support push notifications in your app.
         </tr>
         <tr width="600px">
             <td align="left">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/Authentication.md">
                     <code>Authentication</code>
                 </a>
             </td>
@@ -143,7 +143,7 @@ Select which push notification provider you would like Courier to route push not
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#automatic-token-syncing-fcm-only">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/PushNotifications.md#automatic-token-syncing-fcm-only">
                      <code>Automatic</code>
                 </a>
             </td>
@@ -155,7 +155,7 @@ Select which push notification provider you would like Courier to route push not
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#manual-token-syncing">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/PushNotifications.md#manual-token-syncing">
                     <code>Manual</code>
                 </a>
             </td>
@@ -167,7 +167,7 @@ Select which push notification provider you would like Courier to route push not
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#manual-token-syncing">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/PushNotifications.md#manual-token-syncing">
                     <code>Manual</code>
                 </a>
             </td>
@@ -179,7 +179,7 @@ Select which push notification provider you would like Courier to route push not
                 </a>
             </td>
             <td align="center">
-                <a href="https://github.com/trycourier/courier-android/blob/master/Docs/PushNotifications.md#manual-token-syncing">
+                <a href="https://github.com/trycourier/courier-android/blob/main/Docs/PushNotifications.md#manual-token-syncing">
                     <code>Manual</code>
                 </a>
             </td>
@@ -311,7 +311,7 @@ Token syncing is required for push notifications to work. Your `FirebaseMessagin
 | `onNewToken(token)` | `Courier.onNewToken(token)` | Caches the FCM token locally and uploads it to Courier for the current user |
 | `onMessageReceived(message)` | `Courier.onMessageReceived(message.data)` | Tracks the delivery event and broadcasts it through the SDK event bus |
 
-See the working example: [`ExampleService.kt`](https://github.com/trycourier/courier-android/blob/master/app/src/main/java/com/courier/example/ExampleService.kt)
+See the working example: [`ExampleService.kt`](https://github.com/trycourier/courier-android/blob/main/app/src/main/java/com/courier/example/ExampleService.kt)
 
 ### Reading and Refreshing Tokens
 
@@ -329,7 +329,7 @@ lifecycleScope.launch {
 }
 ```
 
-See the working example: [`PushFragment.kt`](https://github.com/trycourier/courier-android/blob/master/app/src/main/java/com/courier/example/fragments/PushFragment.kt)
+See the working example: [`PushFragment.kt`](https://github.com/trycourier/courier-android/blob/main/app/src/main/java/com/courier/example/fragments/PushFragment.kt)
 
 ### Non-FCM Providers
 
@@ -379,7 +379,7 @@ lifecycleScope.launch {
 
 This will take the tokens you are syncing above and upload them to the `userId` you provide here.
 
-See [`Authentication`](https://github.com/trycourier/courier-android/blob/master/Docs/Authentication.md) for more details.
+See [`Authentication`](https://github.com/trycourier/courier-android/blob/main/Docs/Authentication.md) for more details.
 
 ```kotlin
 lifecycleScope.launch {
@@ -432,4 +432,4 @@ val isGranted = Courier.shared.isPushPermissionGranted(context)
 
 ---
 
-👋 `TokenManagement APIs` can be found <a href="https://github.com/trycourier/courier-android/blob/master/Docs/Client.md#token-management-apis"><code>here</code></a>
+👋 `TokenManagement APIs` can be found <a href="https://github.com/trycourier/courier-android/blob/main/Docs/Client.md#token-management-apis"><code>here</code></a>
