@@ -16,6 +16,7 @@ class ExampleService: FirebaseMessagingService() {
 
         // Create the PendingIntent that runs when the user taps the notification
         // This intent targets your Activity and carries the original message payload
+        // TODO: Remove this if you'd like. This is mostly useful for demo purposes.
         val notificationIntent = CourierPushNotificationIntent(
             context = this,
             target = MainActivity::class.java,
@@ -25,6 +26,7 @@ class ExampleService: FirebaseMessagingService() {
         // Show the notification to the user.
         // Prefer data-only FCM so this service runs even in background/killed state.
         // Fall back to notification fields if data keys are missing.
+        // TODO: Remove this if you'd like. This is mostly useful for demo purposes.
         notificationIntent.presentNotification(
             title = message.data["title"] ?: message.notification?.title,
             body = message.data["body"] ?: message.notification?.body,
