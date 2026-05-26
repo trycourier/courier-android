@@ -395,23 +395,26 @@ internal class InboxListView @JvmOverloads constructor(
             return@launch
         }
 
-        // Resolve visible indexes + snapshot messages on the main thread
+        // Resolve visible items on the main thread. RecyclerView/LayoutManager
+        // state and the adapter list are both confined to the main thread, so
+        // these reads are safe and cheap (visible children are bounded).
         val manager = layoutManager ?: return@launch
         val firstIndex = manager.findFirstCompletelyVisibleItemPosition()
         val lastIndex = manager.findLastCompletelyVisibleItemPosition()
-
         if (firstIndex == -1 || lastIndex == -1) {
             return@launch
         }
 
-        val snapshot = messagesAdapter.messages.toList()
+        val messages = messagesAdapter.messages
         val safeFirst = firstIndex.coerceAtLeast(0)
-        val safeLast = lastIndex.coerceAtMost(snapshot.size)
+        val safeLast = lastIndex.coerceAtMost(messages.size)
         if (safeFirst >= safeLast) {
             return@launch
         }
 
-        val messagesToOpen = snapshot.subList(safeFirst, safeLast).filter { !it.isOpened }
+        // .filter produces a new List, so it's safe to pass into the IO block
+        // even if the underlying adapter list mutates afterwards.
+        val messagesToOpen = messages.subList(safeFirst, safeLast).filter { !it.isOpened }
         if (messagesToOpen.isEmpty()) {
             return@launch
         }
