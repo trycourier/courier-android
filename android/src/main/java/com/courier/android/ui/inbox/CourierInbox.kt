@@ -214,6 +214,7 @@ open class CourierInbox @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun reloadViews() {
         theme.backgroundColor?.let { setBackgroundColor(it) }
+        theme.tabBackgroundColor?.let { tabLayout.setBackgroundColor(it) }
         pages.forEach { it.list.theme = theme }
         setupViewPager()
     }
