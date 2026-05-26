@@ -33,6 +33,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 internal class InboxListView @JvmOverloads constructor(
     context: Context,
@@ -382,52 +383,51 @@ internal class InboxListView @JvmOverloads constructor(
     }
 
     // Opens all the current messages
-    // Performs this on an async thread
-    // Fails silently
-    private fun openVisibleMessages() = coroutineScope.launch(Dispatchers.IO) {
+    // Resolves visible items on the main thread (RecyclerView/LayoutManager state is
+    // not thread-safe and reading it from a worker thread races with the layout
+    // pass — most easily reproduced when switching tabs while the list is settling,
+    // which produced a NullPointerException inside ViewBoundsCheck).
+    // Network calls are then dispatched to IO. Fails silently.
+    private fun openVisibleMessages() = coroutineScope.launch(Dispatchers.Main) {
 
         // Ensure we have a user and messages to look through
         if (!Courier.shared.isUserSignedIn || mutatedMessageId != null || messagesAdapter.messages.isEmpty()) {
             return@launch
         }
 
-        // Get all the visible items
-        layoutManager?.let { manager ->
+        // Resolve visible items on the main thread. RecyclerView/LayoutManager
+        // state and the adapter list are both confined to the main thread, so
+        // these reads are safe and cheap (visible children are bounded).
+        val manager = layoutManager ?: return@launch
+        val firstIndex = manager.findFirstCompletelyVisibleItemPosition()
+        val lastIndex = manager.findLastCompletelyVisibleItemPosition()
+        if (firstIndex == -1 || lastIndex == -1) {
+            return@launch
+        }
 
-            // Get the indexes
-            val firstIndex = manager.findFirstCompletelyVisibleItemPosition()
-            val lastIndex = manager.findLastCompletelyVisibleItemPosition()
+        val messages = messagesAdapter.messages
+        val safeFirst = firstIndex.coerceAtLeast(0)
+        val safeLast = lastIndex.coerceAtMost(messages.size)
+        if (safeFirst >= safeLast) {
+            return@launch
+        }
 
-            // Avoid index out of bounds
-            if (firstIndex == -1 || lastIndex == -1) {
-                return@let
-            }
+        // .filter produces a new List, so it's safe to pass into the IO block
+        // even if the underlying adapter list mutates afterwards.
+        val messagesToOpen = messages.subList(safeFirst, safeLast).filter { !it.isOpened }
+        if (messagesToOpen.isEmpty()) {
+            return@launch
+        }
 
+        // Run network work off the main thread
+        withContext(Dispatchers.IO) {
             try {
-
-                // Find the messages
-                val messagesToOpen = messagesAdapter.messages.subList(firstIndex, lastIndex).filter { !it.isOpened }.map { message ->
-
-                    if (message.isOpened) {
-                        return@map null
-                    }
-
-                    // Mark the message as opened
-                    return@map async {
-                        message.markAsOpened()
-                    }
-
-                }
-
-                // Perform all the changes together
-                messagesToOpen.filterNotNull().awaitAll()
-
+                messagesToOpen.map { message ->
+                    async { message.markAsOpened() }
+                }.awaitAll()
             } catch (e: Exception) {
-
                 Courier.shared.client?.error(e.message)
-
             }
-
         }
 
     }
