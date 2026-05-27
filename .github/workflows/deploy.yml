@@ -60,9 +60,10 @@ jobs:
         if: steps.check.outputs.deployed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_NOTES: ${{ steps.notes.outputs.notes }}
         run: |
           VERSION="${{ steps.check.outputs.version }}"
-          gh release create "$VERSION" --notes "${{ steps.notes.outputs.notes }}"
+          gh release create "$VERSION" --notes "$RELEASE_NOTES"
 
   bump-downstream:
     name: Bump Downstream Dependencies
