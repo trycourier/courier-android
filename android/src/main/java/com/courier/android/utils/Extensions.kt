@@ -106,7 +106,7 @@ internal suspend fun trackPushNotification(trackingEvent: CourierTrackingEvent, 
             event = trackingEvent,
         )
     } catch (e: Exception) {
-        Courier.shared.client?.error(e.toString())
+        CourierClient.default.error(e.toString())
     }
 }
 
@@ -117,7 +117,7 @@ internal suspend fun broadcastPushNotification(
     try {
         eventBus.onPushNotificationEvent(trackingEvent, data)
     } catch (e: Exception) {
-        Courier.shared.client?.error(e.toString())
+        CourierClient.default.error(e.toString())
     }
 }
 

@@ -12,7 +12,7 @@ class NotificationEventBus {
     val events = _events.asSharedFlow()
 
     suspend fun onPushNotificationEvent(trackingEvent: CourierTrackingEvent, data: Map<String, String>) {
-        Courier.shared.client?.log("onPushNotificationEvent: $trackingEvent = $data")
+        try { Courier.shared.client?.log("onPushNotificationEvent: $trackingEvent = $data") } catch (_: Exception) {}
         val event = CourierPushNotificationEvent(trackingEvent, data)
         _events.emit(event)
     }
