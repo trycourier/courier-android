@@ -31,6 +31,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
 
@@ -59,7 +61,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     companion object {
 
         // Core
-        private const val VERSION = "6.0.1"
+        private const val VERSION = "6.1.0"
         var agent: CourierAgent = CourierAgent.NativeAndroid(VERSION)
 
         // Inbox
@@ -131,39 +133,58 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
             }
         }
 
-        // Broadcasts and tracks the message in Courier
-        fun onMessageReceived(data: Map<String, String>) = coroutineScope.launch(Dispatchers.IO) {
+        private const val MESSAGE_RECEIVED_TIMEOUT_MS = 8_000L
+
+        /**
+         * Tracks a DELIVERED event and broadcasts the push notification to the
+         * in-app event bus.
+         *
+         * **Threading:** intended to be called from
+         * `FirebaseMessagingService.onMessageReceived`. Blocks the calling thread
+         * until the DELIVERED tracking POST completes (or
+         * [MESSAGE_RECEIVED_TIMEOUT_MS] elapses). FCM guarantees the service
+         * process stays alive while `onMessageReceived` is running, so blocking
+         * is the correct strategy to keep killed-state delivery from losing the
+         * tracking call.
+         *
+         * **Ordering:** call this *after* posting your notification — e.g. after
+         * `NotificationManagerCompat.notify(...)` or
+         * `CourierPushNotificationIntent.presentNotification(...)`. Otherwise the
+         * synchronous tracking POST delays the notification appearing on screen.
+         *
+         */
+        fun onMessageReceived(data: Map<String, String>) {
             try {
-
-                val trackingEvent = CourierTrackingEvent.DELIVERED
-
-                // Broadcast the message to the app
-                broadcastPushNotification(
-                    trackingEvent = trackingEvent,
-                    data = data
-                )
-
-                // Track the push notification delivery
-                data.trackingUrl?.let { trackingUrl ->
-                    trackPushNotification(
-                        trackingEvent = trackingEvent,
-                        trackingUrl = trackingUrl
-                    )
+                runBlocking {
+                    withTimeoutOrNull(MESSAGE_RECEIVED_TIMEOUT_MS) {
+                        processMessageReceived(data)
+                    }
                 }
-
             } catch (e: Exception) {
                 CourierClient.default.error(e.toString())
             }
         }
 
-        // Saves the notification token to Courier token management
+        private suspend fun processMessageReceived(data: Map<String, String>) {
+            broadcastPushNotification(CourierTrackingEvent.DELIVERED, data)
+            data.trackingUrl?.let { trackPushNotification(CourierTrackingEvent.DELIVERED, it) }
+        }
+
+        /**
+         * Syncs this device's FCM token with the Courier backend.
+         *
+         * **Threading:** blocks the calling thread until the token sync
+         * completes (or [MESSAGE_RECEIVED_TIMEOUT_MS] elapses), using the same
+         * strategy as [onMessageReceived] to survive killed-state process teardown.
+         */
         fun onNewToken(token: String) {
             try {
-                shared.setFcmToken(
-                    token = token,
-                    onSuccess = { shared.client?.log("Courier FCM token updated") },
-                    onFailure = { shared.client?.error(it.toString()) }
-                )
+                runBlocking {
+                    withTimeoutOrNull(MESSAGE_RECEIVED_TIMEOUT_MS) {
+                        shared.setFcmToken(token)
+                    }
+                }
+                shared.client?.log("Courier FCM token updated")
             } catch (e: Exception) {
                 CourierClient.default.error(e.toString())
             }
