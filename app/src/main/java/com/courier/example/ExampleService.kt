@@ -7,14 +7,14 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
 // This is a working FirebaseMessagingService used by the example app.
-// Only two Courier SDK calls are required to integrate push tracking:
+// Two Courier SDK calls are required to integrate push tracking:
 //   1. Courier.onMessageReceived(...)   — in onMessageReceived
 //   2. Courier.onNewToken(...)          — in onNewToken
 //
-// Everything below those calls (CourierPushNotificationIntent, presentNotification)
-// is demo code that puts a basic notification on screen for testing.
-// In a production app you would replace that block with your own
-// NotificationCompat.Builder implementation.
+// IMPORTANT: Courier.onMessageReceived blocks until the tracking POST
+// completes, so always post your notification *before* calling it.
+// Otherwise the notification appears on screen only after the HTTP
+// roundtrip finishes (up to ~8 s on a slow network).
 //
 // Docs:
 //   Courier Android SDK    — https://www.courier.com/docs/sdk-libraries/android
@@ -24,33 +24,22 @@ class ExampleService: FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        // Required — Tells the Courier SDK a push was delivered.
-        // Behind the scenes this posts the trackingUrl from the FCM data payload
-        // as a DELIVERED event so delivery analytics appear in the Courier dashboard,
-        // and fires any onPushDelivered listeners registered via Courier.shared.
-        Courier.onMessageReceived(message.data)
-
-        // --- Demo notification code (replace with your own for production) -----------
-        //
-        // CourierPushNotificationIntent is a convenience wrapper that bundles the
-        // RemoteMessage into a PendingIntent. When the user taps the notification,
-        // Courier can fire onPushNotificationClicked and track a CLICKED event.
-        // In your own app you can build the PendingIntent yourself and call
-        // Courier.shared.client.tracking.postTrackingUrl(...) on tap instead.
+        // 1) Show the notification immediately so the user sees it without delay.
         val notificationIntent = CourierPushNotificationIntent(
             context = this,
             target = MainActivity::class.java,
             payload = message
         )
 
-        // presentNotification is a Courier helper that posts a basic notification
-        // via NotificationManagerCompat. It is fine for testing but not customizable
-        // enough for production — use NotificationCompat.Builder directly:
-        // https://developer.android.com/develop/ui/views/notifications/build-notification
         notificationIntent.presentNotification(
             title = message.data["title"] ?: message.notification?.title,
             body = message.data["body"] ?: message.notification?.body,
         )
+
+        // 2) Track the delivery. This call blocks until the POST completes (or
+        //    times out) so the process survives long enough for the tracking HTTP
+        //    call to land — important for killed-state delivery.
+        Courier.onMessageReceived(message.data)
 
     }
 
