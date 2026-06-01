@@ -24,7 +24,7 @@ Add the dependency to your app's `build.gradle`:
 
 ```gradle
 dependencies {
-    implementation 'com.github.trycourier:courier-android:LATEST_VERSION'
+    implementation 'com.github.trycourier:courier-android:6.1.1'
 }
 ```
 
