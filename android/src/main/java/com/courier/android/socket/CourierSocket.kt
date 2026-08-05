@@ -17,6 +17,7 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
+import java.util.UUID
 import kotlin.coroutines.resume
 
 open class CourierSocket(internal val url: String) {
@@ -97,13 +98,29 @@ open class CourierSocket(internal val url: String) {
         return@withContext webSocket?.send(json)
     }
 
+    /**
+     * Pings keep alive. Will ping every 5 minutes by default.
+     *
+     * Sends the inbox wire protocol `ping`, not the old `keepAlive` action. `keepAlive` is not a
+     * valid IWP action and carries no `tid`, so under `iwpv=v2` it would fail envelope validation
+     * and come back as an error frame every interval — the server accepts only subscribe /
+     * unsubscribe / ping / pong / stats / get-config, each requiring a `tid`.
+     *
+     * The server also drives its own heartbeat and drops a connection that fails to pong, so this
+     * timer is belt-and-braces rather than the sole liveness mechanism.
+     */
     fun keepAlive(interval: Long = 300_000L) {
         stopPing()
         pingJob = CoroutineScope(Dispatchers.IO).launch {
             while (true) {
                 delay(interval)
                 try {
-                    send(mapOf("action" to "keepAlive"))
+                    send(
+                        mapOf(
+                            "tid" to UUID.randomUUID().toString(),
+                            "action" to "ping"
+                        )
+                    )
                 } catch (e: Exception) {
                     Courier.shared.client?.log(e.localizedMessage ?: "Error occurred on Keep Alive")
                 }

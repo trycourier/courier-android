@@ -30,9 +30,19 @@ data class InboxMessage(
     val isOpened get() = opened != null
     val isArchived get() = archived != null
 
-    // TODO: Make this cleaner. Need Riley's Changes.
-    private val trackingIdsData: Map<String, Any>? get() = data?.get("trackingIds") as? Map<String, Any>?
-    val clickTrackingId: String? get() = trackingIdsData?.get("clickTrackingId") as? String ?: trackingIds?.clickTrackingId
+    /**
+     * Tracking id for a click on this message.
+     *
+     * Reads the root-level [trackingIds] only. Both the GraphQL read and the `iwpv=v2` socket
+     * publish it there, so the two shapes finally agree.
+     *
+     * The nested `data["trackingIds"]` branch that used to be checked first is gone — this is the
+     * "Riley's changes" the old TODO here was waiting on. It existed because the socket, on the
+     * `legacy` protocol, nested tracking ids under `data` while GraphQL returned them at the root,
+     * so this property had to look in both places and guess. Removing it is only safe because the
+     * socket now speaks v2; on `legacy` the nested copy was the *only* one present.
+     */
+    val clickTrackingId: String? get() = trackingIds?.clickTrackingId
 
     internal fun setRead() {
         read = Date().toIsoTimestamp()
