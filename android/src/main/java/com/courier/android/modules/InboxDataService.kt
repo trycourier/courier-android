@@ -1,5 +1,6 @@
 package com.courier.android.modules
 
+import com.courier.android.Courier
 import com.courier.android.client.CourierClient
 import com.courier.android.models.CourierException
 import com.courier.android.models.CourierGetInboxMessagesResponse
@@ -8,7 +9,6 @@ import com.courier.android.models.InboxMessageSet
 import com.courier.android.models.toMessageSet
 import com.courier.android.socket.InboxSocket
 import com.courier.android.socket.InboxSocketManager
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -83,13 +83,13 @@ internal class InboxDataService {
 
         // Connect socket listeners
         socket.receivedMessage = { message ->
-            CoroutineScope(Dispatchers.IO).launch {
+            Courier.coroutineScope.launch(Dispatchers.IO) {
                 onReceivedMessage(message)
             }
         }
 
         socket.receivedMessageEvent = { event ->
-            CoroutineScope(Dispatchers.IO).launch {
+            Courier.coroutineScope.launch(Dispatchers.IO) {
                 onReceivedMessageEvent(event)
             }
         }
