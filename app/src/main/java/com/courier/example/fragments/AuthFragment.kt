@@ -203,7 +203,7 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
     }
 
     private fun showEnvironmentPicker() {
-        val environments = CourierEnvironment.values()
+        val environments = CourierEnvironment.all()
         val labels = environments.map { it.label }.toTypedArray()
         val checkedIndex = environments.indexOf(selectedEnvironment)
 
@@ -222,7 +222,7 @@ class AuthFragment : Fragment(R.layout.fragment_auth) {
         options[0] = options[0].first to env.label
         authPreferences.environment = env.label
 
-        env.urls()?.let { urls ->
+        env.urls?.let { urls ->
             options[4] = options[4].first to urls.rest
             options[5] = options[5].first to urls.graphql
             options[6] = options[6].first to urls.inboxGraphql
