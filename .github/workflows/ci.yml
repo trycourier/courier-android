@@ -3,6 +3,9 @@ name: CI
 on:
   pull_request:
     branches: [main]
+  # Also check main after every merge
+  push:
+    branches: [main]
   workflow_dispatch:
 
 # Env generation is duplicated in both jobs — keep in sync (com.courier.app for androidTest).
