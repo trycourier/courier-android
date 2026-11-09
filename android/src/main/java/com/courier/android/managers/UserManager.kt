@@ -25,11 +25,46 @@ sealed class UserManager {
             return getSharedPreferences(TAG, Context.MODE_PRIVATE)
         }
 
+        // The access token and client key are encrypted with a keystore key, and everything else
+        // stays in plain preferences. Replaceable so tests can swap the store.
+        @Volatile
+        internal var secretStore: SecretStore? = null
+
+        private fun secrets(context: Context): SecretStore {
+            return secretStore ?: synchronized(this) {
+                secretStore ?: KeystoreSecretStore(context).also { secretStore = it }
+            }
+        }
+
+        // Reads a secret, moving one saved in plain preferences by an earlier version into the
+        // keystore. If the keystore can't be used, the plain value is kept and used.
+        private fun secret(context: Context, key: String): String? {
+            val prefs = context.sharedPrefs
+            val plain = prefs.getString(key, null)
+            return when (val read = secrets(context).read(key)) {
+                is SecretRead.Found -> read.value
+                SecretRead.Unavailable -> plain
+                SecretRead.Missing -> {
+                    if (plain != null && secrets(context).write(key, plain)) {
+                        prefs.edit().remove(key).apply()
+                    }
+                    plain
+                }
+            }
+        }
+
         suspend fun setCredentials(context: Context, userId: String, accessToken: String, clientKey: String?, tenantId: String?, apiUrls: CourierClient.ApiUrls, showLogs: Boolean) = withContext(Dispatchers.IO) {
+            // The secrets go to the keystore. If it can't be written, they stay in plain
+            // preferences as before, so signing in still works.
+            val secrets = secrets(context)
+            val tokenSaved = secrets.write(ACCESS_TOKEN, accessToken)
+            secrets.delete(CLIENT_KEY)
+            val keySaved = clientKey == null || secrets.write(CLIENT_KEY, clientKey)
+
             val prefs = context.sharedPrefs.edit()
-            prefs.putString(ACCESS_TOKEN, accessToken)
+            prefs.putString(ACCESS_TOKEN, if (tokenSaved) null else accessToken)
             prefs.putString(USER_ID, userId)
-            prefs.putString(CLIENT_KEY, clientKey)
+            prefs.putString(CLIENT_KEY, if (keySaved) null else clientKey)
             prefs.putString(TENANT_ID, tenantId)
             prefs.putString(REST_URL, apiUrls.rest)
             prefs.putString(GRAPHQL_URL, apiUrls.graphql)
@@ -44,11 +79,11 @@ sealed class UserManager {
         }
 
         fun getAccessToken(context: Context): String? {
-            return context.sharedPrefs.getString(ACCESS_TOKEN, null)
+            return secret(context, ACCESS_TOKEN)
         }
 
         fun getClientKey(context: Context): String? {
-            return context.sharedPrefs.getString(CLIENT_KEY, null)
+            return secret(context, CLIENT_KEY)
         }
 
         fun getTenantId(context: Context): String? {
@@ -72,6 +107,8 @@ sealed class UserManager {
         }
 
         suspend fun removeCredentials(context: Context) = withContext(Dispatchers.IO) {
+            secrets(context).delete(ACCESS_TOKEN)
+            secrets(context).delete(CLIENT_KEY)
             val prefs = context.sharedPrefs.edit()
             prefs.putString(ACCESS_TOKEN, null)
             prefs.putString(USER_ID, null)
