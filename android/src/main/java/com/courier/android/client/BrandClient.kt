@@ -1,5 +1,6 @@
 package com.courier.android.client
 
+import com.courier.android.utils.graphQLArgument
 import com.courier.android.models.CourierBrandResponse
 import com.courier.android.utils.dispatch
 import com.courier.android.utils.toGraphQuery
@@ -12,7 +13,7 @@ class BrandClient(private val options: CourierClient.Options): CourierApiClient(
 
         val query = """
             query GetBrand {
-                brand(brandId: \"${brandId}\") {
+                brand(brandId: ${brandId.graphQLArgument}) {
                     settings {
                         colors {
                             primary

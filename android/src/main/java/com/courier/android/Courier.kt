@@ -15,6 +15,7 @@ import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.modules.InboxModule
 import com.courier.android.modules.linkInbox
 import com.courier.android.modules.refreshFcmToken
+import com.courier.android.modules.restoreClient
 import com.courier.android.modules.setFcmToken
 import com.courier.android.modules.unlinkInbox
 import com.courier.android.utils.NotificationEventBus
@@ -25,7 +26,10 @@ import com.courier.android.utils.trackPushNotification
 import com.courier.android.utils.trackingUrl
 import com.courier.android.utils.warn
 import com.google.firebase.FirebaseApp
+import com.courier.android.utils.Logger
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -61,7 +65,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     companion object {
 
         // Core
-        private const val VERSION = "6.1.2"
+        private const val VERSION = "6.1.3"
         var agent: CourierAgent = CourierAgent.NativeAndroid(VERSION)
 
         // Inbox
@@ -71,8 +75,12 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
         val eventBus by lazy { NotificationEventBus() }
 
         // Async
-        private val COURIER_COROUTINE_CONTEXT by lazy { Job() }
-        internal val coroutineScope = CoroutineScope(COURIER_COROUTINE_CONTEXT)
+        // A failure in background work is logged rather than thrown to the app, which crashed it,
+        // and the supervisor keeps one failure from cancelling every later SDK call.
+        private val COURIER_EXCEPTION_HANDLER = CoroutineExceptionHandler { _, error ->
+            runCatching { Logger.error("Courier background task failed: $error") }
+        }
+        internal val coroutineScope = CoroutineScope(SupervisorJob() + COURIER_EXCEPTION_HANDLER)
 
         // This will not create a memory leak
         // Please call Courier.initialize(context) before using Courier.shared
@@ -94,9 +102,12 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
          */
         fun initialize(context: Context) {
 
-            // Create the new instance if needed
+            // Create the new instance if needed, with the client of a user who signed in
+            // before the app was last closed
             if (mInstance == null) {
-                mInstance = Courier(context)
+                mInstance = Courier(context).apply {
+                    client = restoreClient()
+                }
             }
 
             // Register lifecycle callbacks

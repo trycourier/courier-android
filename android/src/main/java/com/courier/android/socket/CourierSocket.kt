@@ -4,7 +4,6 @@ import com.courier.android.Courier
 import com.courier.android.models.CourierException
 import com.courier.android.utils.log
 import com.google.gson.Gson
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -99,7 +98,7 @@ open class CourierSocket(internal val url: String) {
 
     fun keepAlive(interval: Long = 300_000L) {
         stopPing()
-        pingJob = CoroutineScope(Dispatchers.IO).launch {
+        pingJob = Courier.coroutineScope.launch(Dispatchers.IO) {
             while (true) {
                 delay(interval)
                 try {

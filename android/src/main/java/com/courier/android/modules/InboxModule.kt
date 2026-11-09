@@ -13,7 +13,6 @@ import com.courier.android.ui.inbox.InboxMessageFeed
 import com.courier.android.utils.error
 import com.courier.android.utils.log
 import com.courier.android.utils.warn
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -91,12 +90,12 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
             dataService.connectWebSocket(
                 client = client,
                 onReceivedMessage = { message ->
-                    CoroutineScope(Dispatchers.IO).launch {
+                    Courier.coroutineScope.launch(Dispatchers.IO) {
                         dataStore.addMessage(message, 0, InboxMessageFeed.FEED)
                     }
                 },
                 onReceivedMessageEvent = { event ->
-                    CoroutineScope(Dispatchers.IO).launch {
+                    Courier.coroutineScope.launch(Dispatchers.IO) {
                         handleMessageEvent(event)
                     }
                 }

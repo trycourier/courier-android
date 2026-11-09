@@ -37,10 +37,10 @@ suspend fun Courier.signIn(userId: String, tenantId: String? = null, accessToken
         showLogs = showLogs,
     )
 
+    // The access token and client key are credentials, so they stay out of the logs
     client?.log("Signing user in")
     client?.log("User Id: $userId")
-    client?.log("Access Token: $accessToken")
-    client?.log("Client Key: $clientKey")
+    client?.log("Client Key: ${if (clientKey != null) "set" else "none"}")
 
     // Set the current user
     UserManager.setCredentials(
@@ -49,6 +49,8 @@ suspend fun Courier.signIn(userId: String, tenantId: String? = null, accessToken
         accessToken = accessToken,
         clientKey = clientKey,
         tenantId = tenantId,
+        apiUrls = apiUrls,
+        showLogs = showLogs,
     )
 
     putPushTokens()
@@ -72,16 +74,46 @@ suspend fun Courier.signOut() = withContext(Dispatchers.IO) {
     }
 
     client?.log("Signing user out")
-    client = null
 
+    // The token deletes go through the client, so it's cleared only after them
     deletePushTokens()
     closeInbox()
+    client = null
 
     // Clear the user
     // Must be called after tokens are deleted
     UserManager.removeCredentials(Courier.shared.context)
 
     notifyListeners()
+
+}
+
+/**
+ * Credentials outlive the process but the client does not, so without this a relaunched app
+ * reports a signed in user while everything that needs the client fails until signIn runs again.
+ */
+internal fun Courier.restoreClient(): CourierClient? {
+
+    // Sessions saved before the urls were stored are left alone. Falling back to the default
+    // urls would send a token issued in another region to the wrong API.
+    val userId = UserManager.getUserId(context) ?: return null
+    val accessToken = UserManager.getAccessToken(context) ?: return null
+    val apiUrls = UserManager.getApiUrls(context) ?: return null
+    val showLogs = UserManager.getShowLogs(context) ?: return null
+
+    val client = CourierClient(
+        jwt = accessToken,
+        clientKey = UserManager.getClientKey(context),
+        userId = userId,
+        connectionId = UUID.randomUUID().toString(),
+        tenantId = UserManager.getTenantId(context),
+        apiUrls = apiUrls,
+        showLogs = showLogs,
+    )
+
+    client.log("Restored signed in user: $userId")
+
+    return client
 
 }
 
