@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.RecyclerView
 import com.courier.android.R
 import com.courier.android.models.CourierPreferenceStatus
@@ -68,12 +69,16 @@ internal class TopicViewHolder(itemView: View) : RecyclerView.ViewHolder(itemVie
             }
         }
 
-        val res = if (isDarkModeOn(itemView.context)) android.R.color.white else android.R.color.black
+        val isDark = isDarkModeOn(itemView.context)
+        val res = if (isDark) android.R.color.white else android.R.color.black
         val fallbackColor = ContextCompat.getColor(itemView.context, res)
+
+        // The subtitle defaults to Material's secondary text, so it doesn't match the title
+        val subtitleFallbackColor = ColorUtils.setAlphaComponent(fallbackColor, if (isDark) 0xB3 else 0x8A)
 
         // Set the font
         titleTextView.setCourierFont(font = theme.topicTitleFont, fallbackColor = fallbackColor)
-        subtitleTextView.setCourierFont(font = theme.topicSubtitleFont, fallbackColor = fallbackColor)
+        subtitleTextView.setCourierFont(font = theme.topicSubtitleFont, fallbackColor = subtitleFallbackColor)
 
         // Container
         container.setOnClickListener {

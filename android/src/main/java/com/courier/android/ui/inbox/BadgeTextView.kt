@@ -7,6 +7,7 @@ import android.util.TypedValue
 import android.view.Gravity
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import com.courier.android.Courier
 import com.courier.android.utils.setCourierFont
 import com.courier.android.utils.setSemanticsDescription
@@ -46,9 +47,17 @@ class BadgeTextView @JvmOverloads constructor(
         val color = theme.getBadgeColor(isSelected) ?: getPrimaryColor()
         background = getRoundedBackground(color)
         val font = if (isSelected) theme.tabStyle.selected.indicator.font else theme.tabStyle.unselected.indicator.font
-        setCourierFont(font)
+        setCourierFont(font, fallbackColor = readableTextColor(color))
         setSemanticsDescription(color)
         invalidate()
+    }
+
+    // White, unless it's hard to read on the badge. Dark themes often use a light primary
+    // color, where white text dropped to about 1.7:1, so those badges get black text.
+    private fun readableTextColor(background: Int): Int {
+        val opaque = ColorUtils.setAlphaComponent(background, 255)
+        val white = ColorUtils.calculateContrast(android.graphics.Color.WHITE, opaque)
+        return if (white >= 3.0) android.graphics.Color.WHITE else android.graphics.Color.BLACK
     }
 
     // Helper function to create a GradientDrawable with rounded corners

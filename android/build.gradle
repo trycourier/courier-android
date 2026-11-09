@@ -5,11 +5,11 @@ plugins {
 
 android {
 
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         minSdk 23
-        targetSdk 35
+        targetSdk 36
         consumerProguardFiles "consumer-rules.pro"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -35,6 +35,10 @@ android {
 
     namespace 'com.courier.android'
 
+    composeOptions {
+        // The Compose compiler that matches Kotlin 1.9.25
+        kotlinCompilerExtensionVersion '1.5.15'
+    }
     buildFeatures {
         compose true
         buildConfig true
@@ -72,7 +76,7 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'com.google.code.gson:gson:2.11.0'
-    implementation 'com.google.firebase:firebase-messaging-ktx:24.1.2'
+    implementation 'com.google.firebase:firebase-messaging:24.1.2'
     implementation 'androidx.startup:startup-runtime:1.1.1'
 
     // Exportable APIs

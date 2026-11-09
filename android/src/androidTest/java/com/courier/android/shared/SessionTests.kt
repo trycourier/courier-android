@@ -4,6 +4,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.courier.android.Courier
 import com.courier.android.ExampleServer
+import com.courier.android.models.CourierException
+import com.courier.android.modules.addInboxListener
+import com.courier.android.modules.removeInboxListener
 import com.courier.android.modules.restoreClient
 import com.courier.android.modules.setToken
 import com.courier.android.modules.signIn
@@ -76,6 +79,35 @@ class SessionTests {
 
         assertNull(Courier.shared.client)
         assertNull(Courier.shared.restoreClient())
+
+    }
+
+    @Test
+    fun expiredTokenFailsCleanlyAndRecovers() = runBlocking {
+
+        val userId = "android-session-${UUID.randomUUID()}"
+        val shortJwt = ExampleServer.generateJWT(authKey = Env.COURIER_AUTH_KEY, userId = userId, expiresIn = "10s")
+        Courier.shared.signIn(userId = userId, accessToken = shortJwt, showLogs = true)
+
+        delay(13_000)
+
+        // Requests fail with an error the app can handle, not a crash
+        val failure = runCatching { Courier.shared.client!!.inbox.getUnreadMessageCount() }.exceptionOrNull()
+        assertTrue("expected a CourierException, got $failure", failure is CourierException)
+
+        // And the inbox reports it through its listener
+        var inboxError: String? = null
+        val listener = Courier.shared.addInboxListener(onError = { inboxError = it.message ?: "error" })
+        repeat(20) { if (inboxError == null) delay(500) }
+        Courier.shared.removeInboxListener(listener)
+        assertNotNull("the inbox listener should get an error", inboxError)
+
+        // Signing in again with a fresh token recovers
+        val freshJwt = ExampleServer.generateJWT(authKey = Env.COURIER_AUTH_KEY, userId = userId)
+        Courier.shared.signIn(userId = userId, accessToken = freshJwt, showLogs = true)
+        assertTrue(Courier.shared.client!!.inbox.getUnreadMessageCount() >= 0)
+
+        Courier.shared.signOut()
 
     }
 
