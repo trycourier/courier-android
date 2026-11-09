@@ -37,12 +37,12 @@ internal class ExampleServer {
             )
         }.build()
 
-        internal suspend fun generateJWT(authKey: String, userId: String): String {
+        internal suspend fun generateJWT(authKey: String, userId: String, expiresIn: String = "2 days"): String {
 
             val json = JSONObject(
                 mapOf(
                     "scope" to "user_id:$userId write:user-tokens inbox:read:messages inbox:write:events read:preferences write:preferences read:brands",
-                    "expires_in" to "2 days"
+                    "expires_in" to expiresIn
                 )
             ).toString()
 
