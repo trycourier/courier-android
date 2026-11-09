@@ -15,6 +15,7 @@ import com.courier.android.models.CourierTrackingEvent
 import com.courier.android.modules.InboxModule
 import com.courier.android.modules.linkInbox
 import com.courier.android.modules.refreshFcmToken
+import com.courier.android.modules.restoreClient
 import com.courier.android.modules.setFcmToken
 import com.courier.android.modules.unlinkInbox
 import com.courier.android.utils.NotificationEventBus
@@ -101,9 +102,12 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
          */
         fun initialize(context: Context) {
 
-            // Create the new instance if needed
+            // Create the new instance if needed, with the client of a user who signed in
+            // before the app was last closed
             if (mInstance == null) {
-                mInstance = Courier(context)
+                mInstance = Courier(context).apply {
+                    client = restoreClient()
+                }
             }
 
             // Register lifecycle callbacks

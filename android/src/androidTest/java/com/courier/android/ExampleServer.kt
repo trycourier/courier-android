@@ -2,7 +2,10 @@ package com.courier.android
 
 import com.courier.android.client.CourierClient
 import com.courier.android.utils.dispatch
+import com.courier.android.utils.urlEncoded
 import com.courier.app.Env
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -92,6 +95,21 @@ internal class ExampleServer {
             )
 
             return res.requestId
+
+        }
+
+        // Whether the server has the token for the user, checked with the API key
+        internal suspend fun hasUserToken(authKey: String, userId: String, token: String): Boolean {
+
+            val request = Request.Builder()
+                .url("https://api.courier.com/users/${userId.urlEncoded}/tokens/${token.urlEncoded}")
+                .addHeader("Authorization", "Bearer $authKey")
+                .get()
+                .build()
+
+            return withContext(Dispatchers.IO) {
+                http.newCall(request).execute().use { it.code == 200 }
+            }
 
         }
 
