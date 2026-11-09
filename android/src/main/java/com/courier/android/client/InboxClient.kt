@@ -1,5 +1,6 @@
 package com.courier.android.client
 
+import com.courier.android.utils.graphQLArgument
 import com.courier.android.models.CourierGetInboxMessageResponse
 import com.courier.android.models.CourierGetInboxMessagesResponse
 import com.courier.android.socket.InboxSocket
@@ -18,11 +19,11 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
         options.warn("🚧 getMessage is under construction and may result in data you do not expect")
 
         // TODO: Support tenants
-        val tenantParams = if (options.tenantId != null) """accountId: \"${options.tenantId}\"""" else ""
+        val tenantParams = if (options.tenantId != null) """accountId: ${options.tenantId.graphQLArgument}""" else ""
 
         val query = """
             query GetInboxMessage {
-                message(messageId: \"$messageId\") {
+                message(messageId: ${messageId.graphQLArgument}) {
                     messageId
                     read
                     archived
@@ -63,13 +64,13 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
     suspend fun getMessages(paginationLimit: Int = 24, startCursor: String? = null): CourierGetInboxMessagesResponse {
 
-        val tenantParams = if (options.tenantId != null) """accountId: \"${options.tenantId}\"""" else ""
+        val tenantParams = if (options.tenantId != null) """accountId: ${options.tenantId.graphQLArgument}""" else ""
 
         val query = """
             query GetInboxMessages(
                 ${'$'}params: FilterParamsInput = { $tenantParams }
                 ${'$'}limit: Int = $paginationLimit
-                ${'$'}after: String ${if (startCursor != null) "= \\\"${startCursor}\\\"" else ""}
+                ${'$'}after: String ${if (startCursor != null) "= ${startCursor.graphQLArgument}" else ""}
             ) {
                 count(params: ${'$'}params)
                 messages(params: ${'$'}params, limit: ${'$'}limit, after: ${'$'}after) {
@@ -117,13 +118,13 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
     suspend fun getArchivedMessages(paginationLimit: Int = 24, startCursor: String? = null): CourierGetInboxMessagesResponse {
 
-        val tenantParams = if (options.tenantId != null) """accountId: \"${options.tenantId}\"""" else ""
+        val tenantParams = if (options.tenantId != null) """accountId: ${options.tenantId.graphQLArgument}""" else ""
 
         val query = """
             query GetInboxMessages(
                 ${'$'}params: FilterParamsInput = { $tenantParams, archived: true }
                 ${'$'}limit: Int = $paginationLimit
-                ${'$'}after: String ${if (startCursor != null) "= \\\"${startCursor}\\\"" else ""}
+                ${'$'}after: String ${if (startCursor != null) "= ${startCursor.graphQLArgument}" else ""}
             ) {
                 count(params: ${'$'}params)
                 messages(params: ${'$'}params, limit: ${'$'}limit, after: ${'$'}after) {
@@ -171,7 +172,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
     suspend fun getUnreadMessageCount(): Int {
 
-        val tenantParams = if (options.tenantId != null) """, accountId: \"${options.tenantId}\"""" else ""
+        val tenantParams = if (options.tenantId != null) """, accountId: ${options.tenantId.graphQLArgument}""" else ""
 
         val mutation = """
             query GetMessages {
@@ -200,7 +201,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
         val mutation = """
             mutation TrackEvent {
-                clicked(messageId: \"${messageId}\", trackingId: \"${trackingId}\")
+                clicked(messageId: ${messageId.graphQLArgument}, trackingId: ${trackingId.graphQLArgument})
             }
         """.toGraphQuery()
 
@@ -224,7 +225,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
         val mutation = """
             mutation TrackEvent {
-                read(messageId: \"${messageId}\")
+                read(messageId: ${messageId.graphQLArgument})
             }
         """.toGraphQuery()
 
@@ -248,7 +249,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
         val query = """
             mutation TrackEvent {
-                unread(messageId: \"${messageId}\")
+                unread(messageId: ${messageId.graphQLArgument})
             }
         """.toGraphQuery()
 
@@ -296,7 +297,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
         val query = """
             mutation TrackEvent {
-                opened(messageId: \"${messageId}\")
+                opened(messageId: ${messageId.graphQLArgument})
             }
         """.toGraphQuery()
 
@@ -320,7 +321,7 @@ class InboxClient(private val options: CourierClient.Options): CourierApiClient(
 
         val mutation = """
             mutation TrackEvent {
-                archive(messageId: \"${messageId}\")
+                archive(messageId: ${messageId.graphQLArgument})
             }
         """.toGraphQuery()
 
