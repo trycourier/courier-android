@@ -2,7 +2,7 @@ package com.courier.android
 
 import com.courier.android.client.CourierClient
 import com.courier.android.utils.dispatch
-import com.courier.android.utils.urlEncoded
+import com.courier.android.utils.urlPathSegment
 import com.courier.app.Env
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -98,11 +98,30 @@ internal class ExampleServer {
 
         }
 
+        // Every token the server stores for the user, exactly as stored
+        internal suspend fun userTokens(authKey: String, userId: String): List<String> {
+
+            val request = Request.Builder()
+                .url("https://api.courier.com/users/${userId.urlPathSegment}/tokens")
+                .addHeader("Authorization", "Bearer $authKey")
+                .get()
+                .build()
+
+            return withContext(Dispatchers.IO) {
+                http.newCall(request).execute().use { response ->
+                    if (response.code == 404) return@use emptyList()
+                    val tokens = JSONObject(response.body?.string() ?: "{}").optJSONArray("tokens")
+                    (0 until (tokens?.length() ?: 0)).map { tokens!!.getJSONObject(it).getString("token") }
+                }
+            }
+
+        }
+
         // Whether the server has the token for the user, checked with the API key
         internal suspend fun hasUserToken(authKey: String, userId: String, token: String): Boolean {
 
             val request = Request.Builder()
-                .url("https://api.courier.com/users/${userId.urlEncoded}/tokens/${token.urlEncoded}")
+                .url("https://api.courier.com/users/${userId.urlPathSegment}/tokens/${token.urlPathSegment}")
                 .addHeader("Authorization", "Bearer $authKey")
                 .get()
                 .build()
