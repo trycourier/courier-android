@@ -16,6 +16,7 @@ import com.courier.android.utils.warn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.concurrent.CopyOnWriteArrayList
 
 internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDelegate {
 
@@ -34,6 +35,11 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
     internal val dataStore = InboxDataStore()
     internal val dataService = InboxDataService()
     internal var state: State = State.UNINITIALIZED
+
+    // Loads, sign out and socket swaps run on main, one at a time between suspension points.
+    // Each load takes a generation, and a load that finishes after a newer one started (or after
+    // a kill) drops its result, so it can't reconnect a second socket or overwrite newer data.
+    private var loadGeneration = 0
     var paginationLimit: Int = Pagination.DEFAULT.value
         internal set
 
@@ -55,7 +61,8 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
         }
     }
 
-    suspend fun getInbox(isRefresh: Boolean) {
+    suspend fun getInbox(isRefresh: Boolean) = withContext(Dispatchers.Main.immediate) {
+        val generation = ++loadGeneration
         try {
             state = State.UNINITIALIZED
             dataService.stop()
@@ -71,15 +78,18 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
             val archivePaginationLimit = getInitialLimit(dataStore.archive.messages.size, isRefresh)
 
             val snapshot = dataService.getInboxData(client, feedPaginationLimit, archivePaginationLimit, isRefresh)
+            if (generation != loadGeneration) return@withContext
 
             // Connect the socket if possible
             // Graceful fallback if error
             connectSocketIfPossible(client)
+            if (generation != loadGeneration) return@withContext
 
             // Post the data
             dataStore.reloadSnapshot(snapshot)
             state = State.INITIALIZED
         } catch (error: Exception) {
+            if (generation != loadGeneration) return@withContext
             dataStore.delegate?.onError(error)
             state = State.UNINITIALIZED
         }
@@ -151,7 +161,8 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
         return data
     }
 
-    suspend fun kill() {
+    suspend fun kill() = withContext(Dispatchers.Main.immediate) {
+        loadGeneration++
         state = State.UNINITIALIZED
         dataStore.dispose()
         dataService.stop()
@@ -164,7 +175,8 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
     }
 
     /** Listeners */
-    internal val inboxListeners: MutableList<CourierInboxListener> = mutableListOf()
+    // Added and removed from any thread while main walks the list to notify them
+    internal val inboxListeners: MutableList<CourierInboxListener> = CopyOnWriteArrayList()
 
     fun addListener(listener: CourierInboxListener) {
         inboxListeners.add(listener)
@@ -176,7 +188,7 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
         courier.client?.log("Courier Inbox Listener Unregistered. Total Listeners: ${inboxListeners.size}")
     }
 
-    fun removeAllListeners() {
+    suspend fun removeAllListeners() = withContext(Dispatchers.Main.immediate) {
         inboxListeners.clear()
         courier.client?.log("Courier Inbox Listeners Removed. Total Listeners: ${inboxListeners.size}")
         dataService.stop()
@@ -196,6 +208,7 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
     }
 
     override suspend fun onMessagesChanged(messages: List<InboxMessage>, canPaginate: Boolean, feed: InboxMessageFeed) {
+        val messages = messages.toList()
         withContext(Dispatchers.Main) {
             inboxListeners.forEach { it.onMessagesChanged?.invoke(messages, canPaginate, feed) }
         }
@@ -220,6 +233,7 @@ internal class InboxModule(private val courier: Courier) : InboxDataStoreEventDe
     }
 
     override suspend fun onPageAdded(messages: List<InboxMessage>, canPaginate: Boolean, isFirstPage: Boolean, feed: InboxMessageFeed) {
+        val messages = messages.toList()
         withContext(Dispatchers.Main) {
             inboxListeners.forEach { it.onPageAdded?.invoke(messages, canPaginate, isFirstPage, feed) }
         }
@@ -265,7 +279,9 @@ suspend fun Courier.addInboxListener(
             // Do not hit any callbacks while data is fetching
         }
         InboxModule.State.INITIALIZED -> {
-            listener.onLoad(inboxModule.dataStore.getSnapshot())
+            withContext(Dispatchers.Main.immediate) {
+                listener.onLoad(inboxModule.dataStore.getSnapshot())
+            }
         }
     }
 
@@ -355,7 +371,7 @@ suspend fun Courier.readAllInboxMessages() {
 // Reconnects and refreshes the data
 // Called because the websocket may have disconnected or
 // new data may have been sent when the user closed their app
-internal suspend fun Courier.linkInbox() {
+internal suspend fun Courier.linkInbox() = withContext(Dispatchers.Main.immediate) {
     // Get the socket connection
     val sharedSocket = inboxModule.dataService.inboxSocketManager.socket
     val isSocketConnected = sharedSocket?.isConnected ?: false
@@ -368,7 +384,7 @@ internal suspend fun Courier.linkInbox() {
 
 // Disconnects the websocket
 // Helps keep battery usage lower
-internal fun Courier.unlinkInbox() {
+internal suspend fun Courier.unlinkInbox() = withContext(Dispatchers.Main.immediate) {
     inboxModule.dataService.stop()
 }
 
@@ -403,8 +419,8 @@ var Courier.inboxPaginationLimit
         inboxModule.paginationLimit = inboxModule.getTrimmedPaginationLimit(value)
     }
 
-val Courier.feedMessages: List<InboxMessage> get() = inboxModule.dataStore.feed.messages
-val Courier.archivedMessages: List<InboxMessage> get() = inboxModule.dataStore.archive.messages
+val Courier.feedMessages: List<InboxMessage> get() = inboxModule.dataStore.feed.messages.toList()
+val Courier.archivedMessages: List<InboxMessage> get() = inboxModule.dataStore.archive.messages.toList()
 
 /**
  * Traditional Callbacks

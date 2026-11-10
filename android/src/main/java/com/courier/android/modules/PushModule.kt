@@ -119,7 +119,8 @@ internal suspend fun Courier.putPushTokens() = withContext(Dispatchers.IO) {
     refreshFcmToken()
 
     // Save all the tokens
-    tokens.forEach { token ->
+    // A copy, since a new token can arrive while these requests run
+    tokens.toMap().forEach { token ->
         putTokenIfNeeded(
             provider = token.key,
             token = token.value
@@ -136,7 +137,7 @@ internal suspend fun Courier.deletePushTokens() = withContext(Dispatchers.IO) {
     refreshFcmToken()
 
     // Remove the old tokens
-    tokens.forEach { token ->
+    tokens.toMap().forEach { token ->
         deleteTokenIfNeeded(
             token = token.value
         )
