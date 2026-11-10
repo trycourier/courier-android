@@ -37,6 +37,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
 
@@ -218,14 +220,16 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
         internal set
 
     // Authentication
-    var authListeners: MutableList<CourierAuthenticationListener> = mutableListOf()
+    // Added and removed on the caller's thread while sign in and sign out notify them
+    var authListeners: MutableList<CourierAuthenticationListener> = CopyOnWriteArrayList()
         private set
 
     // Firebase
     internal val isFirebaseInitialized get() = FirebaseApp.getApps(context).isNotEmpty()
 
     // Push
-    internal var tokens: MutableMap<String, String> = mutableMapOf()
+    // Written from the FCM service, IO and main threads
+    internal var tokens: MutableMap<String, String> = ConcurrentHashMap()
 
     // Stores a local copy of the fcmToken
     internal var fcmToken: String? = null
@@ -234,7 +238,7 @@ class Courier private constructor(val context: Context) : Application.ActivityLi
     private var inactivityTimerJob: Job? = null
 
     // Closes the inbox websocket
-    private fun dispose() {
+    private suspend fun dispose() {
         unlinkInbox()
     }
 
