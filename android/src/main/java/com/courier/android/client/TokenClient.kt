@@ -1,6 +1,6 @@
 package com.courier.android.client
 
-import com.courier.android.utils.urlEncoded
+import com.courier.android.utils.urlPathSegment
 import com.courier.android.models.CourierDevice
 import com.courier.android.models.CourierToken
 import com.courier.android.utils.dispatch
@@ -11,7 +11,7 @@ class TokenClient(private val options: CourierClient.Options) : CourierApiClient
 
     suspend fun putUserToken(token: String, provider: String, device: CourierDevice) {
 
-        val url = "${options.apiUrls.rest}/users/${options.userId.urlEncoded}/tokens/${token.urlEncoded}"
+        val url = "${options.apiUrls.rest}/users/${options.userId.urlPathSegment}/tokens/${token.urlPathSegment}"
 
         val json = gson.toJson(
             CourierToken(
@@ -35,7 +35,7 @@ class TokenClient(private val options: CourierClient.Options) : CourierApiClient
 
     suspend fun deleteUserToken(token: String) {
 
-        val url = "${options.apiUrls.rest}/users/${options.userId.urlEncoded}/tokens/${token.urlEncoded}"
+        val url = "${options.apiUrls.rest}/users/${options.userId.urlPathSegment}/tokens/${token.urlPathSegment}"
 
         val request = Request.Builder()
             .url(url)

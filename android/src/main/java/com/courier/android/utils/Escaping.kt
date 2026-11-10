@@ -1,7 +1,5 @@
 package com.courier.android.utils
 
-import java.net.URLEncoder
-
 /**
  * An id as a GraphQL string argument. toGraphQuery() puts the query text straight into a JSON
  * string, so the literal is escaped for GraphQL and then again for JSON. A plain id comes out
@@ -37,7 +35,20 @@ internal val String.graphQLString: String
     }
 
 /**
- * One URL path segment or query value, so a "/", "?" or "#" in an id can't change the request
+ * One URL path segment. The Courier API stores path segments exactly as sent and doesn't decode
+ * them, so an encoded ":" in an FCM token or "@" in an email user id became part of the stored
+ * value. Only the characters that would change which url is requested are escaped.
  */
-internal val String.urlEncoded: String
-    get() = URLEncoder.encode(this, "UTF-8").replace("+", "%20")
+internal val String.urlPathSegment: String
+    get() = this
+        .replace("/", "%2F")
+        .replace("?", "%3F")
+        .replace("#", "%23")
+
+/**
+ * One query value. Only the characters that would end the value or the query are escaped.
+ */
+internal val String.urlQueryValue: String
+    get() = this
+        .replace("&", "%26")
+        .replace("#", "%23")

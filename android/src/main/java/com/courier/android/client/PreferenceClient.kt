@@ -1,6 +1,7 @@
 package com.courier.android.client
 
-import com.courier.android.utils.urlEncoded
+import com.courier.android.utils.urlPathSegment
+import com.courier.android.utils.urlQueryValue
 import com.courier.android.models.CourierPreferenceChannel
 import com.courier.android.models.CourierPreferenceStatus
 import com.courier.android.models.CourierPreferenceTopic
@@ -14,10 +15,10 @@ class PreferenceClient(private val options: CourierClient.Options): CourierApiCl
 
     suspend fun getUserPreferences(paginationCursor: String? = null): CourierUserPreferences {
 
-        var url = "${options.apiUrls.rest}/users/${options.userId.urlEncoded}/preferences"
+        var url = "${options.apiUrls.rest}/users/${options.userId.urlPathSegment}/preferences"
 
         paginationCursor?.let { cursor ->
-            url += "?cursor=${cursor.urlEncoded}"
+            url += "?cursor=${cursor.urlQueryValue}"
         }
 
         val request = Request.Builder()
@@ -34,7 +35,7 @@ class PreferenceClient(private val options: CourierClient.Options): CourierApiCl
 
     suspend fun getUserPreferenceTopic(topicId: String): CourierPreferenceTopic {
 
-        val url = "${options.apiUrls.rest}/users/${options.userId.urlEncoded}/preferences/${topicId.urlEncoded}"
+        val url = "${options.apiUrls.rest}/users/${options.userId.urlPathSegment}/preferences/${topicId.urlPathSegment}"
 
         val request = Request.Builder()
             .url(url)
@@ -52,7 +53,7 @@ class PreferenceClient(private val options: CourierClient.Options): CourierApiCl
 
     suspend fun putUserPreferenceTopic(topicId: String, status: CourierPreferenceStatus, hasCustomRouting: Boolean, customRouting: List<CourierPreferenceChannel>) {
 
-        val url = "${options.apiUrls.rest}/users/${options.userId.urlEncoded}/preferences/${topicId.urlEncoded}"
+        val url = "${options.apiUrls.rest}/users/${options.userId.urlPathSegment}/preferences/${topicId.urlPathSegment}"
 
         val json = gson.toJson(mapOf(
             "topic" to mapOf(

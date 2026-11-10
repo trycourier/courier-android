@@ -34,11 +34,25 @@ class EscapingTests {
         assertEquals("\"a\\nb\\u0001\"", "a\nb\u0001".graphQLString)
     }
 
+    // The API stores path segments exactly as sent, so anything legal in a path must go as is
     @Test
-    fun urlEncodingKeepsAnIdInOnePathSegment() {
-        assertEquals("..%2Fadmin", "../admin".urlEncoded)
-        assertEquals("a%20b%3Fc%23d", "a b?c#d".urlEncoded)
-        assertEquals("plain-id_1", "plain-id_1".urlEncoded)
+    fun pathSegmentKeepsFcmTokensAndEmailIdsAsTheyAre() {
+        val fcmToken = "deM3-M1aQASSXQpLHuGQ7k:APA91bGmfN3C0rlx_ktwi3B0tQ8"
+        assertEquals(fcmToken, fcmToken.urlPathSegment)
+        assertEquals("mike+test@courier.com", "mike+test@courier.com".urlPathSegment)
+        assertEquals("plain-id_1", "plain-id_1".urlPathSegment)
+    }
+
+    @Test
+    fun pathSegmentEscapesWhatWouldChangeTheUrl() {
+        assertEquals("..%2Fadmin", "../admin".urlPathSegment)
+        assertEquals("a%3Fb%23c", "a?b#c".urlPathSegment)
+    }
+
+    @Test
+    fun queryValueEscapesWhatWouldEndIt() {
+        assertEquals("abc%26next=1%23x", "abc&next=1#x".urlQueryValue)
+        assertEquals("eyJwYWdlIjoyfQ==", "eyJwYWdlIjoyfQ==".urlQueryValue)
     }
 
 }

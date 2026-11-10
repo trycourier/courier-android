@@ -111,6 +111,30 @@ class SessionTests {
 
     }
 
+    // The API stores path segments exactly as sent. 6.1.3 and 6.1.4 encoded the ":" in every FCM
+    // token and the "@" in email user ids, so tokens landed corrupted or on the wrong user.
+    @Test
+    fun pushTokenAndEmailUserIdReachTheServerUnchanged() = runBlocking {
+
+        val userId = "android+session-${UUID.randomUUID()}@example.com"
+        val jwt = ExampleServer.generateJWT(authKey = Env.COURIER_AUTH_KEY, userId = userId)
+        Courier.shared.signIn(userId = userId, accessToken = jwt, showLogs = true)
+
+        val token = "fcm-${UUID.randomUUID()}:APA91bTest_token-value"
+        Courier.shared.setToken(provider = "firebase-fcm", token = token)
+
+        var stored = emptyList<String>()
+        repeat(20) {
+            stored = ExampleServer.userTokens(Env.COURIER_AUTH_KEY, userId)
+            if (token in stored) return@repeat
+            delay(1000)
+        }
+        assertTrue("expected $token for $userId, server has $stored", token in stored)
+
+        Courier.shared.signOut()
+
+    }
+
     @Test
     fun signOutDeletesTheDeviceTokens() = runBlocking {
 
