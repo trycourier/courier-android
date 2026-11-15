@@ -127,8 +127,12 @@ fun Courier.removeAuthenticationListener(listener: CourierAuthenticationListener
     authListeners.removeAll { it == listener }
 }
 
-private fun Courier.notifyListeners() {
-    authListeners.forEach { it.onChange(Courier.shared.userId) }
+// Called on main, like inbox listeners, so apps can update their UI from the callback
+private suspend fun Courier.notifyListeners() {
+    val userId = Courier.shared.userId
+    withContext(Dispatchers.Main) {
+        authListeners.forEach { it.onChange(userId) }
+    }
 }
 
 /**

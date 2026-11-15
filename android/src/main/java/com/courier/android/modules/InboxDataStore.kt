@@ -6,7 +6,11 @@ import com.courier.android.models.InboxMessageSet
 import com.courier.android.ui.inbox.InboxMessageEvent
 import com.courier.android.ui.inbox.InboxMessageFeed
 import com.courier.android.utils.log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
+// The lists and counts are read and changed only on main. Socket events, user actions and loads
+// arrive on other threads, and a plain list isn't safe to change from two threads at once.
 internal class InboxDataStore {
 
     var delegate: InboxDataStoreEventDelegate? = null
@@ -26,7 +30,7 @@ internal class InboxDataStore {
     }
 
     /** Reloads the data store from a snapshot */
-    suspend fun reloadSnapshot(snapshot: Triple<InboxMessageSet, InboxMessageSet, Int>) {
+    suspend fun reloadSnapshot(snapshot: Triple<InboxMessageSet, InboxMessageSet, Int>) = withContext(Dispatchers.Main.immediate) {
         updateUnreadCount(snapshot.third)
         updateDataSet(snapshot.first, InboxMessageFeed.FEED)
         updateDataSet(snapshot.second, InboxMessageFeed.ARCHIVE)
@@ -49,7 +53,7 @@ internal class InboxDataStore {
     }
 
     /** Adds a message to either `feed` or `archive` */
-    suspend fun addMessage(message: InboxMessage, index: Int, feedType: InboxMessageFeed) {
+    suspend fun addMessage(message: InboxMessage, index: Int, feedType: InboxMessageFeed) = withContext(Dispatchers.Main.immediate) {
         when (feedType) {
             InboxMessageFeed.FEED -> {
                 if (index in 0..feed.messages.size) {
@@ -87,11 +91,11 @@ internal class InboxDataStore {
     }
 
     /** Reads a message */
-    suspend fun readMessage(message: InboxMessage, feedType: InboxMessageFeed, client: CourierClient?): Boolean {
+    suspend fun readMessage(message: InboxMessage, feedType: InboxMessageFeed, client: CourierClient?): Boolean = withContext(Dispatchers.Main.immediate) {
         val snapshot = getSnapshot()
         var canUpdate = false
 
-        val index = getMessageIndexById(feedType, message.messageId) ?: return false
+        val index = getMessageIndexById(feedType, message.messageId) ?: return@withContext false
         val msg = when (feedType) {
             InboxMessageFeed.FEED -> feed.messages[index]
             InboxMessageFeed.ARCHIVE -> archive.messages[index]
@@ -123,14 +127,14 @@ internal class InboxDataStore {
                 reloadSnapshot(snapshot)
             }
         }
-        return canUpdate
+        return@withContext canUpdate
     }
 
-    suspend fun unreadMessage(message: InboxMessage, feedType: InboxMessageFeed, client: CourierClient?): Boolean {
+    suspend fun unreadMessage(message: InboxMessage, feedType: InboxMessageFeed, client: CourierClient?): Boolean = withContext(Dispatchers.Main.immediate) {
         val snapshot = getSnapshot()
         var canUpdate = false
 
-        val index = getMessageIndexById(feedType, message.messageId) ?: return false
+        val index = getMessageIndexById(feedType, message.messageId) ?: return@withContext false
 
         when (feedType) {
             InboxMessageFeed.FEED -> {
@@ -169,14 +173,14 @@ internal class InboxDataStore {
             }
         }
 
-        return canUpdate
+        return@withContext canUpdate
     }
 
-    suspend fun openMessage(message: InboxMessage, feedType: InboxMessageFeed, client: CourierClient?): Boolean {
+    suspend fun openMessage(message: InboxMessage, feedType: InboxMessageFeed, client: CourierClient?): Boolean = withContext(Dispatchers.Main.immediate) {
         val snapshot = getSnapshot()
         var canUpdate = false
 
-        val index = getMessageIndexById(feedType, message.messageId) ?: return false
+        val index = getMessageIndexById(feedType, message.messageId) ?: return@withContext false
 
         when (feedType) {
             InboxMessageFeed.FEED -> {
@@ -209,14 +213,14 @@ internal class InboxDataStore {
             }
         }
 
-        return canUpdate
+        return@withContext canUpdate
     }
 
-    suspend fun archiveMessage(message: InboxMessage, feedType: InboxMessageFeed, client: CourierClient?): Boolean {
+    suspend fun archiveMessage(message: InboxMessage, feedType: InboxMessageFeed, client: CourierClient?): Boolean = withContext(Dispatchers.Main.immediate) {
         val snapshot = getSnapshot()
         var canUpdate = false
 
-        val index = getMessageIndexById(feedType, message.messageId) ?: return false
+        val index = getMessageIndexById(feedType, message.messageId) ?: return@withContext false
 
         when (feedType) {
             InboxMessageFeed.FEED -> {
@@ -254,7 +258,7 @@ internal class InboxDataStore {
                 canUpdate = true
             }
 
-            InboxMessageFeed.ARCHIVE -> return false
+            InboxMessageFeed.ARCHIVE -> return@withContext false
         }
 
         if (canUpdate) {
@@ -266,11 +270,11 @@ internal class InboxDataStore {
             }
         }
 
-        return canUpdate
+        return@withContext canUpdate
     }
 
-    suspend fun clickMessage(message: InboxMessage, feedType: InboxMessageFeed, client: CourierClient?): Boolean {
-        val index = getMessageIndexById(feedType, message.messageId) ?: return false
+    suspend fun clickMessage(message: InboxMessage, feedType: InboxMessageFeed, client: CourierClient?): Boolean = withContext(Dispatchers.Main.immediate) {
+        val index = getMessageIndexById(feedType, message.messageId) ?: return@withContext false
 
         val trackingId = when (feedType) {
             InboxMessageFeed.FEED -> feed.messages[index].clickTrackingId
@@ -278,7 +282,7 @@ internal class InboxDataStore {
         }
 
         // Perform server update
-        return if (trackingId != null) {
+        return@withContext if (trackingId != null) {
             try {
                 client?.inbox?.click(message.messageId, trackingId)
                 true
@@ -291,7 +295,7 @@ internal class InboxDataStore {
         }
     }
 
-    suspend fun readAllMessages(client: CourierClient?): Boolean {
+    suspend fun readAllMessages(client: CourierClient?): Boolean = withContext(Dispatchers.Main.immediate) {
         val snapshot = getSnapshot()
 
         // Read all messages in the feed
@@ -316,7 +320,7 @@ internal class InboxDataStore {
         delegate?.onMessagesChanged(feed.messages, feed.canPaginate, InboxMessageFeed.FEED)
         delegate?.onMessagesChanged(archive.messages, archive.canPaginate, InboxMessageFeed.ARCHIVE)
 
-        return try {
+        return@withContext try {
             client?.inbox?.readAll()
             true
         } catch (e: Exception) {
@@ -326,7 +330,7 @@ internal class InboxDataStore {
         }
     }
 
-    suspend fun addPage(page: InboxMessageSet, feedType: InboxMessageFeed) {
+    suspend fun addPage(page: InboxMessageSet, feedType: InboxMessageFeed) = withContext(Dispatchers.Main.immediate) {
         when (feedType) {
             InboxMessageFeed.FEED -> {
                 feed.totalCount = page.totalCount
@@ -353,13 +357,13 @@ internal class InboxDataStore {
     }
 
     /** Updates unread count */
-    suspend fun updateUnreadCount(count: Int) {
+    suspend fun updateUnreadCount(count: Int) = withContext(Dispatchers.Main.immediate) {
         unreadCount = count
         delegate?.onUnreadCountUpdated(count)
     }
 
     /** Removes and resets everything */
-    suspend fun dispose() {
+    suspend fun dispose() = withContext(Dispatchers.Main.immediate) {
         updateDataSet(InboxMessageSet(), InboxMessageFeed.FEED)
         updateDataSet(InboxMessageSet(), InboxMessageFeed.ARCHIVE)
         updateUnreadCount(0)
@@ -383,7 +387,7 @@ internal class InboxDataStore {
     }
 
     /** Updates the dataset */
-    suspend fun updateDataSet(data: InboxMessageSet, feedType: InboxMessageFeed) {
+    suspend fun updateDataSet(data: InboxMessageSet, feedType: InboxMessageFeed) = withContext(Dispatchers.Main.immediate) {
         when (feedType) {
             InboxMessageFeed.FEED -> {
                 feed = data
