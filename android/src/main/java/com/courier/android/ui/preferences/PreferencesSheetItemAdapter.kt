@@ -37,6 +37,10 @@ internal class SheetItemViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
     fun setItem(theme: CourierPreferencesTheme, item: CourierSheetItem, onItemChange: (CourierSheetItem) -> Unit) {
 
         textView.text = item.title
+
+        // Cleared first so binding a recycled row doesn't report a change
+        switchView.setOnCheckedChangeListener(null)
+        container.setOnClickListener(null)
         switchView.isChecked = item.isOn
         switchView.isEnabled = !item.isDisabled
 
@@ -54,20 +58,24 @@ internal class SheetItemViewHolder(itemView: View) : RecyclerView.ViewHolder(ite
 
         if (switchView.isEnabled) {
 
-            container.setOnClickListener {
-
-                switchView.isChecked = !switchView.isChecked
+            // Every change goes through the switch, so a tap or drag on the switch itself is
+            // saved too, not only a tap on the row
+            switchView.setOnCheckedChangeListener { _, isChecked ->
 
                 // Create a new item and pass it to the callbacks
                 val newItem = CourierSheetItem(
                     title = item.title,
-                    isOn = switchView.isChecked,
+                    isOn = isChecked,
                     isDisabled = !switchView.isEnabled,
                     data = item.data
                 )
 
                 onItemChange(newItem)
 
+            }
+
+            container.setOnClickListener {
+                switchView.isChecked = !switchView.isChecked
             }
 
         }
