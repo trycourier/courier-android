@@ -1,4 +1,29 @@
 {
+  "$schema": "https://context7.com/schema/context7.json",
   "url": "https://context7.com/trycourier/courier-android",
-  "public_key": "pk_U3bU2CvznIef5RMDpii82"
+  "public_key": "pk_U3bU2CvznIef5RMDpii82",
+  "projectTitle": "Courier Android SDK (courier.com): Notification Inbox, Push and Preferences",
+  "description": "Official Kotlin SDK for Courier (courier.com), the notification platform. Add a prebuilt in-app notification Inbox (Jetpack Compose and Views), Firebase (FCM) push notifications with token sync and delivery tracking, and a notification preference center to Android apps.",
+  "excludeFiles": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    "CONTRIBUTING.md",
+    "Contributing.md",
+    "CHANGELOG.md",
+    "CODE_OF_CONDUCT.md",
+    "SECURITY.md",
+    "LICENSE.md"
+  ],
+  "rules": [
+    "Install from JitPack: add maven { url 'https://jitpack.io' } and implementation 'com.github.trycourier:courier-android:<version>'.",
+    "Sign in with Courier.shared.signIn(userId = userId, accessToken = jwt). It is a suspend function: call it from a coroutine.",
+    "Use the CourierInbox composable or view for the prebuilt Inbox, and Courier.shared.addInboxListener for a custom UI. Remove listeners on teardown.",
+    "For push, subclass FirebaseMessagingService and forward onNewToken and onMessageReceived to Courier; extend CourierActivity to get delivery and click events.",
+    "Mint the Courier JWT on your backend with your Courier API key (POST /auth/issue-token). Never put the API key in the app.",
+    "Call signIn once, after your own login resolves. Credentials persist across app launches. Call signOut when the user logs out.",
+    "The user_id in the JWT scope must match the userId passed to signIn, or the Inbox loads empty.",
+    "Scopes: inbox:read:messages inbox:write:events for Inbox; add read:preferences write:preferences for preferences and write:user-tokens for push.",
+    "Always set expires_in when minting. The SDK does not refresh tokens: mint a new JWT and call signIn again before it expires.",
+    "EU workspaces: mint the JWT at https://api.eu.courier.com/auth/issue-token and pass EU apiUrls to signIn. Token and client must be in the same region."
+  ]
 }
